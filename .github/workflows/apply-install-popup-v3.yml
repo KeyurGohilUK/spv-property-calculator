@@ -1,0 +1,159 @@
+name: Apply install popup changes v3
+
+on:
+  push:
+    branches:
+      - agent/deposit-slider
+    paths:
+      - .github/workflows/apply-install-popup-v3.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/deposit-slider
+          fetch-depth: 0
+
+      - name: Update install popup
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          index = Path('index.html')
+          text = index.read_text()
+          new_dialog = '''  <dialog id="installDialog" class="install-dialog">
+            <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+            <p class="eyebrow">Install app</p>
+            <h3>SPV Property Calculator</h3>
+            <p class="muted small">Install the calculator on your phone for an app-like experience and offline access after the first successful visit.</p>
+
+            <button id="nativeInstallBtn" class="primary-btn install-now-btn hidden" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3.5v10"></path>
+                <path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path>
+                <path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path>
+              </svg>
+              Install now
+            </button>
+
+            <div class="install-platforms">
+              <section class="install-platform-card">
+                <div class="install-platform-heading"><span class="install-platform-icon" aria-hidden="true">A</span><strong>Android</strong></div>
+                <p>Open the site in <strong>Chrome</strong>, tap the <strong>⋮</strong> menu, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p>
+                <small>If <strong>Install now</strong> appears above, you can use it instead.</small>
+              </section>
+
+              <section class="install-platform-card">
+                <div class="install-platform-heading"><span class="install-platform-icon apple-icon" aria-hidden="true">●</span><strong>iPhone / iPad</strong></div>
+                <p>Open the site in <strong>Safari</strong>, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
+                <small>Safari must be used for the iPhone/iPad Home Screen installation flow.</small>
+              </section>
+            </div>
+          </dialog>'''
+          text, count = re.subn(r'  <dialog id="installDialog" class="install-dialog">.*?  </dialog>', new_dialog, text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'install dialog replacements: {count}')
+          index.write_text(text)
+
+          app = Path('app.js')
+          text = app.read_text()
+          new_setup = '''function setupInstall() {
+            window.addEventListener('beforeinstallprompt', (event) => {
+              event.preventDefault();
+              deferredInstallPrompt = event;
+              $('nativeInstallBtn').classList.remove('hidden');
+            });
+
+            $('installBtn').addEventListener('click', () => {
+              $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
+              $('installDialog').showModal();
+            });
+
+            $('nativeInstallBtn').addEventListener('click', async () => {
+              if (!deferredInstallPrompt) return;
+              const prompt = deferredInstallPrompt;
+              deferredInstallPrompt = null;
+              $('nativeInstallBtn').disabled = true;
+              try {
+                prompt.prompt();
+                const choice = await prompt.userChoice;
+                if (choice?.outcome === 'accepted') $('installDialog').close();
+              } finally {
+                $('nativeInstallBtn').disabled = false;
+                $('nativeInstallBtn').classList.add('hidden');
+              }
+            });
+
+            $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
+
+            window.addEventListener('appinstalled', () => {
+              deferredInstallPrompt = null;
+              $('nativeInstallBtn').classList.add('hidden');
+              if ($('installDialog').open) $('installDialog').close();
+              setHeaderTooltip($('installBtn'), 'App installed');
+            });
+          }
+
+          function init()'''
+          text, count = re.subn(r'function setupInstall\(\) \{.*?\n\}\n\nfunction init\(\)', new_setup, text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'setupInstall replacements: {count}')
+          app.write_text(text)
+
+          styles = Path('styles.css')
+          text = styles.read_text()
+          install_css = '''
+
+          /* Cross-platform PWA installation guide */
+          .install-now-btn { width: 100%; margin: 16px 0 4px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+          .install-now-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+          .install-platforms { display: grid; gap: 11px; margin-top: 16px; }
+          .install-platform-card { padding: 14px 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface-2); }
+          .install-platform-card p { margin: 9px 0 7px; font-size: 13px; line-height: 1.5; }
+          .install-platform-card small { display: block; color: var(--muted); font-size: 11px; line-height: 1.4; }
+          .install-platform-heading { display: flex; align-items: center; gap: 9px; }
+          .install-platform-heading strong { font-size: 14px; }
+          .install-platform-icon { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--brand); font-size: 13px; font-weight: 900; }
+          .install-platform-icon.apple-icon { background: color-mix(in srgb, var(--text) 9%, var(--surface)); color: var(--text); font-size: 10px; }
+          @media (min-width: 620px) { .install-platforms { grid-template-columns: 1fr 1fr; } }
+          '''
+          marker = '@media (max-width: 620px) {'
+          if marker not in text:
+              raise SystemExit('styles media marker not found')
+          text = text.replace(marker, install_css + '\n' + marker, 1)
+          styles.write_text(text)
+
+          sw = Path('service-worker.js')
+          text = sw.read_text()
+          text, count = re.subn(r"spv-property-calculator-v1\.7\.6-deposit-slider", 'spv-property-calculator-v1.7.7-install-guide', text, count=1)
+          if count != 1:
+              raise SystemExit(f'cache replacements: {count}')
+          sw.write_text(text)
+          PY
+
+      - name: Validate
+        run: |
+          node --check app.js
+          npm test
+
+      - name: Clean helper files
+        run: |
+          rm -f install-popup.patch
+          rm -f .github/workflows/apply-install-popup.yml
+          rm -f .github/workflows/apply-install-popup-v2.yml
+          rm -f .github/workflows/apply-install-popup-v3.yml
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add Android and iPhone install guide"
+          git push
