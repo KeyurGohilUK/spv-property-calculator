@@ -349,6 +349,7 @@ let cloudListenerAttached = false;
 let currentNotes = [];
 let notesLoading = false;
 let deletingNoteId = null;
+let savedPropertySnapshot = '';
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -386,6 +387,39 @@ function getFormModel() {
 
   for (const field of FEE_FIELDS) model[field] = safeNumber($(field).value);
   return model;
+}
+
+function getEditablePropertySnapshot() {
+  const { id, createdAt, ...editable } = getFormModel();
+  return JSON.stringify(editable);
+}
+
+function updateSaveButtonState() {
+  const button = $('savePropertyBtn');
+  if (!button) return;
+
+  const hasUnsavedChanges = getEditablePropertySnapshot() !== savedPropertySnapshot;
+  button.classList.toggle('is-unsaved', hasUnsavedChanges);
+  button.classList.toggle('is-saved', !hasUnsavedChanges);
+
+  const label = hasUnsavedChanges
+    ? 'Unsaved changes — save property'
+    : 'All property changes saved';
+  button.setAttribute('aria-label', label);
+  button.title = label;
+  button.dataset.tooltip = label;
+}
+
+function captureSavedPropertyState() {
+  savedPropertySnapshot = getEditablePropertySnapshot();
+  updateSaveButtonState();
+}
+
+function handlePropertyFormMutation(event) {
+  // Notes have their own save lifecycle and must not mark the property itself dirty.
+  if (event.target?.closest?.('#notesSection')) return;
+  renderCalculation();
+  updateSaveButtonState();
 }
 
 function renderCalculation() {
@@ -447,6 +481,7 @@ function addExpenseRow(expense = {}) {
   row.querySelector('[data-remove-expense]').addEventListener('click', () => {
     row.remove();
     renderCalculation();
+    updateSaveButtonState();
   });
   row.querySelector('[data-expense-amount]').addEventListener('blur', (event) => {
     const value = safeNumber(event.target.value);
@@ -674,6 +709,7 @@ function resetForm() {
   if ($('noteSaveMessage')) $('noteSaveMessage').textContent = '';
   renderCalculation();
   renderNotes();
+  captureSavedPropertyState();
 }
 
 function loadIntoForm(property) {
@@ -699,6 +735,7 @@ function loadIntoForm(property) {
   currentNotes = getCachedNotes(property.id);
   renderCalculation();
   renderNotes();
+  captureSavedPropertyState();
 }
 
 function showHome() {
@@ -778,6 +815,7 @@ async function saveCurrentProperty() {
     editingId = saved.id;
     editingCreatedAt = saved.createdAt;
     $('editorModeLabel').textContent = 'Editing saved property';
+    captureSavedPropertyState();
     renderNotes();
     $('saveMessage').textContent = cloudUser
       ? (navigator.onLine ? 'Saved locally. Syncing…' : 'Saved locally. Will sync when online.')
@@ -1092,7 +1130,10 @@ function init() {
   $('archiveBtn').addEventListener('click', showArchive);
   $('archiveBackBtn').addEventListener('click', showHome);
   $('backBtn').addEventListener('click', showHome);
-  $('addExpenseBtn').addEventListener('click', () => addExpenseRow());
+  $('addExpenseBtn').addEventListener('click', () => {
+    addExpenseRow();
+    updateSaveButtonState();
+  });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
 
   $('accountBtn').addEventListener('click', () => {
@@ -1121,8 +1162,8 @@ function init() {
     if (event.key === 'Enter') handleSignIn();
   });
 
-  $('propertyForm').addEventListener('input', renderCalculation);
-  $('propertyForm').addEventListener('change', renderCalculation);
+  $('propertyForm').addEventListener('input', handlePropertyFormMutation);
+  $('propertyForm').addEventListener('change', handlePropertyFormMutation);
 
   [$('purchasePrice'), ...FEE_FIELDS.map((id) => $(id))].forEach(attachFormatting);
 
