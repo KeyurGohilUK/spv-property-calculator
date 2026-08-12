@@ -397,11 +397,34 @@
   </dialog>
 
   <dialog id="installDialog" class="install-dialog">
-    <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
-    <h3>Install on iPhone</h3>
-    <p>Open this site in Safari, tap the <strong>Share</strong> button, then choose <strong>Add to Home Screen</strong> and tap <strong>Add</strong>.</p>
-    <p class="muted small">After the first successful visit, the calculator is cached for offline use.</p>
-  </dialog>
+  <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+  <p class="eyebrow">Install app</p>
+  <h3>SPV Property Calculator</h3>
+  <p class="muted small">Install the calculator on your phone for an app-like experience and offline access after the first successful visit.</p>
+
+  <button id="nativeInstallBtn" class="primary-btn install-now-btn hidden" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3.5v10"></path>
+      <path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path>
+      <path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path>
+    </svg>
+    Install now
+  </button>
+
+  <div class="install-platforms">
+    <section class="install-platform-card">
+      <div class="install-platform-heading"><span class="install-platform-icon" aria-hidden="true">A</span><strong>Android</strong></div>
+      <p>Open the site in <strong>Chrome</strong>, tap the <strong>⋮</strong> menu, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p>
+      <small>If <strong>Install now</strong> appears above, you can use it instead.</small>
+    </section>
+
+    <section class="install-platform-card">
+      <div class="install-platform-heading"><span class="install-platform-icon apple-icon" aria-hidden="true">●</span><strong>iPhone / iPad</strong></div>
+      <p>Open the site in <strong>Safari</strong>, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
+      <small>Safari must be used for the iPhone/iPad Home Screen installation flow.</small>
+    </section>
+  </div>
+</dialog>
 
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>

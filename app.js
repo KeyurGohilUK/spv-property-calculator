@@ -1112,19 +1112,37 @@ function setupInstall() {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
+    $('nativeInstallBtn').classList.remove('hidden');
   });
 
-  $('installBtn').addEventListener('click', async () => {
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      return;
-    }
+  $('installBtn').addEventListener('click', () => {
+    $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
     $('installDialog').showModal();
   });
 
+  $('nativeInstallBtn').addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    const prompt = deferredInstallPrompt;
+    deferredInstallPrompt = null;
+    $('nativeInstallBtn').disabled = true;
+    try {
+      prompt.prompt();
+      const choice = await prompt.userChoice;
+      if (choice?.outcome === 'accepted') $('installDialog').close();
+    } finally {
+      $('nativeInstallBtn').disabled = false;
+      $('nativeInstallBtn').classList.add('hidden');
+    }
+  });
+
   $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    $('nativeInstallBtn').classList.add('hidden');
+    if ($('installDialog').open) $('installDialog').close();
+    setHeaderTooltip($('installBtn'), 'App installed');
+  });
 }
 
 function init() {
