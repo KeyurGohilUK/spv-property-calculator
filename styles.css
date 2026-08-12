@@ -331,6 +331,21 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
   .summary-card { box-shadow: none; }
 }
 
+
+
+/* Cross-platform PWA installation guide */
+.install-now-btn { width: 100%; margin: 16px 0 4px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.install-now-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.install-platforms { display: grid; gap: 11px; margin-top: 16px; }
+.install-platform-card { padding: 14px 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface-2); }
+.install-platform-card p { margin: 9px 0 7px; font-size: 13px; line-height: 1.5; }
+.install-platform-card small { display: block; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.install-platform-heading { display: flex; align-items: center; gap: 9px; }
+.install-platform-heading strong { font-size: 14px; }
+.install-platform-icon { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--brand); font-size: 13px; font-weight: 900; }
+.install-platform-icon.apple-icon { background: color-mix(in srgb, var(--text) 9%, var(--surface)); color: var(--text); font-size: 10px; }
+@media (min-width: 620px) { .install-platforms { grid-template-columns: 1fr 1fr; } }
+
 @media (max-width: 620px) {
   .main-shell { padding-inline: 12px; }
   .header-inner { padding-inline: 14px; }
