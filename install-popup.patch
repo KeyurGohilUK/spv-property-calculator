@@ -1,0 +1,174 @@
+--- a/index.html
++++ b/index.html
+@@ -393,9 +393,31 @@
+ 
+   <dialog id="installDialog" class="install-dialog">
+     <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+-    <h3>Install on iPhone</h3>
+-    <p>Open this site in Safari, tap the <strong>Share</strong> button, then choose <strong>Add to Home Screen</strong> and tap <strong>Add</strong>.</p>
+-    <p class="muted small">After the first successful visit, the calculator is cached for offline use.</p>
++    <p class="eyebrow">Install app</p>
++    <h3>SPV Property Calculator</h3>
++    <p class="muted small">Install the calculator on your phone for an app-like experience and offline access after the first successful visit.</p>
++
++    <button id="nativeInstallBtn" class="primary-btn install-now-btn hidden" type="button">
++      <svg viewBox="0 0 24 24" aria-hidden="true">
++        <path d="M12 3.5v10"></path>
++        <path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path>
++        <path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path>
++      </svg>
++      Install now
++    </button>
++
++    <div class="install-platforms">
++      <section class="install-platform-card">
++        <div class="install-platform-heading"><span class="install-platform-icon" aria-hidden="true">A</span><strong>Android</strong></div>
++        <p>Open the site in <strong>Chrome</strong>, tap the <strong>⋮</strong> menu, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p>
++        <small>If <strong>Install now</strong> appears above, you can use it instead.</small>
++      </section>
++
++      <section class="install-platform-card">
++        <div class="install-platform-heading"><span class="install-platform-icon apple-icon" aria-hidden="true">●</span><strong>iPhone / iPad</strong></div>
++        <p>Open the site in <strong>Safari</strong>, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
++        <small>Safari must be used for the iPhone/iPad Home Screen installation flow.</small>
++      </section>
++    </div>
+   </dialog>
+ 
+   <script defer src="./supabase-config.js"></script>
+--- a/app.js
++++ b/app.js
+@@ -1102,18 +1102,35 @@
+   window.addEventListener('beforeinstallprompt', (event) => {
+     event.preventDefault();
+     deferredInstallPrompt = event;
++    $('nativeInstallBtn').classList.remove('hidden');
+   });
+ 
+-  $('installBtn').addEventListener('click', async () => {
+-    if (deferredInstallPrompt) {
+-      deferredInstallPrompt.prompt();
+-      await deferredInstallPrompt.userChoice;
+-      deferredInstallPrompt = null;
+-      return;
++  $('installBtn').addEventListener('click', () => {
++    $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
++    $('installDialog').showModal();
++  });
++
++  $('nativeInstallBtn').addEventListener('click', async () => {
++    if (!deferredInstallPrompt) return;
++
++    const prompt = deferredInstallPrompt;
++    deferredInstallPrompt = null;
++    $('nativeInstallBtn').disabled = true;
++
++    try {
++      prompt.prompt();
++      const choice = await prompt.userChoice;
++      if (choice?.outcome === 'accepted') {
++        $('installDialog').close();
++      }
++    } finally {
++      $('nativeInstallBtn').disabled = false;
++      $('nativeInstallBtn').classList.add('hidden');
+     }
+-    $('installDialog').showModal();
+   });
+ 
+   $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
++
++  window.addEventListener('appinstalled', () => {
++    deferredInstallPrompt = null;
++    $('nativeInstallBtn').classList.add('hidden');
++    if ($('installDialog').open) $('installDialog').close();
++    setHeaderTooltip($('installBtn'), 'App installed');
++  });
+ }
+ 
+ function init() {
+--- a/styles.css
++++ b/styles.css
+@@ -516,6 +516,69 @@
+ #accountBtn.needs-attention {
+   color: #9b6500;
+   background: color-mix(in srgb, #e0a018 12%, var(--surface));
+ }
++
++/* Cross-platform PWA installation guide */
++.install-now-btn {
++  width: 100%;
++  margin: 16px 0 4px;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  gap: 9px;
++}
++.install-now-btn svg {
++  width: 19px;
++  height: 19px;
++  fill: none;
++  stroke: currentColor;
++  stroke-width: 1.9;
++  stroke-linecap: round;
++  stroke-linejoin: round;
++}
++.install-platforms {
++  display: grid;
++  gap: 11px;
++  margin-top: 16px;
++}
++.install-platform-card {
++  padding: 14px 15px;
++  border: 1px solid var(--border);
++  border-radius: 15px;
++  background: var(--surface-2);
++}
++.install-platform-card p {
++  margin: 9px 0 7px;
++  font-size: 13px;
++  line-height: 1.5;
++}
++.install-platform-card small {
++  display: block;
++  color: var(--muted);
++  font-size: 11px;
++  line-height: 1.4;
++}
++.install-platform-heading {
++  display: flex;
++  align-items: center;
++  gap: 9px;
++}
++.install-platform-heading strong { font-size: 14px; }
++.install-platform-icon {
++  width: 28px;
++  height: 28px;
++  display: grid;
++  place-items: center;
++  border-radius: 8px;
++  background: color-mix(in srgb, var(--brand) 14%, var(--surface));
++  color: var(--brand);
++  font-size: 13px;
++  font-weight: 900;
++}
++.install-platform-icon.apple-icon {
++  background: color-mix(in srgb, var(--text) 9%, var(--surface));
++  color: var(--text);
++  font-size: 10px;
++}
++
++@media (min-width: 620px) {
++  .install-platforms { grid-template-columns: 1fr 1fr; }
++}
+ 
+ @media (max-width: 620px) {
+   .header-inner { gap: 9px; }
+--- a/service-worker.js
++++ b/service-worker.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'spv-property-calculator-v1.7.6-deposit-slider';
++const CACHE_NAME = 'spv-property-calculator-v1.7.7-install-guide';
+ const ROOT = new URL('./', self.location.href).href;
+ const APP_SHELL = new URL('./index.html', self.location.href).href;
+ const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
