@@ -19,14 +19,43 @@
   <div id="app">
     <header class="app-header">
       <div class="header-inner">
-        <div>
-          <p class="eyebrow">UK Limited Company / SPV</p>
-          <h1>SPV Property Calculator</h1>
-        </div>
-        <div class="header-actions">
-          <span id="connectionStatus" class="status-pill" aria-live="polite">Online</span>
-          <button id="accountBtn" class="icon-btn" type="button" aria-label="Cloud account">Sign in</button>
-          <button id="installBtn" class="icon-btn" type="button" aria-label="Install app">Install</button>
+        <a id="homeBrandLink" class="brand-home" href="./" aria-label="Go to property calculator home" title="Home">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy">
+            <span class="eyebrow">UK Limited Company / SPV</span>
+            <span class="brand-title">SPV Property Calculator</span>
+          </span>
+        </a>
+        <div class="header-actions" aria-label="App controls">
+          <span id="connectionStatus" class="header-icon-control connection-icon" role="status" tabindex="0" aria-label="Online" title="Online" data-tooltip="Online">
+            <svg class="connection-online-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 9.5a10.2 10.2 0 0 1 14 0"></path>
+              <path d="M8 13a5.8 5.8 0 0 1 8 0"></path>
+              <path d="M10.8 16.3a1.8 1.8 0 0 1 2.4 0"></path>
+              <circle cx="12" cy="18.5" r="1"></circle>
+            </svg>
+            <svg class="connection-offline-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 4.5 19.5 19.5"></path>
+              <path d="M5 9.5a10.2 10.2 0 0 1 10.8-2.1"></path>
+              <path d="M18.8 10.7c.1.1.1.1.2.2"></path>
+              <path d="M8 13a5.8 5.8 0 0 1 3-1.5"></path>
+              <path d="M14.8 13.8c.4.2.8.5 1.2.8"></path>
+              <circle cx="12" cy="18.5" r="1"></circle>
+            </svg>
+          </span>
+          <button id="accountBtn" class="header-icon-control" type="button" aria-label="Sign in" title="Sign in" data-tooltip="Sign in">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.25"></circle>
+              <path d="M5.5 19c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3"></path>
+            </svg>
+          </button>
+          <button id="installBtn" class="header-icon-control" type="button" aria-label="Install app" title="Install app" data-tooltip="Install app">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.5v10"></path>
+              <path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path>
+              <path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </header>
@@ -39,22 +68,14 @@
             <h2 id="homeTitle">Your properties</h2>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed. Works offline, with a shared Supabase workspace for your small team.</p>
           </div>
-          <div class="hero-actions">
-            <button id="archiveBtn" class="secondary-btn" type="button">Archived <span id="archiveCountBadge" class="button-count">0</span></button>
-            <button id="newPropertyBtn" class="primary-btn" type="button">+ New Property</button>
+          <div class="home-action-panel" aria-label="Property actions">
+            <div class="home-action-row">
+              <button id="newPropertyBtn" class="primary-btn action-main" type="button"><span aria-hidden="true">＋</span> New Property</button>
+            </div>
+            <button id="archiveBtn" class="secondary-btn action-archive" type="button">Archived Properties <span id="archiveCountBadge" class="button-count">0</span></button>
           </div>
         </div>
 
-        <div id="cloudBar" class="cloud-bar" aria-live="polite">
-          <div class="cloud-bar-copy">
-            <span class="cloud-icon" aria-hidden="true">☁</span>
-            <div>
-              <strong id="cloudStatusTitle">Local only</strong>
-              <small id="cloudStatusText">Sign in to open the shared property workspace.</small>
-            </div>
-          </div>
-          <button id="syncBtn" class="secondary-btn compact-btn hidden" type="button">Sync now</button>
-        </div>
 
         <div class="list-heading">
           <h3>Saved calculations</h3>
@@ -102,13 +123,14 @@
 
         <div class="editor-layout">
           <form id="propertyForm" class="form-column" novalidate>
-            <div class="section-card">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Property</p>
-                  <h2 id="editorTitle">Purchase details</h2>
-                </div>
-              </div>
+            <details class="section-card collapsible-section" open>
+              <summary class="section-heading collapsible-heading">
+                <span class="section-heading-copy">
+                  <span class="eyebrow">Property</span>
+                  <span id="editorTitle" class="section-title section-title-large">Purchase details</span>
+                </span>
+                <strong id="purchaseDetailsInline" class="section-total">£0</strong>
+              </summary>
 
               <label class="field">
                 <span>Property Title <strong aria-hidden="true">*</strong></span>
@@ -138,17 +160,17 @@
                 <div><span>Deposit amount</span><strong id="depositAmountInline">£0</strong></div>
                 <div><span>Mortgage required</span><strong id="mortgageInline">£0</strong></div>
               </div>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Tax</p>
-                  <h3>Stamp Duty Land Tax</h3>
-                  <p class="muted small">England & Northern Ireland residential purchase.</p>
-                </div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading">
+                <span class="section-heading-copy">
+                  <span class="eyebrow">Tax</span>
+                  <span class="section-title">Stamp Duty Land Tax</span>
+                  <span class="muted small section-description">England & Northern Ireland residential purchase.</span>
+                </span>
                 <strong id="sdltInline" class="section-total">£0</strong>
-              </div>
+              </summary>
 
               <label class="switch-row">
                 <div>
@@ -171,35 +193,35 @@
                 <div id="sdltMethod" class="tax-method"></div>
                 <div id="sdltBreakdown" class="tax-breakdown"></div>
               </details>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading"><div><p class="eyebrow">Professional</p><h3>Legal & survey costs</h3></div></div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Professional</span><span class="section-title">Legal & survey costs</span></span><strong id="legalInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
                 <label class="field currency-field"><span>Solicitor / Conveyancing Fee</span><div class="input-prefix"><span>£</span><input id="solicitorFee" type="text" inputmode="decimal" placeholder="0"></div></label>
                 <label class="field currency-field"><span>Survey / Property Inspection</span><div class="input-prefix"><span>£</span><input id="surveyCost" type="text" inputmode="decimal" placeholder="0"></div></label>
               </div>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading"><div><p class="eyebrow">Finance</p><h3>Mortgage costs</h3></div></div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Finance</span><span class="section-title">Mortgage costs</span></span><strong id="mortgageCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
                 <label class="field currency-field"><span>Arrangement / Product Fee</span><div class="input-prefix"><span>£</span><input id="mortgageArrangementFee" type="text" inputmode="decimal" placeholder="0"></div></label>
                 <label class="field currency-field"><span>Mortgage Broker Fee</span><div class="input-prefix"><span>£</span><input id="mortgageBrokerFee" type="text" inputmode="decimal" placeholder="0"></div></label>
                 <label class="field currency-field"><span>Mortgage Valuation Fee</span><div class="input-prefix"><span>£</span><input id="mortgageValuationFee" type="text" inputmode="decimal" placeholder="0"></div></label>
               </div>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading"><div><p class="eyebrow">SPV</p><h3>Company costs</h3></div></div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">SPV</span><span class="section-title">Company costs</span></span><strong id="companyCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
                 <label class="field currency-field"><span>Company Formation Cost</span><div class="input-prefix"><span>£</span><input id="companyFormationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
                 <label class="field currency-field"><span>SPV Mortgage Administration Costs</span><div class="input-prefix"><span>£</span><input id="spvAdministrationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
               </div>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading"><div><p class="eyebrow">Other</p><h3>Purchase costs</h3></div></div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Other</span><span class="section-title">Purchase costs</span></span><strong id="purchaseCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
                 <label class="field currency-field"><span>Land Registry / Searches</span><div class="input-prefix"><span>£</span><input id="landRegistrySearches" type="text" inputmode="decimal" placeholder="0"></div></label>
                 <label class="field currency-field"><span>Insurance / Initial Insurance</span><div class="input-prefix"><span>£</span><input id="insuranceCost" type="text" inputmode="decimal" placeholder="0"></div></label>
@@ -211,26 +233,61 @@
                 <button id="addExpenseBtn" class="secondary-btn" type="button">+ Add Expense</button>
               </div>
               <div id="customExpenses" class="custom-expenses"></div>
-            </div>
+            </details>
 
-            <div class="section-card">
-              <div class="section-heading"><div><p class="eyebrow">Works</p><h3>Refurbishment</h3></div></div>
+            <details class="section-card collapsible-section">
+              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Works</span><span class="section-title">Refurbishment</span></span><strong id="refurbishmentInline" class="section-total">£0</strong></summary>
               <label class="field currency-field">
                 <span>Estimated Refurbishment Cost</span>
                 <div class="input-prefix"><span>£</span><input id="refurbishmentCost" type="text" inputmode="decimal" value="0"></div>
                 <small>Excluded from SDLT purchase price, but included in total cash required.</small>
               </label>
-            </div>
+            </details>
 
-            <div class="disclaimer-card">
-              This calculator provides estimates for property investment planning only. Tax, legal and mortgage costs may vary. Always confirm applicable taxes and fees with a qualified professional before completing a property purchase.
-            </div>
+            <details id="notesSection" class="section-card collapsible-section notes-section">
+              <summary class="section-heading collapsible-heading">
+                <span class="section-heading-copy"><span class="eyebrow">Collaboration</span><span class="section-title">Notes</span></span>
+                <strong id="notesInline" class="section-total notes-count">0 notes</strong>
+              </summary>
+              <div id="notesSignedOut" class="notes-state hidden">
+                <p class="muted small">Sign in to your Supabase account to view and add shared property notes.</p>
+              </div>
+              <div id="notesUnsaved" class="notes-state">
+                <p class="muted small">Save this property first, then you can add shared notes.</p>
+              </div>
+              <div id="notesWorkspace" class="hidden">
+                <label class="field">
+                  <span>Add a note</span>
+                  <textarea id="noteText" rows="3" maxlength="2000" placeholder="Add an update, question or decision about this property..."></textarea>
+                  <small>Notes are shared with all signed-in users and show who added them.</small>
+                </label>
+                <div class="notes-actions">
+                  <button id="saveNoteBtn" class="secondary-btn" type="button">Save Note</button>
+                  <span id="noteSaveMessage" class="muted small" aria-live="polite"></span>
+                </div>
+                <div class="notes-list-header">
+                  <h4>Note history</h4>
+                  <button id="refreshNotesBtn" class="text-btn" type="button">Refresh</button>
+                </div>
+                <div id="notesList" class="notes-list"></div>
+              </div>
+            </details>
+
+            <details class="disclaimer-card collapsible-disclaimer">
+              <summary>Important disclaimer</summary>
+              <p>This calculator provides estimates for property investment planning only. Tax, legal and mortgage costs may vary. Always confirm applicable taxes and fees with a qualified professional before completing a property purchase.</p>
+            </details>
           </form>
 
           <aside class="summary-column" aria-label="Calculation summary">
-            <div class="summary-card">
-              <p class="eyebrow">Live calculation</p>
-              <h3>Purchase summary</h3>
+            <details class="summary-card collapsible-section summary-collapsible" open>
+              <summary class="summary-heading collapsible-heading">
+                <span class="section-heading-copy">
+                  <span class="eyebrow">Live calculation</span>
+                  <span class="section-title section-title-summary">Purchase summary</span>
+                </span>
+                <strong id="summaryInline" class="section-total">£0</strong>
+              </summary>
 
               <div class="summary-rows">
                 <div><span>Purchase Price</span><strong id="summaryPurchasePrice">£0</strong></div>
@@ -257,7 +314,7 @@
 
               <button id="savePropertyBtn" class="primary-btn full-width" type="button">Save Property</button>
               <p id="saveMessage" class="save-message" aria-live="polite"></p>
-            </div>
+            </details>
           </aside>
         </div>
       </section>
@@ -271,6 +328,10 @@
       <h3>Supabase account</h3>
       <p class="muted small">Sign in to the shared workspace. Every authenticated user can see, edit and archive the same shared property list. The local copy remains available offline.</p>
 
+      <label class="field">
+        <span>Your name <em>(used when creating an account and on notes)</em></span>
+        <input id="authDisplayName" type="text" autocomplete="name" maxlength="80" placeholder="e.g. Keyur">
+      </label>
       <label class="field">
         <span>Email</span>
         <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
@@ -290,6 +351,13 @@
       <p class="eyebrow">Cloud sync</p>
       <h3>Signed in</h3>
       <p id="signedInEmail" class="muted"></p>
+      <label class="field account-name-field">
+        <span>Display name <em>(shown on notes)</em></span>
+        <div class="account-name-row">
+          <input id="accountDisplayName" type="text" autocomplete="name" maxlength="80" placeholder="Your name">
+          <button id="saveDisplayNameBtn" class="secondary-btn compact-btn" type="button">Save name</button>
+        </div>
+      </label>
       <div class="auth-account-card">
         <strong id="accountSyncTitle">Supabase connected</strong>
         <small id="accountSyncText">All signed-in users share the same Supabase property list.</small>

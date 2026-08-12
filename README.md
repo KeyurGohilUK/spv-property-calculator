@@ -105,3 +105,10 @@ This is a planning estimator, not tax advice. Corporate property transactions ca
 ## Archived Properties and permanent deletion
 
 The main list uses soft-delete via **Archive**. Archived Properties provides **Restore Property** and **Permanently Delete**. Permanent deletion is online-only, requires sign-in, removes the property data for all users, and records a small deletion tombstone to prevent stale offline caches from recreating it. Run the latest `supabase-schema.sql` before deploying this version.
+
+## UI refresh (v1.5)
+
+- The app icon/title in the sticky header now returns to the Home property list.
+- **Sync now** is positioned directly beside **New Property** when a signed-in cloud session is available.
+- The Home actions use a compact responsive action panel, with **Archived Properties** as a quieter secondary action.
+- The service-worker cache is bumped to `v1.5.0-ui-refresh` so deployed PWAs can pick up the refreshed interface.

@@ -131,9 +131,13 @@
     return data?.session || null;
   }
 
-  async function signUp(email, password) {
+  async function signUp(email, password, displayName = '') {
     const supabaseClient = ensureClient();
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    const name = String(displayName || '').trim();
+    const credentials = name
+      ? { email, password, options: { data: { display_name: name } } }
+      : { email, password };
+    const { data, error } = await supabaseClient.auth.signUp(credentials);
     if (error) throw error;
     if (data?.session?.user) emitAuth(data.session.user, 'SIGNED_IN');
     return data;
@@ -152,6 +156,23 @@
     const { error } = await supabaseClient.auth.signOut();
     if (error) throw error;
     emitAuth(null, 'SIGNED_OUT');
+  }
+
+  function getUserDisplayName(user = currentUser) {
+    if (!user) return '';
+    const metadata = user.user_metadata || {};
+    return String(metadata.display_name || metadata.full_name || metadata.name || user.email || '').trim();
+  }
+
+  async function updateDisplayName(displayName) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const name = String(displayName || '').trim();
+    if (!name) throw new Error('Enter a display name.');
+    const { data, error } = await supabaseClient.auth.updateUser({ data: { display_name: name } });
+    if (error) throw error;
+    emitAuth(data?.user || currentUser, 'USER_UPDATED');
+    return data?.user || currentUser;
   }
 
   async function requireUser() {
@@ -197,6 +218,42 @@
     const { error } = await supabaseClient.from('properties').upsert(row, { onConflict: 'id' });
     if (error) throw error;
     return record;
+  }
+
+  async function listNotes(propertyId) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const id = String(propertyId || '').trim();
+    if (!id) return [];
+    const { data, error } = await supabaseClient
+      .from('property_notes')
+      .select('id,property_id,author_user_id,author_name,note,created_at')
+      .eq('property_id', id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function addNote(propertyId, noteText) {
+    const supabaseClient = ensureClient();
+    const user = await requireUser();
+    const id = String(propertyId || '').trim();
+    const note = String(noteText || '').trim();
+    if (!id) throw new Error('Save the property before adding a note.');
+    if (!note) throw new Error('Enter a note first.');
+    const authorName = getUserDisplayName(user) || user.email || 'Signed-in user';
+    const { data, error } = await supabaseClient
+      .from('property_notes')
+      .insert({
+        property_id: id,
+        author_user_id: user.id,
+        author_name: authorName,
+        note
+      })
+      .select('id,property_id,author_user_id,author_name,note,created_at')
+      .single();
+    if (error) throw error;
+    return data;
   }
 
   async function listPermanentDeletions() {
@@ -317,10 +374,14 @@
     onAuthChange,
     getSession,
     getCurrentUser: () => currentUser,
+    getUserDisplayName,
+    updateDisplayName,
     signUp,
     signIn,
     signOut,
     listProperties,
+    listNotes,
+    addNote,
     upsertProperty,
     listPermanentDeletions,
     permanentlyDeleteProperty,

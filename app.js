@@ -329,6 +329,8 @@ const currency = new Intl.NumberFormat('en-GB', {
 
 const numberFormat = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 });
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const dateTimeFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const NOTES_CACHE_KEY = 'spv-property-calculator.notes.v1';
 
 const FEE_FIELDS = [
   'solicitorFee', 'surveyCost', 'mortgageArrangementFee', 'mortgageBrokerFee',
@@ -344,6 +346,8 @@ let cloudSyncing = false;
 let cloudLastMessage = '';
 let cloudInitialized = false;
 let cloudListenerAttached = false;
+let currentNotes = [];
+let notesLoading = false;
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -389,7 +393,14 @@ function renderCalculation() {
 
   $('depositAmountInline').textContent = money(calc.depositAmount);
   $('mortgageInline').textContent = money(calc.mortgageRequired);
+  $('purchaseDetailsInline').textContent = money(calc.purchasePrice);
   $('sdltInline').textContent = money(calc.sdlt.total);
+  $('legalInline').textContent = money(calc.legalProfessional);
+  $('mortgageCostsInline').textContent = money(calc.mortgageCosts);
+  $('companyCostsInline').textContent = money(calc.companyCosts);
+  $('purchaseCostsInline').textContent = money(calc.otherPurchaseCosts);
+  $('refurbishmentInline').textContent = money(calc.refurbishment);
+  $('summaryInline').textContent = money(calc.totalCashRequired);
 
   $('summaryPurchasePrice').textContent = money(calc.purchasePrice);
   $('summaryDepositPercent').textContent = `${numberFormat.format(calc.depositPercent)}%`;
@@ -452,6 +463,128 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
+function readNotesCache() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch { return {}; }
+}
+
+function cacheNotes(propertyId, notes) {
+  if (!propertyId) return;
+  try {
+    const cache = readNotesCache();
+    cache[String(propertyId)] = Array.isArray(notes) ? notes : [];
+    localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(cache));
+  } catch (error) { console.warn('Could not cache notes:', error); }
+}
+
+function getCachedNotes(propertyId) {
+  if (!propertyId) return [];
+  const notes = readNotesCache()[String(propertyId)];
+  return Array.isArray(notes) ? notes : [];
+}
+
+function removeCachedNotes(propertyId) {
+  if (!propertyId) return;
+  try {
+    const cache = readNotesCache();
+    delete cache[String(propertyId)];
+    localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(cache));
+  } catch (error) { console.warn('Could not clear cached notes:', error); }
+}
+
+function getCloudDisplayName(user = cloudUser) {
+  if (!user) return '';
+  return window.SPVCloud?.getUserDisplayName?.(user) || user.email || '';
+}
+
+function renderNotes() {
+  const hasSavedProperty = Boolean(editingId);
+  const signedIn = Boolean(cloudUser);
+  $('notesUnsaved').classList.toggle('hidden', hasSavedProperty);
+  $('notesSignedOut').classList.toggle('hidden', !hasSavedProperty || signedIn);
+  $('notesWorkspace').classList.toggle('hidden', !hasSavedProperty || !signedIn);
+  $('notesInline').textContent = `${currentNotes.length} note${currentNotes.length === 1 ? '' : 's'}`;
+
+  const saveBtn = $('saveNoteBtn');
+  if (saveBtn) {
+    saveBtn.disabled = notesLoading || !navigator.onLine || !signedIn || !hasSavedProperty;
+    saveBtn.textContent = notesLoading ? 'Saving…' : 'Save Note';
+  }
+  if ($('refreshNotesBtn')) $('refreshNotesBtn').disabled = notesLoading || !navigator.onLine || !signedIn || !hasSavedProperty;
+
+  const list = $('notesList');
+  if (!list) return;
+  if (!currentNotes.length) {
+    list.innerHTML = '<div class="notes-empty"><p>No notes yet.</p><small>Add the first update for this property.</small></div>';
+    return;
+  }
+
+  list.innerHTML = currentNotes.map((item) => {
+    const author = escapeHtml(item.author_name || 'Signed-in user');
+    const created = item.created_at ? dateTimeFormat.format(new Date(item.created_at)) : 'Recently';
+    return `<article class="note-item"><div class="note-meta"><strong>${author}</strong><time>${escapeHtml(created)}</time></div><p>${escapeHtml(item.note || '').replaceAll('\n', '<br>')}</p></article>`;
+  }).join('');
+}
+
+async function loadNotes({ forceCloud = false } = {}) {
+  currentNotes = getCachedNotes(editingId);
+  renderNotes();
+  if (!editingId || !cloudUser || !navigator.onLine || !window.SPVCloud?.listNotes) return;
+  if (notesLoading && !forceCloud) return;
+  notesLoading = true;
+  renderNotes();
+  try {
+    currentNotes = await window.SPVCloud.listNotes(editingId);
+    cacheNotes(editingId, currentNotes);
+    $('noteSaveMessage').textContent = '';
+  } catch (error) {
+    console.warn('Could not load notes:', error);
+    $('noteSaveMessage').textContent = 'Could not refresh notes. Showing the last cached copy.';
+  } finally {
+    notesLoading = false;
+    renderNotes();
+  }
+}
+
+async function saveNote() {
+  if (!editingId) { $('noteSaveMessage').textContent = 'Save this property first.'; return; }
+  if (!cloudUser) { $('noteSaveMessage').textContent = 'Sign in to add a shared note.'; return; }
+  if (!navigator.onLine) { $('noteSaveMessage').textContent = 'Connect to the internet to save a shared note.'; return; }
+  const text = $('noteText').value.trim();
+  if (!text) { $('noteSaveMessage').textContent = 'Enter a note first.'; $('noteText').focus(); return; }
+  notesLoading = true;
+  $('noteSaveMessage').textContent = 'Saving note…';
+  renderNotes();
+  try {
+    const saved = await window.SPVCloud.addNote(editingId, text);
+    currentNotes = [saved, ...currentNotes.filter((item) => item.id !== saved.id)];
+    cacheNotes(editingId, currentNotes);
+    $('noteText').value = '';
+    $('noteSaveMessage').textContent = `Saved by ${saved.author_name || getCloudDisplayName() || 'signed-in user'}.`;
+  } catch (error) {
+    $('noteSaveMessage').textContent = error.message || 'Could not save the note.';
+  } finally {
+    notesLoading = false;
+    renderNotes();
+  }
+}
+
+function openPrimaryDetailsSection() {
+  const firstSection = document.querySelector('#propertyForm > details.collapsible-section');
+  if (firstSection) firstSection.open = true;
+}
+
+function resetEditorSectionState() {
+  const sections = [...document.querySelectorAll('#propertyForm > details.collapsible-section')];
+  sections.forEach((section, index) => { section.open = index === 0; });
+  const disclaimer = document.querySelector('#propertyForm > details.collapsible-disclaimer');
+  if (disclaimer) disclaimer.open = false;
+  const summary = document.querySelector('.summary-collapsible');
+  if (summary) summary.open = true;
+}
+
 function validateForm() {
   const titleValid = $('title').value.trim().length > 0;
   const priceValid = safeNumber($('purchasePrice').value) > 0;
@@ -461,6 +594,8 @@ function validateForm() {
   $('titleError').classList.toggle('hidden', titleValid);
   $('priceError').classList.toggle('hidden', priceValid);
   $('depositPercent').setCustomValidity(depositValid ? '' : 'Deposit must be between 0% and 100%.');
+
+  if (!titleValid || !priceValid || !depositValid) openPrimaryDetailsSection();
 
   if (!titleValid) $('title').focus();
   else if (!priceValid) $('purchasePrice').focus();
@@ -483,7 +618,11 @@ function resetForm() {
   $('titleError').classList.add('hidden');
   $('priceError').classList.add('hidden');
   $('editorModeLabel').textContent = 'New calculation';
+  currentNotes = [];
+  if ($('noteText')) $('noteText').value = '';
+  if ($('noteSaveMessage')) $('noteSaveMessage').textContent = '';
   renderCalculation();
+  renderNotes();
 }
 
 function loadIntoForm(property) {
@@ -506,7 +645,9 @@ function loadIntoForm(property) {
 
   $('customExpenses').innerHTML = '';
   (property.customExpenses || []).forEach(addExpenseRow);
+  currentNotes = getCachedNotes(property.id);
   renderCalculation();
+  renderNotes();
 }
 
 function showHome() {
@@ -523,7 +664,10 @@ function showArchive() {
 }
 function showEditor(id = null) {
   $('homeView').classList.add('hidden'); $('archiveView').classList.add('hidden'); $('editorView').classList.remove('hidden');
+  resetEditorSectionState();
   if (id) { const property=getProperty(id); if (property && !property.deletedAt) loadIntoForm(property); else resetForm(); } else resetForm();
+  renderNotes();
+  if (editingId) loadNotes();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function updatePropertyCounts() {
@@ -558,6 +702,7 @@ function renderArchiveList() {
       try{
         await window.SPVCloud.permanentlyDeleteProperty(property.id);
         if(!permanentlyDeleteLocalProperty(property.id)) throw new Error('Cloud deletion succeeded, but the local cache could not be updated. Reload the app to refresh it.');
+        removeCachedNotes(property.id);
         renderArchiveList(); renderPropertyList();
         setCloudMessage('Property permanently deleted for all users.');
       }catch(error){
@@ -578,6 +723,7 @@ async function saveCurrentProperty() {
     editingId = saved.id;
     editingCreatedAt = saved.createdAt;
     $('editorModeLabel').textContent = 'Editing saved property';
+    renderNotes();
     $('saveMessage').textContent = cloudUser
       ? (navigator.onLine ? 'Saved locally. Syncing…' : 'Saved locally. Will sync when online.')
       : 'Saved on this device.';
@@ -617,53 +763,39 @@ function setCloudMessage(message, isWarning = false) {
   renderCloudState(isWarning);
 }
 
+function setHeaderTooltip(element, label) {
+  if (!element) return;
+  element.setAttribute('aria-label', label);
+  element.setAttribute('title', label);
+  element.dataset.tooltip = label;
+}
+
 function renderCloudState(isWarning = false) {
   const cloud = window.SPVCloud;
   const state = cloud?.getConfigState?.() || { configured: false, available: false };
-  const syncBtn = $('syncBtn');
   const accountBtn = $('accountBtn');
-
-  $('cloudBar').classList.toggle('warning', Boolean(isWarning));
+  accountBtn.classList.remove('is-signed-in', 'needs-attention');
 
   if (!state.configured) {
-    $('cloudStatusTitle').textContent = 'Cloud not configured';
-    $('cloudStatusText').textContent = 'Edit supabase-config.js to enable free Supabase cloud storage.';
-    accountBtn.textContent = 'Cloud setup';
-    syncBtn.classList.add('hidden');
+    setHeaderTooltip(accountBtn, 'Cloud setup required');
+    accountBtn.classList.add('needs-attention');
     return;
   }
 
   if (!state.available) {
-    $('cloudStatusTitle').textContent = 'Cloud library unavailable';
-    $('cloudStatusText').textContent = navigator.onLine
-      ? 'Reload the page to retry loading Supabase.'
-      : 'The calculator still works locally while offline.';
-    accountBtn.textContent = 'Cloud';
-    syncBtn.classList.add('hidden');
+    setHeaderTooltip(accountBtn, 'Cloud unavailable');
+    accountBtn.classList.add('needs-attention');
     return;
   }
 
   if (!cloudUser) {
-    $('cloudStatusTitle').textContent = 'Local only';
-    $('cloudStatusText').textContent = cloudLastMessage || 'Sign in to open the shared property workspace.';
-    accountBtn.textContent = 'Sign in';
-    syncBtn.classList.add('hidden');
+    setHeaderTooltip(accountBtn, 'Sign in');
     return;
   }
 
-  accountBtn.textContent = 'Account';
-  syncBtn.classList.remove('hidden');
-  syncBtn.disabled = cloudSyncing || !navigator.onLine;
-  syncBtn.textContent = cloudSyncing ? 'Syncing…' : 'Sync now';
-
-  if (!navigator.onLine) {
-    $('cloudStatusTitle').textContent = 'Offline — saved locally';
-    $('cloudStatusText').textContent = 'Changes will sync to Supabase when this device is online again.';
-    return;
-  }
-
-  $('cloudStatusTitle').textContent = 'Supabase connected';
-  $('cloudStatusText').textContent = cloudLastMessage || `Shared workspace · signed in as ${cloudUser.email || 'your account'}.`;
+  const displayName = getCloudDisplayName(cloudUser);
+  setHeaderTooltip(accountBtn, displayName ? `Account · ${displayName}` : 'Account');
+  accountBtn.classList.add('is-signed-in');
 }
 
 function renderAuthDialog() {
@@ -685,6 +817,7 @@ function renderAuthDialog() {
 
   if (cloudUser) {
     $('signedInEmail').textContent = cloudUser.email || 'Signed-in Supabase user';
+    $('accountDisplayName').value = getCloudDisplayName(cloudUser) === cloudUser.email ? '' : getCloudDisplayName(cloudUser);
     $('dialogSyncBtn').disabled = cloudSyncing || !navigator.onLine;
     $('dialogSyncBtn').textContent = cloudSyncing ? 'Syncing…' : 'Sync now';
     $('accountSyncText').textContent = navigator.onLine
@@ -694,7 +827,7 @@ function renderAuthDialog() {
 }
 
 function setAuthBusy(busy) {
-  ['signInBtn', 'signUpBtn', 'signOutBtn', 'dialogSyncBtn'].forEach((id) => {
+  ['signInBtn', 'signUpBtn', 'signOutBtn', 'dialogSyncBtn', 'saveDisplayNameBtn'].forEach((id) => {
     const element = $(id);
     if (element) element.disabled = busy;
   });
@@ -768,6 +901,7 @@ async function handleSignIn() {
 async function handleSignUp() {
   const email = $('authEmail').value.trim();
   const password = $('authPassword').value;
+  const displayName = $('authDisplayName').value.trim();
   if (!email || password.length < 6) {
     $('authMessage').textContent = 'Enter a valid email and a password of at least 6 characters.';
     return;
@@ -776,7 +910,7 @@ async function handleSignUp() {
   setAuthBusy(true);
   $('authMessage').textContent = 'Creating account…';
   try {
-    const data = await window.SPVCloud.signUp(email, password);
+    const data = await window.SPVCloud.signUp(email, password, displayName);
     if (data?.session?.user) {
       cloudUser = data.session.user;
       $('authMessage').textContent = '';
@@ -789,6 +923,25 @@ async function handleSignUp() {
     }
   } catch (error) {
     $('authMessage').textContent = error.message || 'Could not create the account.';
+  } finally {
+    setAuthBusy(false);
+    renderAuthDialog();
+  }
+}
+
+async function handleSaveDisplayName() {
+  if (!cloudUser) return;
+  const name = $('accountDisplayName').value.trim();
+  if (!name) { $('signedInMessage').textContent = 'Enter your name first.'; return; }
+  setAuthBusy(true);
+  $('signedInMessage').textContent = 'Saving name…';
+  try {
+    cloudUser = await window.SPVCloud.updateDisplayName(name);
+    $('signedInMessage').textContent = 'Display name saved. New notes will use this name.';
+    renderCloudState();
+    renderNotes();
+  } catch (error) {
+    $('signedInMessage').textContent = error.message || 'Could not save your display name.';
   } finally {
     setAuthBusy(false);
     renderAuthDialog();
@@ -825,6 +978,8 @@ async function setupCloud() {
         cloudUser = user || null;
         renderCloudState();
         renderAuthDialog();
+        renderNotes();
+        if (editingId && cloudUser) loadNotes();
         if (cloudUser && navigator.onLine) syncCloud({ showFeedback: false });
       }, 0);
     });
@@ -848,8 +1003,9 @@ async function setupCloud() {
 
 function updateConnectionStatus() {
   const online = navigator.onLine;
-  $('connectionStatus').textContent = online ? 'Online' : 'Offline';
-  $('connectionStatus').classList.toggle('offline', !online);
+  const status = $('connectionStatus');
+  status.classList.toggle('offline', !online);
+  setHeaderTooltip(status, online ? 'Online' : 'Offline');
   renderCloudState(!online && Boolean(cloudUser));
 }
 
@@ -873,6 +1029,10 @@ function setupInstall() {
 }
 
 function init() {
+  $('homeBrandLink').addEventListener('click', (event) => {
+    event.preventDefault();
+    showHome();
+  });
   $('newPropertyBtn').addEventListener('click', () => showEditor());
   $('archiveBtn').addEventListener('click', showArchive);
   $('archiveBackBtn').addEventListener('click', showHome);
@@ -888,8 +1048,10 @@ function init() {
   $('signInBtn').addEventListener('click', handleSignIn);
   $('signUpBtn').addEventListener('click', handleSignUp);
   $('signOutBtn').addEventListener('click', handleSignOut);
-  $('syncBtn').addEventListener('click', () => syncCloud());
+  $('saveDisplayNameBtn').addEventListener('click', handleSaveDisplayName);
   $('dialogSyncBtn').addEventListener('click', () => syncCloud());
+  $('saveNoteBtn').addEventListener('click', saveNote);
+  $('refreshNotesBtn').addEventListener('click', () => loadNotes({ forceCloud: true }));
   $('authPassword').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') handleSignIn();
   });
@@ -902,7 +1064,10 @@ function init() {
   window.addEventListener('online', () => {
     updateConnectionStatus();
     if (!cloudInitialized) setupCloud();
-    else if (cloudUser) syncCloud({ showFeedback: false });
+    else if (cloudUser) {
+      syncCloud({ showFeedback: false });
+      if (editingId) loadNotes({ forceCloud: true });
+    }
   });
   window.addEventListener('offline', updateConnectionStatus);
 
@@ -912,12 +1077,14 @@ function init() {
   window.setInterval(() => {
     if (cloudUser && navigator.onLine && document.visibilityState !== 'hidden') {
       syncCloud({ showFeedback: false });
+      if (editingId) loadNotes();
     }
   }, 45000);
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && cloudUser && navigator.onLine) {
       syncCloud({ showFeedback: false });
+      if (editingId) loadNotes({ forceCloud: true });
     }
   });
 
