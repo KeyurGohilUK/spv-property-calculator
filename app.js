@@ -366,6 +366,11 @@ function formatInputValue(value) {
   return numeric === 0 ? '0' : numberFormat.format(numeric);
 }
 
+function normalizeDepositPercent(value) {
+  const clamped = clamp(safeNumber(value), 0, 100);
+  return Math.round(clamped / 5) * 5;
+}
+
 function getFormModel() {
   const customExpenses = [...document.querySelectorAll('.expense-row')].map((row) => ({
     id: row.dataset.id,
@@ -428,6 +433,7 @@ function renderCalculation() {
 
   $('depositAmountInline').textContent = money(calc.depositAmount);
   $('mortgageInline').textContent = money(calc.mortgageRequired);
+  $('depositPercentValue').textContent = `${numberFormat.format(calc.depositPercent)}%`;
   $('purchaseDetailsInline').textContent = money(calc.purchasePrice);
   $('sdltInline').textContent = money(calc.sdlt.total);
   $('legalInline').textContent = money(calc.legalProfessional);
@@ -721,7 +727,7 @@ function loadIntoForm(property) {
   $('title').value = property.title || '';
   $('details').value = property.details || '';
   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
-  $('depositPercent').value = property.depositPercent ?? 25;
+  $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
   $('nonResident').checked = Boolean(property.nonResident);
 
