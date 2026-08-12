@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SPV Property">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><title>SPV Property Calculator</title></head>
+<body><header><div><small>UK PROPERTY INVESTMENT</small><h1>SPV Property Calculator</h1></div><button id="share" class="primary">Share</button></header>
+<main><div class="hero card"><div><small>Purchase price</small><b id="hp">£0</b></div><div><small>Total investment</small><b id="hi">£0</b></div><div><small>ICR</small><b id="hicr">—</b></div><div id="status">—</div></div>
+<nav><button class="tab active" data-t="inputs">Inputs</button><button class="tab" data-t="mortgage">Mortgage</button><button class="tab" data-t="cash">Cash Flow</button><button class="tab" data-t="summary">Summary</button></nav>
+<section id="inputs" class="panel active">
+<div class="card"><h2>Property & Mortgage</h2>
+<label>Purchase price (£)<input id="price" type="number" value="300000"></label><label>Deposit (%)<input id="dep" type="number" step=".01" value="25"></label>
+<label>Mortgage rate (%)<input id="rate" type="number" step=".01" value="5.5"></label><label>Arrangement fee (% of loan)<input id="fee" type="number" step=".01" value="1"></label>
+<label>Minimum ICR (x)<input id="icr" type="number" step=".01" value="1.25"></label><label>Stress rate (%)<input id="stress" type="number" step=".01" value="6.5"></label></div>
+<div class="card"><h2>Purchase Costs</h2>
+<label>Legal fees (£)<input id="legal" type="number" value="1800"></label><label>Survey / valuation (£)<input id="survey" type="number" value="500"></label>
+<label>Broker fee (£)<input id="broker" type="number" value="500"></label><label>SPV formation (£)<input id="spv" type="number" value="250"></label>
+<label><strong>Refurbishment cost (£)</strong><input id="refurb" type="number" value="10000"></label>
+<label>Non-resident 2% SDLT surcharge?<select id="nr"><option value="no">No</option><option value="yes">Yes</option></select></label></div>
+<div class="card"><h2>Annual Operating Costs</h2>
+<label>Accountancy (£)<input id="acct" type="number" value="1200"></label><label>Ground rent / service charge (£)<input id="service" type="number" value="1500"></label>
+<label>Buildings insurance (£)<input id="ins" type="number" value="350"></label><label>HMO licensing (£)<input id="lic" type="number" value="0"></label>
+<label>Management fee (%)<input id="mgmt" type="number" value="10"></label><label>Void allowance (%)<input id="void" type="number" value="5"></label>
+<label>Maintenance reserve (%)<input id="maint" type="number" value="5"></label><label>Expected annual rent (£)<input id="rent" type="number" value="24000"></label></div></section>
+<section id="mortgage" class="panel"><div class="grid" id="mortGrid"></div></section>
+<section id="cash" class="panel"><div class="card"><h2>Annual Cash Flow</h2><div id="cashTable"></div></div></section>
+<section id="summary" class="panel"><div class="card"><h2>Investment Summary</h2><div id="summaryTable"></div></div><div class="card actions"><button id="pdf" class="primary">Share / Save PDF</button><button id="csv" class="secondary">Export CSV for Excel</button></div></section></main>
+<div id="toast"></div><script src="app.js"></script></body></html>
