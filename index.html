@@ -1,26 +1,295 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1220"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SPV Property">
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><title>SPV Property Calculator</title></head>
-<body><header><div><small>UK PROPERTY INVESTMENT</small><h1>SPV Property Calculator</h1></div><button id="share" class="primary">Share</button></header>
-<main><div class="hero card"><div><small>Purchase price</small><b id="hp">£0</b></div><div><small>Total investment</small><b id="hi">£0</b></div><div><small>ICR</small><b id="hicr">—</b></div><div id="status">—</div></div>
-<nav><button class="tab active" data-t="inputs">Inputs</button><button class="tab" data-t="mortgage">Mortgage</button><button class="tab" data-t="cash">Cash Flow</button><button class="tab" data-t="summary">Summary</button></nav>
-<section id="inputs" class="panel active">
-<div class="card"><h2>Property & Mortgage</h2>
-<label>Purchase price (£)<input id="price" type="number" value="300000"></label><label>Deposit (%)<input id="dep" type="number" step=".01" value="25"></label>
-<label>Mortgage rate (%)<input id="rate" type="number" step=".01" value="5.5"></label><label>Arrangement fee (% of loan)<input id="fee" type="number" step=".01" value="1"></label>
-<label>Minimum ICR (x)<input id="icr" type="number" step=".01" value="1.25"></label><label>Stress rate (%)<input id="stress" type="number" step=".01" value="6.5"></label></div>
-<div class="card"><h2>Purchase Costs</h2>
-<label>Legal fees (£)<input id="legal" type="number" value="1800"></label><label>Survey / valuation (£)<input id="survey" type="number" value="500"></label>
-<label>Broker fee (£)<input id="broker" type="number" value="500"></label><label>SPV formation (£)<input id="spv" type="number" value="250"></label>
-<label><strong>Refurbishment cost (£)</strong><input id="refurb" type="number" value="10000"></label>
-<label>Non-resident 2% SDLT surcharge?<select id="nr"><option value="no">No</option><option value="yes">Yes</option></select></label></div>
-<div class="card"><h2>Annual Operating Costs</h2>
-<label>Accountancy (£)<input id="acct" type="number" value="1200"></label><label>Ground rent / service charge (£)<input id="service" type="number" value="1500"></label>
-<label>Buildings insurance (£)<input id="ins" type="number" value="350"></label><label>HMO licensing (£)<input id="lic" type="number" value="0"></label>
-<label>Management fee (%)<input id="mgmt" type="number" value="10"></label><label>Void allowance (%)<input id="void" type="number" value="5"></label>
-<label>Maintenance reserve (%)<input id="maint" type="number" value="5"></label><label>Expected annual rent (£)<input id="rent" type="number" value="24000"></label></div></section>
-<section id="mortgage" class="panel"><div class="grid" id="mortGrid"></div></section>
-<section id="cash" class="panel"><div class="card"><h2>Annual Cash Flow</h2><div id="cashTable"></div></div></section>
-<section id="summary" class="panel"><div class="card"><h2>Investment Summary</h2><div id="summaryTable"></div></div><div class="card actions"><button id="pdf" class="primary">Share / Save PDF</button><button id="csv" class="secondary">Export CSV for Excel</button></div></section></main>
-<div id="toast"></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f6b55" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1714" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="Offline UK SPV property purchase cost calculator for England and Northern Ireland.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SPV Calculator">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>SPV Property Calculator</title>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <div>
+          <p class="eyebrow">UK Limited Company / SPV</p>
+          <h1>SPV Property Calculator</h1>
+        </div>
+        <div class="header-actions">
+          <span id="connectionStatus" class="status-pill" aria-live="polite">Online</span>
+          <button id="accountBtn" class="icon-btn" type="button" aria-label="Cloud account">Sign in</button>
+          <button id="installBtn" class="icon-btn" type="button" aria-label="Install app">Install</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-shell">
+      <section id="homeView" class="view" aria-labelledby="homeTitle">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">Purchase-cost planning</p>
+            <h2 id="homeTitle">Your properties</h2>
+            <p class="muted">Estimate deposit, SDLT, fees and total cash needed. Works offline, with optional Supabase cloud sync across your devices.</p>
+          </div>
+          <button id="newPropertyBtn" class="primary-btn" type="button">+ New Property</button>
+        </div>
+
+        <div id="cloudBar" class="cloud-bar" aria-live="polite">
+          <div class="cloud-bar-copy">
+            <span class="cloud-icon" aria-hidden="true">☁</span>
+            <div>
+              <strong id="cloudStatusTitle">Local only</strong>
+              <small id="cloudStatusText">Sign in to sync saved properties across devices.</small>
+            </div>
+          </div>
+          <button id="syncBtn" class="secondary-btn compact-btn hidden" type="button">Sync now</button>
+        </div>
+
+        <div class="list-heading">
+          <h3>Saved calculations</h3>
+          <span id="propertyCount" class="count-badge">0</span>
+        </div>
+        <div id="propertyList" class="property-list"></div>
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon" aria-hidden="true">⌂</div>
+          <h3>No properties yet</h3>
+          <p>Create your first purchase-cost calculation. It will be stored locally and available offline.</p>
+        </div>
+      </section>
+
+      <section id="editorView" class="view hidden" aria-labelledby="editorTitle">
+        <div class="editor-topbar">
+          <button id="backBtn" class="text-btn" type="button">← Properties</button>
+          <span id="editorModeLabel" class="mode-label">New calculation</span>
+        </div>
+
+        <div class="editor-layout">
+          <form id="propertyForm" class="form-column" novalidate>
+            <div class="section-card">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Property</p>
+                  <h2 id="editorTitle">Purchase details</h2>
+                </div>
+              </div>
+
+              <label class="field">
+                <span>Property Title <strong aria-hidden="true">*</strong></span>
+                <input id="title" name="title" type="text" maxlength="120" autocomplete="off" placeholder="e.g. 2 Bedroom Flat – Bristol" required>
+                <small id="titleError" class="error-text hidden">Please enter a property title.</small>
+              </label>
+
+              <label class="field">
+                <span>Property Details <em>optional</em></span>
+                <textarea id="details" name="details" rows="4" placeholder="Address, estate agent, auction details, property condition or notes"></textarea>
+              </label>
+
+              <div class="field-grid">
+                <label class="field currency-field">
+                  <span>Purchase Price</span>
+                  <div class="input-prefix"><span>£</span><input id="purchasePrice" name="purchasePrice" type="text" inputmode="decimal" autocomplete="off" placeholder="250,000" aria-describedby="priceError"></div>
+                  <small id="priceError" class="error-text hidden">Enter a purchase price greater than £0.</small>
+                </label>
+
+                <label class="field">
+                  <span>Deposit Percentage</span>
+                  <div class="input-suffix"><input id="depositPercent" name="depositPercent" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="25"><span>%</span></div>
+                </label>
+              </div>
+
+              <div class="mini-summary">
+                <div><span>Deposit amount</span><strong id="depositAmountInline">£0</strong></div>
+                <div><span>Mortgage required</span><strong id="mortgageInline">£0</strong></div>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Tax</p>
+                  <h3>Stamp Duty Land Tax</h3>
+                  <p class="muted small">England & Northern Ireland residential purchase.</p>
+                </div>
+                <strong id="sdltInline" class="section-total">£0</strong>
+              </div>
+
+              <label class="switch-row">
+                <div>
+                  <span class="switch-title">Qualifying corporate relief</span>
+                  <small>Assume the SPV qualifies for relief from the 17% corporate whole-price rate where relevant, such as an eligible property rental business.</small>
+                </div>
+                <input id="qualifyingCorporateRelief" type="checkbox" role="switch" checked>
+              </label>
+
+              <label class="switch-row">
+                <div>
+                  <span class="switch-title">Non-UK resident SDLT surcharge</span>
+                  <small>Add the 2 percentage point surcharge for a transaction that is non-resident for SDLT purposes.</small>
+                </div>
+                <input id="nonResident" type="checkbox" role="switch">
+              </label>
+
+              <details class="tax-details">
+                <summary>View SDLT calculation</summary>
+                <div id="sdltMethod" class="tax-method"></div>
+                <div id="sdltBreakdown" class="tax-breakdown"></div>
+              </details>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading"><div><p class="eyebrow">Professional</p><h3>Legal & survey costs</h3></div></div>
+              <div class="field-grid">
+                <label class="field currency-field"><span>Solicitor / Conveyancing Fee</span><div class="input-prefix"><span>£</span><input id="solicitorFee" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Survey / Property Inspection</span><div class="input-prefix"><span>£</span><input id="surveyCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading"><div><p class="eyebrow">Finance</p><h3>Mortgage costs</h3></div></div>
+              <div class="field-grid">
+                <label class="field currency-field"><span>Arrangement / Product Fee</span><div class="input-prefix"><span>£</span><input id="mortgageArrangementFee" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Mortgage Broker Fee</span><div class="input-prefix"><span>£</span><input id="mortgageBrokerFee" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Mortgage Valuation Fee</span><div class="input-prefix"><span>£</span><input id="mortgageValuationFee" type="text" inputmode="decimal" placeholder="0"></div></label>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading"><div><p class="eyebrow">SPV</p><h3>Company costs</h3></div></div>
+              <div class="field-grid">
+                <label class="field currency-field"><span>Company Formation Cost</span><div class="input-prefix"><span>£</span><input id="companyFormationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>SPV Mortgage Administration Costs</span><div class="input-prefix"><span>£</span><input id="spvAdministrationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading"><div><p class="eyebrow">Other</p><h3>Purchase costs</h3></div></div>
+              <div class="field-grid">
+                <label class="field currency-field"><span>Land Registry / Searches</span><div class="input-prefix"><span>£</span><input id="landRegistrySearches" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Insurance / Initial Insurance</span><div class="input-prefix"><span>£</span><input id="insuranceCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Auction / Reservation Fee</span><div class="input-prefix"><span>£</span><input id="auctionReservationFee" type="text" inputmode="decimal" value="0"></div></label>
+              </div>
+
+              <div class="custom-expenses-header">
+                <div><h4>Additional expenses</h4><p class="muted small">Add any other purchase-specific costs.</p></div>
+                <button id="addExpenseBtn" class="secondary-btn" type="button">+ Add Expense</button>
+              </div>
+              <div id="customExpenses" class="custom-expenses"></div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-heading"><div><p class="eyebrow">Works</p><h3>Refurbishment</h3></div></div>
+              <label class="field currency-field">
+                <span>Estimated Refurbishment Cost</span>
+                <div class="input-prefix"><span>£</span><input id="refurbishmentCost" type="text" inputmode="decimal" value="0"></div>
+                <small>Excluded from SDLT purchase price, but included in total cash required.</small>
+              </label>
+            </div>
+
+            <div class="disclaimer-card">
+              This calculator provides estimates for property investment planning only. Tax, legal and mortgage costs may vary. Always confirm applicable taxes and fees with a qualified professional before completing a property purchase.
+            </div>
+          </form>
+
+          <aside class="summary-column" aria-label="Calculation summary">
+            <div class="summary-card">
+              <p class="eyebrow">Live calculation</p>
+              <h3>Purchase summary</h3>
+
+              <div class="summary-rows">
+                <div><span>Purchase Price</span><strong id="summaryPurchasePrice">£0</strong></div>
+                <div><span>Deposit <small id="summaryDepositPercent">25%</small></span><strong id="summaryDeposit">£0</strong></div>
+                <div><span>Mortgage Required</span><strong id="summaryMortgage">£0</strong></div>
+                <div class="separator"><span>Stamp Duty</span><strong id="summarySDLT">£0</strong></div>
+                <div><span>Legal & Professional</span><strong id="summaryLegal">£0</strong></div>
+                <div><span>Mortgage Costs</span><strong id="summaryMortgageCosts">£0</strong></div>
+                <div><span>Company / SPV Costs</span><strong id="summaryCompanyCosts">£0</strong></div>
+                <div><span>Other Purchase Costs</span><strong id="summaryOtherCosts">£0</strong></div>
+                <div><span>Refurbishment</span><strong id="summaryRefurbishment">£0</strong></div>
+              </div>
+
+              <div class="totals-block">
+                <div><span>Purchase costs excluding deposit</span><strong id="summaryCostsExDeposit">£0</strong></div>
+                <div><span>Purchase costs including deposit</span><strong id="summaryCostsIncDeposit">£0</strong></div>
+              </div>
+
+              <div class="grand-total">
+                <span>Total Cash Required</span>
+                <strong id="summaryTotalCash">£0</strong>
+                <small>Includes refurbishment</small>
+              </div>
+
+              <button id="savePropertyBtn" class="primary-btn full-width" type="button">Save Property</button>
+              <p id="saveMessage" class="save-message" aria-live="polite"></p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="authDialog" class="install-dialog auth-dialog">
+    <button id="closeAuthDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+    <div id="authSignedOut">
+      <p class="eyebrow">Cloud sync</p>
+      <h3>Supabase account</h3>
+      <p class="muted small">Sign in to keep an online copy of your properties and sync them across devices. The local copy remains available offline.</p>
+
+      <label class="field">
+        <span>Email</span>
+        <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Password">
+      </label>
+      <div class="auth-actions">
+        <button id="signInBtn" class="primary-btn" type="button">Sign in</button>
+        <button id="signUpBtn" class="secondary-btn" type="button">Create account</button>
+      </div>
+      <p id="authMessage" class="auth-message" aria-live="polite"></p>
+    </div>
+
+    <div id="authSignedIn" class="hidden">
+      <p class="eyebrow">Cloud sync</p>
+      <h3>Signed in</h3>
+      <p id="signedInEmail" class="muted"></p>
+      <div class="auth-account-card">
+        <strong id="accountSyncTitle">Supabase connected</strong>
+        <small id="accountSyncText">Your local properties can sync with your cloud account.</small>
+      </div>
+      <div class="auth-actions">
+        <button id="dialogSyncBtn" class="primary-btn" type="button">Sync now</button>
+        <button id="signOutBtn" class="secondary-btn" type="button">Sign out</button>
+      </div>
+      <p class="muted tiny">Signing out does not erase the local offline copy stored on this device.</p>
+      <p id="signedInMessage" class="auth-message" aria-live="polite"></p>
+    </div>
+
+    <div id="authNotConfigured" class="hidden">
+      <p class="eyebrow">Cloud sync</p>
+      <h3>Supabase setup required</h3>
+      <p>Open <code>supabase-config.js</code> and enter your Supabase Project URL and Publishable key, then reload the app.</p>
+      <p class="muted small">Never put a Supabase Secret key or service_role key in this browser app.</p>
+    </div>
+  </dialog>
+
+  <dialog id="installDialog" class="install-dialog">
+    <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+    <h3>Install on iPhone</h3>
+    <p>Open this site in Safari, tap the <strong>Share</strong> button, then choose <strong>Add to Home Screen</strong> and tap <strong>Add</strong>.</p>
+    <p class="muted small">After the first successful visit, the calculator is cached for offline use.</p>
+  </dialog>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script defer src="./app.js"></script>
+</body>
+</html>

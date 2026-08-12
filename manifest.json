@@ -1,1 +1,26 @@
-{"name":"SPV Property Calculator","short_name":"SPV Property","start_url":"./","display":"standalone","background_color":"#f3f5f8","theme_color":"#0b1220","description":"Offline UK SPV property investment calculator.","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "SPV Property Calculator",
+  "short_name": "SPV Calculator",
+  "description": "Offline UK SPV property purchase cost calculator for England and Northern Ireland.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7f5",
+  "theme_color": "#0f6b55",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
