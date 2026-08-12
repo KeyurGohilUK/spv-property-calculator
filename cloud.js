@@ -166,7 +166,8 @@
       id: String(record.id),
       data: record,
       created_at: record.createdAt || now,
-      updated_at: record.updatedAt || now
+      updated_at: record.updatedAt || now,
+      deleted_at: record.deletedAt || null
     };
   }
 
@@ -176,17 +177,15 @@
       ...data,
       id: String(row.id),
       createdAt: data.createdAt || row.created_at || new Date().toISOString(),
-      updatedAt: data.updatedAt || row.updated_at || new Date().toISOString()
+      updatedAt: data.updatedAt || row.updated_at || new Date().toISOString(),
+      deletedAt: data.deletedAt || row.deleted_at || null
     };
   }
 
   async function listProperties() {
     const supabaseClient = ensureClient();
     await requireUser();
-    const { data, error } = await supabaseClient
-      .from('properties')
-      .select('id,data,created_at,updated_at')
-      .order('updated_at', { ascending: false });
+    const { data, error } = await supabaseClient.from('properties').select('id,data,created_at,updated_at,deleted_at').order('updated_at', { ascending: false });
     if (error) throw error;
     return (data || []).map(fromCloudRow);
   }
@@ -195,22 +194,9 @@
     const supabaseClient = ensureClient();
     await requireUser();
     const row = toCloudRow(record);
-    const { error } = await supabaseClient
-      .from('properties')
-      .upsert(row, { onConflict: 'id' });
+    const { error } = await supabaseClient.from('properties').upsert(row, { onConflict: 'id' });
     if (error) throw error;
     return record;
-  }
-
-  async function deleteProperty(id) {
-    const supabaseClient = ensureClient();
-    await requireUser();
-    const { error } = await supabaseClient
-      .from('properties')
-      .delete()
-      .eq('id', String(id));
-    if (error) throw error;
-    return true;
   }
 
   function asTime(value) {
@@ -218,8 +204,7 @@
     return Number.isFinite(time) ? time : 0;
   }
 
-  function mergePropertySets(localProperties, cloudProperties, pendingDeletes = []) {
-    const deletedIds = new Set((pendingDeletes || []).map((item) => String(item.id || item)));
+  function mergePropertySets(localProperties, cloudProperties) {
     const localMap = new Map((localProperties || []).map((item) => [String(item.id), item]));
     const cloudMap = new Map((cloudProperties || []).map((item) => [String(item.id), item]));
     const ids = new Set([...localMap.keys(), ...cloudMap.keys()]);
@@ -228,22 +213,11 @@
     let downloadedCount = 0;
 
     for (const id of ids) {
-      if (deletedIds.has(id)) continue;
       const local = localMap.get(id);
       const cloud = cloudMap.get(id);
-
-      if (local && !cloud) {
-        merged.push(local);
-        upload.push(local);
-        continue;
-      }
-      if (!local && cloud) {
-        merged.push(cloud);
-        downloadedCount += 1;
-        continue;
-      }
+      if (local && !cloud) { merged.push(local); upload.push(local); continue; }
+      if (!local && cloud) { merged.push(cloud); downloadedCount += 1; continue; }
       if (!local || !cloud) continue;
-
       if (asTime(local.updatedAt) >= asTime(cloud.updatedAt)) {
         merged.push(local);
         if (asTime(local.updatedAt) > asTime(cloud.updatedAt)) upload.push(local);
@@ -252,58 +226,38 @@
         downloadedCount += 1;
       }
     }
-
     merged.sort((a, b) => asTime(b.updatedAt) - asTime(a.updatedAt));
     return { merged, upload, downloadedCount };
   }
 
   async function syncAll(localProperties, pendingDeletes = []) {
     await requireUser();
-
-    // In a shared workspace, another user may have edited a property after this
-    // device deleted it offline. Fetch first, then only apply an offline delete
-    // when the tombstone is at least as new as the cloud row.
+    // Convert old offline hard-delete tombstones into archived rows.
     let cloudProperties = await listProperties();
     const cloudById = new Map(cloudProperties.map((item) => [String(item.id), item]));
     const clearedDeleteIds = [];
-    const appliedDeleteIds = [];
+    const archivedLegacyIds = [];
 
     for (const tombstone of pendingDeletes || []) {
       const id = String(tombstone?.id || tombstone || '');
       if (!id) continue;
-
       const cloud = cloudById.get(id);
       const deletedAt = typeof tombstone === 'object' ? tombstone.deletedAt : '';
-
-      if (!cloud) {
-        // Already absent in the shared database: the local tombstone is resolved.
-        clearedDeleteIds.push(id);
-        continue;
-      }
-
+      if (!cloud) { clearedDeleteIds.push(id); continue; }
       if (asTime(deletedAt) >= asTime(cloud.updatedAt)) {
-        await deleteProperty(id);
-        cloudById.delete(id);
-        appliedDeleteIds.push(id);
+        const when = deletedAt || new Date().toISOString();
+        const archived = { ...cloud, deletedAt: when, updatedAt: when };
+        await upsertProperty(archived);
+        cloudById.set(id, archived);
+        archivedLegacyIds.push(id);
       }
-
-      // Whether applied or superseded by a newer shared edit, this tombstone has
-      // now been reconciled and can be removed from local pending-deletes storage.
       clearedDeleteIds.push(id);
     }
 
     cloudProperties = [...cloudById.values()];
-    const merge = mergePropertySets(localProperties, cloudProperties, []);
-
+    const merge = mergePropertySets(localProperties, cloudProperties);
     for (const record of merge.upload) await upsertProperty(record);
-
-    return {
-      merged: merge.merged,
-      uploadedCount: merge.upload.length,
-      downloadedCount: merge.downloadedCount,
-      deletedIds: appliedDeleteIds,
-      clearedDeleteIds
-    };
+    return { merged: merge.merged, uploadedCount: merge.upload.length, downloadedCount: merge.downloadedCount, archivedLegacyIds, deletedIds: [], clearedDeleteIds };
   }
 
   function destroy() {
@@ -324,7 +278,6 @@
     signOut,
     listProperties,
     upsertProperty,
-    deleteProperty,
     syncAll,
     mergePropertySets,
     destroy

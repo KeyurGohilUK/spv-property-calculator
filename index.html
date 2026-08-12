@@ -39,7 +39,10 @@
             <h2 id="homeTitle">Your properties</h2>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed. Works offline, with a shared Supabase workspace for your small team.</p>
           </div>
-          <button id="newPropertyBtn" class="primary-btn" type="button">+ New Property</button>
+          <div class="hero-actions">
+            <button id="archiveBtn" class="secondary-btn" type="button">Archived <span id="archiveCountBadge" class="button-count">0</span></button>
+            <button id="newPropertyBtn" class="primary-btn" type="button">+ New Property</button>
+          </div>
         </div>
 
         <div id="cloudBar" class="cloud-bar" aria-live="polite">
@@ -62,6 +65,32 @@
           <div class="empty-icon" aria-hidden="true">⌂</div>
           <h3>No properties yet</h3>
           <p>Create your first purchase-cost calculation. It will be stored locally and available offline.</p>
+        </div>
+      </section>
+
+      <section id="archiveView" class="view hidden" aria-labelledby="archiveTitle">
+        <div class="editor-topbar">
+          <button id="archiveBackBtn" class="text-btn" type="button">← Properties</button>
+          <span class="mode-label">Shared archive</span>
+        </div>
+
+        <div class="hero-card archive-hero">
+          <div>
+            <p class="eyebrow">Soft-deleted records</p>
+            <h2 id="archiveTitle">Archived Properties</h2>
+            <p class="muted">Archived properties are hidden from the main list but remain stored locally and in Supabase. Any signed-in user can restore them.</p>
+          </div>
+        </div>
+
+        <div class="list-heading">
+          <h3>Archived calculations</h3>
+          <span id="archivedPropertyCount" class="count-badge">0</span>
+        </div>
+        <div id="archivePropertyList" class="property-list"></div>
+        <div id="archiveEmptyState" class="empty-state">
+          <div class="empty-icon" aria-hidden="true">↺</div>
+          <h3>No archived properties</h3>
+          <p>Properties moved to the archive will appear here and can be restored later.</p>
         </div>
       </section>
 
@@ -240,7 +269,7 @@
     <div id="authSignedOut">
       <p class="eyebrow">Cloud sync</p>
       <h3>Supabase account</h3>
-      <p class="muted small">Sign in to the shared workspace. Every authenticated user can see, edit and delete the same property list. The local copy remains available offline.</p>
+      <p class="muted small">Sign in to the shared workspace. Every authenticated user can see, edit and archive the same shared property list. The local copy remains available offline.</p>
 
       <label class="field">
         <span>Email</span>

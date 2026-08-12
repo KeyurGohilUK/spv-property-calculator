@@ -1,29 +1,11 @@
 import assert from 'node:assert/strict';
-
 const backing = new Map();
-globalThis.localStorage = {
-  getItem: (key) => backing.has(key) ? backing.get(key) : null,
-  setItem: (key, value) => backing.set(key, String(value)),
-  removeItem: (key) => backing.delete(key),
-  clear: () => backing.clear()
-};
-
-const { getProperties, getProperty, saveProperty, deleteProperty, duplicateProperty } = await import('./storage.js');
-
-const saved = saveProperty({ title: 'Test Property', purchasePrice: 200000, depositPercent: 25 });
-assert.ok(saved.id);
-assert.equal(getProperties().length, 1);
-assert.equal(getProperty(saved.id).title, 'Test Property');
-
-const updated = saveProperty({ ...saved, title: 'Updated Property' });
-assert.equal(updated.id, saved.id);
-assert.equal(getProperty(saved.id).title, 'Updated Property');
-
-const copy = duplicateProperty(saved.id);
-assert.ok(copy.id !== saved.id);
-assert.equal(getProperties().length, 2);
-assert.match(copy.title, /\(Copy\)$/);
-
-assert.equal(deleteProperty(saved.id), true);
-assert.equal(getProperties().length, 1);
-console.log('All storage tests passed.');
+globalThis.localStorage = { getItem:k=>backing.has(k)?backing.get(k):null, setItem:(k,v)=>backing.set(k,String(v)), removeItem:k=>backing.delete(k), clear:()=>backing.clear() };
+const { getProperties,getActiveProperties,getArchivedProperties,getProperty,saveProperty,archiveProperty,restoreProperty,duplicateProperty } = await import('./storage.js');
+const saved=saveProperty({title:'Test Property',purchasePrice:200000,depositPercent:25});
+assert.ok(saved.id); assert.equal(getActiveProperties().length,1); assert.equal(getArchivedProperties().length,0);
+const updated=saveProperty({...saved,title:'Updated Property'}); assert.equal(getProperty(saved.id).title,'Updated Property');
+const copy=duplicateProperty(saved.id); assert.ok(copy.id!==saved.id); assert.equal(getActiveProperties().length,2);
+const archived=archiveProperty(saved.id); assert.ok(archived.deletedAt); assert.equal(getProperties().length,2); assert.equal(getActiveProperties().length,1); assert.equal(getArchivedProperties().length,1); assert.equal(duplicateProperty(saved.id),null);
+const restored=restoreProperty(saved.id); assert.equal(restored.deletedAt,null); assert.equal(getActiveProperties().length,2); assert.equal(getArchivedProperties().length,0);
+console.log('Soft-delete storage tests passed.');

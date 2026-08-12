@@ -1,4 +1,4 @@
-# SPV Property Calculator — Shared Supabase Edition
+# SPV Property Calculator — Shared Archive Edition
 
 A mobile-first Progressive Web App for estimating the cash required to buy a residential investment property through a UK Limited Company / SPV.
 
@@ -16,12 +16,13 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 - Local offline storage
 - Supabase email/password sign-in
 - Shared cloud property list for all authenticated users, protected by Row Level Security
-- Offline-first cloud sync and queued deletions
+- Soft-delete Archived Properties page with restore support
+- Offline-first cloud sync; archived records remain stored locally and in Supabase
 - GitHub Pages and iPhone PWA support
 
 ## Before deploying
 
-For a new Supabase project follow **`SUPABASE_SETUP.md`**. If upgrading the previous per-user edition, read **`SHARED_WORKSPACE_UPGRADE.md`**. The short version is:
+For a new Supabase project follow **`SUPABASE_SETUP.md`**. If upgrading an existing shared edition, read **`SOFT_DELETE_UPGRADE.md`**. The short version is:
 
 1. Create a free Supabase project.
 2. Run `supabase-schema.sql` in Supabase SQL Editor.
@@ -38,7 +39,8 @@ The app remains offline-first:
 - `localStorage` is used immediately when saving.
 - When signed in and online, the property is stored in the shared Supabase workspace.
 - Every authenticated account sees the same cloud rows. The app syncs on sign-in/app return and periodically while visible; local and shared-cloud versions are compared by `updatedAt`, so the newer copy wins.
-- Offline deletions are queued. A newer shared edit can supersede an older offline deletion.
+- Archiving is a normal synced update using a `deleted_at` timestamp; restoring clears it.
+- Legacy pending deletes from the older version are converted into archives during sync.
 - Signing out leaves the local device copy intact.
 
 ## Deploy to GitHub Pages

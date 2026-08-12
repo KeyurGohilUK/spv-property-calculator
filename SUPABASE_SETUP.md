@@ -18,7 +18,7 @@ This app keeps a local offline copy in `localStorage` and syncs a shared propert
 4. Copy the whole SQL file into the SQL Editor.
 5. Click **Run**.
 
-The script creates/upgrades `public.properties`, enables Row Level Security (RLS), removes anonymous table access, and creates SELECT / INSERT / UPDATE / DELETE policies so every authenticated user can access the same shared property rows.
+The script creates/upgrades `public.properties`, enables Row Level Security (RLS), removes anonymous table access, and creates SELECT / INSERT / UPDATE policies so every authenticated user can access the same shared property rows. Hard DELETE is intentionally not granted; the app archives rows by updating `deleted_at`.
 
 ## 3. Configure email/password authentication
 
@@ -111,7 +111,7 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 - The calculator works without Supabase or an internet connection.
 - Property changes are saved locally first.
 - If you are signed in but offline, cloud sync waits until the device is online again.
-- Deletions are also queued locally so a deleted cloud property is not intentionally restored during the next merge.
+- Archive and restore actions are saved locally first and then synced like any other property update. Archived rows remain in Supabase.
 - Signing out does **not** erase the local copy on that device.
 
 ## 9. Checking your data in Supabase
@@ -138,7 +138,7 @@ Re-copy the **Publishable** key and Project URL from Supabase. Do not use a Secr
 Your Supabase project probably has **Confirm Email** enabled. Confirm the email and return to the app, or temporarily disable Confirm Email for the initial personal setup.
 
 ### Database returns permission/RLS errors
-Run `supabase-schema.sql` again and check that RLS is enabled and the four **Authenticated users can ... shared properties** policies exist on `public.properties`.
+Run `supabase-schema.sql` again and check that RLS is enabled and the three shared read/insert/update policies exist on `public.properties`.
 
 ### Cloud library unavailable while offline
 The calculator remains usable locally. Once online, reload the app if necessary; the Supabase SDK is then cached for later PWA use.
@@ -146,4 +146,4 @@ The calculator remains usable locally. Once online, reload the app if necessary;
 
 ## Shared access model
 
-All authenticated users in this Supabase project can read, create, edit and delete all property rows. Keep the user list small and controlled. Once your 2–3 accounts exist, disable new public sign-ups in Supabase Authentication settings. Signed-out visitors have no access to the table.
+All authenticated users in this Supabase project can read, create, edit, archive and restore all property rows. Keep the user list small and controlled. Once your 2–3 accounts exist, disable new public sign-ups in Supabase Authentication settings. Signed-out visitors have no access to the table.

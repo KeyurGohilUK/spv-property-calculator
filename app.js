@@ -271,67 +271,36 @@ function writePendingDeletes(items) {
   }
 }
 
-function markPendingDelete(id) {
-  const items = readPendingDeletes().filter((item) => String(item.id) !== String(id));
-  items.push({ id: String(id), deletedAt: new Date().toISOString() });
-  writePendingDeletes(items);
-}
-
 function clearPendingDeletes(ids) {
   const set = new Set((ids || []).map(String));
   if (!set.size) return;
   writePendingDeletes(readPendingDeletes().filter((item) => !set.has(String(item.id))));
 }
-
-function clearPendingDelete(id) {
-  clearPendingDeletes([id]);
-}
-
-function getProperties() {
-  return readRaw().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
-}
-
-function getProperty(id) {
-  return readRaw().find((item) => item.id === id) || null;
-}
-
+function clearPendingDelete(id) { clearPendingDeletes([id]); }
+function getProperties() { return readRaw().sort((a,b)=>new Date(b.updatedAt||0)-new Date(a.updatedAt||0)); }
+function getActiveProperties() { return getProperties().filter((item)=>!item.deletedAt); }
+function getArchivedProperties() { return getProperties().filter((item)=>Boolean(item.deletedAt)).sort((a,b)=>new Date(b.deletedAt||b.updatedAt||0)-new Date(a.deletedAt||a.updatedAt||0)); }
+function getProperty(id) { return readRaw().find((item)=>item.id===id) || null; }
 function saveProperty(property) {
-  const properties = readRaw();
-  const now = new Date().toISOString();
-  const record = {
-    ...property,
-    id: property.id || makePropertyId(),
-    createdAt: property.createdAt || now,
-    updatedAt: now
-  };
-
-  const index = properties.findIndex((item) => item.id === record.id);
-  if (index >= 0) properties[index] = record;
-  else properties.push(record);
-
-  if (!writeRaw(properties)) {
-    throw new Error('Unable to save. Your browser may have storage disabled or full.');
-  }
-  clearPendingDelete(record.id);
-  return record;
+  const properties=readRaw(); const now=new Date().toISOString();
+  const record={...property,id:property.id||makePropertyId(),createdAt:property.createdAt||now,updatedAt:now};
+  const index=properties.findIndex((item)=>item.id===record.id); if(index>=0) properties[index]=record; else properties.push(record);
+  if(!writeRaw(properties)) throw new Error('Unable to save. Your browser may have storage disabled or full.');
+  clearPendingDelete(record.id); return record;
 }
-
-function deleteProperty(id) {
-  const properties = readRaw().filter((item) => item.id !== id);
-  const saved = writeRaw(properties);
-  if (saved) markPendingDelete(id);
-  return saved;
-}
+function archiveProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:new Date().toISOString()}); }
+function restoreProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:null}); }
 
 function duplicateProperty(id) {
   const source = getProperty(id);
-  if (!source) return null;
+  if (!source || source.deletedAt) return null;
 
   const now = new Date().toISOString();
   const copy = {
     ...source,
     id: makePropertyId(),
     title: `${source.title || 'Untitled Property'} (Copy)`,
+    deletedAt: null,
     createdAt: now,
     updatedAt: now
   };
@@ -534,92 +503,44 @@ function loadIntoForm(property) {
 
 function showHome() {
   $('editorView').classList.add('hidden');
+  $('archiveView').classList.add('hidden');
   $('homeView').classList.remove('hidden');
   editingId = null;
-  renderPropertyList();
+  renderPropertyList(); renderArchiveList();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
+function showArchive() {
+  $('homeView').classList.add('hidden'); $('editorView').classList.add('hidden'); $('archiveView').classList.remove('hidden');
+  editingId = null; renderArchiveList(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 function showEditor(id = null) {
-  $('homeView').classList.add('hidden');
-  $('editorView').classList.remove('hidden');
-  if (id) {
-    const property = getProperty(id);
-    if (property) loadIntoForm(property);
-    else resetForm();
-  } else {
-    resetForm();
-  }
+  $('homeView').classList.add('hidden'); $('archiveView').classList.add('hidden'); $('editorView').classList.remove('hidden');
+  if (id) { const property=getProperty(id); if (property && !property.deletedAt) loadIntoForm(property); else resetForm(); } else resetForm();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
+function updatePropertyCounts() {
+  const activeCount=getActiveProperties().length, archivedCount=getArchivedProperties().length;
+  $('propertyCount').textContent=activeCount; $('archivedPropertyCount').textContent=archivedCount; $('archiveCountBadge').textContent=archivedCount;
+}
 function renderPropertyList() {
-  const properties = getProperties();
-  $('propertyCount').textContent = properties.length;
-  $('emptyState').classList.toggle('hidden', properties.length > 0);
-  $('propertyList').innerHTML = '';
-
-  properties.forEach((property) => {
-    const calc = calculateProperty(property);
-    const card = document.createElement('article');
-    card.className = 'property-card';
-    card.innerHTML = `
-      <div class="property-card-header">
-        <div>
-          <h3>${escapeHtml(property.title || 'Untitled Property')}</h3>
-          <p class="property-meta">Updated ${property.updatedAt ? dateFormat.format(new Date(property.updatedAt)) : 'recently'}</p>
-        </div>
-      </div>
-      <div class="property-stats">
-        <div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div>
-        <div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div>
-        <div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div>
-        <div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div>
-      </div>
-      <div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div>
-      <div class="card-actions">
-        <button class="card-action" type="button" data-action="edit">Edit</button>
-        <button class="card-action" type="button" data-action="duplicate">Duplicate</button>
-        <button class="card-action delete" type="button" data-action="delete">Delete</button>
-      </div>
-    `;
-
-    card.addEventListener('click', (event) => {
-      if (!event.target.closest('button')) showEditor(property.id);
-    });
-    card.querySelector('[data-action="edit"]').addEventListener('click', () => showEditor(property.id));
-    card.querySelector('[data-action="duplicate"]').addEventListener('click', async () => {
-      const copy = duplicateProperty(property.id);
-      if (!copy) return;
-      renderPropertyList();
-      if (cloudUser && navigator.onLine) {
-        try {
-          await window.SPVCloud.upsertProperty(copy);
-          setCloudMessage('Duplicate synced to Supabase.');
-        } catch (error) {
-          console.warn('Cloud duplicate sync failed:', error);
-          setCloudMessage('Duplicate saved locally; cloud sync is pending.', true);
-        }
-      }
-    });
-    card.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-      if (window.confirm(`Delete “${property.title || 'this property'}”? This cannot be undone.`)) {
-        deleteProperty(property.id);
-        renderPropertyList();
-        if (cloudUser && navigator.onLine) {
-          try {
-            await window.SPVCloud.deleteProperty(property.id);
-            clearPendingDelete(property.id);
-            setCloudMessage('Deletion synced to Supabase.');
-          } catch (error) {
-            console.warn('Cloud delete sync failed:', error);
-            setCloudMessage('Deleted locally; cloud deletion will retry on the next sync.', true);
-          }
-        }
-      }
-    });
-
+  const properties=getActiveProperties(); updatePropertyCounts(); $('emptyState').classList.toggle('hidden', properties.length>0); $('propertyList').innerHTML='';
+  properties.forEach((property)=>{
+    const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card';
+    card.innerHTML=`<div class="property-card-header"><div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div><div class="card-actions"><button class="card-action" type="button" data-action="edit">Edit</button><button class="card-action" type="button" data-action="duplicate">Duplicate</button><button class="card-action delete" type="button" data-action="archive">Archive</button></div>`;
+    card.addEventListener('click',(event)=>{ if(!event.target.closest('button')) showEditor(property.id); });
+    card.querySelector('[data-action="edit"]').addEventListener('click',()=>showEditor(property.id));
+    card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(copy);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
+    card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(archived);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
     $('propertyList').appendChild(card);
+  });
+}
+function renderArchiveList() {
+  const properties=getArchivedProperties(); updatePropertyCounts(); $('archiveEmptyState').classList.toggle('hidden',properties.length>0); $('archivePropertyList').innerHTML='';
+  properties.forEach((property)=>{
+    const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card archived-card';
+    card.innerHTML=`<div class="property-card-header"><div><div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div><div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button></div>`;
+    card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(restored);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
+    $('archivePropertyList').appendChild(card);
   });
 }
 
@@ -769,10 +690,11 @@ async function syncCloud({ showFeedback = true } = {}) {
   try {
     const result = await window.SPVCloud.syncAll(getProperties(), readPendingDeletes());
     if (!replaceLocalProperties(result.merged)) throw new Error('Could not update the local offline cache.');
-    clearPendingDeletes(result.clearedDeleteIds || result.deletedIds);
+    clearPendingDeletes(result.clearedDeleteIds || []);
     renderPropertyList();
+    renderArchiveList();
 
-    const changes = result.uploadedCount + result.downloadedCount + result.deletedIds.length;
+    const changes = result.uploadedCount + result.downloadedCount + (result.archivedLegacyIds?.length || 0);
     const message = changes
       ? `Synced ${changes} change${changes === 1 ? '' : 's'} with Supabase.`
       : 'Cloud is up to date.';
@@ -926,6 +848,8 @@ function setupInstall() {
 
 function init() {
   $('newPropertyBtn').addEventListener('click', () => showEditor());
+  $('archiveBtn').addEventListener('click', showArchive);
+  $('archiveBackBtn').addEventListener('click', showHome);
   $('backBtn').addEventListener('click', showHome);
   $('addExpenseBtn').addEventListener('click', () => addExpenseRow());
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
@@ -974,6 +898,7 @@ function init() {
   updateConnectionStatus();
   setupInstall();
   renderPropertyList();
+  renderArchiveList();
   setupCloud();
 
   if ('serviceWorker' in navigator) {
