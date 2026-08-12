@@ -100,3 +100,8 @@ This runs the calculation tests, local storage tests and cloud merge tests.
 ## Important tax note
 
 This is a planning estimator, not tax advice. Corporate property transactions can have special rules and reliefs, particularly for dwellings over £500,000. Confirm the correct tax treatment and transaction costs with qualified advisers before purchase.
+
+
+## Archived Properties and permanent deletion
+
+The main list uses soft-delete via **Archive**. Archived Properties provides **Restore Property** and **Permanently Delete**. Permanent deletion is online-only, requires sign-in, removes the property data for all users, and records a small deletion tombstone to prevent stale offline caches from recreating it. Run the latest `supabase-schema.sql` before deploying this version.

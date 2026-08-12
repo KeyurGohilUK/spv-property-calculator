@@ -290,6 +290,14 @@ function saveProperty(property) {
 }
 function archiveProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:new Date().toISOString()}); }
 function restoreProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:null}); }
+function permanentlyDeleteLocalProperty(id) {
+  const source=getProperty(id);
+  if(!source || !source.deletedAt) return false;
+  const properties=readRaw().filter((item)=>item.id!==id);
+  if(!writeRaw(properties)) return false;
+  clearPendingDelete(id);
+  return true;
+}
 
 function duplicateProperty(id) {
   const source = getProperty(id);
@@ -538,8 +546,26 @@ function renderArchiveList() {
   const properties=getArchivedProperties(); updatePropertyCounts(); $('archiveEmptyState').classList.toggle('hidden',properties.length>0); $('archivePropertyList').innerHTML='';
   properties.forEach((property)=>{
     const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card archived-card';
-    card.innerHTML=`<div class="property-card-header"><div><div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div><div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button></div>`;
+    card.innerHTML=`<div class="property-card-header"><div><div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div><div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button><button class="danger-btn" type="button" data-action="permanent-delete">Permanently Delete</button></div>`;
     card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(restored);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
+    card.querySelector('[data-action="permanent-delete"]').addEventListener('click',async(event)=>{
+      if(!cloudUser){ window.alert('Please sign in before permanently deleting a shared property.'); return; }
+      if(!navigator.onLine){ window.alert('Permanent deletion requires an internet connection so it can be removed safely for every user.'); return; }
+      const title=property.title||'this property';
+      if(!window.confirm(`Permanently delete “${title}”?\n\nThis cannot be undone and will remove the property for all users.`)) return;
+      const button=event.currentTarget;
+      button.disabled=true; button.textContent='Deleting…';
+      try{
+        await window.SPVCloud.permanentlyDeleteProperty(property.id);
+        if(!permanentlyDeleteLocalProperty(property.id)) throw new Error('Cloud deletion succeeded, but the local cache could not be updated. Reload the app to refresh it.');
+        renderArchiveList(); renderPropertyList();
+        setCloudMessage('Property permanently deleted for all users.');
+      }catch(error){
+        console.warn('Permanent delete failed:',error);
+        setCloudMessage(`Permanent delete failed: ${error.message||'Supabase could not be reached.'}`,true);
+        button.disabled=false; button.textContent='Permanently Delete';
+      }
+    });
     $('archivePropertyList').appendChild(card);
   });
 }
@@ -694,7 +720,7 @@ async function syncCloud({ showFeedback = true } = {}) {
     renderPropertyList();
     renderArchiveList();
 
-    const changes = result.uploadedCount + result.downloadedCount + (result.archivedLegacyIds?.length || 0);
+    const changes = result.uploadedCount + result.downloadedCount + (result.archivedLegacyIds?.length || 0) + (result.permanentlyDeletedIds?.length || 0);
     const message = changes
       ? `Synced ${changes} change${changes === 1 ? '' : 's'} with Supabase.`
       : 'Cloud is up to date.';

@@ -55,6 +55,14 @@ export function saveProperty(property) {
 export function archiveProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:new Date().toISOString()}); }
 export function restoreProperty(id) { const source=getProperty(id); if(!source) return null; return saveProperty({...source,deletedAt:null}); }
 export function deleteProperty(id) { return Boolean(archiveProperty(id)); }
+export function permanentlyDeleteProperty(id) {
+  const source=getProperty(id);
+  if(!source || !source.deletedAt) return false;
+  const properties=readRaw().filter((item)=>item.id!==id);
+  if(!writeRaw(properties)) return false;
+  clearPendingDeletes([id]);
+  return true;
+}
 export function duplicateProperty(id) {
   const source=getProperty(id); if(!source || source.deletedAt) return null; const now=new Date().toISOString();
   const copy={...source,id:makeId(),title:`${source.title||'Untitled Property'} (Copy)`,deletedAt:null,createdAt:now,updatedAt:now};

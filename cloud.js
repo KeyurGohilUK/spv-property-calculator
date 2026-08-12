@@ -199,6 +199,27 @@
     return record;
   }
 
+  async function listPermanentDeletions() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient
+      .from('property_deletions')
+      .select('id,deleted_at')
+      .order('deleted_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function permanentlyDeleteProperty(id) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const propertyId = String(id || '').trim();
+    if (!propertyId) throw new Error('Property ID is required.');
+    const { error } = await supabaseClient.rpc('permanently_delete_property', { p_id: propertyId });
+    if (error) throw error;
+    return true;
+  }
+
   function asTime(value) {
     const time = Date.parse(value || '');
     return Number.isFinite(time) ? time : 0;
@@ -232,8 +253,22 @@
 
   async function syncAll(localProperties, pendingDeletes = []) {
     await requireUser();
-    // Convert old offline hard-delete tombstones into archived rows.
-    let cloudProperties = await listProperties();
+
+    // Permanent deletion tombstones contain no property data; they only prevent
+    // another user's offline cache from re-uploading a property that was purged.
+    const permanentDeletions = await listPermanentDeletions();
+    const permanentlyDeletedIds = new Set(permanentDeletions.map((item) => String(item.id)));
+    const locallyPurgedIds = (localProperties || [])
+      .filter((item) => permanentlyDeletedIds.has(String(item.id)))
+      .map((item) => String(item.id));
+
+    const cleanLocalProperties = (localProperties || [])
+      .filter((item) => !permanentlyDeletedIds.has(String(item.id)));
+
+    // Convert old offline hard-delete tombstones from pre-archive versions into
+    // archived rows, unless that property has since been permanently deleted.
+    let cloudProperties = (await listProperties())
+      .filter((item) => !permanentlyDeletedIds.has(String(item.id)));
     const cloudById = new Map(cloudProperties.map((item) => [String(item.id), item]));
     const clearedDeleteIds = [];
     const archivedLegacyIds = [];
@@ -241,6 +276,7 @@
     for (const tombstone of pendingDeletes || []) {
       const id = String(tombstone?.id || tombstone || '');
       if (!id) continue;
+      if (permanentlyDeletedIds.has(id)) { clearedDeleteIds.push(id); continue; }
       const cloud = cloudById.get(id);
       const deletedAt = typeof tombstone === 'object' ? tombstone.deletedAt : '';
       if (!cloud) { clearedDeleteIds.push(id); continue; }
@@ -255,9 +291,17 @@
     }
 
     cloudProperties = [...cloudById.values()];
-    const merge = mergePropertySets(localProperties, cloudProperties);
+    const merge = mergePropertySets(cleanLocalProperties, cloudProperties);
     for (const record of merge.upload) await upsertProperty(record);
-    return { merged: merge.merged, uploadedCount: merge.upload.length, downloadedCount: merge.downloadedCount, archivedLegacyIds, deletedIds: [], clearedDeleteIds };
+    return {
+      merged: merge.merged,
+      uploadedCount: merge.upload.length,
+      downloadedCount: merge.downloadedCount,
+      archivedLegacyIds,
+      permanentlyDeletedIds: locallyPurgedIds,
+      deletedIds: [],
+      clearedDeleteIds
+    };
   }
 
   function destroy() {
@@ -278,6 +322,8 @@
     signOut,
     listProperties,
     upsertProperty,
+    listPermanentDeletions,
+    permanentlyDeleteProperty,
     syncAll,
     mergePropertySets,
     destroy

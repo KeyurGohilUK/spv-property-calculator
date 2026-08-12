@@ -1,4 +1,4 @@
--- SPV Property Calculator - SHARED workspace with SOFT DELETE / ARCHIVE
+-- SPV Property Calculator - SHARED workspace with ARCHIVE + PERMANENT DELETE
 -- Run this whole file in Supabase Dashboard > SQL Editor > New query.
 -- Safe to run over the previous shared-workspace schema. Existing property rows are preserved.
 
@@ -61,3 +61,59 @@ on public.properties for update to authenticated
 using (true) with check (true);
 
 -- Intentionally no DELETE policy. Archive/restore is performed with UPDATE.
+
+-- Permanent deletion tombstones ------------------------------------------------
+-- The property row/data is actually deleted. This tiny table retains only the
+-- property ID and deletion time so another user's offline cache cannot recreate it.
+create table if not exists public.property_deletions (
+  id text primary key,
+  deleted_at timestamptz not null default now(),
+  deleted_by uuid default auth.uid() references auth.users(id) on delete set null
+);
+
+alter table public.property_deletions enable row level security;
+revoke all on table public.property_deletions from anon;
+revoke all on table public.property_deletions from authenticated;
+grant select on table public.property_deletions to authenticated;
+
+drop policy if exists "Authenticated users can read permanent deletions" on public.property_deletions;
+create policy "Authenticated users can read permanent deletions"
+on public.property_deletions for select to authenticated using (true);
+
+-- One atomic RPC performs both operations: record a tombstone, then delete the
+-- property row. Direct DELETE on public.properties remains unavailable to clients.
+create or replace function public.permanently_delete_property(p_id text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  -- Permanent deletion is deliberately limited to properties that have already
+  -- been soft-deleted/archived. Lock the row during this transaction so it cannot
+  -- be restored at the same moment it is being purged.
+  perform 1 from public.properties
+  where id = p_id and deleted_at is not null
+  for update;
+  if not found then
+    raise exception 'Only archived properties can be permanently deleted';
+  end if;
+
+  insert into public.property_deletions (id, deleted_at, deleted_by)
+  values (p_id, now(), auth.uid())
+  on conflict (id) do update
+    set deleted_at = excluded.deleted_at,
+        deleted_by = excluded.deleted_by;
+
+  delete from public.properties where id = p_id;
+end;
+$$;
+
+revoke all on function public.permanently_delete_property(text) from public;
+revoke all on function public.permanently_delete_property(text) from anon;
+grant execute on function public.permanently_delete_property(text) to authenticated;
+

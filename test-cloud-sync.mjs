@@ -12,6 +12,7 @@ if(!result.upload.some(x=>x.id==='a')||!result.upload.some(x=>x.id==='b')) throw
 if(!source.includes("onConflict: 'id'")) throw new Error('shared id upsert missing');
 if(!source.includes('deleted_at: record.deletedAt || null')) throw new Error('deleted_at persistence missing');
 if(!source.includes('archivedLegacyIds')) throw new Error('legacy conversion missing');
-if(source.includes('.delete()')) throw new Error('hard delete still present');
-if(source.includes('deleteProperty,')) throw new Error('hard delete API exposed');
-console.log('Soft-delete cloud merge tests passed.');
+if(!source.includes("rpc('permanently_delete_property'")) throw new Error('permanent-delete RPC missing');
+if(!source.includes("from('property_deletions')")) throw new Error('permanent deletion tombstones missing');
+if(!source.includes('permanentlyDeletedIds')) throw new Error('permanent deletion sync filtering missing');
+console.log('Archive + permanent-delete cloud tests passed.');
