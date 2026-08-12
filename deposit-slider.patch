@@ -1,0 +1,136 @@
+--- a/index.html
++++ b/index.html
+@@ -160,9 +160,13 @@
+                   <small id="priceError" class="error-text hidden">Enter a purchase price greater than £0.</small>
+                 </label>
+ 
+-                <label class="field">
+-                  <span>Deposit Percentage</span>
+-                  <div class="input-suffix"><input id="depositPercent" name="depositPercent" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="25"><span>%</span></div>
++                <label class="field deposit-range-field">
++                  <span class="deposit-range-heading">
++                    <span>Deposit Percentage</span>
++                    <output id="depositPercentValue" class="deposit-range-value" for="depositPercent">25%</output>
++                  </span>
++                  <input id="depositPercent" name="depositPercent" class="deposit-range" type="range" min="0" max="100" step="5" value="25" aria-label="Deposit percentage in 5 percent steps">
++                  <span class="deposit-range-scale" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></span>
+                 </label>
+               </div>
+ 
+--- a/app.js
++++ b/app.js
+@@ -366,6 +366,11 @@
+   return numeric === 0 ? '0' : numberFormat.format(numeric);
+ }
+ 
++function normalizeDepositPercent(value) {
++  const clamped = clamp(safeNumber(value), 0, 100);
++  return Math.round(clamped / 5) * 5;
++}
++
+ function getFormModel() {
+   const customExpenses = [...document.querySelectorAll('.expense-row')].map((row) => ({
+     id: row.dataset.id,
+@@ -428,6 +433,7 @@
+ 
+   $('depositAmountInline').textContent = money(calc.depositAmount);
+   $('mortgageInline').textContent = money(calc.mortgageRequired);
++  $('depositPercentValue').textContent = `${numberFormat.format(calc.depositPercent)}%`;
+   $('purchaseDetailsInline').textContent = money(calc.purchasePrice);
+   $('sdltInline').textContent = money(calc.sdlt.total);
+   $('legalInline').textContent = money(calc.legalProfessional);
+@@ -721,7 +727,7 @@
+   $('title').value = property.title || '';
+   $('details').value = property.details || '';
+   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
+-  $('depositPercent').value = property.depositPercent ?? 25;
++  $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
+   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
+   $('nonResident').checked = Boolean(property.nonResident);
+ 
+--- a/styles.css
++++ b/styles.css
+@@ -202,6 +202,75 @@
+ .input-prefix > span, .input-suffix > span { color: var(--muted); font-weight: 800; padding-left: 13px; }
+ .input-suffix > span { padding-left: 0; padding-right: 13px; }
+ .input-prefix input, .input-suffix input { border: 0 !important; border-radius: 0 !important; background: transparent !important; min-height: 48px !important; }
++
++.deposit-range-field { gap: 10px; }
++.deposit-range-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
++.deposit-range-heading > span:first-child { font-weight: 750; font-size: 13px; }
++.deposit-range-value {
++  min-width: 58px;
++  padding: 6px 10px;
++  border-radius: 999px;
++  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
++  color: var(--brand);
++  font-size: 14px;
++  font-weight: 850;
++  text-align: center;
++}
++.field input.deposit-range {
++  appearance: none;
++  -webkit-appearance: none;
++  width: 100%;
++  min-height: 32px;
++  height: 32px;
++  padding: 0;
++  border: 0;
++  background: transparent;
++  cursor: pointer;
++}
++.field input.deposit-range::-webkit-slider-runnable-track {
++  height: 8px;
++  border-radius: 999px;
++  background: color-mix(in srgb, var(--brand) 26%, var(--border));
++}
++.field input.deposit-range::-webkit-slider-thumb {
++  -webkit-appearance: none;
++  width: 26px;
++  height: 26px;
++  margin-top: -9px;
++  border: 3px solid var(--surface);
++  border-radius: 50%;
++  background: var(--brand);
++  box-shadow: 0 2px 8px rgba(0,0,0,.22);
++}
++.field input.deposit-range::-moz-range-track {
++  height: 8px;
++  border: 0;
++  border-radius: 999px;
++  background: color-mix(in srgb, var(--brand) 26%, var(--border));
++}
++.field input.deposit-range::-moz-range-thumb {
++  width: 22px;
++  height: 22px;
++  border: 3px solid var(--surface);
++  border-radius: 50%;
++  background: var(--brand);
++  box-shadow: 0 2px 8px rgba(0,0,0,.22);
++}
++.field input.deposit-range:focus-visible { outline: none; }
++.field input.deposit-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 24%, transparent), 0 2px 8px rgba(0,0,0,.22); }
++.field input.deposit-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 24%, transparent), 0 2px 8px rgba(0,0,0,.22); }
++.deposit-range-scale {
++  display: grid;
++  grid-template-columns: repeat(5, 1fr);
++  color: var(--muted);
++  font-size: 10px;
++  font-weight: 700;
++}
++.deposit-range-scale span:nth-child(2),
++.deposit-range-scale span:nth-child(3),
++.deposit-range-scale span:nth-child(4) { text-align: center; }
++.deposit-range-scale span:last-child { text-align: right; }
++
+ .error-text { color: var(--danger) !important; font-weight: 700; }
+ 
+ .mini-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+--- a/service-worker.js
++++ b/service-worker.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'spv-property-calculator-v1.7.5-save-state';
++const CACHE_NAME = 'spv-property-calculator-v1.7.6-deposit-slider';
+ const ROOT = new URL('./', self.location.href).href;
+ const APP_SHELL = new URL('./index.html', self.location.href).href;
+ const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
