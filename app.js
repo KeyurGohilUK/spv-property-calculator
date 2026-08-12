@@ -698,7 +698,7 @@ function renderCloudState(isWarning = false) {
 
   if (!cloudUser) {
     $('cloudStatusTitle').textContent = 'Local only';
-    $('cloudStatusText').textContent = cloudLastMessage || 'Sign in to sync saved properties across your devices.';
+    $('cloudStatusText').textContent = cloudLastMessage || 'Sign in to open the shared property workspace.';
     accountBtn.textContent = 'Sign in';
     syncBtn.classList.add('hidden');
     return;
@@ -716,7 +716,7 @@ function renderCloudState(isWarning = false) {
   }
 
   $('cloudStatusTitle').textContent = 'Supabase connected';
-  $('cloudStatusText').textContent = cloudLastMessage || `Signed in as ${cloudUser.email || 'your account'}.`;
+  $('cloudStatusText').textContent = cloudLastMessage || `Shared workspace · signed in as ${cloudUser.email || 'your account'}.`;
 }
 
 function renderAuthDialog() {
@@ -741,7 +741,7 @@ function renderAuthDialog() {
     $('dialogSyncBtn').disabled = cloudSyncing || !navigator.onLine;
     $('dialogSyncBtn').textContent = cloudSyncing ? 'Syncing…' : 'Sync now';
     $('accountSyncText').textContent = navigator.onLine
-      ? (cloudLastMessage || 'Your local properties can sync with your cloud account.')
+      ? (cloudLastMessage || 'All signed-in users share the same Supabase property list.')
       : 'Offline now. Local changes will be retained until the next sync.';
   }
 }
@@ -769,7 +769,7 @@ async function syncCloud({ showFeedback = true } = {}) {
   try {
     const result = await window.SPVCloud.syncAll(getProperties(), readPendingDeletes());
     if (!replaceLocalProperties(result.merged)) throw new Error('Could not update the local offline cache.');
-    clearPendingDeletes(result.deletedIds);
+    clearPendingDeletes(result.clearedDeleteIds || result.deletedIds);
     renderPropertyList();
 
     const changes = result.uploadedCount + result.downloadedCount + result.deletedIds.length;
@@ -955,6 +955,22 @@ function init() {
     else if (cloudUser) syncCloud({ showFeedback: false });
   });
   window.addEventListener('offline', updateConnectionStatus);
+
+  // Small-team shared workspace: refresh periodically while the app is visible,
+  // and once when the user returns to the app. This keeps other users' changes
+  // appearing without requiring a manual reload.
+  window.setInterval(() => {
+    if (cloudUser && navigator.onLine && document.visibilityState !== 'hidden') {
+      syncCloud({ showFeedback: false });
+    }
+  }, 45000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && cloudUser && navigator.onLine) {
+      syncCloud({ showFeedback: false });
+    }
+  });
+
   updateConnectionStatus();
   setupInstall();
   renderPropertyList();

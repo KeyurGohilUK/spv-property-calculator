@@ -1,4 +1,4 @@
-# SPV Property Calculator — Supabase Cloud Sync Edition
+# SPV Property Calculator — Shared Supabase Edition
 
 A mobile-first Progressive Web App for estimating the cash required to buy a residential investment property through a UK Limited Company / SPV.
 
@@ -15,19 +15,19 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 - Total purchase costs and total cash required
 - Local offline storage
 - Supabase email/password sign-in
-- Per-user cloud storage protected by Row Level Security
+- Shared cloud property list for all authenticated users, protected by Row Level Security
 - Offline-first cloud sync and queued deletions
 - GitHub Pages and iPhone PWA support
 
 ## Before deploying
 
-Follow **`SUPABASE_SETUP.md`**. The short version is:
+For a new Supabase project follow **`SUPABASE_SETUP.md`**. If upgrading the previous per-user edition, read **`SHARED_WORKSPACE_UPGRADE.md`**. The short version is:
 
 1. Create a free Supabase project.
 2. Run `supabase-schema.sql` in Supabase SQL Editor.
 3. Copy the Project URL and Publishable key into `supabase-config.js`.
 4. Upload this folder to GitHub Pages.
-5. Open the app and create/sign in to your account.
+5. Open the app and sign in with one of your small-team accounts.
 
 Do **not** put a Supabase Secret key or `service_role` key in this project.
 
@@ -36,9 +36,9 @@ Do **not** put a Supabase Secret key or `service_role` key in this project.
 The app remains offline-first:
 
 - `localStorage` is used immediately when saving.
-- When signed in and online, the property is also stored in Supabase.
-- On login/sync, local and cloud versions are compared by `updatedAt`; the newer copy wins.
-- Offline deletions are queued and sent to Supabase on the next sync.
+- When signed in and online, the property is stored in the shared Supabase workspace.
+- Every authenticated account sees the same cloud rows. The app syncs on sign-in/app return and periodically while visible; local and shared-cloud versions are compared by `updatedAt`, so the newer copy wins.
+- Offline deletions are queued. A newer shared edit can supersede an older offline deletion.
 - Signing out leaves the local device copy intact.
 
 ## Deploy to GitHub Pages

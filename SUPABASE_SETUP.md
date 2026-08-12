@@ -1,6 +1,6 @@
 # Supabase setup for SPV Property Calculator
 
-This app keeps a local offline copy in `localStorage` and can optionally sync the same property records to Supabase when you sign in.
+This app keeps a local offline copy in `localStorage` and syncs a shared property workspace to Supabase when a permitted user signs in.
 
 ## 1. Create the Supabase project
 
@@ -18,7 +18,7 @@ This app keeps a local offline copy in `localStorage` and can optionally sync th
 4. Copy the whole SQL file into the SQL Editor.
 5. Click **Run**.
 
-The script creates `public.properties`, enables Row Level Security (RLS), removes anonymous table access, and creates separate SELECT / INSERT / UPDATE / DELETE policies so an authenticated user can only access rows where `user_id = auth.uid()`.
+The script creates/upgrades `public.properties`, enables Row Level Security (RLS), removes anonymous table access, and creates SELECT / INSERT / UPDATE / DELETE policies so every authenticated user can access the same shared property rows.
 
 ## 3. Configure email/password authentication
 
@@ -26,9 +26,9 @@ Open **Authentication** in the Supabase dashboard and make sure the Email provid
 
 ### Easiest setup for a personal calculator
 
-For the simplest first setup, turn **Confirm Email** off while you create your own account. The app can then create the account and sign in immediately without relying on confirmation email delivery.
+For the simplest first setup, turn **Confirm Email** off while you create the 2–3 accounts you intend to use. The app can then create the account and sign in immediately without relying on confirmation email delivery.
 
-After you have created your own account successfully, you can optionally turn **Allow new users to sign up** off. Existing users can still sign in, but the public app will no longer let new people register.
+After you have created all intended accounts successfully, turn **Allow new users to sign up** off. Existing users can still sign in, but visitors to the public GitHub Pages URL cannot create additional accounts.
 
 ### If you want email confirmation enabled
 
@@ -103,8 +103,8 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 1. Open the GitHub Pages URL.
 2. Tap/click **Sign in** in the app header.
 3. Choose **Create account** the first time, or **Sign in** if the account already exists.
-4. Existing local properties will be merged into the signed-in Supabase account on sync.
-5. Save a property. The app first saves locally, then syncs the record to Supabase when online.
+4. Existing local properties will be merged into the shared Supabase property list on sync.
+5. Save a property. The app first saves locally, then syncs the record to the shared Supabase workspace when online. Other signed-in users receive it on their next sync/app load.
 
 ## 8. Offline behaviour
 
@@ -118,7 +118,7 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 
 In Supabase open **Table Editor → properties**. Each row contains:
 
-- `user_id` — Supabase Auth user ID
+- `user_id` — the Auth user who originally created the row (informational; it does not restrict shared access)
 - `id` — property record ID
 - `data` — the full calculator record as JSON
 - `created_at`
@@ -138,7 +138,12 @@ Re-copy the **Publishable** key and Project URL from Supabase. Do not use a Secr
 Your Supabase project probably has **Confirm Email** enabled. Confirm the email and return to the app, or temporarily disable Confirm Email for the initial personal setup.
 
 ### Database returns permission/RLS errors
-Run `supabase-schema.sql` again and check that RLS is enabled and the four policies exist on `public.properties`.
+Run `supabase-schema.sql` again and check that RLS is enabled and the four **Authenticated users can ... shared properties** policies exist on `public.properties`.
 
 ### Cloud library unavailable while offline
 The calculator remains usable locally. Once online, reload the app if necessary; the Supabase SDK is then cached for later PWA use.
+
+
+## Shared access model
+
+All authenticated users in this Supabase project can read, create, edit and delete all property rows. Keep the user list small and controlled. Once your 2–3 accounts exist, disable new public sign-ups in Supabase Authentication settings. Signed-out visitors have no access to the table.

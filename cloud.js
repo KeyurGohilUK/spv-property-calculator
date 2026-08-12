@@ -1,5 +1,5 @@
 /*
- * SPV Property Calculator - Supabase cloud sync
+ * SPV Property Calculator - shared Supabase cloud sync
  * Uses the browser/UMD build of @supabase/supabase-js loaded by index.html.
  * Local storage remains the offline-first source used by app.js.
  */
@@ -160,11 +160,10 @@
     return session.user;
   }
 
-  function toCloudRow(record, userId) {
+  function toCloudRow(record) {
     const now = new Date().toISOString();
     return {
       id: String(record.id),
-      user_id: userId,
       data: record,
       created_at: record.createdAt || now,
       updated_at: record.updatedAt || now
@@ -194,11 +193,11 @@
 
   async function upsertProperty(record) {
     const supabaseClient = ensureClient();
-    const user = await requireUser();
-    const row = toCloudRow(record, user.id);
+    await requireUser();
+    const row = toCloudRow(record);
     const { error } = await supabaseClient
       .from('properties')
-      .upsert(row, { onConflict: 'user_id,id' });
+      .upsert(row, { onConflict: 'id' });
     if (error) throw error;
     return record;
   }
@@ -260,17 +259,41 @@
 
   async function syncAll(localProperties, pendingDeletes = []) {
     await requireUser();
-    const deletedIds = [];
+
+    // In a shared workspace, another user may have edited a property after this
+    // device deleted it offline. Fetch first, then only apply an offline delete
+    // when the tombstone is at least as new as the cloud row.
+    let cloudProperties = await listProperties();
+    const cloudById = new Map(cloudProperties.map((item) => [String(item.id), item]));
+    const clearedDeleteIds = [];
+    const appliedDeleteIds = [];
 
     for (const tombstone of pendingDeletes || []) {
-      const id = String(tombstone.id || tombstone);
+      const id = String(tombstone?.id || tombstone || '');
       if (!id) continue;
-      await deleteProperty(id);
-      deletedIds.push(id);
+
+      const cloud = cloudById.get(id);
+      const deletedAt = typeof tombstone === 'object' ? tombstone.deletedAt : '';
+
+      if (!cloud) {
+        // Already absent in the shared database: the local tombstone is resolved.
+        clearedDeleteIds.push(id);
+        continue;
+      }
+
+      if (asTime(deletedAt) >= asTime(cloud.updatedAt)) {
+        await deleteProperty(id);
+        cloudById.delete(id);
+        appliedDeleteIds.push(id);
+      }
+
+      // Whether applied or superseded by a newer shared edit, this tombstone has
+      // now been reconciled and can be removed from local pending-deletes storage.
+      clearedDeleteIds.push(id);
     }
 
-    const cloudProperties = await listProperties();
-    const merge = mergePropertySets(localProperties, cloudProperties, pendingDeletes);
+    cloudProperties = [...cloudById.values()];
+    const merge = mergePropertySets(localProperties, cloudProperties, []);
 
     for (const record of merge.upload) await upsertProperty(record);
 
@@ -278,7 +301,8 @@
       merged: merge.merged,
       uploadedCount: merge.upload.length,
       downloadedCount: merge.downloadedCount,
-      deletedIds
+      deletedIds: appliedDeleteIds,
+      clearedDeleteIds
     };
   }
 

@@ -37,7 +37,7 @@
           <div>
             <p class="eyebrow">Purchase-cost planning</p>
             <h2 id="homeTitle">Your properties</h2>
-            <p class="muted">Estimate deposit, SDLT, fees and total cash needed. Works offline, with optional Supabase cloud sync across your devices.</p>
+            <p class="muted">Estimate deposit, SDLT, fees and total cash needed. Works offline, with a shared Supabase workspace for your small team.</p>
           </div>
           <button id="newPropertyBtn" class="primary-btn" type="button">+ New Property</button>
         </div>
@@ -47,7 +47,7 @@
             <span class="cloud-icon" aria-hidden="true">☁</span>
             <div>
               <strong id="cloudStatusTitle">Local only</strong>
-              <small id="cloudStatusText">Sign in to sync saved properties across devices.</small>
+              <small id="cloudStatusText">Sign in to open the shared property workspace.</small>
             </div>
           </div>
           <button id="syncBtn" class="secondary-btn compact-btn hidden" type="button">Sync now</button>
@@ -240,7 +240,7 @@
     <div id="authSignedOut">
       <p class="eyebrow">Cloud sync</p>
       <h3>Supabase account</h3>
-      <p class="muted small">Sign in to keep an online copy of your properties and sync them across devices. The local copy remains available offline.</p>
+      <p class="muted small">Sign in to the shared workspace. Every authenticated user can see, edit and delete the same property list. The local copy remains available offline.</p>
 
       <label class="field">
         <span>Email</span>
@@ -263,7 +263,7 @@
       <p id="signedInEmail" class="muted"></p>
       <div class="auth-account-card">
         <strong id="accountSyncTitle">Supabase connected</strong>
-        <small id="accountSyncText">Your local properties can sync with your cloud account.</small>
+        <small id="accountSyncText">All signed-in users share the same Supabase property list.</small>
       </div>
       <div class="auth-actions">
         <button id="dialogSyncBtn" class="primary-btn" type="button">Sync now</button>
