@@ -256,6 +256,23 @@
     return data;
   }
 
+  async function deleteNote(noteId) {
+    const supabaseClient = ensureClient();
+    const user = await requireUser();
+    const id = String(noteId || '').trim();
+    if (!id) throw new Error('Note ID is required.');
+
+    const { data, error } = await supabaseClient
+      .from('property_notes')
+      .delete()
+      .eq('id', id)
+      .eq('author_user_id', user.id)
+      .select('id');
+    if (error) throw error;
+    if (!data || data.length === 0) throw new Error('You can only delete your own notes.');
+    return true;
+  }
+
   async function listPermanentDeletions() {
     const supabaseClient = ensureClient();
     await requireUser();
@@ -382,6 +399,7 @@
     listProperties,
     listNotes,
     addNote,
+    deleteNote,
     upsertProperty,
     listPermanentDeletions,
     permanentlyDeleteProperty,

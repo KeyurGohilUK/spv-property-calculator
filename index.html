@@ -118,8 +118,18 @@
       <section id="editorView" class="view hidden" aria-labelledby="editorTitle">
         <div class="editor-topbar">
           <button id="backBtn" class="text-btn" type="button">← Properties</button>
-          <span id="editorModeLabel" class="mode-label">New calculation</span>
+          <div class="editor-topbar-actions">
+            <span id="editorModeLabel" class="mode-label">New calculation</span>
+            <button id="savePropertyBtn" class="editor-save-icon" type="button" aria-label="Save property" title="Save property" data-tooltip="Save property">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 4h12l2 2v14H5V4Z"></path>
+                <path d="M8 4v6h8V4"></path>
+                <path d="M8 20v-6h8v6"></path>
+              </svg>
+            </button>
+          </div>
         </div>
+        <p id="saveMessage" class="save-message editor-save-message" aria-live="polite"></p>
 
         <div class="editor-layout">
           <form id="propertyForm" class="form-column" novalidate>
@@ -255,21 +265,26 @@
               <div id="notesUnsaved" class="notes-state">
                 <p class="muted small">Save this property first, then you can add shared notes.</p>
               </div>
-              <div id="notesWorkspace" class="hidden">
-                <label class="field">
-                  <span>Add a note</span>
-                  <textarea id="noteText" rows="3" maxlength="2000" placeholder="Add an update, question or decision about this property..."></textarea>
-                  <small>Notes are shared with all signed-in users and show who added them.</small>
-                </label>
-                <div class="notes-actions">
-                  <button id="saveNoteBtn" class="secondary-btn" type="button">Save Note</button>
-                  <span id="noteSaveMessage" class="muted small" aria-live="polite"></span>
-                </div>
+              <div id="notesWorkspace" class="hidden notes-chat">
                 <div class="notes-list-header">
-                  <h4>Note history</h4>
-                  <button id="refreshNotesBtn" class="text-btn" type="button">Refresh</button>
+                  <div>
+                    <h4>Conversation</h4>
+                    <small>Shared with all signed-in users</small>
+                  </div>
+                  <button id="refreshNotesBtn" class="note-refresh-btn" type="button" aria-label="Refresh notes" title="Refresh notes">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 9m0 0V4m0 5h5M4 13a8.1 8.1 0 0 0 14.9 4L21 15m0 0v5m0-5h-5"/></svg>
+                  </button>
                 </div>
-                <div id="notesList" class="notes-list"></div>
+                <div id="notesList" class="notes-list" role="log" aria-live="polite" aria-label="Property notes conversation"></div>
+                <div class="note-composer-wrap">
+                  <div class="note-composer">
+                    <textarea id="noteText" rows="1" maxlength="2000" aria-label="Write a note" placeholder="Write a note..."></textarea>
+                    <button id="saveNoteBtn" class="note-send-btn" type="button" aria-label="Send note" title="Send note">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+                    </button>
+                  </div>
+                  <span id="noteSaveMessage" class="note-save-message" aria-live="polite"></span>
+                </div>
               </div>
             </details>
 
@@ -312,8 +327,7 @@
                 <small>Includes refurbishment</small>
               </div>
 
-              <button id="savePropertyBtn" class="primary-btn full-width" type="button">Save Property</button>
-              <p id="saveMessage" class="save-message" aria-live="polite"></p>
+
             </details>
           </aside>
         </div>

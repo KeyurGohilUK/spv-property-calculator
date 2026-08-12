@@ -348,6 +348,7 @@ let cloudInitialized = false;
 let cloudListenerAttached = false;
 let currentNotes = [];
 let notesLoading = false;
+let deletingNoteId = null;
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -510,22 +511,42 @@ function renderNotes() {
   const saveBtn = $('saveNoteBtn');
   if (saveBtn) {
     saveBtn.disabled = notesLoading || !navigator.onLine || !signedIn || !hasSavedProperty;
-    saveBtn.textContent = notesLoading ? 'Saving…' : 'Save Note';
+    saveBtn.classList.toggle('is-loading', notesLoading);
+    const label = notesLoading ? 'Sending note…' : 'Send note';
+    saveBtn.setAttribute('aria-label', label);
+    saveBtn.title = label;
   }
   if ($('refreshNotesBtn')) $('refreshNotesBtn').disabled = notesLoading || !navigator.onLine || !signedIn || !hasSavedProperty;
 
   const list = $('notesList');
   if (!list) return;
   if (!currentNotes.length) {
-    list.innerHTML = '<div class="notes-empty"><p>No notes yet.</p><small>Add the first update for this property.</small></div>';
+    list.innerHTML = '<div class="notes-empty"><div class="notes-empty-icon">💬</div><p>No messages yet</p><small>Start the conversation about this property.</small></div>';
     return;
   }
 
-  list.innerHTML = currentNotes.map((item) => {
-    const author = escapeHtml(item.author_name || 'Signed-in user');
+  const notesForDisplay = [...currentNotes].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return aTime - bTime;
+  });
+
+  list.innerHTML = notesForDisplay.map((item) => {
+    const rawAuthor = item.author_name || 'Signed-in user';
+    const author = escapeHtml(rawAuthor);
     const created = item.created_at ? dateTimeFormat.format(new Date(item.created_at)) : 'Recently';
-    return `<article class="note-item"><div class="note-meta"><strong>${author}</strong><time>${escapeHtml(created)}</time></div><p>${escapeHtml(item.note || '').replaceAll('\n', '<br>')}</p></article>`;
+    const isMine = Boolean(cloudUser?.id && item.author_user_id === cloudUser.id);
+    const initials = escapeHtml(rawAuthor.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?');
+    return `<article class="note-message ${isMine ? 'mine' : 'theirs'}">
+      <div class="note-avatar" aria-hidden="true">${initials}</div>
+      <div class="note-message-stack">
+        <div class="note-bubble"><p>${escapeHtml(item.note || '').replaceAll('\n', '<br>')}</p></div>
+        <div class="note-meta"><strong>${author}</strong><span aria-hidden="true">·</span><time>${escapeHtml(created)}</time>${isMine ? `<button class="note-delete-btn ${deletingNoteId === item.id ? 'is-loading' : ''}" type="button" data-note-id="${escapeHtml(item.id || '')}" aria-label="Delete note" title="Delete note" ${deletingNoteId ? 'disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>` : ''}</div>
+      </div>
+    </article>`;
   }).join('');
+
+  requestAnimationFrame(() => { list.scrollTop = list.scrollHeight; });
 }
 
 async function loadNotes({ forceCloud = false } = {}) {
@@ -567,6 +588,36 @@ async function saveNote() {
     $('noteSaveMessage').textContent = error.message || 'Could not save the note.';
   } finally {
     notesLoading = false;
+    renderNotes();
+  }
+}
+
+async function deleteOwnNote(noteId) {
+  const id = String(noteId || '').trim();
+  if (!id || deletingNoteId) return;
+  const note = currentNotes.find((item) => String(item.id) === id);
+  if (!note || !cloudUser || note.author_user_id !== cloudUser.id) {
+    $('noteSaveMessage').textContent = 'You can only delete your own notes.';
+    return;
+  }
+  if (!navigator.onLine) {
+    $('noteSaveMessage').textContent = 'Connect to the internet to delete a note.';
+    return;
+  }
+  if (!window.confirm('Delete this note? This cannot be undone.')) return;
+
+  deletingNoteId = id;
+  $('noteSaveMessage').textContent = 'Deleting note…';
+  renderNotes();
+  try {
+    await window.SPVCloud.deleteNote(id);
+    currentNotes = currentNotes.filter((item) => String(item.id) !== id);
+    cacheNotes(editingId, currentNotes);
+    $('noteSaveMessage').textContent = 'Note deleted.';
+  } catch (error) {
+    $('noteSaveMessage').textContent = error.message || 'Could not delete the note.';
+  } finally {
+    deletingNoteId = null;
     renderNotes();
   }
 }
@@ -678,9 +729,13 @@ function renderPropertyList() {
   const properties=getActiveProperties(); updatePropertyCounts(); $('emptyState').classList.toggle('hidden', properties.length>0); $('propertyList').innerHTML='';
   properties.forEach((property)=>{
     const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card';
-    card.innerHTML=`<div class="property-card-header"><div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div><div class="card-actions"><button class="card-action" type="button" data-action="edit">Edit</button><button class="card-action" type="button" data-action="duplicate">Duplicate</button><button class="card-action delete" type="button" data-action="archive">Archive</button></div>`;
+    const propertyTitle=property.title||'Untitled Property';
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.setAttribute('aria-label',`Open ${propertyTitle} for editing`);
+    card.innerHTML=`<div class="property-card-tools" aria-label="Property actions"><button class="property-card-icon-action" type="button" data-action="duplicate" aria-label="Duplicate ${escapeHtml(propertyTitle)}" title="Duplicate property" data-tooltip="Duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button class="property-card-icon-action archive" type="button" data-action="archive" aria-label="Archive ${escapeHtml(propertyTitle)}" title="Archive property" data-tooltip="Archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg></button></div><div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div>`;
     card.addEventListener('click',(event)=>{ if(!event.target.closest('button')) showEditor(property.id); });
-    card.querySelector('[data-action="edit"]').addEventListener('click',()=>showEditor(property.id));
+    card.addEventListener('keydown',(event)=>{ if(event.target!==card)return; if(event.key==='Enter'||event.key===' '){event.preventDefault();showEditor(property.id);} });
     card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(copy);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
     card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(archived);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
     $('propertyList').appendChild(card);
@@ -1051,7 +1106,17 @@ function init() {
   $('saveDisplayNameBtn').addEventListener('click', handleSaveDisplayName);
   $('dialogSyncBtn').addEventListener('click', () => syncCloud());
   $('saveNoteBtn').addEventListener('click', saveNote);
+  $('noteText').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      saveNote();
+    }
+  });
   $('refreshNotesBtn').addEventListener('click', () => loadNotes({ forceCloud: true }));
+  $('notesList').addEventListener('click', (event) => {
+    const deleteBtn = event.target.closest('.note-delete-btn');
+    if (deleteBtn) deleteOwnNote(deleteBtn.dataset.noteId);
+  });
   $('authPassword').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') handleSignIn();
   });
