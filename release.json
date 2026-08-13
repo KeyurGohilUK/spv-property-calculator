@@ -1,9 +1,9 @@
 {
-  "version": "1.9.0",
+  "version": "1.10.0",
   "notes": [
-    "New long-term property Forecast page",
-    "Cash flow, yield, equity and mortgage projections",
-    "Conservative, expected and optimistic scenarios",
-    "Mortgage stress test, refinance and exit estimates"
+    "Advanced forecast return breakdown and annualised return",
+    "Rent and occupancy stress testing with break-even rent",
+    "ICR, DSCR and LTV risk metrics",
+    "Refurbishment uplift and value-created analysis"
   ]
 }
