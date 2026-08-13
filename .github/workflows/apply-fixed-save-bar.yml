@@ -1,0 +1,77 @@
+name: Apply fixed editor save bar
+
+on:
+  push:
+    branches:
+      - agent/fixed-save-bar
+    paths:
+      - .github/workflows/apply-fixed-save-bar.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/fixed-save-bar
+          fetch-depth: 0
+
+      - name: Make editor save bar fully fixed
+        shell: bash
+        run: |
+          cat >> styles.css <<'EOF'
+
+/* v1.7.9: keep the editor save action completely stationary while scrolling. */
+#editorView {
+  padding-top: 62px;
+}
+
+#editorView .editor-topbar {
+  position: fixed;
+  top: calc(var(--safe-top) + 74px);
+  left: 50%;
+  width: min(calc(100% - 32px), 1100px);
+  margin: 0;
+  transform: translateX(-50%);
+  z-index: 19;
+}
+
+@media (max-width: 620px) {
+  #editorView {
+    padding-top: 60px;
+  }
+
+  #editorView .editor-topbar {
+    top: calc(var(--safe-top) + 74px);
+    width: calc(100% - 24px);
+    margin: 0;
+  }
+}
+EOF
+
+          sed -i "s/spv-property-calculator-v1.7.8-listing-sticky-save/spv-property-calculator-v1.7.9-fixed-save-bar/" service-worker.js
+
+      - name: Validate
+        shell: bash
+        run: |
+          node --check app.js
+          npm test
+          grep -q "#editorView .editor-topbar" styles.css
+          grep -q "position: fixed" styles.css
+          grep -q "v1.7.9-fixed-save-bar" service-worker.js
+
+      - name: Remove temporary workflow
+        shell: bash
+        run: rm .github/workflows/apply-fixed-save-bar.yml
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add styles.css service-worker.js .github/workflows/apply-fixed-save-bar.yml
+          git commit -m "Keep editor save bar fixed while scrolling"
+          git push
