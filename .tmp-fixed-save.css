@@ -1,0 +1,27 @@
+
+/* v1.7.9: keep the editor save action completely stationary while scrolling. */
+#editorView {
+  padding-top: 62px;
+}
+
+#editorView .editor-topbar {
+  position: fixed;
+  top: calc(var(--safe-top) + 74px);
+  left: 50%;
+  width: min(calc(100% - 32px), 1100px);
+  margin: 0;
+  transform: translateX(-50%);
+  z-index: 19;
+}
+
+@media (max-width: 620px) {
+  #editorView {
+    padding-top: 60px;
+  }
+
+  #editorView .editor-topbar {
+    top: calc(var(--safe-top) + 74px);
+    width: calc(100% - 24px);
+    margin: 0;
+  }
+}
