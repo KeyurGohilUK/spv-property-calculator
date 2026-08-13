@@ -1,0 +1,96 @@
+name: Apply forecast integration
+
+on:
+  push:
+    branches: [agent/property-forecasting]
+    paths: ['.github/workflows/apply-forecast-integration.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/property-forecasting
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch app integration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          index = Path('index.html')
+          text = index.read_text()
+          old = '''            <button id="archiveBtn" class="secondary-btn action-archive" type="button">Archived Properties <span id="archiveCountBadge" class="button-count">0</span></button>'''
+          new = '''            <div class="home-secondary-actions">
+              <a class="secondary-btn action-forecast" href="./forecast.html">Forecast</a>
+              <button id="archiveBtn" class="secondary-btn action-archive" type="button">Archived Properties <span id="archiveCountBadge" class="button-count">0</span></button>
+            </div>'''
+          if old not in text:
+              raise SystemExit('Home archive button marker not found')
+          index.write_text(text.replace(old, new, 1))
+
+          styles = Path('styles.css')
+          css = styles.read_text()
+          css += '''\n/* Forecast home entry */\n.home-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action-forecast{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}@media(max-width:560px){.home-secondary-actions{grid-template-columns:1fr}}\n'''
+          styles.write_text(css)
+
+          app = Path('app.js')
+          js = app.read_text()
+          js = js.replace("const APP_VERSION = '1.8.2';", "const APP_VERSION = '1.9.0';")
+          js = js.replace("  './release.json',\n  './icons/icon-192.png',", "  './release.json',\n  './forecast.html',\n  './forecast.css',\n  './forecast.js',\n  './icons/icon-192.png',")
+          app.write_text(js)
+
+          sw = Path('service-worker.js')
+          s = sw.read_text()
+          s = s.replace("const CACHE_NAME = 'spv-property-calculator-v1.8.2-smart-update-status';", "const CACHE_NAME = 'spv-property-calculator-v1.9.0-forecasting';")
+          s = s.replace("  './release.json',\n  './icons/icon-192.png',", "  './release.json',\n  './forecast.html',\n  './forecast.css',\n  './forecast.js',\n  './icons/icon-192.png',")
+          sw.write_text(s)
+
+          release = {
+            'version': '1.9.0',
+            'notes': [
+              'New long-term property Forecast page',
+              'Cash flow, yield, equity and mortgage projections',
+              'Conservative, expected and optimistic scenarios',
+              'Mortgage stress test, refinance and exit estimates'
+            ]
+          }
+          Path('release.json').write_text(json.dumps(release, indent=2) + '\n')
+
+          manifest = json.loads(Path('manifest.json').read_text())
+          manifest['shortcuts'] = [
+            {
+              'name': 'Property Forecast',
+              'short_name': 'Forecast',
+              'description': 'Forecast rent, cash flow, equity and investment returns',
+              'url': './forecast.html',
+              'icons': [{'src':'./icons/icon-192.png','sizes':'192x192','type':'image/png'}]
+            }
+          ]
+          Path('manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          PY
+      - name: Validate
+        run: |
+          node --check app.js
+          node --check forecast.js
+          node --check service-worker.js
+          node test-calculations.mjs
+          node test-storage.mjs
+          node test-cloud-sync.mjs
+          python3 -m json.tool release.json >/dev/null
+          python3 -m json.tool manifest.json >/dev/null
+      - name: Commit integration and remove helper workflow
+        run: |
+          rm .github/workflows/apply-forecast-integration.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html styles.css app.js service-worker.js release.json manifest.json .github/workflows/apply-forecast-integration.yml
+          git commit -m "Integrate property forecasting"
+          git push origin HEAD:agent/property-forecasting
