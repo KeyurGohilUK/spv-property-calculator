@@ -351,7 +351,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.8.2';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -1161,14 +1161,24 @@ function renderReleaseInfo(release) {
   const notes = Array.isArray(release.notes)
     ? release.notes.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 5)
     : [];
+  const updateAvailable = Boolean(version && version !== APP_VERSION);
+  const updateButton = $('downloadUpdatesBtn');
 
   if (version) $('releaseVersion').textContent = `Version ${version}`;
-  if (version && version !== APP_VERSION) {
+  if (updateAvailable) {
     $('releaseStatus').textContent = `Latest ${version} · Installed ${APP_VERSION}`;
     $('releaseStatus').classList.add('update-available');
   } else {
-    $('releaseStatus').textContent = `Installed ${APP_VERSION}`;
+    $('releaseStatus').textContent = `Up to date · ${APP_VERSION}`;
     $('releaseStatus').classList.remove('update-available');
+  }
+
+  if (updateButton) {
+    updateButton.dataset.updateAvailable = updateAvailable ? 'true' : 'false';
+    const label = updateButton.querySelector('[data-update-label]');
+    if (label && !updateButton.disabled) {
+      label.textContent = updateAvailable ? 'Download updates' : 'Check for updates';
+    }
   }
 
   if (notes.length) {
@@ -1183,26 +1193,68 @@ function renderReleaseInfo(release) {
 }
 
 async function loadReleaseInfo() {
-  if (!navigator.onLine) return;
+  if (!navigator.onLine) return null;
   try {
     const response = await fetch(new URL('./release.json', document.baseURI), {
       cache: 'no-store',
       credentials: 'same-origin'
     });
     if (!response.ok) throw new Error(`Release metadata returned ${response.status}.`);
-    renderReleaseInfo(await response.json());
+    const release = await response.json();
+    renderReleaseInfo(release);
+    return release;
   } catch (error) {
     console.warn('Could not load latest release information:', error);
+    return null;
   }
 }
 
-function setDownloadUpdatesBusy(busy) {
+function setDownloadUpdatesBusy(busy, busyLabel = '') {
   const button = $('downloadUpdatesBtn');
   if (!button) return;
   button.disabled = busy;
   button.classList.toggle('is-loading', busy);
   const label = button.querySelector('[data-update-label]');
-  if (label) label.textContent = busy ? 'Downloading…' : 'Download updates';
+  if (!label) return;
+  if (busy) {
+    label.textContent = busyLabel || 'Checking…';
+  } else {
+    label.textContent = button.dataset.updateAvailable === 'true'
+      ? 'Download updates'
+      : 'Check for updates';
+  }
+}
+
+async function handleUpdateAction() {
+  const button = $('downloadUpdatesBtn');
+  const message = $('updateMessage');
+  if (!button || !message) return;
+
+  if (button.dataset.updateAvailable === 'true') {
+    await downloadAppUpdates();
+    return;
+  }
+
+  if (!navigator.onLine) {
+    message.textContent = 'Connect to the internet to check for updates.';
+    return;
+  }
+
+  setDownloadUpdatesBusy(true, 'Checking…');
+  message.textContent = 'Checking for updates…';
+  const release = await loadReleaseInfo();
+  setDownloadUpdatesBusy(false);
+
+  if (!release) {
+    message.textContent = 'Could not check for updates. Try again when online.';
+    return;
+  }
+
+  if (button.dataset.updateAvailable === 'true') {
+    message.textContent = `Version ${release.version} is available. Tap Download updates.`;
+  } else {
+    message.textContent = 'You’re up to date.';
+  }
 }
 
 async function downloadAppUpdates() {
@@ -1218,7 +1270,7 @@ async function downloadAppUpdates() {
     return;
   }
 
-  setDownloadUpdatesBusy(true);
+  setDownloadUpdatesBusy(true, 'Downloading…');
   message.textContent = 'Refreshing cached app files…';
 
   try {
@@ -1294,7 +1346,7 @@ function setupInstall() {
     }
   });
 
-  $('downloadUpdatesBtn').addEventListener('click', downloadAppUpdates);
+  $('downloadUpdatesBtn').addEventListener('click', handleUpdateAction);
 
   $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
 

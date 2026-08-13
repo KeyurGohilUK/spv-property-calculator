@@ -1,9 +1,9 @@
 {
-  "version": "1.8.1",
+  "version": "1.8.2",
   "date": "2026-08-13",
   "notes": [
+    "Smarter update status and manual update checks",
     "Download updates inside the app",
-    "Property listing links",
-    "Fixed Save bar with cleaner spacing"
+    "Property listing links and fixed Save bar"
   ]
 }
