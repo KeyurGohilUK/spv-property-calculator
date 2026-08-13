@@ -1,7 +1,8 @@
-const CACHE_NAME = 'spv-property-calculator-v1.8.0-save-bar-gap';
+const CACHE_NAME = 'spv-property-calculator-v1.8.1-release-updates';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
+const RELEASE_URL = new URL('./release.json', self.location.href).href;
 const SUPABASE_CDN_PREFIX = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3';
 
 const ASSETS = [
@@ -14,6 +15,7 @@ const ASSETS = [
   './tax-config.js',
   './storage.js',
   './manifest.json',
+  './release.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'
@@ -42,6 +44,21 @@ self.addEventListener('fetch', (event) => {
   // Always try to refresh Supabase config when online, but retain the last working
   // copy for offline launches. This avoids an old cached config after GitHub updates.
   if (requestUrl.href === CONFIG_URL) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Release metadata is network-first so an installed older app can show the
+  // latest version notes before its main app-shell cache is refreshed.
+  if (requestUrl.href === RELEASE_URL) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

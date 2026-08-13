@@ -351,6 +351,25 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
+const APP_VERSION = '1.8.1';
+const APP_CACHE_PREFIX = 'spv-property-calculator-';
+const APP_UPDATE_ASSETS = Object.freeze([
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './cloud.js',
+  './calculations.js',
+  './tax-config.js',
+  './storage.js',
+  './manifest.json',
+  './supabase-config.js',
+  './release.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png'
+]);
+
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -1136,6 +1155,116 @@ function updateConnectionStatus() {
   renderCloudState(!online && Boolean(cloudUser));
 }
 
+function renderReleaseInfo(release) {
+  if (!release || typeof release !== 'object') return;
+  const version = String(release.version || '').trim();
+  const notes = Array.isArray(release.notes)
+    ? release.notes.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 5)
+    : [];
+
+  if (version) $('releaseVersion').textContent = `Version ${version}`;
+  if (version && version !== APP_VERSION) {
+    $('releaseStatus').textContent = `Latest ${version} · Installed ${APP_VERSION}`;
+    $('releaseStatus').classList.add('update-available');
+  } else {
+    $('releaseStatus').textContent = `Installed ${APP_VERSION}`;
+    $('releaseStatus').classList.remove('update-available');
+  }
+
+  if (notes.length) {
+    const list = $('releaseNotes');
+    list.innerHTML = '';
+    notes.forEach((note) => {
+      const item = document.createElement('li');
+      item.textContent = note;
+      list.appendChild(item);
+    });
+  }
+}
+
+async function loadReleaseInfo() {
+  if (!navigator.onLine) return;
+  try {
+    const response = await fetch(new URL('./release.json', document.baseURI), {
+      cache: 'no-store',
+      credentials: 'same-origin'
+    });
+    if (!response.ok) throw new Error(`Release metadata returned ${response.status}.`);
+    renderReleaseInfo(await response.json());
+  } catch (error) {
+    console.warn('Could not load latest release information:', error);
+  }
+}
+
+function setDownloadUpdatesBusy(busy) {
+  const button = $('downloadUpdatesBtn');
+  if (!button) return;
+  button.disabled = busy;
+  button.classList.toggle('is-loading', busy);
+  const label = button.querySelector('[data-update-label]');
+  if (label) label.textContent = busy ? 'Downloading…' : 'Download updates';
+}
+
+async function downloadAppUpdates() {
+  const message = $('updateMessage');
+  if (!navigator.onLine) {
+    message.textContent = 'Connect to the internet to download updates.';
+    return;
+  }
+
+  const editorIsOpen = !$('editorView').classList.contains('hidden');
+  const hasUnsavedChanges = editorIsOpen && getEditablePropertySnapshot() !== savedPropertySnapshot;
+  if (hasUnsavedChanges && !window.confirm('You have unsaved property changes. Downloading updates reloads the app and will discard those unsaved changes. Continue?')) {
+    return;
+  }
+
+  setDownloadUpdatesBusy(true);
+  message.textContent = 'Refreshing cached app files…';
+
+  try {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter((name) => name.startsWith(APP_CACHE_PREFIX))
+          .map((name) => caches.delete(name))
+      );
+    }
+
+    // Re-fetch every local app-shell file with browser HTTP caching bypassed.
+    // The active service worker will store these fresh responses back into its cache.
+    await Promise.all(APP_UPDATE_ASSETS.map(async (path) => {
+      const url = new URL(path, document.baseURI);
+      const response = await fetch(url, {
+        cache: 'reload',
+        credentials: 'same-origin'
+      });
+      if (!response.ok) throw new Error(`Could not refresh ${path} (${response.status}).`);
+      return response;
+    }));
+
+    // Explicitly ask the browser to check service-worker.js now instead of waiting
+    // for its normal update interval. New workers already use skipWaiting().
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        try {
+          await registration.update();
+        } catch (error) {
+          console.warn('Service worker update check failed after cache refresh:', error);
+        }
+      }
+    }
+
+    message.textContent = 'Updates downloaded. Reloading the app…';
+    window.setTimeout(() => window.location.reload(), 350);
+  } catch (error) {
+    console.warn('App update download failed:', error);
+    message.textContent = 'Could not download updates. Check your connection and try again.';
+    setDownloadUpdatesBusy(false);
+  }
+}
+
 function setupInstall() {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
@@ -1145,6 +1274,8 @@ function setupInstall() {
 
   $('installBtn').addEventListener('click', () => {
     $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
+    $('updateMessage').textContent = '';
+    loadReleaseInfo();
     $('installDialog').showModal();
   });
 
@@ -1162,6 +1293,8 @@ function setupInstall() {
       $('nativeInstallBtn').classList.add('hidden');
     }
   });
+
+  $('downloadUpdatesBtn').addEventListener('click', downloadAppUpdates);
 
   $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
 
