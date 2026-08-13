@@ -1,0 +1,43 @@
+name: Apply smart update status
+
+on:
+  push:
+    branches:
+      - agent/smart-update-status
+    paths:
+      - .github/workflows/apply-smart-update-status.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/smart-update-status
+          fetch-depth: 0
+
+      - name: Apply update status changes
+        run: python3 .github/scripts/apply-smart-update-status.py
+
+      - name: Validate
+        run: |
+          node --check app.js
+          python3 -m json.tool release.json >/dev/null
+          npm test
+          grep -q "const APP_VERSION = '1.8.2'" app.js
+          grep -q "Check for updates" app.js
+          grep -q "v1.8.2-smart-update-status" service-worker.js
+
+      - name: Remove temporary helper files
+        run: rm .github/workflows/apply-smart-update-status.yml .github/scripts/apply-smart-update-status.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js index.html release.json service-worker.js .github/workflows/apply-smart-update-status.yml .github/scripts/apply-smart-update-status.py
+          git commit -m "Make update button reflect release status"
+          git push
