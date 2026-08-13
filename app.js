@@ -371,6 +371,19 @@ function normalizeDepositPercent(value) {
   return Math.round(clamped / 5) * 5;
 }
 
+function normalizeListingUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+    return parsed.href;
+  } catch {
+    return '';
+  }
+}
+
 function getFormModel() {
   const customExpenses = [...document.querySelectorAll('.expense-row')].map((row) => ({
     id: row.dataset.id,
@@ -383,6 +396,7 @@ function getFormModel() {
     createdAt: editingCreatedAt,
     title: $('title').value.trim(),
     details: $('details').value.trim(),
+    listingUrl: $('listingUrl').value.trim(),
     purchasePrice: safeNumber($('purchasePrice').value),
     depositPercent: safeNumber($('depositPercent').value),
     qualifyingCorporateRelief: $('qualifyingCorporateRelief').checked,
@@ -682,18 +696,25 @@ function validateForm() {
   const priceValid = safeNumber($('purchasePrice').value) > 0;
   const deposit = safeNumber($('depositPercent').value);
   const depositValid = deposit >= 0 && deposit <= 100;
+  const listingRaw = $('listingUrl').value.trim();
+  const listingUrl = normalizeListingUrl(listingRaw);
+  const listingValid = !listingRaw || Boolean(listingUrl);
 
   $('titleError').classList.toggle('hidden', titleValid);
   $('priceError').classList.toggle('hidden', priceValid);
+  $('listingUrlError').classList.toggle('hidden', listingValid);
+  $('listingUrl').setCustomValidity(listingValid ? '' : 'Enter a valid http:// or https:// property listing link.');
   $('depositPercent').setCustomValidity(depositValid ? '' : 'Deposit must be between 0% and 100%.');
 
-  if (!titleValid || !priceValid || !depositValid) openPrimaryDetailsSection();
+  if (!titleValid || !priceValid || !depositValid || !listingValid) openPrimaryDetailsSection();
 
   if (!titleValid) $('title').focus();
   else if (!priceValid) $('purchasePrice').focus();
+  else if (!listingValid) $('listingUrl').focus();
   else if (!depositValid) $('depositPercent').focus();
 
-  return titleValid && priceValid && depositValid;
+  if (listingValid && listingRaw && listingUrl !== listingRaw) $('listingUrl').value = listingUrl;
+  return titleValid && priceValid && depositValid && listingValid;
 }
 
 function resetForm() {
@@ -709,6 +730,8 @@ function resetForm() {
   $('saveMessage').textContent = '';
   $('titleError').classList.add('hidden');
   $('priceError').classList.add('hidden');
+  $('listingUrlError').classList.add('hidden');
+  $('listingUrl').setCustomValidity('');
   $('editorModeLabel').textContent = 'New calculation';
   currentNotes = [];
   if ($('noteText')) $('noteText').value = '';
@@ -726,6 +749,7 @@ function loadIntoForm(property) {
 
   $('title').value = property.title || '';
   $('details').value = property.details || '';
+  $('listingUrl').value = property.listingUrl || '';
   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
@@ -776,8 +800,11 @@ function renderPropertyList() {
     card.setAttribute('role','button');
     card.setAttribute('tabindex','0');
     card.setAttribute('aria-label',`Open ${propertyTitle} for editing`);
-    card.innerHTML=`<div class="property-card-tools" aria-label="Property actions"><button class="property-card-icon-action" type="button" data-action="duplicate" aria-label="Duplicate ${escapeHtml(propertyTitle)}" title="Duplicate property" data-tooltip="Duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button class="property-card-icon-action archive" type="button" data-action="archive" aria-label="Archive ${escapeHtml(propertyTitle)}" title="Archive property" data-tooltip="Archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg></button></div><div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div>`;
+    const listingUrl = normalizeListingUrl(property.listingUrl);
+    const listingAction = listingUrl ? `<button class="property-card-icon-action listing" type="button" data-action="listing" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></button>` : '';
+    card.innerHTML=`<div class="property-card-tools" aria-label="Property actions">${listingAction}<button class="property-card-icon-action" type="button" data-action="duplicate" aria-label="Duplicate ${escapeHtml(propertyTitle)}" title="Duplicate property" data-tooltip="Duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button class="property-card-icon-action archive" type="button" data-action="archive" aria-label="Archive ${escapeHtml(propertyTitle)}" title="Archive property" data-tooltip="Archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg></button></div><div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total"><span>Total Cash Required</span><strong>${money(calc.totalCashRequired)}</strong></div>`;
     card.addEventListener('click',(event)=>{ if(!event.target.closest('button')) showEditor(property.id); });
+    if (listingUrl) card.querySelector('[data-action="listing"]').addEventListener('click',()=>{ window.open(listingUrl,'_blank','noopener,noreferrer'); });
     card.addEventListener('keydown',(event)=>{ if(event.target!==card)return; if(event.key==='Enter'||event.key===' '){event.preventDefault();showEditor(property.id);} });
     card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(copy);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
     card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(archived);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
@@ -816,6 +843,7 @@ function renderArchiveList() {
 async function saveCurrentProperty() {
   if (!validateForm()) return;
   const { model, calc } = renderCalculation();
+  model.listingUrl = normalizeListingUrl(model.listingUrl);
   try {
     const saved = saveProperty({ ...model, calculated: calc });
     editingId = saved.id;

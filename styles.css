@@ -87,7 +87,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .property-card { position: relative; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .property-card:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--brand) 28%, var(--border)); }
 .property-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 32%, transparent); outline-offset: 3px; }
-.property-card-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding-right: 82px; }
+.property-card-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding-right: 124px; }
 .property-card-header > div { min-width: 0; }
 .property-card h3 { margin: 0; font-size: 18px; line-height: 1.25; }
 .property-meta { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
@@ -172,7 +172,23 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .empty-state p { line-height: 1.55; }
 .empty-icon { width: 58px; height: 58px; margin: 0 auto; border-radius: 18px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); font-size: 30px; }
 
-.editor-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.editor-topbar {
+  position: sticky;
+  top: calc(var(--safe-top) + 72px);
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -6px -6px 14px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, #000 8%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
 .editor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
 .form-column { display: grid; gap: 16px; }
 .section-card { padding: 20px; }
@@ -197,6 +213,30 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
   font-size: 16px;
 }
 .field textarea { resize: vertical; min-height: 100px; }
+.listing-link-input {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.listing-link-input svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-left: 13px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.listing-link-input input { min-height: 48px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+.listing-link-input:focus-within { border-color: color-mix(in srgb, var(--brand) 55%, var(--border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 15%, transparent); }
+.property-card-icon-action.listing:hover,
+.property-card-icon-action.listing:focus-visible { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--surface)); }
 .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 14px; }
 .input-prefix, .input-suffix { display: flex; align-items: center; border: 1px solid var(--border); background: var(--bg); border-radius: 13px; min-height: 50px; overflow: hidden; }
 .input-prefix > span, .input-suffix > span { color: var(--muted); font-weight: 800; padding-left: 13px; }
@@ -1029,4 +1069,12 @@ button.header-icon-control:active { transform: translateY(1px); }
 
 @media (hover: none) {
   .editor-save-icon::after { display: none; }
+}
+
+/* v1.7.8 listing link + always-visible save */
+@media (max-width: 430px) {
+  .property-card-header { padding-right: 112px; }
+  .property-card-tools { gap: 4px; }
+  .property-card-icon-action { width: 33px; height: 33px; min-width: 33px; min-height: 33px; }
+  #editorView .editor-topbar { top: calc(var(--safe-top) + 66px); margin-inline: -3px; }
 }

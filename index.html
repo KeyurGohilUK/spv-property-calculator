@@ -153,6 +153,16 @@
                 <textarea id="details" name="details" rows="4" placeholder="Address, estate agent, auction details, property condition or notes"></textarea>
               </label>
 
+              <label class="field listing-link-field">
+                <span>Property Listing Link <em>optional</em></span>
+                <div class="listing-link-input">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg>
+                  <input id="listingUrl" name="listingUrl" type="url" inputmode="url" autocomplete="url" maxlength="1000" placeholder="https://www.rightmove.co.uk/..." aria-describedby="listingUrlHelp listingUrlError">
+                </div>
+                <small id="listingUrlHelp">Rightmove, Zoopla, estate-agent or other web listing.</small>
+                <small id="listingUrlError" class="error-text hidden">Enter a valid http:// or https:// property listing link.</small>
+              </label>
+
               <div class="field-grid">
                 <label class="field currency-field">
                   <span>Purchase Price</span>
