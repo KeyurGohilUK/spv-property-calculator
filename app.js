@@ -351,7 +351,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.8.2';
+const APP_VERSION = '1.9.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -365,6 +365,9 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './manifest.json',
   './supabase-config.js',
   './release.json',
+  './forecast.html',
+  './forecast.css',
+  './forecast.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'

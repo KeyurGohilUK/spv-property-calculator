@@ -1190,3 +1190,6 @@ button.header-icon-control:active { transform: translateY(1px); }
   .release-update-heading { align-items: center; }
   .release-status { max-width: 160px; white-space: normal; text-align: right; }
 }
+
+/* Forecast home entry */
+.home-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action-forecast{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}@media(max-width:560px){.home-secondary-actions{grid-template-columns:1fr}}

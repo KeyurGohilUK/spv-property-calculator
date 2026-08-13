@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.8.2-smart-update-status';
+const CACHE_NAME = 'spv-property-calculator-v1.9.0-forecasting';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -16,6 +16,9 @@ const ASSETS = [
   './storage.js',
   './manifest.json',
   './release.json',
+  './forecast.html',
+  './forecast.css',
+  './forecast.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'

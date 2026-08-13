@@ -22,5 +22,20 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Property Forecast",
+      "short_name": "Forecast",
+      "description": "Forecast rent, cash flow, equity and investment returns",
+      "url": "./forecast.html",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

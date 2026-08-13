@@ -1,9 +1,9 @@
 {
-  "version": "1.8.2",
-  "date": "2026-08-13",
+  "version": "1.9.0",
   "notes": [
-    "Smarter update status and manual update checks",
-    "Download updates inside the app",
-    "Property listing links and fixed Save bar"
+    "New long-term property Forecast page",
+    "Cash flow, yield, equity and mortgage projections",
+    "Conservative, expected and optimistic scenarios",
+    "Mortgage stress test, refinance and exit estimates"
   ]
 }

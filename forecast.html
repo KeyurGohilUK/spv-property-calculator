@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f6b55">
+  <meta name="description" content="Long-term rental and equity forecasting for saved SPV property calculations.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV Forecast">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./forecast.css">
+  <title>Property Forecast · SPV Property Calculator</title>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <main class="main-shell forecast-shell">
+      <div class="forecast-topbar">
+        <a class="text-btn forecast-back" href="./">← Properties</a>
+        <span class="mode-label">Investment forecasting</span>
+      </div>
+
+      <section class="hero-card forecast-hero">
+        <div>
+          <p class="eyebrow">Long-term planning</p>
+          <h2>Property Forecast</h2>
+          <p class="muted">Project rent, cash flow, mortgage balance, property value and equity using one of your saved property calculations.</p>
+        </div>
+        <label class="field forecast-property-picker">
+          <span>Property</span>
+          <select id="forecastProperty"></select>
+        </label>
+      </section>
+
+      <div id="forecastEmpty" class="empty-state hidden">
+        <div class="empty-icon" aria-hidden="true">⌂</div>
+        <h3>No saved property available</h3>
+        <p>Create and save a property calculation first, then return to Forecast.</p>
+        <a class="primary-btn forecast-inline-button" href="./">Go to properties</a>
+      </div>
+
+      <div id="forecastWorkspace" class="forecast-workspace hidden">
+        <section class="forecast-card assumptions-card">
+          <div class="forecast-section-heading">
+            <div><p class="eyebrow">Assumptions</p><h3>Forecast inputs</h3></div>
+            <button id="resetForecastBtn" class="secondary-btn compact-btn" type="button">Reset</button>
+          </div>
+
+          <div class="forecast-periods" aria-label="Forecast period">
+            <button type="button" data-years="5">5 years</button>
+            <button type="button" data-years="10" class="active">10 years</button>
+            <button type="button" data-years="15">15 years</button>
+            <button type="button" data-years="20">20 years</button>
+            <button type="button" data-years="25">25 years</button>
+          </div>
+
+          <div class="forecast-field-grid">
+            <label class="field currency-field"><span>Monthly Rent</span><div class="input-prefix"><span>£</span><input id="monthlyRent" type="number" min="0" step="10" inputmode="decimal"></div></label>
+            <label class="field"><span>Mortgage Type</span><select id="mortgageType"><option value="interest-only">Interest only</option><option value="repayment">Repayment</option></select></label>
+            <label class="field"><span>Mortgage Interest Rate</span><div class="forecast-suffix-input"><input id="interestRate" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
+            <label class="field"><span>Mortgage Term</span><div class="forecast-suffix-input"><input id="mortgageTerm" type="number" min="1" max="40" step="1" inputmode="numeric"><span>years</span></div></label>
+            <label class="field"><span>Annual Rent Growth</span><div class="forecast-suffix-input"><input id="rentGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
+            <label class="field"><span>Property Value Growth</span><div class="forecast-suffix-input"><input id="propertyGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
+            <label class="field"><span>Maintenance</span><div class="forecast-suffix-input"><input id="maintenancePercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></div></label>
+            <label class="field"><span>Management Fee</span><div class="forecast-suffix-input"><input id="managementPercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></div></label>
+            <label class="field"><span>Void Allowance</span><div class="forecast-suffix-input"><input id="voidWeeks" type="number" min="0" max="20" step="0.5" inputmode="decimal"><span>weeks</span></div></label>
+            <label class="field currency-field"><span>Insurance / Year</span><div class="input-prefix"><span>£</span><input id="annualInsurance" type="number" min="0" step="50" inputmode="decimal"></div></label>
+            <label class="field currency-field"><span>Service Charge / Year</span><div class="input-prefix"><span>£</span><input id="annualServiceCharge" type="number" min="0" step="50" inputmode="decimal"></div></label>
+            <label class="field currency-field"><span>Other Costs / Year</span><div class="input-prefix"><span>£</span><input id="annualOtherCosts" type="number" min="0" step="50" inputmode="decimal"></div></label>
+            <label class="field currency-field"><span>SPV Admin / Accountancy</span><div class="input-prefix"><span>£</span><input id="annualSpvAdmin" type="number" min="0" step="50" inputmode="decimal"></div></label>
+            <label class="field currency-field"><span>Post-refurb Value <em>optional</em></span><div class="input-prefix"><span>£</span><input id="postRefurbValue" type="number" min="0" step="1000" inputmode="decimal"></div></label>
+          </div>
+          <p class="muted tiny forecast-save-note">Forecast assumptions are saved locally on this device for each property.</p>
+        </section>
+
+        <section class="forecast-summary-section">
+          <div class="forecast-section-heading"><div><p class="eyebrow">Projection</p><h3 id="forecastSummaryTitle">10-year outlook</h3></div></div>
+          <div class="forecast-summary-grid">
+            <article><span>Year 1 cash flow</span><strong id="year1CashFlow">£0</strong><small id="monthlyCashFlow">£0 / month</small></article>
+            <article><span>Gross yield</span><strong id="grossYield">0%</strong><small>Year 1</small></article>
+            <article><span>Net yield</span><strong id="netYield">0%</strong><small>Before corporation tax</small></article>
+            <article><span>Cash-on-cash return</span><strong id="cashOnCash">0%</strong><small>Year 1</small></article>
+            <article><span>Projected value</span><strong id="projectedValue">£0</strong><small id="projectedValueYear">Year 10</small></article>
+            <article><span>Projected equity</span><strong id="projectedEquity">£0</strong><small id="projectedMortgage">Mortgage £0</small></article>
+            <article class="summary-highlight"><span>Total projected return</span><strong id="totalReturn">£0</strong><small id="totalReturnPercent">0% on initial cash</small></article>
+            <article><span>Cash-flow payback</span><strong id="paybackPeriod">—</strong><small>Cumulative rental cash flow</small></article>
+          </div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading"><div><p class="eyebrow">Growth</p><h3>Value, mortgage & equity</h3></div></div>
+          <div id="forecastChart" class="forecast-chart" role="img" aria-label="Projected property value, mortgage balance and equity chart"></div>
+          <div class="forecast-chart-legend"><span><i class="legend-value"></i>Property value</span><span><i class="legend-equity"></i>Equity</span><span><i class="legend-mortgage"></i>Mortgage</span></div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading"><div><p class="eyebrow">Scenarios</p><h3>Conservative vs expected vs optimistic</h3></div></div>
+          <div id="scenarioGrid" class="scenario-grid"></div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading"><div><p class="eyebrow">Risk</p><h3>Mortgage-rate stress test</h3></div><span id="breakEvenRate" class="forecast-pill">Break-even —</span></div>
+          <div id="stressGrid" class="stress-grid"></div>
+        </section>
+
+        <section class="forecast-card forecast-split-card">
+          <div>
+            <p class="eyebrow">Refinance</p><h3>Potential cash release</h3>
+            <div class="forecast-mini-fields">
+              <label class="field"><span>Refinance Year</span><input id="refinanceYear" type="number" min="1" max="25" step="1"></label>
+              <label class="field"><span>New LTV</span><div class="forecast-suffix-input"><input id="refinanceLtv" type="number" min="0" max="95" step="1"><span>%</span></div></label>
+            </div>
+            <div id="refinanceResult" class="forecast-result-box"></div>
+          </div>
+          <div>
+            <p class="eyebrow">Exit</p><h3>Sale at forecast end</h3>
+            <div class="forecast-mini-fields">
+              <label class="field"><span>Agent / selling fee</span><div class="forecast-suffix-input"><input id="sellingFeePercent" type="number" min="0" max="10" step="0.1"><span>%</span></div></label>
+              <label class="field currency-field"><span>Legal / exit cost</span><div class="input-prefix"><span>£</span><input id="exitLegalCost" type="number" min="0" step="100"></div></label>
+            </div>
+            <div id="exitResult" class="forecast-result-box"></div>
+          </div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading"><div><p class="eyebrow">Detail</p><h3>Year-by-year forecast</h3></div></div>
+          <div class="forecast-table-wrap"><table class="forecast-table"><thead><tr><th>Year</th><th>Property value</th><th>Rent</th><th>Expenses</th><th>Mortgage</th><th>Cash flow</th><th>Mortgage balance</th><th>Equity</th></tr></thead><tbody id="forecastRows"></tbody></table></div>
+        </section>
+
+        <details class="disclaimer-card forecast-disclaimer">
+          <summary>Forecast disclaimer</summary>
+          <p>Forecasts are illustrative estimates, not financial or tax advice. They exclude corporation tax, capital gains/tax on disposal, financing changes, major one-off repairs and transaction-specific tax treatment unless explicitly entered. Confirm assumptions with your accountant, broker and professional advisers.</p>
+        </details>
+      </div>
+    </main>
+  </div>
+
+  <script defer src="./forecast.js"></script>
+</body>
+</html>
