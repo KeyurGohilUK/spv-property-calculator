@@ -1081,12 +1081,12 @@ button.header-icon-control:active { transform: translateY(1px); }
 
 /* v1.7.9: keep the editor save action completely stationary while scrolling. */
 #editorView {
-  padding-top: 62px;
+  padding-top: 74px;
 }
 
 #editorView .editor-topbar {
   position: fixed;
-  top: calc(var(--safe-top) + 74px);
+  top: calc(var(--safe-top) + 86px);
   left: 50%;
   width: min(calc(100% - 32px), 1100px);
   margin: 0;
@@ -1096,11 +1096,11 @@ button.header-icon-control:active { transform: translateY(1px); }
 
 @media (max-width: 620px) {
   #editorView {
-    padding-top: 60px;
+    padding-top: 72px;
   }
 
   #editorView .editor-topbar {
-    top: calc(var(--safe-top) + 74px);
+    top: calc(var(--safe-top) + 86px);
     width: calc(100% - 24px);
     margin: 0;
   }
