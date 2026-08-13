@@ -1105,3 +1105,88 @@ button.header-icon-control:active { transform: translateY(1px); }
     margin: 0;
   }
 }
+
+
+/* v1.8.1 release notes + manual PWA cache refresh */
+.release-update-card {
+  margin-top: 16px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--brand-soft) 38%, var(--surface));
+}
+.release-update-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.release-update-heading h4 { margin: 3px 0 0; font-size: 16px; }
+.release-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.release-status.update-available {
+  background: color-mix(in srgb, var(--brand) 13%, var(--surface));
+  color: var(--brand);
+}
+.release-notes {
+  margin: 12px 0 13px;
+  padding-left: 19px;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.release-notes li + li { margin-top: 3px; }
+.download-updates-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, var(--border));
+  color: var(--brand);
+  background: var(--surface);
+}
+.download-updates-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+}
+.download-updates-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.download-updates-btn.is-loading svg { animation: update-refresh-spin .8s linear infinite; }
+@keyframes update-refresh-spin { to { transform: rotate(360deg); } }
+.update-message {
+  min-height: 17px;
+  margin: 8px 2px 0;
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+.release-data-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+@media (max-width: 430px) {
+  .release-update-card { padding: 13px; }
+  .release-update-heading { align-items: center; }
+  .release-status { max-width: 160px; white-space: normal; text-align: right; }
+}
