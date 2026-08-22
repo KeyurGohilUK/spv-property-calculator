@@ -1,8 +1,8 @@
 {
-  "version": "1.10.1",
+  "version": "1.10.2",
   "notes": [
-    "Viewing date on property editor and cards",
-    "Advanced forecast return and risk metrics",
-    "Smarter in-app update checks"
+    "Single Viewing Date & Time field with hour and minute",
+    "Viewing time displayed on property cards",
+    "Advanced forecast return and risk metrics"
   ]
 }
