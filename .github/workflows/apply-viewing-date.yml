@@ -1,0 +1,32 @@
+name: Apply viewing date update
+on:
+  push:
+    branches: [agent/viewing-date]
+    paths: ['.github/workflows/apply-viewing-date.yml']
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply changes
+        run: python apply-viewing-date.py
+      - name: Validate
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          python -m json.tool release.json >/dev/null
+          npm test
+      - name: Remove helpers
+        run: |
+          rm apply-viewing-date.py
+          rm .github/workflows/apply-viewing-date.yml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js index.html styles.css service-worker.js release.json apply-viewing-date.py .github/workflows/apply-viewing-date.yml || true
+          git add -u
+          git commit -m "Add property viewing date" || exit 0
+          git push
