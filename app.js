@@ -351,7 +351,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.10.1';
+const APP_VERSION = '1.10.2';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -397,11 +397,22 @@ function normalizeDepositPercent(value) {
 
 function formatViewingDate(value) {
   const raw = String(value || '').trim();
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  const match = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(raw);
   if (!match) return '';
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 0), Number(match[5] || 0));
   if (Number.isNaN(date.getTime())) return '';
-  return dateFormat.format(date);
+  const dateLabel = dateFormat.format(date);
+  if (!match[4] || !match[5]) return dateLabel;
+  const timeLabel = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+  return dateLabel + ' · ' + timeLabel;
+}
+
+function normalizeViewingDateTime(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw + 'T00:00';
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/.exec(raw);
+  return match ? match[1] : '';
 }
 
 function normalizeListingUrl(value) {
@@ -784,7 +795,7 @@ function loadIntoForm(property) {
   $('title').value = property.title || '';
   $('details').value = property.details || '';
   $('listingUrl').value = property.listingUrl || '';
-  $('viewingDate').value = property.viewingDate || '';
+  $('viewingDate').value = normalizeViewingDateTime(property.viewingDate || '');
   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
