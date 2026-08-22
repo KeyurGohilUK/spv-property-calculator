@@ -1193,3 +1193,60 @@ button.header-icon-control:active { transform: translateY(1px); }
 
 /* Forecast home entry */
 .home-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action-forecast{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}@media(max-width:560px){.home-secondary-actions{grid-template-columns:1fr}}
+
+
+/* v1.10.1 property viewing date */
+.viewing-date-field { max-width: 420px; }
+.viewing-date-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.viewing-date-input svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.viewing-date-input input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text);
+}
+.property-viewing-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 11%, var(--surface-2));
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.property-viewing-date svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 620px) {
+  .viewing-date-field { max-width: none; }
+}
