@@ -22,7 +22,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('release.json','utf8'))"
           npm test
       - name: Remove helper files
-        run: rm -f apply-viewing-datetime.js .github/workflows/apply-viewing-datetime.yml .github/workflows/apply-viewing-datetime-now.yml
+        run: rm -f apply-viewing-datetime.js PR_READY README.tmp VIEWING_DATETIME_RELEASE.md .github/workflows/apply-viewing-datetime.yml .github/workflows/apply-viewing-datetime-now.yml .github/workflows/cleanup-viewing-datetime-marker.yml
       - name: Commit changes
         run: |
           git config user.name "Keyur Gohil"
