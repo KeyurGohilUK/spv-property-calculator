@@ -12,18 +12,34 @@ html = replaceOnce(html,
 fs.writeFileSync('index.html', html);
 
 let app = fs.readFileSync('app.js', 'utf8');
-app = replaceOnce(app,
-`const APP_VERSION = '1.10.1';`,
-`const APP_VERSION = '1.10.2';`, 'app version');
-app = replaceOnce(app,
-`function formatViewingDate(value) {\n  const raw = String(value || '').trim();\n  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(raw);\n  if (!match) return '';\n  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));\n  if (Number.isNaN(date.getTime())) return '';\n  return dateFormat.format(date);\n}`,
-`function formatViewingDate(value) {\n  const raw = String(value || '').trim();\n  const match = /^(\\d{4})-(\\d{2})-(\\d{2})(?:T(\\d{2}):(\\d{2}))?$/.exec(raw);\n  if (!match) return '';\n  const date = new Date(\n    Number(match[1]),\n    Number(match[2]) - 1,\n    Number(match[3]),\n    Number(match[4] || 0),\n    Number(match[5] || 0)\n  );\n  if (Number.isNaN(date.getTime())) return '';\n  const dateLabel = dateFormat.format(date);\n  if (!match[4] || !match[5]) return dateLabel;\n  const timeLabel = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);\n  return \\`${dateLabel} · ${timeLabel}\\`;\n}\n\nfunction normalizeViewingDateTime(value) {\n  const raw = String(value || '').trim();\n  if (!raw) return '';\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return \\`${raw}T00:00\\`;\n  const match = /^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2})/.exec(raw);\n  return match ? match[1] : '';\n}`.replace(/\\`/g,'`'), 'formatViewingDate');
-app = replaceOnce(app,
-`  $('viewingDate').value = property.viewingDate || '';`,
-`  $('viewingDate').value = normalizeViewingDateTime(property.viewingDate || '');`, 'load viewing datetime');
+app = replaceOnce(app, "const APP_VERSION = '1.10.1';", "const APP_VERSION = '1.10.2';", 'app version');
+const oldFormatter = `function formatViewingDate(value) {\n  const raw = String(value || '').trim();\n  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(raw);\n  if (!match) return '';\n  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));\n  if (Number.isNaN(date.getTime())) return '';\n  return dateFormat.format(date);\n}`;
+const newFormatter = [
+"function formatViewingDate(value) {",
+"  const raw = String(value || '').trim();",
+"  const match = /^(\\d{4})-(\\d{2})-(\\d{2})(?:T(\\d{2}):(\\d{2}))?$/.exec(raw);",
+"  if (!match) return '';",
+"  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 0), Number(match[5] || 0));",
+"  if (Number.isNaN(date.getTime())) return '';",
+"  const dateLabel = dateFormat.format(date);",
+"  if (!match[4] || !match[5]) return dateLabel;",
+"  const timeLabel = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);",
+"  return dateLabel + ' · ' + timeLabel;",
+"}",
+"",
+"function normalizeViewingDateTime(value) {",
+"  const raw = String(value || '').trim();",
+"  if (!raw) return '';",
+"  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return raw + 'T00:00';",
+"  const match = /^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2})/.exec(raw);",
+"  return match ? match[1] : '';",
+"}"
+].join('\n');
+app = replaceOnce(app, oldFormatter, newFormatter, 'formatViewingDate');
+app = replaceOnce(app, "  $('viewingDate').value = property.viewingDate || '';", "  $('viewingDate').value = normalizeViewingDateTime(property.viewingDate || '');", 'load viewing datetime');
 fs.writeFileSync('app.js', app);
 
-let release = JSON.parse(fs.readFileSync('release.json', 'utf8'));
+const release = JSON.parse(fs.readFileSync('release.json', 'utf8'));
 release.version = '1.10.2';
 release.notes = [
   'Single Viewing Date & Time field with hour and minute',
@@ -35,5 +51,3 @@ fs.writeFileSync('release.json', JSON.stringify(release, null, 2) + '\n');
 let sw = fs.readFileSync('service-worker.js', 'utf8');
 sw = sw.replace(/const CACHE_NAME = '[^']+';/, "const CACHE_NAME = 'spv-property-calculator-v1.10.2-viewing-datetime';");
 fs.writeFileSync('service-worker.js', sw);
-
-// trigger
