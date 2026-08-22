@@ -1,15 +1,18 @@
 name: Apply viewing datetime now
 on:
-  push:
-    branches: [agent/viewing-date-time]
-    paths: ['.github/workflows/apply-viewing-datetime-now.yml']
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
 permissions:
   contents: write
 jobs:
   apply:
+    if: github.head_ref == 'agent/viewing-date-time'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - name: Apply changes
         run: node apply-viewing-datetime.js
       - name: Validate
@@ -26,4 +29,4 @@ jobs:
           git config user.email "133516013+KeyurGohilUK@users.noreply.github.com"
           git add -A
           git commit -m "Combine viewing date and time" || exit 0
-          git push
+          git push origin HEAD:${{ github.head_ref }}
