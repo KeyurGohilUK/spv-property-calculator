@@ -1,0 +1,29 @@
+name: Apply viewing datetime now
+on:
+  push:
+    branches: [agent/viewing-date-time]
+    paths: ['.github/workflows/apply-viewing-datetime-now.yml']
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply changes
+        run: node apply-viewing-datetime.js
+      - name: Validate
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          node -e "JSON.parse(require('fs').readFileSync('release.json','utf8'))"
+          npm test
+      - name: Remove helper files
+        run: rm -f apply-viewing-datetime.js .github/workflows/apply-viewing-datetime.yml .github/workflows/apply-viewing-datetime-now.yml
+      - name: Commit changes
+        run: |
+          git config user.name "Keyur Gohil"
+          git config user.email "133516013+KeyurGohilUK@users.noreply.github.com"
+          git add -A
+          git commit -m "Combine viewing date and time" || exit 0
+          git push
