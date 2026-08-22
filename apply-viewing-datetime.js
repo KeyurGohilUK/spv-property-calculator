@@ -35,3 +35,5 @@ fs.writeFileSync('release.json', JSON.stringify(release, null, 2) + '\n');
 let sw = fs.readFileSync('service-worker.js', 'utf8');
 sw = sw.replace(/const CACHE_NAME = '[^']+';/, "const CACHE_NAME = 'spv-property-calculator-v1.10.2-viewing-datetime';");
 fs.writeFileSync('service-worker.js', sw);
+
+// trigger
