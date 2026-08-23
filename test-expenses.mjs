@@ -18,6 +18,9 @@ assert.match(expensePage, /Optimising receipt…[\s\S]*Receipt reduced from/, 'R
 assert.match(expensePage, /file\.type === 'application\/pdf' && file\.size <= TARGET_RECEIPT_SIZE|file\.type === 'application\/pdf'/, 'PDF receipts must bypass image optimisation');
 assert.match(expenseHtml, /Photos are automatically reduced below 2 MB/, 'Receipt guidance must explain automatic image reduction');
 assert.match(expenseHtml, /accept="image\/\*,application\/pdf"/, 'Receipt picker must allow supported iPhone photos');
+assert.match(expenseHtml, /id="expenseReceiptSize" class="receipt-file-size hidden" aria-live="polite"/, 'Selected receipt size status is missing');
+assert.match(expensePage, /expenseReceipt'\)\.addEventListener\('change'[\s\S]*Selected: \$\{file\.name\} · \$\{formatFileSize\(file\.size\)\}[\s\S]*will be optimised when saved/, 'Selected receipt name, size and optimisation status must be displayed');
+assert.match(expenseStyles, /\.receipt-file-size \{[^}]*overflow-wrap: anywhere;/, 'Long receipt file details must wrap safely');
 assert.match(expensePage, /remove\.innerHTML = '<svg[\s\S]*Delete expense/, 'Expense delete action must use an accessible icon');
 assert.doesNotMatch(expensePage, /remove\.textContent = 'Delete'/, 'Expense card must not show Delete text');
 assert.match(expensePage, /function openForm\(expense = null\)/, 'Expense editor must support existing records');
