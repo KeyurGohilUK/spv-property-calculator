@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.16.2-receipt-cache';
+const CACHE_NAME = 'spv-property-calculator-v1.16.3-receipt-cache';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -21,6 +21,7 @@ const ASSETS = [
   './expenses.css',
   './expenses.js',
   './expense-storage.js',
+  './expense-cloud-sync.js',
   './sync-status.js',
   './receipt-cloud.js',
   './forecast.html',
