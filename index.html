@@ -450,15 +450,15 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.16.0</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.16.1</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.16.0</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.16.1</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>Optimised receipts now upload securely to the private Cloudflare R2 bucket</li>
-      <li>Supabase stores the private object key so receipts work across signed-in devices</li>
-      <li>Receipt viewing prefers the offline copy and downloads from R2 when needed</li>
-      <li>Failed or offline uploads remain local and retry through Sync now</li>
+      <li>Local receipt cache entries now track their matching R2 object key</li>
+      <li>Replacing a receipt invalidates the older image on other devices</li>
+      <li>The latest cloud receipt downloads automatically when the cached version is stale</li>
+      <li>Local-only and pending receipts remain available offline</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">

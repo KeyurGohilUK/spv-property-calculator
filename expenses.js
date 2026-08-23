@@ -471,10 +471,11 @@ async function viewReceipt(expense) {
     viewer.document.body.textContent = 'Opening receipt…';
   }
   try {
-    let file = await getReceipt(expense.id);
+    const expectedObjectPath = expense.receiptCloudPending ? '' : (expense.receiptObjectPath || '');
+    let file = await getReceipt(expense.id, expectedObjectPath);
     if (!file && expense.receiptObjectPath && cloudUser && navigator.onLine) {
       file = await downloadCloudReceipt(expense.id, expense.receiptObjectPath, expense.receipt || {});
-      await saveReceipt(expense.id, file);
+      await saveReceipt(expense.id, file, expense.receiptObjectPath);
     }
     if (!file) {
       throw new Error(expense.receiptObjectPath
@@ -574,6 +575,7 @@ async function submitExpense(event) {
             receiptCloudPending: false,
             receiptDeleteObjectPath: ''
           });
+          await saveReceipt(saved.id, receiptFile, uploaded.objectPath);
         } catch (error) {
           console.warn('Receipt saved locally; cloud upload will retry during sync:', error);
           setSyncStatus('Receipt saved locally · cloud upload pending', 'error');
