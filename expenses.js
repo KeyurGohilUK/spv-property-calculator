@@ -436,8 +436,10 @@ function render() {
     if (expense.receipt) {
       const view = document.createElement('button');
       view.type = 'button';
-      view.textContent = 'View';
+      view.className = 'view-receipt';
+      view.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z"></path><path d="M14 3v4h4"></path><path d="M9 12h6M9 16h6"></path></svg>';
       view.setAttribute('aria-label', `View receipt for ${expense.description || money(expense.amount)}`);
+      view.title = 'View receipt';
       view.addEventListener('click', () => viewReceipt(expense));
       actions.appendChild(view);
     }

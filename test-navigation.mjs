@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+assert.doesNotMatch(index, /Works offline, with a shared Supabase workspace for your small team\./, 'Home introduction must not include the removed workspace sentence');
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');

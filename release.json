@@ -1,8 +1,9 @@
 {
-  "version": "1.14.2",
+  "version": "1.14.3",
   "notes": [
-    "Receipt file size is now shown in a clearly visible status panel",
-    "Existing receipt name and size appear when editing an expense",
-    "Receipt viewing now works with iPhone and iPad Safari popup restrictions"
+    "Expense cards now use a receipt icon instead of View text",
+    "The receipt action retains an accessible label and tooltip",
+    "Receipt viewing behaviour remains unchanged",
+    "The Properties introduction is now shorter and more focused"
   ]
 }
