@@ -1,4 +1,5 @@
 import { TAX_CONFIG } from './tax-config.js';
+import { renderSyncStatus } from './sync-status.js';
 import {
   safeNumber,
   clamp,
@@ -62,7 +63,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.14.4';
+const APP_VERSION = '1.14.5';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -81,6 +82,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './expenses.css',
   './expenses.js',
   './expense-storage.js',
+  './sync-status.js',
   './forecast.html',
   './forecast.css',
   './forecast.js',
@@ -786,7 +788,6 @@ function renderPropertySyncStatus(isWarning = false) {
 
   if (cloudUser && !navigator.onLine) {
     message = 'Offline · changes will sync later';
-    tone = 'error';
   } else if (cloudUser && cloudSyncing) {
     message = 'Syncing…';
   } else if (cloudUser && isWarning) {
@@ -797,9 +798,7 @@ function renderPropertySyncStatus(isWarning = false) {
     tone = 'synced';
   }
 
-  status.textContent = message;
-  status.classList.toggle('error', tone === 'error');
-  status.classList.toggle('synced', tone === 'synced');
+  renderSyncStatus(status, message, tone);
 }
 
 function renderCloudState(isWarning = false) {
