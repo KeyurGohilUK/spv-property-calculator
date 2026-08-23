@@ -22,8 +22,10 @@ import {
 } from './storage.js';
 import {
   getAllExpenses,
-  replaceExpenses as replaceLocalExpenses
+  replaceExpenses as replaceLocalExpenses,
+  getReceipt
 } from './expense-storage.js';
+import { prepareExpenseReceiptForSync } from './receipt-cloud.js';
 
 /*
  * SPV Property Calculator - browser application
@@ -63,7 +65,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.15.0';
+const APP_VERSION = '1.16.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -83,6 +85,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './expenses.js',
   './expense-storage.js',
   './sync-status.js',
+  './receipt-cloud.js',
   './forecast.html',
   './forecast.css',
   './forecast.js',
@@ -747,7 +750,9 @@ async function syncExpenseRecords() {
   let uploaded = 0;
   for (const item of upload) {
     try {
-      const synced = await cloud.upsertExpense(item);
+      const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
+      merged.set(String(item.id), prepared);
+      const synced = await cloud.upsertExpense(prepared);
       merged.set(String(item.id), synced);
       uploaded += 1;
     } catch (error) {
