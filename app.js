@@ -1343,6 +1343,11 @@ function init() {
       }
     }, 350);
   }
+  if (initialMenuUrl.searchParams.get('view') === 'archive') {
+    initialMenuUrl.searchParams.delete('view');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(showArchive, 0);
+  }
   if (initialMenuUrl.searchParams.get('menu') === 'more') {
     initialMenuUrl.searchParams.delete('menu');
     window.history.replaceState({}, '', initialMenuUrl);
