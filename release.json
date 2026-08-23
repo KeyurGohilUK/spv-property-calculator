@@ -1,9 +1,9 @@
 {
-  "version": "1.12.5",
+  "version": "1.12.6",
   "notes": [
-    "More now opens the App Menu popup without leaving the current page",
-    "App Menu styling now matches the Install App popup",
-    "The popup closes from its top-right button or by clicking outside",
-    "Archived Properties remains available inside App Menu"
+    "Account opens locally on Expenses and Forecast without page navigation",
+    "Install and update controls open locally on every page",
+    "Sync now works from each local account popup",
+    "Online status remains informational and updates without navigation"
   ]
 }
