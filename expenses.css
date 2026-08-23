@@ -22,8 +22,8 @@
 .expense-list-heading h3 { margin: 0; }
 .compact-expense-btn { min-height: 40px; padding: 8px 13px; }
 .expense-filters { display: grid; grid-template-columns: 1.3fr 1.3fr 1fr 1fr auto; align-items: end; gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
-.expense-filters .field { margin: 0; }
-.expense-filters select, .expense-filters input { min-height: 42px; width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
+.expense-filters .field { min-width: 0; margin: 0; }
+.expense-filters select, .expense-filters input { display: block; min-height: 42px; width: 100%; min-width: 0; max-width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
 .expense-filters .text-btn { white-space: nowrap; }
 .expense-list { display: grid; gap: 11px; }
 .expense-card { cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
@@ -76,8 +76,18 @@
   .expense-summary-grid span { margin: 0; }
   .expense-summary-grid strong { font-size: 18px; }
   .expense-list-heading { align-items: stretch; flex-direction: column; }
-  .expense-filters { grid-template-columns: 1fr 1fr; }
-  .expense-filters .field:nth-child(-n+2), .expense-filters .text-btn { grid-column: 1 / -1; }
+  .expense-filters { grid-template-columns: minmax(0, 1fr); }
+  .expense-filters .field, .expense-filters .text-btn { grid-column: 1 / -1; }
+  .expense-filters input[type="date"] {
+    min-width: 0;
+    max-width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .expense-filters input[type="date"]::-webkit-date-and-time-value {
+    min-width: 0;
+    text-align: left;
+  }
   .expense-card { align-items: start; }
   .expense-card-actions { flex-direction: column; }
   .expense-form-grid { grid-template-columns: 1fr; gap: 0; }
