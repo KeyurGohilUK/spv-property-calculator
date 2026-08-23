@@ -324,6 +324,80 @@
     return true;
   }
 
+
+  function fromCloudExpense(row) {
+    return {
+      id: String(row.id),
+      amount: Number(row.amount) || 0,
+      date: row.expense_date || '',
+      category: row.category || 'Other',
+      scope: row.scope === 'property' ? 'property' : 'company',
+      propertyId: row.property_id || '',
+      description: row.description || '',
+      notes: row.notes || '',
+      receipt: row.receipt_metadata || null,
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || new Date().toISOString(),
+      deletedAt: row.deleted_at || null,
+      _cloudRevision: Math.max(0, Number(row.revision) || 0),
+      _cloudDirty: false
+    };
+  }
+
+  async function listExpenses() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient
+      .from('expenses')
+      .select('id,amount,expense_date,category,scope,property_id,description,notes,receipt_metadata,created_at,updated_at,deleted_at,revision')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return (data || []).map(fromCloudExpense);
+  }
+
+  function isExpenseConflict(error) {
+    return error?.code === '40001'
+      || String(error?.message || '').includes('EXPENSE_CONFLICT');
+  }
+
+  async function upsertExpense(record) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const expectedRevision = Math.max(0, Number(record?._cloudRevision) || 0);
+    const { data, error } = await supabaseClient
+      .rpc('upsert_expense_if_current', {
+        p_id: String(record.id),
+        p_amount: Number(record.amount),
+        p_expense_date: record.date,
+        p_category: record.category || 'Other',
+        p_scope: record.scope === 'property' ? 'property' : 'company',
+        p_property_id: record.scope === 'property' ? String(record.propertyId || '') : null,
+        p_description: record.description || '',
+        p_notes: record.notes || '',
+        p_receipt_metadata: record.receipt || null,
+        p_receipt_object_path: null,
+        p_deleted_at: record.deletedAt || null,
+        p_expected_revision: expectedRevision
+      })
+      .single();
+    if (error) {
+      if (isExpenseConflict(error)) {
+        const conflict = new Error('This expense changed on another device. Your local change has been kept.');
+        conflict.code = 'EXPENSE_CONFLICT';
+        conflict.expenseId = String(record.id);
+        throw conflict;
+      }
+      throw error;
+    }
+    return {
+      ...record,
+      createdAt: data?.server_created_at || record.createdAt,
+      updatedAt: data?.server_updated_at || record.updatedAt,
+      _cloudRevision: Math.max(1, Number(data?.new_revision) || expectedRevision + 1),
+      _cloudDirty: false
+    };
+  }
+
   function asTime(value) {
     const time = Date.parse(value || '');
     return Number.isFinite(time) ? time : 0;
@@ -459,6 +533,9 @@
     signIn,
     signOut,
     listProperties,
+    listExpenses,
+    upsertExpense,
+    isExpenseConflict,
     listNotes,
     addNote,
     deleteNote,
