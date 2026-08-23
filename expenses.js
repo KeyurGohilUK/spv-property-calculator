@@ -234,6 +234,16 @@ function render() {
   visible.forEach((expense) => {
     const card = document.createElement('article');
     card.className = 'expense-card';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `Edit expense ${expense.description || money(expense.amount)}`);
+    card.addEventListener('click', () => openForm(expense));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openForm(expense);
+      }
+    });
     const main = document.createElement('div');
     main.className = 'expense-card-main';
     const heading = document.createElement('div');
@@ -272,14 +282,8 @@ function render() {
 
     const actions = document.createElement('div');
     actions.className = 'expense-card-actions';
-    const edit = document.createElement('button');
-    edit.type = 'button';
-    edit.className = 'edit-expense';
-    edit.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path><path d="m14.5 6.7 2.8 2.8"></path></svg>';
-    edit.setAttribute('aria-label', `Edit expense ${expense.description || money(expense.amount)}`);
-    edit.title = 'Edit expense';
-    edit.addEventListener('click', () => openForm(expense));
-    actions.appendChild(edit);
+    actions.addEventListener('click', (event) => event.stopPropagation());
+    actions.addEventListener('keydown', (event) => event.stopPropagation());
     if (expense.receipt) {
       const view = document.createElement('button');
       view.type = 'button';
