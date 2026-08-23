@@ -1,10 +1,9 @@
 {
-  "version": "1.14.3",
+  "version": "1.14.4",
   "notes": [
-    "Expense cards now use a receipt icon instead of View text",
-    "The receipt action retains an accessible label and tooltip",
-    "Receipt viewing behaviour remains unchanged",
-    "The Properties introduction is now shorter and more focused",
-    "Archive guidance is now clearer and backend-neutral"
+    "New Property now matches the Expense Tracker primary action",
+    "Properties now displays the same live sync-status pattern as Expenses",
+    "Property actions stack cleanly on smaller screens",
+    "Archive guidance is clearer and backend-neutral"
   ]
 }
