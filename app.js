@@ -58,7 +58,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.11.4';
+const APP_VERSION = '1.12.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -72,6 +72,10 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './manifest.json',
   './supabase-config.js',
   './release.json',
+  './expenses.html',
+  './expenses.css',
+  './expenses.js',
+  './expense-storage.js',
   './forecast.html',
   './forecast.css',
   './forecast.js',
