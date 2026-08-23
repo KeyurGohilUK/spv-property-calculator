@@ -1,9 +1,8 @@
 {
-  "version": "1.16.3",
+  "version": "1.16.4",
   "notes": [
-    "One shared expense sync service now powers every page and account popup",
-    "Account sync now safely handles Cloudflare receipts and avoids overlapping expense syncs",
-    "Local receipt cache entries now track their matching R2 object key",
-    "Replacing a receipt invalidates the older image on other devices"
+    "Receipt files now use the expense description and upload timestamp",
+    "Receipt names are consistent across this device, shared sync and secure cloud storage",
+    "Compressed phone photos keep the new descriptive filename"
   ]
 }

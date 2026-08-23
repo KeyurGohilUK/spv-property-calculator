@@ -60,6 +60,7 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseAmount').fill('20');
+  await page.locator('#expenseDescription').fill('Test receipt');
   await page.locator('#expenseReceipt').setInputFiles(receipt);
   await expect(page.locator('#expenseReceiptSize')).toContainText('test-receipt.png');
   await expect(page.locator('#expenseReceiptSize')).toContainText(/\d+ (B|KB)/);
@@ -76,7 +77,7 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
     const items = JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]');
     return items[0]?.receipt || null;
   });
-  expect(storedReceipt?.name).toBe('test-receipt.png');
+  expect(storedReceipt?.name).toMatch(/^test-receipt-\d{8}-\d{6}\.png$/);
   expect(storedReceipt?.type).toBe('image/png');
   expect(storedReceipt?.size).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: /View receipt/i })).toBeVisible();

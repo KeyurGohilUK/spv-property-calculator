@@ -29,6 +29,43 @@ function formatFileSize(bytes) {
   return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+function receiptTimestamp(date = new Date()) {
+  const digits = date.toISOString().replace(/\D/g, '').slice(0, 14);
+  return `${digits.slice(0, 8)}-${digits.slice(8)}`;
+}
+
+function safeReceiptNamePart(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'expense';
+}
+
+function receiptExtension(file) {
+  const fromName = String(file?.name || '').match(/\.([a-z0-9]{2,5})$/i)?.[1]?.toLowerCase();
+  if (fromName) return fromName === 'jpeg' ? 'jpg' : fromName;
+  return {
+    'application/pdf': 'pdf',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/heic': 'heic',
+    'image/heif': 'heif'
+  }[file?.type] || 'bin';
+}
+
+function nameReceiptForExpense(file, expenseName, date = new Date()) {
+  if (!file) return null;
+  const name = `${safeReceiptNamePart(expenseName)}-${receiptTimestamp(date)}.${receiptExtension(file)}`;
+  return new File([file], name, {
+    type: file.type || 'application/octet-stream',
+    lastModified: file.lastModified || date.getTime()
+  });
+}
+
 function canvasToBlob(canvas, type, quality) {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not optimise this receipt image.')), type, quality);
@@ -450,6 +487,8 @@ async function submitExpense(event) {
   const amount = Number($('expenseAmount').value);
   const scope = $('expenseScope').value;
   const propertyId = $('expenseProperty').value;
+  const expenseCategory = $('expenseCategory').value;
+  const expenseDescription = $('expenseDescription').value.trim();
   let receiptFile = $('expenseReceipt').files[0] || null;
   const amountInvalid = !Number.isFinite(amount) || amount <= 0;
   const propertyInvalid = scope === 'property' && !propertyId;
@@ -479,15 +518,18 @@ async function submitExpense(event) {
       receiptFile = await optimiseReceiptImage(receiptFile);
       $('expenseSaveMessage').textContent = `Receipt reduced from ${formatFileSize(originalSize)} to ${formatFileSize(receiptFile.size)}. Saving…`;
     }
+    if (receiptFile) {
+      receiptFile = nameReceiptForExpense(receiptFile, expenseDescription || expenseCategory);
+    }
     saved = saveExpense({
       ...previous,
       id: editingExpenseId || undefined,
       amount,
       date: $('expenseDate').value || today(),
-      category: $('expenseCategory').value,
+      category: expenseCategory,
       scope,
       propertyId,
-      description: $('expenseDescription').value.trim(),
+      description: expenseDescription,
       notes: $('expenseNotes').value.trim(),
       receipt: receiptFile
         ? { name: receiptFile.name, type: receiptFile.type, size: receiptFile.size }

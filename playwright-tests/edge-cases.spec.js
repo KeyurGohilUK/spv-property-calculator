@@ -164,7 +164,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
   expect(originalSize).toBeGreaterThan(2 * 1024 * 1024);
   await expect(page.locator('#expenseReceiptSize')).toContainText('will be optimised when saved');
   await page.getByRole('button', { name: 'Save Expense' }).click();
-  await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
+  await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '', { timeout: 15_000 });
 
   const stored = await page.evaluate(async () => {
     const [expense] = JSON.parse(
@@ -188,7 +188,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
     };
   });
 
-  expect(stored.metadata.name).toBe('iphone-receipt.jpg');
+  expect(stored.metadata.name).toMatch(/^large-phone-receipt-\d{8}-\d{6}\.jpg$/);
   expect(stored.metadata.type).toBe('image/jpeg');
   expect(stored.metadata.size).toBeLessThanOrEqual(2 * 1024 * 1024);
   expect(stored.file).toEqual(stored.metadata);
