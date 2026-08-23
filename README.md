@@ -24,15 +24,13 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 
 ## Before deploying
 
-For a new Supabase project follow **`SUPABASE_SETUP.md`**. Existing shared installations must run **`database-scripts/Update 8 - Workspace Access Control.sql`** followed by **`database-scripts/Update 9 - Sync Conflict Protection.sql`**. The short version is:
+For a new or replacement Supabase project follow **`SUPABASE_SETUP.md`** and run **`database-scripts/00 - Bootstrap Complete Schema.sql`**. Existing installations should apply newer numbered scripts from **`database-scripts/`** in order. See **`database-scripts/README.md`** for the migration policy.
 
-1. Create a free Supabase project.
-2. Run `supabase-schema.sql` in Supabase SQL Editor.
-3. Copy the Project URL and Publishable key into `supabase-config.js`.
-4. Upload this folder to GitHub Pages.
-5. Run `database-scripts/Update 8 - Workspace Access Control.sql`. The oldest existing Auth account becomes the initial administrator.
-6. Review `workspace_members` and add only approved team accounts using the examples at the end of that script.
-7. Open the app and sign in with an approved account.
+1. Create a Supabase project and its first Auth account.
+2. Run `database-scripts/00 - Bootstrap Complete Schema.sql` in the SQL Editor.
+3. Review `workspace_members` and add only approved team accounts.
+4. Copy the Project URL and Publishable key into `supabase-config.js`.
+5. Upload this folder to GitHub Pages and verify sign-in and sync.
 
 Do **not** put a Supabase Secret key or `service_role` key in this project.
 

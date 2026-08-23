@@ -132,8 +132,9 @@ function render() {
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'delete-expense';
-    remove.textContent = 'Delete';
+    remove.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="m6.5 7 .8 13h9.4l.8-13"></path><path d="M10 11v5M14 11v5"></path></svg>';
     remove.setAttribute('aria-label', `Delete expense ${expense.description || money(expense.amount)}`);
+    remove.title = 'Delete expense';
     remove.addEventListener('click', () => removeExpense(expense));
     actions.appendChild(remove);
     card.append(main, actions);

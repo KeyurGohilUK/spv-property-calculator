@@ -14,11 +14,11 @@ This app keeps a local offline copy in `localStorage` and syncs a shared propert
 
 1. In the Supabase dashboard open **SQL Editor**.
 2. Choose **New query**.
-3. Open the supplied file `supabase-schema.sql` from this project.
+3. Open the supplied file `database-scripts/00 - Bootstrap Complete Schema.sql` from this project.
 4. Copy the whole SQL file into the SQL Editor.
 5. Click **Run**.
 
-The script creates/upgrades `public.properties`, enables Row Level Security (RLS), removes anonymous table access, and creates SELECT / INSERT / UPDATE policies so every authenticated user can access the same shared property rows. Hard DELETE is intentionally not granted; the app archives rows by updating `deleted_at`.
+The bootstrap creates the complete current schema: workspace membership, properties, notes, deletion tombstones and expenses, together with indexes, Row Level Security and conflict-safe write functions. Run numbered migrations only when upgrading an existing database.
 
 ## 3. Configure email/password authentication
 
@@ -90,7 +90,7 @@ Upload all files in this folder to the root of your GitHub repository, including
 - `app.js`
 - `cloud.js`
 - `supabase-config.js`
-- `supabase-schema.sql`
+- `database-scripts/00 - Bootstrap Complete Schema.sql`
 - `styles.css`
 - `service-worker.js`
 - `manifest.json`
@@ -138,7 +138,7 @@ Re-copy the **Publishable** key and Project URL from Supabase. Do not use a Secr
 Your Supabase project probably has **Confirm Email** enabled. Confirm the email and return to the app, or temporarily disable Confirm Email for the initial personal setup.
 
 ### Database returns permission/RLS errors
-Run `supabase-schema.sql` again and check that RLS is enabled and the three shared read/insert/update policies exist on `public.properties`.
+Run `database-scripts/00 - Bootstrap Complete Schema.sql` again and check that RLS is enabled. For an existing installation, confirm every numbered migration has been applied in order.
 
 ### Cloud library unavailable while offline
 The calculator remains usable locally. Once online, reload the app if necessary; the Supabase SDK is then cached for later PWA use.
