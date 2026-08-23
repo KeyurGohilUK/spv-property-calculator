@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test-calculations.mjs && node test-storage.mjs && node test-cloud-sync.mjs && node test-release.mjs && node test-navigation.mjs && node test-expenses.mjs && node test-database-scripts.mjs && node test-expense-cloud-sync.mjs && node test-receipt-worker.mjs && node test-receipt-cloud.mjs"
+    "test": "node test-calculations.mjs && node test-storage.mjs && node test-cloud-sync.mjs && node test-release.mjs && node test-navigation.mjs && node test-expenses.mjs && node test-database-scripts.mjs && node test-expense-cloud-sync.mjs && node test-receipt-worker.mjs && node test-receipt-cloud.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
   }
 }
