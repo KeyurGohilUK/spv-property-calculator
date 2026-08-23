@@ -24,7 +24,7 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 
 ## Before deploying
 
-For a new Supabase project follow **`SUPABASE_SETUP.md`**. Existing shared installations must also run **`database-scripts/Update 8 - Workspace Access Control.sql`**. The short version is:
+For a new Supabase project follow **`SUPABASE_SETUP.md`**. Existing shared installations must run **`database-scripts/Update 8 - Workspace Access Control.sql`** followed by **`database-scripts/Update 9 - Sync Conflict Protection.sql`**. The short version is:
 
 1. Create a free Supabase project.
 2. Run `supabase-schema.sql` in Supabase SQL Editor.
@@ -43,7 +43,7 @@ The app remains offline-first:
 - `localStorage` is used immediately when saving.
 - When signed in and online, the property is stored in the shared Supabase workspace.
 - Only active accounts listed in `workspace_members` can access cloud rows. Viewers can read; editors and administrators can save, archive and restore.
-- The app syncs on sign-in/app return and periodically while visible; local and shared-cloud versions are compared by `updatedAt`, so the newer copy wins.
+- The app syncs on sign-in/app return and periodically while visible. Server-controlled revisions prevent a stale device from overwriting a newer cloud edit; unsynced local work is retained when a conflict is detected.
 - Archiving is a normal synced update using a `deleted_at` timestamp; restoring clears it.
 - Legacy pending deletes from the older version are converted into archives during sync.
 - Signing out leaves the local device copy intact.

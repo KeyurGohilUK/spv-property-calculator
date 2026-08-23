@@ -1,9 +1,9 @@
 {
-  "version": "1.10.5",
+  "version": "1.11.0",
   "notes": [
-    "Production and automated tests now use the same calculation code",
-    "Expanded SDLT checks at tax-band and company-rate boundaries",
-    "Forecast headline returns are clearly labelled as pre-tax",
-    "Approved workspace access and administrator-only permanent deletion"
+    "Prevents an older device from silently overwriting a newer property edit",
+    "Keeps unsynced local changes safe when a cloud conflict is detected",
+    "Uses server-controlled revisions instead of device clocks for successful writes",
+    "Adds automated conflict and revision tests"
   ]
 }

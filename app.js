@@ -58,7 +58,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.10.5';
+const APP_VERSION = '1.11.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -580,8 +580,8 @@ function renderPropertyList() {
     card.addEventListener('click',(event)=>{ if(!event.target.closest('button')) showEditor(property.id); });
     if (listingUrl) card.querySelector('[data-action="listing"]').addEventListener('click',()=>{ window.open(listingUrl,'_blank','noopener,noreferrer'); });
     card.addEventListener('keydown',(event)=>{ if(event.target!==card)return; if(event.key==='Enter'||event.key===' '){event.preventDefault();showEditor(property.id);} });
-    card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(copy);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
-    card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(archived);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
+    card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(copy);storeCloudSyncedProperty(synced);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
+    card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(archived);storeCloudSyncedProperty(synced);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
     $('propertyList').appendChild(card);
   });
 }
@@ -590,7 +590,7 @@ function renderArchiveList() {
   properties.forEach((property)=>{
     const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card archived-card';
     card.innerHTML=`<div class="property-card-header"><div><div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div><div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button><button class="danger-btn" type="button" data-action="permanent-delete">Permanently Delete</button></div>`;
-    card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{await window.SPVCloud.upsertProperty(restored);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
+    card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(restored);storeCloudSyncedProperty(synced);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
     card.querySelector('[data-action="permanent-delete"]').addEventListener('click',async(event)=>{
       if(!cloudUser){ window.alert('Please sign in before permanently deleting a shared property.'); return; }
       if(!navigator.onLine){ window.alert('Permanent deletion requires an internet connection so it can be removed safely for every user.'); return; }
@@ -619,7 +619,8 @@ async function saveCurrentProperty() {
   const { model, calc } = renderCalculation();
   model.listingUrl = normalizeListingUrl(model.listingUrl);
   try {
-    const saved = saveProperty({ ...model, calculated: calc });
+    const existing = model.id ? getProperty(model.id) : null;
+    const saved = saveProperty({ ...model, calculated: calc, _cloudRevision: Math.max(0, Number(existing?._cloudRevision) || 0) });
     editingId = saved.id;
     editingCreatedAt = saved.createdAt;
     $('editorModeLabel').textContent = 'Editing saved property';
@@ -631,13 +632,17 @@ async function saveCurrentProperty() {
 
     if (cloudUser && navigator.onLine) {
       try {
-        await window.SPVCloud.upsertProperty(saved);
+        const synced = await window.SPVCloud.upsertProperty(saved);
+        storeCloudSyncedProperty(synced);
         $('saveMessage').textContent = 'Saved locally and synced to Supabase.';
         setCloudMessage('Cloud is up to date.');
       } catch (cloudError) {
         console.warn('Cloud save failed:', cloudError);
-        $('saveMessage').textContent = 'Saved locally. Cloud sync will retry later.';
-        setCloudMessage('Cloud sync pending.', true);
+        const conflict = cloudError?.code === 'PROPERTY_CONFLICT';
+        $('saveMessage').textContent = conflict
+          ? 'Saved locally, but another device has a newer version. Your changes were not overwritten.'
+          : 'Saved locally. Cloud sync will retry later.';
+        setCloudMessage(conflict ? 'Sync conflict detected. Local changes are safe.' : 'Cloud sync pending.', true);
       }
     }
 
@@ -657,6 +662,15 @@ function attachFormatting(input) {
     input.value = value ? formatInputValue(value) : (input.id === 'auctionReservationFee' || input.id === 'refurbishmentCost' ? '0' : '');
     renderCalculation();
   });
+}
+
+function storeCloudSyncedProperty(synced) {
+  if (!synced?.id) return false;
+  const properties = getProperties();
+  const index = properties.findIndex((item) => String(item.id) === String(synced.id));
+  if (index >= 0) properties[index] = synced;
+  else properties.push(synced);
+  return replaceLocalProperties(properties);
 }
 
 function setCloudMessage(message, isWarning = false) {
@@ -753,6 +767,14 @@ async function syncCloud({ showFeedback = true } = {}) {
     clearPendingDeletes(result.clearedDeleteIds || []);
     renderPropertyList();
     renderArchiveList();
+
+    const conflictCount = result.conflicts?.length || 0;
+    if (conflictCount) {
+      const message = `${conflictCount} sync conflict${conflictCount === 1 ? '' : 's'} detected. Your local changes are safe and were not overwritten.`;
+      cloudLastMessage = message;
+      if (showFeedback) $('signedInMessage').textContent = message;
+      return false;
+    }
 
     const changes = result.uploadedCount + result.downloadedCount + (result.archivedLegacyIds?.length || 0) + (result.permanentlyDeletedIds?.length || 0);
     const message = changes

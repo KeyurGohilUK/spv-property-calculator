@@ -197,27 +197,57 @@
     return {
       ...data,
       id: String(row.id),
-      createdAt: data.createdAt || row.created_at || new Date().toISOString(),
-      updatedAt: data.updatedAt || row.updated_at || new Date().toISOString(),
-      deletedAt: data.deletedAt || row.deleted_at || null
+      createdAt: row.created_at || data.createdAt || new Date().toISOString(),
+      updatedAt: row.updated_at || data.updatedAt || new Date().toISOString(),
+      deletedAt: row.deleted_at || data.deletedAt || null,
+      _cloudRevision: Math.max(0, Number(row.revision) || 0),
+      _cloudDirty: false
     };
   }
 
   async function listProperties() {
     const supabaseClient = ensureClient();
     await requireUser();
-    const { data, error } = await supabaseClient.from('properties').select('id,data,created_at,updated_at,deleted_at').order('updated_at', { ascending: false });
+    const { data, error } = await supabaseClient.from('properties').select('id,data,created_at,updated_at,deleted_at,revision').order('updated_at', { ascending: false });
     if (error) throw error;
     return (data || []).map(fromCloudRow);
+  }
+
+  function isPropertyConflict(error) {
+    return error?.code === '40001'
+      || String(error?.message || '').includes('PROPERTY_CONFLICT');
   }
 
   async function upsertProperty(record) {
     const supabaseClient = ensureClient();
     await requireUser();
-    const row = toCloudRow(record);
-    const { error } = await supabaseClient.from('properties').upsert(row, { onConflict: 'id' });
-    if (error) throw error;
-    return record;
+    const { _cloudRevision, _cloudDirty, ...propertyData } = record || {};
+    const expectedRevision = Math.max(0, Number(_cloudRevision) || 0);
+    const { data, error } = await supabaseClient
+      .rpc('upsert_property_if_current', {
+        p_id: String(record.id),
+        p_data: propertyData,
+        p_created_at: record.createdAt || null,
+        p_deleted_at: record.deletedAt || null,
+        p_expected_revision: expectedRevision
+      })
+      .single();
+    if (error) {
+      if (isPropertyConflict(error)) {
+        const conflict = new Error('This property changed on another device. Your local changes are safe; review the latest cloud version before retrying.');
+        conflict.code = 'PROPERTY_CONFLICT';
+        conflict.propertyId = String(record.id);
+        throw conflict;
+      }
+      throw error;
+    }
+    return {
+      ...record,
+      createdAt: data?.server_created_at || record.createdAt,
+      updatedAt: data?.server_updated_at || record.updatedAt,
+      _cloudRevision: Math.max(1, Number(data?.new_revision) || expectedRevision + 1),
+      _cloudDirty: false
+    };
   }
 
   async function listNotes(propertyId) {
@@ -305,6 +335,7 @@
     const ids = new Set([...localMap.keys(), ...cloudMap.keys()]);
     const merged = [];
     const upload = [];
+    const conflicts = [];
     let downloadedCount = 0;
 
     for (const id of ids) {
@@ -313,6 +344,22 @@
       if (local && !cloud) { merged.push(local); upload.push(local); continue; }
       if (!local && cloud) { merged.push(cloud); downloadedCount += 1; continue; }
       if (!local || !cloud) continue;
+
+      const localRevision = Math.max(0, Number(local._cloudRevision) || 0);
+      const cloudRevision = Math.max(0, Number(cloud._cloudRevision) || 0);
+
+      if (local._cloudDirty) {
+        if (localRevision === cloudRevision) {
+          merged.push(local);
+          upload.push(local);
+        } else {
+          // Preserve the unsynced local copy. Never silently replace it.
+          merged.push(local);
+          conflicts.push({ id, local, cloud });
+        }
+        continue;
+      }
+
       if (asTime(local.updatedAt) >= asTime(cloud.updatedAt)) {
         merged.push(local);
         if (asTime(local.updatedAt) > asTime(cloud.updatedAt)) upload.push(local);
@@ -322,7 +369,7 @@
       }
     }
     merged.sort((a, b) => asTime(b.updatedAt) - asTime(a.updatedAt));
-    return { merged, upload, downloadedCount };
+    return { merged, upload, conflicts, downloadedCount };
   }
 
   async function syncAll(localProperties, pendingDeletes = []) {
@@ -366,15 +413,30 @@
 
     cloudProperties = [...cloudById.values()];
     const merge = mergePropertySets(cleanLocalProperties, cloudProperties);
-    for (const record of merge.upload) await upsertProperty(record);
+    const mergedById = new Map(merge.merged.map((item) => [String(item.id), item]));
+    const conflicts = [...merge.conflicts];
+    let uploadedCount = 0;
+
+    for (const record of merge.upload) {
+      try {
+        const synced = await upsertProperty(record);
+        mergedById.set(String(record.id), synced);
+        uploadedCount += 1;
+      } catch (error) {
+        if (!isPropertyConflict(error)) throw error;
+        conflicts.push({ id: String(record.id), local: record, cloud: null });
+      }
+    }
+
     return {
-      merged: merge.merged,
-      uploadedCount: merge.upload.length,
+      merged: [...mergedById.values()].sort((a, b) => asTime(b.updatedAt) - asTime(a.updatedAt)),
+      uploadedCount,
       downloadedCount: merge.downloadedCount,
       archivedLegacyIds,
       permanentlyDeletedIds: locallyPurgedIds,
       deletedIds: [],
-      clearedDeleteIds
+      clearedDeleteIds,
+      conflicts
     };
   }
 
