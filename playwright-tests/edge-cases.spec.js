@@ -1,22 +1,9 @@
 import { test, expect } from '@playwright/test';
-
-async function keepCloudOffline(page) {
-  await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
-}
-
-async function createProperty(page, title = 'Edge Case Property', price = '250000') {
-  await page.goto('/');
-  await page.locator('#newPropertyBtn').click();
-  await page.locator('#title').fill(title);
-  await page.locator('#purchasePrice').fill(price);
-  await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
-  await page.locator('#backBtn').click();
-}
+import { blockExternalServices, createProperty } from './support/app-helpers.js';
 
 test.beforeEach(async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Logic is browser-independent; mobile layout has dedicated WebKit coverage');
-  await keepCloudOffline(page);
+  await blockExternalServices(page);
 });
 
 test('property validation blocks incomplete records and identifies both required fields', async ({ page }) => {
@@ -51,18 +38,18 @@ test('non-resident SDLT surcharge changes a known £250,000 calculation', async 
   await expect(page.locator('#summarySDLT')).toHaveText('£15,000');
 
   const taxSection = page.locator('#nonResident').locator('xpath=ancestor::details[1]');
-  await taxSection.locator('summary').click();
+  await taxSection.locator(':scope > summary').click();
   await page.locator('#nonResident').check();
   await expect(page.locator('#summarySDLT')).toHaveText('£20,000');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£82,500');
 });
 
 test('duplicate property creates an independent copy with the same values', async ({ page }) => {
-  await createProperty(page, 'Original Investment', '280000');
+  await createProperty(page, { title: 'Original Investment', price: '280000' });
 
   await page.getByRole('button', { name: 'Duplicate Original Investment' }).click();
   await expect(page.locator('#propertyCount')).toHaveText('2');
-  await expect(page.getByRole('heading', { name: 'Original Investment' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Original Investment', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Original Investment.*Copy/i })).toBeVisible();
 
   const cards = page.locator('.property-card');
@@ -86,7 +73,7 @@ test('past viewing date is represented as Viewed on the property card', async ({
 });
 
 test('properties survive a full browser reload from offline storage', async ({ page }) => {
-  await createProperty(page, 'Persistent Property', '325000');
+  await createProperty(page, { title: 'Persistent Property', price: '325000' });
   await page.reload();
 
   const card = page.locator('.property-card').filter({ hasText: 'Persistent Property' });
@@ -96,7 +83,7 @@ test('properties survive a full browser reload from offline storage', async ({ p
 });
 
 test('expense validation requires an amount and a selected property', async ({ page }) => {
-  await createProperty(page, 'Allocated Property', '200000');
+  await createProperty(page, { title: 'Allocated Property', price: '200000' });
   await page.goto('/expenses.html');
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
@@ -109,7 +96,7 @@ test('expense validation requires an amount and a selected property', async ({ p
 });
 
 test('expense allocation, filtering and CSV export work together', async ({ page }) => {
-  await createProperty(page, 'Filter Property', '240000');
+  await createProperty(page, { title: 'Filter Property', price: '240000' });
   await page.goto('/expenses.html');
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
@@ -145,9 +132,9 @@ test('receipt PDFs larger than 2 MB are rejected before local save', async ({ pa
     buffer: Buffer.alloc(2 * 1024 * 1024 + 1, 1)
   });
 
-  await expect(page.locator('#expenseReceiptError')).toContainText('2 MB');
   await expect(page.locator('#expenseReceiptSize')).toContainText('oversized-receipt.pdf');
   await page.getByRole('button', { name: 'Save Expense' }).click();
+  await expect(page.locator('#expenseReceiptError')).toContainText('2 MB');
   await expect(page.locator('#expenseDialog')).toHaveAttribute('open', '');
   await expect(page.locator('#expenseCount')).toHaveText('0');
 });
