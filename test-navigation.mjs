@@ -26,7 +26,8 @@ assert.match(secondaryHeader, /id="accountBtn"/, 'Shared header must include Acc
 assert.match(secondaryHeader, /id="installBtn"/, 'Shared header must include Install');
 assert.match(secondaryHeader, /\.\/\?dialog=account/, 'Account must route to the master dialog');
 assert.match(secondaryHeader, /\.\/\?dialog=install/, 'Install must route to the master dialog');
-assert.match(app, /requestedDialog === 'account'[\s\S]*authDialog[\s\S]*requestedDialog === 'install'[\s\S]*installDialog/, 'Master page must open routed dialogs');
+assert.match(app, /requestedDialog === 'account'[\s\S]*authDialog/, 'Master page must open the routed Account dialog');
+assert.match(app, /requestedDialog === 'account' \|\| requestedDialog === 'install'[\s\S]*installDialog/, 'Master page must open the routed Install dialog');
 
 assert.equal((index.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
 assert.match(index, /id="moreMenuDialog"/, 'More menu dialog missing');
