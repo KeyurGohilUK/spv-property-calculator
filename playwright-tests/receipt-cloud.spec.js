@@ -136,13 +136,14 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
   await expect(page.locator('#expenseSyncStatus')).toContainText('Offline');
 
   await context.setOffline(false);
-  await page.locator('#secondaryAccountBtn').click();
-  if (await page.locator('#secondarySyncBtn').isEnabled()) {
-    await page.locator('#secondarySyncBtn').click();
-  }
-
-  await expect.poll(() => worker.callsFor('PUT').length).toBe(1);
+  await expect.poll(() => worker.callsFor('PUT').length).toBeGreaterThan(0);
   await expect.poll(async () => (await storedExpense(page))?.receiptCloudPending).toBe(false);
+  const uploadsAfterReconnect = worker.callsFor('PUT').length;
+
+  await page.locator('#secondaryAccountBtn').click();
+  await page.locator('#secondarySyncBtn').click();
+  await expect(page.locator('#secondaryAccountMessage')).toHaveText('Properties and expenses are up to date.');
+  expect(worker.callsFor('PUT')).toHaveLength(uploadsAfterReconnect);
 });
 
 test('unauthorized Worker response keeps the receipt safely pending locally', async ({ page }) => {
