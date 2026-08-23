@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.14.1-receipt-size';
+const CACHE_NAME = 'spv-property-calculator-v1.14.2-receipt-viewer';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
