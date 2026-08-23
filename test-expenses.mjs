@@ -34,6 +34,8 @@ assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support 
 assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*expenseDateTo/, 'Category and date filters must be wired');
 assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
 assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not show a separate Sync now button');
+assert.match(expenseHtml, /id="expenseSyncStatus" class="sync-status"/, 'Expenses must use the shared sync-status component');
+assert.match(expensePage, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
 assert.match(expenseHtml, /id="toggleExpenseFiltersBtn"[\s\S]*Filter &amp; Export/, 'Combined Filter & Export action is missing');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"/, 'CSV export must live inside the filter panel');
@@ -45,6 +47,7 @@ assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dial
 const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.css', import.meta.url), 'utf8'));
 assert.match(expenseStyles, /\.receipt-file-size \{[^}]*min-height: 38px;[^}]*overflow-wrap: anywhere;/, 'Receipt details must remain visible and wrap safely');
 assert.match(expenseStyles, /\.expense-report-inline \{[\s\S]*grid-column: 1 \/ -1[\s\S]*box-shadow: none/, 'Nested Expense Summary must span the filter panel without a second shadow');
+assert.doesNotMatch(expenseStyles, /\.expense-sync-status/, 'Expense page must not define a separate sync-status component');
 assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
 assert.match(expenseStyles, /input\[type="date"\][\s\S]*min-width: 0[\s\S]*max-width: 100%/, 'Expense date input must stay within the iPhone popup');
 assert.match(expenseStyles, /\.expense-dialog[\s\S]*overflow-x: hidden/, 'Expense popup must prevent horizontal overflow');

@@ -88,7 +88,7 @@
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed.</p>
           </div>
           <div class="property-hero-actions" aria-label="Property actions">
-            <span id="propertySyncStatus" class="property-sync-status" role="status">Saved on this device</span>
+            <span id="propertySyncStatus" class="sync-status" role="status">Saved on this device</span>
             <button id="newPropertyBtn" class="primary-btn" type="button">＋ New Property</button>
           </div>
         </div>
@@ -450,15 +450,15 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.14.4</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.14.5</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.14.4</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.14.5</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>New Property now matches the Expense Tracker primary action</li>
-      <li>Properties now displays the same live sync-status pattern as Expenses</li>
-      <li>Property actions stack cleanly on smaller screens</li>
-      <li>Archive guidance is clearer and backend-neutral</li>
+      <li>Properties and Expenses now use one shared sync-status component</li>
+      <li>Offline status uses the same neutral styling throughout the app</li>
+      <li>Only genuine sync failures display in red</li>
+      <li>Successful sync status remains green</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">

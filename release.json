@@ -1,9 +1,9 @@
 {
-  "version": "1.14.4",
+  "version": "1.14.5",
   "notes": [
-    "New Property now matches the Expense Tracker primary action",
-    "Properties now displays the same live sync-status pattern as Expenses",
-    "Property actions stack cleanly on smaller screens",
-    "Archive guidance is clearer and backend-neutral"
+    "Properties and Expenses now use one shared sync-status component",
+    "Offline status uses the same neutral styling throughout the app",
+    "Only genuine sync failures display in red",
+    "Successful sync status remains green"
   ]
 }

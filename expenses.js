@@ -1,4 +1,5 @@
 import { getActiveProperties } from './storage.js';
+import { renderSyncStatus } from './sync-status.js';
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 
 const $ = (id) => document.getElementById(id);
@@ -93,10 +94,7 @@ function asTime(value) {
 }
 
 function setSyncStatus(message, state = '') {
-  const status = $('expenseSyncStatus');
-  status.textContent = message;
-  status.classList.toggle('error', state === 'error');
-  status.classList.toggle('synced', state === 'synced');
+  renderSyncStatus($('expenseSyncStatus'), message, state);
 }
 
 function mergeExpenseSets(localItems, cloudItems) {
