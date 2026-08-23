@@ -4,6 +4,11 @@ async function keepCloudOffline(page) {
   await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
 }
 
+async function openContainingSection(page, fieldSelector) {
+  const details = page.locator(fieldSelector).locator('xpath=ancestor::details[1]');
+  if (!(await details.getAttribute('open'))) await details.locator('summary').click();
+}
+
 async function createProperty(page, {
   title = 'Playwright Test Property',
   price = '250000',
@@ -12,8 +17,13 @@ async function createProperty(page, {
   await page.locator('#newPropertyBtn').click();
   await page.locator('#title').fill(title);
   await page.locator('#purchasePrice').fill(price);
-  if (refurbishment !== '0') await page.locator('#refurbishmentCost').fill(refurbishment);
+  if (refurbishment !== '0') {
+    await openContainingSection(page, '#refurbishmentCost');
+    await page.locator('#refurbishmentCost').fill(refurbishment);
+  }
   await page.locator('#savePropertyBtn').click();
+  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await page.locator('#backBtn').click();
   await expect(page.locator('#homeView')).not.toHaveClass(/hidden/);
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
 }
@@ -37,6 +47,7 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
   await expect(page.locator('#summaryCostsIncDeposit')).toHaveText('£77,500');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£77,500');
 
+  await openContainingSection(page, '#refurbishmentCost');
   await page.locator('#refurbishmentCost').fill('10000');
   await expect(page.locator('#summaryRefurbishment')).toHaveText('£10,000');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£87,500');
@@ -53,6 +64,8 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   await page.locator('#title').fill('Updated Playwright Property');
   await page.locator('#purchasePrice').fill('300000');
   await page.locator('#savePropertyBtn').click();
+  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await page.locator('#backBtn').click();
 
   const card = page.locator('.property-card').filter({ hasText: 'Updated Playwright Property' });
   await expect(card).toBeVisible();
