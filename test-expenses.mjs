@@ -31,6 +31,9 @@ const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new U
 assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
 assert.match(expenseStyles, /input\[type="date"\][\s\S]*min-width: 0[\s\S]*max-width: 100%/, 'Expense date input must stay within the iPhone popup');
 assert.match(expenseStyles, /\.expense-dialog[\s\S]*overflow-x: hidden/, 'Expense popup must prevent horizontal overflow');
+assert.match(expenseStyles, /\.expense-filters \.field \{ min-width: 0;/, 'Filter fields must be allowed to shrink');
+assert.match(expenseStyles, /@media \(max-width: 620px\)[\s\S]*\.expense-filters \{ grid-template-columns: minmax\(0, 1fr\); \}/, 'Mobile expense filters must use one column');
+assert.match(expenseStyles, /\.expense-filters input\[type="date"\][\s\S]*max-width: 100%/, 'Mobile filter dates must stay inside their container');
 assert.match(expenseHtml, /class="dialog-close expense-dialog-close"/, 'Expense popup must use the shared close control');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 

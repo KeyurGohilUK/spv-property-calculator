@@ -1,8 +1,8 @@
 {
-  "version": "1.12.8",
+  "version": "1.12.9",
   "notes": [
-    "All app popups now use a thin themed scrollbar",
-    "Scrollbar colours adapt to light and dark mode",
-    "Chrome, Safari and Firefox scrollbar styling is supported"
+    "Expense From and To date filters no longer overlap on iPhone",
+    "Mobile expense filters now use a clear single-column layout",
+    "Native iPhone date controls remain contained within the filter panel"
   ]
 }
