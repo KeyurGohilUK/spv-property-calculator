@@ -23,8 +23,22 @@
 .expense-list-heading h3 { margin: 0; }
 .compact-expense-btn { min-height: 40px; padding: 8px 13px; }
 .expense-filters { display: grid; grid-template-columns: 1.3fr 1.3fr 1fr 1fr auto; align-items: end; gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
-.expense-filters .field { min-width: 0; margin: 0; }
+.expense-filters .field { min-width: 0; margin: 0; overflow: hidden; }
 .expense-filters select, .expense-filters input { display: block; min-height: 42px; width: 100%; min-width: 0; max-width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
+.expense-filters input[type="date"] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.expense-filters input[type="date"]::-webkit-date-and-time-value {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
 .expense-filters .text-btn { white-space: nowrap; }
 .expense-filter-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .expense-filter-actions button { min-height: 42px; white-space: nowrap; }
@@ -74,6 +88,10 @@
   .expense-filter-actions { grid-column: 1 / -1; }
   .expense-filter-actions button { min-width: 140px; }
 }
+@media (max-width: 820px) and (min-width: 621px) {
+  .expense-filters { grid-template-columns: minmax(0, 1fr); }
+  .expense-filters .field, .expense-filter-actions { grid-column: 1 / -1; }
+}
 @media (max-width: 620px) {
   .expense-hero { align-items: stretch; flex-direction: column; }
   .expense-hero-actions { display: grid; grid-template-columns: 1fr; }
@@ -89,16 +107,6 @@
   .expense-filters .field, .expense-filter-actions { grid-column: 1 / -1; }
   .expense-filter-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .expense-filter-actions button { width: 100%; }
-  .expense-filters input[type="date"] {
-    min-width: 0;
-    max-width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .expense-filters input[type="date"]::-webkit-date-and-time-value {
-    min-width: 0;
-    text-align: left;
-  }
   .expense-card { align-items: start; }
   .expense-card-actions { flex-direction: column; }
   .expense-form-grid { grid-template-columns: 1fr; gap: 0; }
