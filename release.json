@@ -1,8 +1,8 @@
 {
-  "version": "1.13.3",
+  "version": "1.14.0",
   "notes": [
-    "iPad Safari date controls are now contained within the filter panel",
-    "Smaller iPads stack expense filters vertically to prevent crowding",
-    "Date fields use consistent sizing across iPhone, iPad and desktop"
+    "Large iPhone receipt photos are automatically resized and compressed",
+    "Optimised images target about 1.5 MB while remaining readable",
+    "PDF receipts remain unchanged and must be 2 MB or smaller"
   ]
 }

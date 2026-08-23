@@ -11,7 +11,13 @@ const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense
 const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
 const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'));
 assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit must remain 2 MB');
-assert.match(expenseHtml, /maximum 2 MB/, 'Receipt guidance must display the 2 MB limit');
+assert.match(expensePage, /TARGET_RECEIPT_SIZE = Math\.floor\(1\.5 \* 1024 \* 1024\)/, 'Receipt images should target approximately 1.5 MB');
+assert.match(expensePage, /MAX_RECEIPT_IMAGE_DIMENSION = 2000/, 'Large receipt images must be resized');
+assert.match(expensePage, /async function optimiseReceiptImage\(file\)[\s\S]*canvasToBlob\(canvas, 'image\/jpeg', quality\)[\s\S]*result\.size > MAX_RECEIPT_SIZE/, 'Receipt image optimisation is missing');
+assert.match(expensePage, /Optimising receipt…[\s\S]*Receipt reduced from/, 'Receipt optimisation feedback is missing');
+assert.match(expensePage, /file\.type === 'application\/pdf' && file\.size <= TARGET_RECEIPT_SIZE|file\.type === 'application\/pdf'/, 'PDF receipts must bypass image optimisation');
+assert.match(expenseHtml, /Photos are automatically reduced below 2 MB/, 'Receipt guidance must explain automatic image reduction');
+assert.match(expenseHtml, /accept="image\/\*,application\/pdf"/, 'Receipt picker must allow supported iPhone photos');
 assert.match(expensePage, /remove\.innerHTML = '<svg[\s\S]*Delete expense/, 'Expense delete action must use an accessible icon');
 assert.doesNotMatch(expensePage, /remove\.textContent = 'Delete'/, 'Expense card must not show Delete text');
 assert.match(expensePage, /function openForm\(expense = null\)/, 'Expense editor must support existing records');
