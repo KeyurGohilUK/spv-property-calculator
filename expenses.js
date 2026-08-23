@@ -142,7 +142,10 @@ function mergeExpenseSets(localItems, cloudItems) {
   return { merged, upload, conflicts };
 }
 
-async function syncExpenses({ showFeedback = true } = {}) {
+async function syncExpenses({ showFeedback = true, lockHeld = false } = {}) {
+  if (!lockHeld && navigator.locks?.request) {
+    return navigator.locks.request('spv-expense-cloud-sync', () => syncExpenses({ showFeedback, lockHeld: true }));
+  }
   const cloud = window.SPVCloud;
   if (!cloud || !cloudUser || expenseSyncing || !navigator.onLine) {
     if (!cloudUser) setSyncStatus('Saved on this device · sign in from Properties to sync');

@@ -1,7 +1,8 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
-import { getAllExpenses, replaceExpenses } from './expense-storage.js';
+import { getAllExpenses, replaceExpenses, getReceipt } from './expense-storage.js';
+import { prepareExpenseReceiptForSync } from './receipt-cloud.js';
 
-const APP_VERSION = '1.16.1';
+const APP_VERSION = '1.16.2';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
@@ -22,7 +23,10 @@ function expenseTime(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-async function syncExpenses(cloud) {
+async function syncExpenses(cloud, lockHeld = false) {
+  if (!lockHeld && navigator.locks?.request) {
+    return navigator.locks.request('spv-expense-cloud-sync', () => syncExpenses(cloud, true));
+  }
   const localItems = getAllExpenses();
   const remoteItems = await cloud.listExpenses();
   const localMap = new Map(localItems.map((item) => [String(item.id), item]));
@@ -55,7 +59,9 @@ async function syncExpenses(cloud) {
   let uploaded = 0;
   for (const item of upload) {
     try {
-      const saved = await cloud.upsertExpense(item);
+      const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
+      merged.set(String(item.id), prepared);
+      const saved = await cloud.upsertExpense(prepared);
       merged.set(String(item.id), saved);
       uploaded += 1;
     } catch (error) {
