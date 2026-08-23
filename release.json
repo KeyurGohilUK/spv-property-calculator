@@ -1,8 +1,9 @@
 {
-  "version": "1.11.4",
+  "version": "1.12.0",
   "notes": [
-    "App Menu title aligned at the top-left of the popup",
-    "Close button aligned on the same row at the top-right",
-    "Clicking outside the popup now closes the menu"
+    "New Expense Tracker page for actual SPV spending",
+    "Allocate expenses to the company or a specific property",
+    "Attach and view receipts stored locally on this device",
+    "Estimated property calculations remain separate and unchanged"
   ]
 }
