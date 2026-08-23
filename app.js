@@ -21,10 +21,9 @@ import {
 } from './storage.js';
 
 /*
- * SPV Property Calculator - browser bundle
- * This file intentionally uses NO ES-module imports so the app also works when
- * index.html is opened directly from a laptop using a file:// URL.
- * Source calculation/config/storage modules remain separate for maintainability/tests.
+ * SPV Property Calculator - browser application
+ * Production imports the same calculation and storage modules exercised by the
+ * Node test suite, preventing browser logic from drifting from tested logic.
  */
 (() => {
 'use strict';
