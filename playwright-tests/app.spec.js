@@ -67,9 +67,9 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
   await expect(page.locator('#expenseReceiptSize')).toContainText('test-receipt.png');
   await expect(page.locator('#expenseReceiptSize')).toContainText(/\d+ (B|KB)/);
 
-  // Linux WebKit cannot persist synthetic File objects in IndexedDB. Real iOS
-  // file persistence remains covered by storage unit tests; Chromium exercises
-  // the complete browser persistence journey here.
+  // Linux WebKit cannot persist Playwright's synthetic File in IndexedDB.
+  // WebKit still verifies selection and size display; Chromium exercises the
+  // complete browser persistence journey, backed by receipt-storage unit tests.
   if (browserName === 'webkit') return;
 
   await page.getByRole('button', { name: 'Save Expense' }).click();
