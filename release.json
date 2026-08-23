@@ -1,8 +1,8 @@
 {
-  "version": "1.10.3",
+  "version": "1.10.4",
   "notes": [
-    "Property cards change to Viewed after the viewing time passes",
-    "Viewing date and time stay available when reopening the property",
-    "Single Viewing Date & Time field with hour and minute"
+    "Property cards now label and show SDLT correctly",
+    "Viewed status after viewing time passes",
+    "Viewing date and time on property cards"
   ]
 }
