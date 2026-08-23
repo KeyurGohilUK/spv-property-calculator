@@ -1,9 +1,6 @@
 .expense-shell { display: grid; gap: 18px; }
 .expense-hero h2 { margin: 5px 0 6px; }
 .expense-hero-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
-.expense-sync-status { width: 100%; color: var(--muted); font-size: 11px; font-weight: 750; text-align: right; }
-.expense-sync-status.error { color: var(--danger); }
-.expense-sync-status.synced { color: var(--brand); }
 .expense-report-card { padding: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); }
 .expense-report-inline { grid-column: 1 / -1; margin-top: 4px; background: var(--surface-2); box-shadow: none; }
 .expense-report-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -98,7 +95,7 @@
 @media (max-width: 620px) {
   .expense-hero { align-items: stretch; flex-direction: column; }
   .expense-hero-actions { display: grid; grid-template-columns: 1fr; }
-  .expense-sync-status { grid-column: 1 / -1; text-align: left; }
+  .expense-hero-actions .sync-status { grid-column: 1 / -1; text-align: left; }
   .expense-hero-actions #openExpenseFormBtn:only-of-type { grid-column: 1 / -1; }
   .expense-summary-grid { grid-template-columns: 1fr; gap: 8px; }
   .expense-report-columns { grid-template-columns: 1fr; gap: 14px; }
