@@ -26,26 +26,41 @@ function writeRaw(expenses) {
   }
 }
 
-export function getExpenses() {
-  return readRaw().sort((a, b) => {
+function sortExpenses(items) {
+  return [...items].sort((a, b) => {
     const dateOrder = String(b.date || '').localeCompare(String(a.date || ''));
     return dateOrder || new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
   });
+}
+
+export function getAllExpenses() { return sortExpenses(readRaw()); }
+export function getExpenses() { return getAllExpenses().filter((item) => !item.deletedAt); }
+
+export function replaceExpenses(expenses) {
+  if (!writeRaw(Array.isArray(expenses) ? expenses : [])) {
+    throw new Error('Unable to update local expenses.');
+  }
+  return true;
 }
 
 export function saveExpense(expense) {
   const expenses = readRaw();
   const now = new Date().toISOString();
   const scope = expense.scope === 'property' ? 'property' : 'company';
+  const existing = expenses.find((item) => item.id === expense.id);
   const record = {
+    ...existing,
     ...expense,
     id: expense.id || makeId(),
     amount: Math.max(0, Number(expense.amount) || 0),
     scope,
     propertyId: scope === 'property' ? String(expense.propertyId || '') : '',
     receipt: expense.receipt || null,
-    createdAt: expense.createdAt || now,
-    updatedAt: now
+    deletedAt: null,
+    createdAt: expense.createdAt || existing?.createdAt || now,
+    updatedAt: now,
+    _cloudRevision: Math.max(0, Number(expense._cloudRevision ?? existing?._cloudRevision) || 0),
+    _cloudDirty: true
   };
   const index = expenses.findIndex((item) => item.id === record.id);
   if (index >= 0) expenses[index] = record;
@@ -55,6 +70,15 @@ export function saveExpense(expense) {
 }
 
 export function deleteExpense(id) {
+  const expenses = readRaw();
+  const index = expenses.findIndex((item) => item.id === id);
+  if (index < 0) return false;
+  const now = new Date().toISOString();
+  expenses[index] = { ...expenses[index], deletedAt: now, updatedAt: now, _cloudDirty: true };
+  return writeRaw(expenses);
+}
+
+export function permanentlyRemoveLocalExpense(id) {
   const expenses = readRaw();
   const filtered = expenses.filter((item) => item.id !== id);
   return filtered.length !== expenses.length && writeRaw(filtered);

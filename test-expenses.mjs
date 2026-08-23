@@ -6,7 +6,7 @@ globalThis.localStorage = {
   setItem: (key, value) => memory.set(key, String(value))
 };
 
-const { getExpenses, saveExpense, deleteExpense } = await import('./expense-storage.js');
+const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense } = await import('./expense-storage.js');
 
 const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
 const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'));
@@ -19,12 +19,19 @@ const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Offic
 assert.equal(company.scope, 'company');
 assert.equal(company.propertyId, '');
 assert.equal(company.amount, 42.5);
+assert.equal(company._cloudDirty, true);
+assert.equal(company._cloudRevision, 0);
 
 const property = saveExpense({ amount: 125, date: '2026-08-24', category: 'Repairs & maintenance', scope: 'property', propertyId: 'property-1' });
 assert.equal(property.propertyId, 'property-1');
 assert.deepEqual(getExpenses().map((item) => item.id), [property.id, company.id], 'Expenses should be newest-date first');
 assert.equal(deleteExpense(company.id), true);
 assert.deepEqual(getExpenses().map((item) => item.id), [property.id]);
+const deletedCompany = getAllExpenses().find((item) => item.id === company.id);
+assert.ok(deletedCompany.deletedAt, 'Deleted expenses must remain as sync tombstones');
+assert.equal(deletedCompany._cloudDirty, true);
+replaceExpenses(getAllExpenses().map((item) => ({ ...item, _cloudDirty: false })));
+assert.equal(getAllExpenses().every((item) => item._cloudDirty === false), true);
 assert.equal(deleteExpense('missing'), false);
 
 console.log('Expense storage checks passed.');

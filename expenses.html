@@ -46,7 +46,11 @@
           <h2>Expense Tracker</h2>
           <p class="muted">Record company-wide or property-specific expenses separately from purchase estimates.</p>
         </div>
-        <button id="openExpenseFormBtn" class="primary-btn" type="button">＋ Add Expense</button>
+        <div class="expense-hero-actions">
+          <span id="expenseSyncStatus" class="expense-sync-status" role="status">Saved on this device</span>
+          <button id="syncExpensesBtn" class="secondary-btn hidden" type="button">Sync now</button>
+          <button id="openExpenseFormBtn" class="primary-btn" type="button">＋ Add Expense</button>
+        </div>
       </section>
 
       <section class="expense-summary-grid" aria-label="Expense totals">
@@ -111,6 +115,8 @@
     </form>
   </dialog>
 
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
   <script type="module" src="./expenses.js"></script>
 </body>
 </html>
