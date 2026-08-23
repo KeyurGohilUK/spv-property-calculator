@@ -26,6 +26,14 @@ assert.match(secondaryHeader, /id="accountBtn"/, 'Shared header must include Acc
 assert.match(secondaryHeader, /id="installBtn"/, 'Shared header must include Install');
 assert.match(secondaryHeader, /\.\/\?dialog=account/, 'Account must route to the master dialog');
 assert.match(secondaryHeader, /\.\/\?dialog=install/, 'Install must route to the master dialog');
+assert.match(forecast, /<button class="primary-nav-item" type="button" data-more-menu/, 'Forecast More must be a local dialog button');
+assert.match(expenses, /<button class="primary-nav-item" type="button" data-more-menu/, 'Expenses More must be a local dialog button');
+assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
+assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not navigate away');
+assert.match(secondaryHeader, /secondaryMoreMenuDialog[\s\S]*showModal\(\)/, 'Secondary More must open a local popup');
+assert.match(secondaryHeader, /class="install-dialog more-menu-dialog"/, 'Secondary App Menu must use Install dialog styling');
+assert.match(index, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Main App Menu must use Install dialog styling');
+assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
 assert.match(app, /requestedDialog === 'account'[\s\S]*authDialog/, 'Master page must open the routed Account dialog');
 assert.match(app, /requestedDialog === 'account' \|\| requestedDialog === 'install'[\s\S]*installDialog/, 'Master page must open the routed Install dialog');
 
