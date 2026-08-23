@@ -21,7 +21,7 @@ assert.match(expenseHtml, /accept="image\/\*,application\/pdf"/, 'Receipt picker
 assert.match(expenseHtml, /id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected<\/div>/, 'Visible receipt size status is missing');
 assert.match(expensePage, /function updateReceiptSelectionDetails\(\)[\s\S]*Selected: \$\{file\.name\} · \$\{formatFileSize\(file\.size\)\}[\s\S]*will be optimised when saved[\s\S]*addEventListener\('input', updateReceiptSelectionDetails\)[\s\S]*addEventListener\('change', updateReceiptSelectionDetails\)/, 'Selected receipt details must update reliably on iOS');
 assert.match(expensePage, /Current receipt: \$\{expense\.receipt\.name[\s\S]*formatFileSize\(expense\.receipt\.size\)/, 'Existing receipt details must display while editing');
-assert.match(expensePage, /async function viewReceipt\(expense\)[\s\S]*window\.open\('', '_blank'\)[\s\S]*await getReceipt\(expense\.id\)[\s\S]*viewer\.location\.replace\(url\)/, 'Receipt viewer must open synchronously before IndexedDB access for iOS Safari');
+assert.match(expensePage, /async function viewReceipt\(expense\)[\s\S]*window\.open\('', '_blank'\)[\s\S]*await getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*viewer\.location\.replace\(url\)/, 'Receipt viewer must open synchronously before version-aware IndexedDB access for iOS Safari');
 assert.match(expensePage, /remove\.innerHTML = '<svg[\s\S]*Delete expense/, 'Expense delete action must use an accessible icon');
 assert.match(expensePage, /view\.className = 'view-receipt'[\s\S]*view\.innerHTML = '<svg[\s\S]*View receipt/, 'Receipt view action must use an accessible icon');
 assert.doesNotMatch(expensePage, /view\.textContent = 'View'/, 'Expense card must not display View text');
