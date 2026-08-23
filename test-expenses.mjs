@@ -31,6 +31,11 @@ assert.match(expensePage, /card\.addEventListener\('click', \(\) => openForm\(ex
 assert.match(expensePage, /card\.setAttribute\('role', 'button'\)/, 'Clickable expense cards must be keyboard accessible');
 assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
 assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
+assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*prepareExpenseReceiptForSync[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
+assert.match(expensePage, /let file = await getReceipt\(expense\.id\)[\s\S]*downloadCloudReceipt\(expense\.id, expense\.receiptObjectPath[\s\S]*saveReceipt\(expense\.id, file\)/, 'Receipt viewing must prefer local storage and cache an R2 download');
+assert.match(expensePage, /Receipt saved locally · cloud upload pending/, 'Failed R2 uploads must remain queued locally');
+assert.match(expensePage, /receiptObjectPath: uploaded\.objectPath[\s\S]*receiptCloudPending: false/, 'Successful R2 uploads must retain the private object key');
+assert.match(expenseHtml, /kept locally and securely synced when signed in/, 'Receipt guidance must explain local and private cloud storage');
 assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*expenseDateTo/, 'Category and date filters must be wired');
 assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
 assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not show a separate Sync now button');
