@@ -1,0 +1,29 @@
+name: Apply viewed status
+on:
+  push:
+    branches: [agent/viewed-status-clean]
+    paths: ['apply-viewed-status.py']
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply changes
+        run: python apply-viewed-status.py
+      - name: Validate
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          node -e "JSON.parse(require('fs').readFileSync('release.json','utf8'))"
+          npm test
+      - name: Cleanup helpers
+        run: rm -f apply-viewed-status.py .github/workflows/apply-viewed-status.yml
+      - name: Commit changes
+        run: |
+          git config user.name "Keyur Gohil"
+          git config user.email "133516013+KeyurGohilUK@users.noreply.github.com"
+          git add -A
+          git commit -m "Show viewed status after viewing time" || exit 0
+          git push
