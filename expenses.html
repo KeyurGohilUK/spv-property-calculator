@@ -48,7 +48,6 @@
         </div>
         <div class="expense-hero-actions">
           <span id="expenseSyncStatus" class="expense-sync-status" role="status">Saved on this device</span>
-          <button id="syncExpensesBtn" class="secondary-btn hidden" type="button">Sync now</button>
           <button id="openExpenseFormBtn" class="primary-btn" type="button">＋ Add Expense</button>
         </div>
       </section>
@@ -57,6 +56,18 @@
         <article><span>Total recorded</span><strong id="totalExpenses">£0</strong></article>
         <article><span>Company expenses</span><strong id="companyExpenses">£0</strong></article>
         <article><span>Property expenses</span><strong id="propertyExpenses">£0</strong></article>
+      </section>
+
+      <section class="expense-report-card" aria-labelledby="expenseReportTitle">
+        <div class="expense-report-heading">
+          <div><p class="eyebrow">Reporting</p><h3 id="expenseReportTitle">Expense summary</h3><small class="muted">Reflects the active filters</small></div>
+          <button id="exportExpensesBtn" class="secondary-btn compact-expense-btn" type="button">Export CSV</button>
+        </div>
+        <div class="expense-report-columns">
+          <div><h4>By month</h4><div id="expenseMonthlyReport" class="expense-breakdown"></div></div>
+          <div><h4>By category</h4><div id="expenseCategoryReport" class="expense-breakdown"></div></div>
+          <div><h4>By allocation</h4><div id="expenseAllocationReport" class="expense-breakdown"></div></div>
+        </div>
       </section>
 
       <div class="expense-list-heading">
