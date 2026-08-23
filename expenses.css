@@ -5,6 +5,7 @@
 .expense-sync-status.error { color: var(--danger); }
 .expense-sync-status.synced { color: var(--brand); }
 .expense-report-card { padding: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-report-inline { grid-column: 1 / -1; margin-top: 4px; background: var(--surface-2); box-shadow: none; }
 .expense-report-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .expense-report-heading h3 { margin: 4px 0 2px; }
 .expense-report-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 16px; }
