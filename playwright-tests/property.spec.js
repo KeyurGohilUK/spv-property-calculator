@@ -62,7 +62,9 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   await expect(page.locator('#title')).toHaveValue('Playwright Test Property');
 
   await page.locator('#title').fill('Updated Playwright Property');
-  await page.locator('#purchasePrice').fill('300000');
+  await page.locator('#purchasePrice').click();
+  await page.locator('#purchasePrice').press('ControlOrMeta+A');
+  await page.locator('#purchasePrice').pressSequentially('300000');
   await page.locator('#savePropertyBtn').click();
   await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
   await page.locator('#backBtn').click();
