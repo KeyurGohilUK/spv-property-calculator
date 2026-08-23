@@ -546,18 +546,6 @@ function setPrimaryNavigation(activeItem = 'properties') {
   else more?.removeAttribute('aria-current');
 }
 
-function renderMoreMenuState() {
-  const syncButton = $('moreSyncBtn');
-  if (!syncButton) return;
-  syncButton.disabled = cloudSyncing || !cloudUser || !navigator.onLine;
-  const detail = syncButton.querySelector('small');
-  if (detail) {
-    detail.textContent = !cloudUser
-      ? 'Sign in through Account & cloud to enable syncing'
-      : (!navigator.onLine ? 'Connect to the internet to sync' : 'Sync property changes with the shared workspace');
-  }
-}
-
 function showHome() {
   setPrimaryNavigation('properties');
   $('editorView').classList.add('hidden');
@@ -1178,22 +1166,9 @@ function init() {
     showHome();
   });
   $('moreNavBtn').addEventListener('click', () => {
-    renderMoreMenuState();
     $('moreMenuDialog').showModal();
   });
   $('closeMoreMenuDialog').addEventListener('click', () => $('moreMenuDialog').close());
-  $('moreAccountBtn').addEventListener('click', () => {
-    $('moreMenuDialog').close();
-    $('accountBtn').click();
-  });
-  $('moreInstallBtn').addEventListener('click', () => {
-    $('moreMenuDialog').close();
-    $('installBtn').click();
-  });
-  $('moreSyncBtn').addEventListener('click', async () => {
-    $('moreMenuDialog').close();
-    await syncCloud();
-  });
   $('addExpenseBtn').addEventListener('click', () => {
     addExpenseRow();
     updateSaveButtonState();
@@ -1269,7 +1244,6 @@ function init() {
     initialMenuUrl.searchParams.delete('menu');
     window.history.replaceState({}, '', initialMenuUrl);
     window.setTimeout(() => {
-      renderMoreMenuState();
       $('moreMenuDialog').showModal();
     }, 0);
   }
