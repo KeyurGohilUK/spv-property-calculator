@@ -4,6 +4,7 @@
     "Expense cards now use a receipt icon instead of View text",
     "The receipt action retains an accessible label and tooltip",
     "Receipt viewing behaviour remains unchanged",
-    "The Properties introduction is now shorter and more focused"
+    "The Properties introduction is now shorter and more focused",
+    "Archive guidance is now clearer and backend-neutral"
   ]
 }
