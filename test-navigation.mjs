@@ -3,6 +3,8 @@ import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(index, /Works offline, with a shared Supabase workspace for your small team\./, 'Home introduction must not include the removed workspace sentence');
+assert.match(index, /Archived properties are hidden from the main list and can be restored at any time\./, 'Archive guidance must remain clear and user-focused');
+assert.doesNotMatch(index, /remain stored locally and in Supabase|Any signed-in user can restore them/, 'Archive guidance must not expose backend details');
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
