@@ -1328,6 +1328,7 @@ button.header-icon-control:active { transform: translateY(1px); }
 .more-menu-list { display: grid; gap: 9px; }
 .more-menu-item {
   width: 100%;
+  text-decoration: none;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
   align-items: center;

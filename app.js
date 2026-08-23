@@ -62,7 +62,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.12.4';
+const APP_VERSION = '1.12.5';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -1342,6 +1342,11 @@ function init() {
         $('installDialog').showModal();
       }
     }, 350);
+  }
+  if (initialMenuUrl.searchParams.get('view') === 'archive') {
+    initialMenuUrl.searchParams.delete('view');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(showArchive, 0);
   }
   if (initialMenuUrl.searchParams.get('menu') === 'more') {
     initialMenuUrl.searchParams.delete('menu');
