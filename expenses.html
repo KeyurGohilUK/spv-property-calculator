@@ -61,7 +61,6 @@
       <section class="expense-report-card" aria-labelledby="expenseReportTitle">
         <div class="expense-report-heading">
           <div><p class="eyebrow">Reporting</p><h3 id="expenseReportTitle">Expense summary</h3><small class="muted">Reflects the active filters</small></div>
-          <button id="exportExpensesBtn" class="secondary-btn compact-expense-btn" type="button">Export CSV</button>
         </div>
         <div class="expense-report-columns">
           <div><h4>By month</h4><div id="expenseMonthlyReport" class="expense-breakdown"></div></div>
@@ -72,14 +71,17 @@
 
       <div class="expense-list-heading">
         <div><h3>Recorded expenses</h3><span id="expenseCount" class="count-badge">0</span></div>
-        <button id="toggleExpenseFiltersBtn" class="secondary-btn compact-expense-btn" type="button" aria-expanded="false" aria-controls="expenseFilters">Filters</button>
+        <button id="toggleExpenseFiltersBtn" class="secondary-btn compact-expense-btn" type="button" aria-expanded="false" aria-controls="expenseFilters">Filter &amp; Export</button>
       </div>
       <section id="expenseFilters" class="expense-filters hidden" aria-label="Expense filters">
         <label class="field"><span>Allocation</span><select id="expenseFilter"><option value="all">All expenses</option><option value="company">General company</option></select></label>
         <label class="field"><span>Category</span><select id="expenseCategoryFilter"><option value="all">All categories</option></select></label>
         <label class="field"><span>From date</span><input id="expenseDateFrom" type="date"></label>
         <label class="field"><span>To date</span><input id="expenseDateTo" type="date"></label>
-        <button id="clearExpenseFiltersBtn" class="text-btn" type="button">Clear filters</button>
+        <div class="expense-filter-actions">
+          <button id="clearExpenseFiltersBtn" class="text-btn" type="button">Clear filters</button>
+          <button id="exportExpensesBtn" class="primary-btn compact-expense-btn" type="button">Export CSV</button>
+        </div>
       </section>
 
       <div id="expenseList" class="expense-list"></div>

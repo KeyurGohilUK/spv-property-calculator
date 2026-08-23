@@ -25,6 +25,8 @@
 .expense-filters .field { min-width: 0; margin: 0; }
 .expense-filters select, .expense-filters input { display: block; min-height: 42px; width: 100%; min-width: 0; max-width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
 .expense-filters .text-btn { white-space: nowrap; }
+.expense-filter-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.expense-filter-actions button { min-height: 42px; white-space: nowrap; }
 .expense-list { display: grid; gap: 11px; }
 .expense-card { cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
 .expense-card:hover { border-color: color-mix(in srgb, var(--brand) 30%, var(--border)); }
@@ -77,7 +79,9 @@
   .expense-summary-grid strong { font-size: 18px; }
   .expense-list-heading { align-items: stretch; flex-direction: column; }
   .expense-filters { grid-template-columns: minmax(0, 1fr); }
-  .expense-filters .field, .expense-filters .text-btn { grid-column: 1 / -1; }
+  .expense-filters .field, .expense-filter-actions { grid-column: 1 / -1; }
+  .expense-filter-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .expense-filter-actions button { width: 100%; }
   .expense-filters input[type="date"] {
     min-width: 0;
     max-width: 100%;
