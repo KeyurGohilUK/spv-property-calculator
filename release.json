@@ -1,8 +1,8 @@
 {
-  "version": "1.13.2",
+  "version": "1.13.3",
   "notes": [
-    "Expense filters now use a spacious two-column layout on iPad",
-    "From and To date fields no longer overlap at tablet widths",
-    "Desktop and iPhone layouts remain optimised for their screen sizes"
+    "iPad Safari date controls are now contained within the filter panel",
+    "Smaller iPads stack expense filters vertically to prevent crowding",
+    "Date fields use consistent sizing across iPhone, iPad and desktop"
   ]
 }
