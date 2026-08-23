@@ -262,6 +262,8 @@ function openForm(expense = null) {
   $('expenseAmountError').classList.add('hidden');
   $('expensePropertyError').classList.add('hidden');
   $('expenseReceiptError').classList.add('hidden');
+  $('expenseReceiptSize').textContent = '';
+  $('expenseReceiptSize').classList.add('hidden');
   updateScope();
   $('expenseDialog').showModal();
   window.setTimeout(() => $('expenseAmount').focus(), 0);
@@ -542,6 +544,19 @@ $('openExpenseFormBtn').addEventListener('click', () => openForm());
 $('closeExpenseDialogBtn').addEventListener('click', closeForm);
 $('cancelExpenseBtn').addEventListener('click', closeForm);
 $('expenseScope').addEventListener('change', updateScope);
+$('expenseReceipt').addEventListener('change', () => {
+  const file = $('expenseReceipt').files[0] || null;
+  const size = $('expenseReceiptSize');
+  $('expenseReceiptError').classList.add('hidden');
+  if (!file) {
+    size.textContent = '';
+    size.classList.add('hidden');
+    return;
+  }
+  const willOptimise = file.type.startsWith('image/') && file.size > TARGET_RECEIPT_SIZE;
+  size.textContent = `Selected: ${file.name} · ${formatFileSize(file.size)}${willOptimise ? ' · will be optimised when saved' : ''}`;
+  size.classList.remove('hidden');
+});
 $('expenseFilter').addEventListener('change', render);
 $('expenseCategoryFilter').addEventListener('change', render);
 $('expenseDateFrom').addEventListener('change', render);

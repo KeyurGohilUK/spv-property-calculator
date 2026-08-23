@@ -79,6 +79,7 @@
 .expense-dialog .field { margin-bottom: 13px; }
 .expense-dialog select, .expense-dialog input[type="date"], .expense-dialog input[type="text"], .expense-dialog input[type="number"], .expense-dialog textarea { width: 100%; }
 .receipt-field input { padding: 10px; border: 1px dashed var(--border); border-radius: 12px; background: var(--surface-2); }
+.receipt-file-size { display: block; margin-top: 7px; color: var(--brand); font-weight: 800; overflow-wrap: anywhere; }
 .compact-switch { margin: 2px 0 13px; }
 .expense-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 10px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

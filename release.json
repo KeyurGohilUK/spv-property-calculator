@@ -1,8 +1,8 @@
 {
-  "version": "1.14.0",
+  "version": "1.14.1",
   "notes": [
-    "Large iPhone receipt photos are automatically resized and compressed",
-    "Optimised images target about 1.5 MB while remaining readable",
-    "PDF receipts remain unchanged and must be 2 MB or smaller"
+    "Selected receipt file name and size are now shown immediately",
+    "Large images clearly indicate that they will be optimised when saved",
+    "Long iPhone photo filenames wrap safely inside the expense form"
   ]
 }
