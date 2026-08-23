@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-async function keepCloudOffline(page) {
-  await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
-}
+import { blockExternalServices } from './support/app-helpers.js';
 
 async function addExpense(page, { amount = '125.50', description = 'Companies House filing fee', receipt } = {}) {
   await page.getByRole('button', { name: /Add Expense/i }).click();
@@ -14,7 +11,7 @@ async function addExpense(page, { amount = '125.50', description = 'Companies Ho
 }
 
 test.beforeEach(async ({ page }) => {
-  await keepCloudOffline(page);
+  await blockExternalServices(page);
 });
 
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {

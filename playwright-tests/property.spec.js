@@ -1,35 +1,8 @@
 import { test, expect } from '@playwright/test';
-
-async function keepCloudOffline(page) {
-  await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
-}
-
-async function openContainingSection(page, fieldSelector) {
-  const details = page.locator(fieldSelector).locator('xpath=ancestor::details[1]');
-  if (!(await details.getAttribute('open'))) await details.locator('summary').click();
-}
-
-async function createProperty(page, {
-  title = 'Playwright Test Property',
-  price = '250000',
-  refurbishment = '0'
-} = {}) {
-  await page.locator('#newPropertyBtn').click();
-  await page.locator('#title').fill(title);
-  await page.locator('#purchasePrice').fill(price);
-  if (refurbishment !== '0') {
-    await openContainingSection(page, '#refurbishmentCost');
-    await page.locator('#refurbishmentCost').fill(refurbishment);
-  }
-  await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
-  await page.locator('#backBtn').click();
-  await expect(page.locator('#homeView')).not.toHaveClass(/hidden/);
-  await expect(page.getByRole('heading', { name: title })).toBeVisible();
-}
+import { blockExternalServices, createProperty, openContainingSection } from './support/app-helpers.js';
 
 test.beforeEach(async ({ page }) => {
-  await keepCloudOffline(page);
+  await blockExternalServices(page);
 });
 
 test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => {
@@ -54,7 +27,6 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
 });
 
 test('saves a property and edits it by clicking its card', async ({ page }) => {
-  await page.goto('/');
   await createProperty(page);
 
   await page.locator('.property-card').filter({ hasText: 'Playwright Test Property' }).click();
@@ -75,7 +47,6 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
 });
 
 test('archives and restores a property without losing its calculation', async ({ page }) => {
-  await page.goto('/');
   await createProperty(page, { title: 'Archive Journey', price: '275000', refurbishment: '12000' });
 
   page.once('dialog', (dialog) => dialog.accept());
@@ -104,7 +75,7 @@ test('mobile save control remains fixed while the editor scrolls', async ({ page
 
   const before = await page.locator('#savePropertyBtn').boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(100);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   const after = await page.locator('#savePropertyBtn').boundingBox();
 
   expect(before && after).toBeTruthy();
