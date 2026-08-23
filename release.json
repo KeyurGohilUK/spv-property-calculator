@@ -1,8 +1,8 @@
 {
-  "version": "1.10.2",
+  "version": "1.10.3",
   "notes": [
-    "Single Viewing Date & Time field with hour and minute",
-    "Viewing time displayed on property cards",
-    "Advanced forecast return and risk metrics"
+    "Property cards change to Viewed after the viewing time passes",
+    "Viewing date and time stay available when reopening the property",
+    "Single Viewing Date & Time field with hour and minute"
   ]
 }
