@@ -42,9 +42,9 @@
 .expense-card-actions .delete-expense { display: grid; place-items: center; color: var(--danger); }
 .expense-card-actions .delete-expense svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .expense-dialog { width: min(620px, calc(100% - 24px)); max-height: calc(100dvh - 28px); }
-.expense-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
+.expense-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; padding-right: 42px; }
 .expense-dialog-header h3 { margin: 4px 0 0; }
-.expense-dialog-close { margin: 0; flex: 0 0 auto; }
+.expense-dialog-close { margin: 0; }
 .expense-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .expense-dialog .field { margin-bottom: 13px; }
 .expense-dialog select, .expense-dialog input[type="date"], .expense-dialog input[type="text"], .expense-dialog input[type="number"], .expense-dialog textarea { width: 100%; }
