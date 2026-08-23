@@ -68,7 +68,14 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
   await expect(page.locator('#expenseReceiptSize')).toContainText(/\d+ (B|KB)/);
   await page.getByRole('button', { name: 'Save Expense' }).click();
 
-  await expect(page.getByText('Receipt saved locally')).toBeVisible();
+  await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
+  const storedReceipt = await page.evaluate(() => {
+    const items = JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]');
+    return items[0]?.receipt || null;
+  });
+  expect(storedReceipt?.name).toBe('test-receipt.png');
+  expect(storedReceipt?.type).toBe('image/png');
+  expect(storedReceipt?.size).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: /View receipt/i })).toBeVisible();
 });
 
