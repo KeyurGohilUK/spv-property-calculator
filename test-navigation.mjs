@@ -6,6 +6,7 @@ const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'u
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
+const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
 
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /class="primary-app-nav"/, `${name} page is missing primary navigation`);
@@ -16,6 +17,16 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /<span>Forecast<\/span><small>Beta<\/small>/, `${name} navigation must label Forecast as Beta`);
   assert.match(page, />More</, `${name} navigation is missing More`);
 }
+
+for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
+  assert.match(page, /secondary-page-header\.js/, `${name} must load shared header controls`);
+}
+assert.match(secondaryHeader, /id="connectionStatus"/, 'Shared header must include online status');
+assert.match(secondaryHeader, /id="accountBtn"/, 'Shared header must include Account');
+assert.match(secondaryHeader, /id="installBtn"/, 'Shared header must include Install');
+assert.match(secondaryHeader, /\.\/\?dialog=account/, 'Account must route to the master dialog');
+assert.match(secondaryHeader, /\.\/\?dialog=install/, 'Install must route to the master dialog');
+assert.match(app, /requestedDialog === 'account'[\s\S]*authDialog[\s\S]*requestedDialog === 'install'[\s\S]*installDialog/, 'Master page must open routed dialogs');
 
 assert.equal((index.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
 assert.match(index, /id="moreMenuDialog"/, 'More menu dialog missing');
