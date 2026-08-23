@@ -8,7 +8,7 @@ const MOCK_SUPABASE_SDK = `
     properties: [...(options.properties || [])],
     expenses: [...(options.expenses || [])]
   };
-  const now = '2026-08-23T12:00:00.000Z';
+  const now = '2026-08-23T23:59:59.000Z';
   const session = {
     access_token: 'playwright-access-token',
     user: {
