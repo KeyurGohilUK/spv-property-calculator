@@ -19,11 +19,50 @@ async function waitForServiceWorkerControl(page) {
 }
 
 async function mockRelease(page, version, notes = []) {
-  await page.route('**/release.json', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ version, notes })
-  }));
+  const installMock = ({ releaseVersion, releaseNotes }) => {
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = new URL(
+        typeof input === 'string' || input instanceof URL ? input : input.url,
+        document.baseURI
+      );
+      if (url.pathname.endsWith('/release.json')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          version: releaseVersion,
+          notes: releaseNotes
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }));
+      }
+      return nativeFetch(input, init);
+    };
+  };
+  const release = { releaseVersion: version, releaseNotes: notes };
+
+  await page.addInitScript(installMock, release);
+  if (page.url() !== 'about:blank') {
+    await page.evaluate(installMock, release);
+  }
+}
+
+async function failAppAsset(page, assetName) {
+  await page.evaluate((failedAsset) => {
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = new URL(
+        typeof input === 'string' || input instanceof URL ? input : input.url,
+        document.baseURI
+      );
+      if (url.pathname.endsWith(`/${failedAsset}`)) {
+        return Promise.resolve(new Response('Temporarily unavailable', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain' }
+        }));
+      }
+      return nativeFetch(input, init);
+    };
+  }, assetName);
 }
 
 async function openInstallDialog(page) {
@@ -146,11 +185,7 @@ test('keeps unsaved editor changes when an update reload is cancelled', async ({
 test('shows a safe retry message when an app-shell refresh fails', async ({ page }) => {
   await waitForServiceWorkerControl(page);
   await mockRelease(page, '9.9.9', ['Failure handling test']);
-  await page.route('**/calculations.js', (route) => route.fulfill({
-    status: 503,
-    contentType: 'text/plain',
-    body: 'Temporarily unavailable'
-  }));
+  await failAppAsset(page, 'calculations.js');
 
   await openInstallDialog(page);
   await expect(page.locator('#downloadUpdatesBtn')).toContainText('Download updates');
