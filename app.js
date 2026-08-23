@@ -77,6 +77,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './supabase-config.js',
   './release.json',
   './expenses.html',
+  './secondary-page-header.js',
   './expenses.css',
   './expenses.js',
   './expense-storage.js',
@@ -1326,6 +1327,22 @@ function init() {
   setupCloud();
 
   const initialMenuUrl = new URL(window.location.href);
+  const requestedDialog = initialMenuUrl.searchParams.get('dialog');
+  if (requestedDialog === 'account' || requestedDialog === 'install') {
+    initialMenuUrl.searchParams.delete('dialog');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(() => {
+      if (requestedDialog === 'account') {
+        renderAuthDialog();
+        $('authDialog').showModal();
+      } else {
+        $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
+        $('updateMessage').textContent = '';
+        loadReleaseInfo();
+        $('installDialog').showModal();
+      }
+    }, 350);
+  }
   if (initialMenuUrl.searchParams.get('menu') === 'more') {
     initialMenuUrl.searchParams.delete('menu');
     window.history.replaceState({}, '', initialMenuUrl);
