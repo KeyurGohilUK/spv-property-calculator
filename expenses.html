@@ -58,17 +58,6 @@
         <article><span>Property expenses</span><strong id="propertyExpenses">£0</strong></article>
       </section>
 
-      <section class="expense-report-card" aria-labelledby="expenseReportTitle">
-        <div class="expense-report-heading">
-          <div><p class="eyebrow">Reporting</p><h3 id="expenseReportTitle">Expense summary</h3><small class="muted">Reflects the active filters</small></div>
-        </div>
-        <div class="expense-report-columns">
-          <div><h4>By month</h4><div id="expenseMonthlyReport" class="expense-breakdown"></div></div>
-          <div><h4>By category</h4><div id="expenseCategoryReport" class="expense-breakdown"></div></div>
-          <div><h4>By allocation</h4><div id="expenseAllocationReport" class="expense-breakdown"></div></div>
-        </div>
-      </section>
-
       <div class="expense-list-heading">
         <div><h3>Recorded expenses</h3><span id="expenseCount" class="count-badge">0</span></div>
         <button id="toggleExpenseFiltersBtn" class="secondary-btn compact-expense-btn" type="button" aria-expanded="false" aria-controls="expenseFilters">Filter &amp; Export</button>
@@ -82,6 +71,16 @@
           <button id="clearExpenseFiltersBtn" class="text-btn" type="button">Clear filters</button>
           <button id="exportExpensesBtn" class="primary-btn compact-expense-btn" type="button">Export CSV</button>
         </div>
+        <section class="expense-report-card expense-report-inline" aria-labelledby="expenseReportTitle">
+          <div class="expense-report-heading">
+            <div><p class="eyebrow">Reporting</p><h3 id="expenseReportTitle">Expense summary</h3><small class="muted">Reflects the active filters</small></div>
+          </div>
+          <div class="expense-report-columns">
+            <div><h4>By month</h4><div id="expenseMonthlyReport" class="expense-breakdown"></div></div>
+            <div><h4>By category</h4><div id="expenseCategoryReport" class="expense-breakdown"></div></div>
+            <div><h4>By allocation</h4><div id="expenseAllocationReport" class="expense-breakdown"></div></div>
+          </div>
+        </section>
       </section>
 
       <div id="expenseList" class="expense-list"></div>
