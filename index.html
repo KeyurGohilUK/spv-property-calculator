@@ -451,14 +451,14 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.11.3</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.11.4</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.11.3</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.11.4</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>Cleaner More popup layout</li>
-      <li>Close button moved to the top-right corner</li>
-      <li>Removed the repeated More heading</li>
+      <li>App Menu title and Close button aligned</li>
+      <li>Click outside the popup to close it</li>
+      <li>Archived Properties remains under App Menu</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -490,7 +490,10 @@
 
 
 <dialog id="moreMenuDialog" class="app-dialog more-menu-dialog">
-  <button id="closeMoreMenuDialog" class="icon-btn more-menu-close" type="button" aria-label="Close menu">×</button>
+  <div class="more-menu-header">
+    <h3>App Menu</h3>
+    <button id="closeMoreMenuDialog" class="icon-btn more-menu-close" type="button" aria-label="Close menu">×</button>
+  </div>
   <div class="more-menu-list">
     <button id="archiveBtn" class="more-menu-item" type="button">
       <span class="more-menu-icon" aria-hidden="true">↺</span>

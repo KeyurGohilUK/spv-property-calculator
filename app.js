@@ -58,7 +58,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.11.3';
+const APP_VERSION = '1.11.4';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -1169,6 +1169,15 @@ function init() {
     $('moreMenuDialog').showModal();
   });
   $('closeMoreMenuDialog').addEventListener('click', () => $('moreMenuDialog').close());
+  $('moreMenuDialog').addEventListener('click', (event) => {
+    const dialog = event.currentTarget;
+    const bounds = dialog.getBoundingClientRect();
+    const clickedInside = event.clientX >= bounds.left
+      && event.clientX <= bounds.right
+      && event.clientY >= bounds.top
+      && event.clientY <= bounds.bottom;
+    if (!clickedInside) dialog.close();
+  });
   $('addExpenseBtn').addEventListener('click', () => {
     addExpenseRow();
     updateSaveButtonState();
