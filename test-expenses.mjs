@@ -23,9 +23,11 @@ assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*exp
 assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
 assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not show a separate Sync now button');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
-assert.match(expenseHtml, /id="exportExpensesBtn"/, 'CSV export action is missing');
+assert.match(expenseHtml, /id="toggleExpenseFiltersBtn"[\s\S]*Filter &amp; Export/, 'Combined Filter & Export action is missing');
+assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"/, 'CSV export must live inside the filter panel');
 assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV export is not implemented');
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
+assert.equal((expenseHtml.match(/id="exportExpensesBtn"/g) || []).length, 1, 'Export action must not be duplicated in the report card');
 assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
 const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.css', import.meta.url), 'utf8'));
 assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
