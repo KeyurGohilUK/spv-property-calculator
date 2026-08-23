@@ -1,8 +1,7 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
-import { getAllExpenses, replaceExpenses, getReceipt } from './expense-storage.js';
-import { prepareExpenseReceiptForSync } from './receipt-cloud.js';
+import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
-const APP_VERSION = '1.16.2';
+const APP_VERSION = '1.16.3';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
@@ -18,61 +17,6 @@ function closeOnBackdrop(dialog) {
   });
 }
 
-function expenseTime(value) {
-  const parsed = Date.parse(value || '');
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-async function syncExpenses(cloud, lockHeld = false) {
-  if (!lockHeld && navigator.locks?.request) {
-    return navigator.locks.request('spv-expense-cloud-sync', () => syncExpenses(cloud, true));
-  }
-  const localItems = getAllExpenses();
-  const remoteItems = await cloud.listExpenses();
-  const localMap = new Map(localItems.map((item) => [String(item.id), item]));
-  const remoteMap = new Map(remoteItems.map((item) => [String(item.id), item]));
-  const merged = new Map();
-  const upload = [];
-  const conflicts = [];
-
-  for (const id of new Set([...localMap.keys(), ...remoteMap.keys()])) {
-    const local = localMap.get(id);
-    const remote = remoteMap.get(id);
-    if (local && !remote) { merged.set(id, local); upload.push(local); continue; }
-    if (!local && remote) { merged.set(id, remote); continue; }
-    if (!local || !remote) continue;
-    const localRevision = Math.max(0, Number(local._cloudRevision) || 0);
-    const remoteRevision = Math.max(0, Number(remote._cloudRevision) || 0);
-    if (local._cloudDirty) {
-      merged.set(id, local);
-      if (localRevision === remoteRevision) upload.push(local);
-      else conflicts.push(id);
-    } else if (remoteRevision > localRevision || expenseTime(remote.updatedAt) > expenseTime(local.updatedAt)) {
-      merged.set(id, remote);
-    } else if (expenseTime(local.updatedAt) > expenseTime(remote.updatedAt)) {
-      merged.set(id, local); upload.push(local);
-    } else {
-      merged.set(id, remote);
-    }
-  }
-
-  let uploaded = 0;
-  for (const item of upload) {
-    try {
-      const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
-      merged.set(String(item.id), prepared);
-      const saved = await cloud.upsertExpense(prepared);
-      merged.set(String(item.id), saved);
-      uploaded += 1;
-    } catch (error) {
-      if (cloud.isExpenseConflict?.(error)) { conflicts.push(String(item.id)); continue; }
-      throw error;
-    }
-  }
-  replaceExpenses([...merged.values()]);
-  return { changes: uploaded + remoteItems.filter((item) => !localMap.has(String(item.id))).length, conflicts };
-}
-
 async function syncWorkspace() {
   if (syncing || !cloudUser || !navigator.onLine) return;
   const cloud = window.SPVCloud;
@@ -83,7 +27,7 @@ async function syncWorkspace() {
     const properties = await cloud.syncAll(getProperties(), getPendingDeletes());
     replaceProperties(properties.merged);
     clearPendingDeletes(properties.clearedDeleteIds || []);
-    const expenses = await syncExpenses(cloud);
+    const expenses = await syncExpenseWorkspace(cloud);
     const conflicts = (properties.conflicts?.length || 0) + expenses.conflicts.length;
     $('secondaryAccountMessage').textContent = conflicts
       ? `${conflicts} conflict${conflicts === 1 ? '' : 's'} kept locally for review.`
@@ -91,7 +35,8 @@ async function syncWorkspace() {
     window.dispatchEvent(new CustomEvent('spv-workspace-synced'));
   } catch (error) {
     console.warn('Workspace sync failed:', error);
-    $('secondaryAccountMessage').textContent = 'Sync pending. Local changes remain safe.';
+    const stage = error?.syncStage ? ` while ${error.syncStage}` : '';
+    $('secondaryAccountMessage').textContent = `Sync pending${stage}. Local changes remain safe. Try again.`;
   } finally {
     syncing = false;
     renderAccount();
