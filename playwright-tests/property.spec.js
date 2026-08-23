@@ -27,7 +27,6 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
 });
 
 test('saves a property and edits it by clicking its card', async ({ page }) => {
-  await page.goto('/');
   await createProperty(page);
 
   await page.locator('.property-card').filter({ hasText: 'Playwright Test Property' }).click();
@@ -48,7 +47,6 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
 });
 
 test('archives and restores a property without losing its calculation', async ({ page }) => {
-  await page.goto('/');
   await createProperty(page, { title: 'Archive Journey', price: '275000', refurbishment: '12000' });
 
   page.once('dialog', (dialog) => dialog.accept());
@@ -77,7 +75,7 @@ test('mobile save control remains fixed while the editor scrolls', async ({ page
 
   const before = await page.locator('#savePropertyBtn').boundingBox();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(100);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   const after = await page.locator('#savePropertyBtn').boundingBox();
 
   expect(before && after).toBeTruthy();
