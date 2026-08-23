@@ -20,12 +20,7 @@ import {
   getPendingDeletes as readPendingDeletes,
   clearPendingDeletes
 } from './storage.js';
-import {
-  getAllExpenses,
-  replaceExpenses as replaceLocalExpenses,
-  getReceipt
-} from './expense-storage.js';
-import { prepareExpenseReceiptForSync } from './receipt-cloud.js';
+import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
 /*
  * SPV Property Calculator - browser application
@@ -65,7 +60,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.16.2';
+const APP_VERSION = '1.16.3';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -702,73 +697,8 @@ function storeCloudSyncedProperty(synced) {
 }
 
 
-function expenseTime(value) {
-  const parsed = Date.parse(value || '');
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 async function syncExpenseRecords() {
-  const cloud = window.SPVCloud;
-  if (!cloud?.listExpenses || !cloud?.upsertExpense) return { changes: 0, conflicts: [] };
-  const localItems = getAllExpenses();
-  const cloudItems = await cloud.listExpenses();
-  const localMap = new Map(localItems.map((item) => [String(item.id), item]));
-  const cloudMap = new Map(cloudItems.map((item) => [String(item.id), item]));
-  const merged = new Map();
-  const upload = [];
-  const conflicts = [];
-
-  for (const id of new Set([...localMap.keys(), ...cloudMap.keys()])) {
-    const local = localMap.get(id);
-    const remote = cloudMap.get(id);
-    if (local && !remote) {
-      merged.set(id, local);
-      upload.push(local);
-      continue;
-    }
-    if (!local && remote) {
-      merged.set(id, remote);
-      continue;
-    }
-    if (!local || !remote) continue;
-    const localRevision = Math.max(0, Number(local._cloudRevision) || 0);
-    const remoteRevision = Math.max(0, Number(remote._cloudRevision) || 0);
-    if (local._cloudDirty) {
-      merged.set(id, local);
-      if (localRevision === remoteRevision) upload.push(local);
-      else conflicts.push(id);
-    } else if (remoteRevision > localRevision || expenseTime(remote.updatedAt) > expenseTime(local.updatedAt)) {
-      merged.set(id, remote);
-    } else if (expenseTime(local.updatedAt) > expenseTime(remote.updatedAt)) {
-      merged.set(id, local);
-      upload.push(local);
-    } else {
-      merged.set(id, remote);
-    }
-  }
-
-  let uploaded = 0;
-  for (const item of upload) {
-    try {
-      const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
-      merged.set(String(item.id), prepared);
-      const synced = await cloud.upsertExpense(prepared);
-      merged.set(String(item.id), synced);
-      uploaded += 1;
-    } catch (error) {
-      if (cloud.isExpenseConflict?.(error)) {
-        conflicts.push(String(item.id));
-        continue;
-      }
-      throw error;
-    }
-  }
-  replaceLocalExpenses([...merged.values()]);
-  const downloaded = [...merged.values()].filter((item) => {
-    const local = localMap.get(String(item.id));
-    return !local || Number(item._cloudRevision || 0) > Number(local._cloudRevision || 0);
-  }).length;
-  return { changes: uploaded + downloaded, conflicts };
+  return syncExpenseWorkspace(window.SPVCloud);
 }
 
 function setCloudMessage(message, isWarning = false) {
