@@ -1,9 +1,8 @@
 {
-  "version": "1.13.0",
+  "version": "1.13.1",
   "notes": [
-    "Expense filtering and CSV export are now combined in one panel",
-    "The main action is renamed Filter & Export",
-    "CSV export continues to use the active filters",
-    "The separate report-card export button has been removed"
+    "Expense Summary now lives inside Filter & Export",
+    "Monthly, category and allocation reports expand with the filters",
+    "Report totals continue to reflect the active filters"
   ]
 }
