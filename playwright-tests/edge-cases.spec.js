@@ -122,6 +122,80 @@ test('expense allocation, filtering and CSV export work together', async ({ page
   await expect(page.getByRole('heading', { name: 'No expenses recorded' })).toBeVisible();
 });
 
+test('large receipt photos are compressed below 2 MB before being saved', async ({ page }) => {
+  await page.goto('/expenses.html');
+  await page.getByRole('button', { name: /Add Expense/i }).click();
+  await page.locator('#expenseAmount').fill('45');
+  await page.locator('#expenseDescription').fill('Large phone receipt');
+
+  const originalSize = await page.locator('#expenseReceipt').evaluate(async (input) => {
+    const width = 2200;
+    const height = 2200;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    const pixels = context.createImageData(width, height);
+    let seed = 123456789;
+
+    for (let index = 0; index < pixels.data.length; index += 4) {
+      seed = (1664525 * seed + 1013904223) >>> 0;
+      pixels.data[index] = seed & 255;
+      pixels.data[index + 1] = (seed >>> 8) & 255;
+      pixels.data[index + 2] = (seed >>> 16) & 255;
+      pixels.data[index + 3] = 255;
+    }
+
+    context.putImageData(pixels, 0, 0);
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (result) => result ? resolve(result) : reject(new Error('Could not create test receipt')),
+        'image/png'
+      );
+    });
+    const file = new File([blob], 'iphone-receipt.png', { type: 'image/png' });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return file.size;
+  });
+
+  expect(originalSize).toBeGreaterThan(2 * 1024 * 1024);
+  await expect(page.locator('#expenseReceiptSize')).toContainText('will be optimised when saved');
+  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
+
+  const stored = await page.evaluate(async () => {
+    const [expense] = JSON.parse(
+      localStorage.getItem('spv-property-calculator.expenses.v1') || '[]'
+    );
+    const file = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('spv-property-calculator.receipts.v1', 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction('receipts', 'readonly');
+        const get = transaction.objectStore('receipts').get(expense.id);
+        get.onerror = () => reject(get.error);
+        get.onsuccess = () => resolve(get.result?.file || null);
+        transaction.oncomplete = () => db.close();
+      };
+    });
+    return {
+      metadata: expense.receipt,
+      file: file ? { name: file.name, type: file.type, size: file.size } : null
+    };
+  });
+
+  expect(stored.metadata.name).toBe('iphone-receipt.jpg');
+  expect(stored.metadata.type).toBe('image/jpeg');
+  expect(stored.metadata.size).toBeLessThanOrEqual(2 * 1024 * 1024);
+  expect(stored.file).toEqual(stored.metadata);
+  await expect(page.getByText('Large phone receipt')).toBeVisible();
+  await expect(page.getByRole('button', { name: /View receipt/i })).toBeVisible();
+});
+
 test('receipt PDFs larger than 2 MB are rejected before local save', async ({ page }) => {
   await page.goto('/expenses.html');
   await page.getByRole('button', { name: /Add Expense/i }).click();
