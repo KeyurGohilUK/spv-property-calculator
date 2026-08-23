@@ -5,15 +5,18 @@ const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(index, /Works offline, with a shared Supabase workspace for your small team\./, 'Home introduction must not include the removed workspace sentence');
 assert.match(index, /Archived properties are hidden from the main list and can be restored at any time\./, 'Archive guidance must remain clear and user-focused');
 assert.doesNotMatch(index, /remain stored locally and in Supabase|Any signed-in user can restore them/, 'Archive guidance must not expose backend details');
-assert.match(index, /class="property-hero-actions"[\s\S]*id="propertySyncStatus" class="property-sync-status"[\s\S]*id="newPropertyBtn" class="primary-btn"/, 'Properties hero must match the Expense Tracker action pattern');
+assert.match(index, /class="property-hero-actions"[\s\S]*id="propertySyncStatus" class="sync-status"[\s\S]*id="newPropertyBtn" class="primary-btn"/, 'Properties hero must use the shared sync-status component');
+assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
+const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
 
-assert.match(app, /function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Saved on this device[\s\S]*Offline · changes will sync later[\s\S]*Syncing…[\s\S]*Synced/, 'Property sync status must reflect the shared sync lifecycle');
+assert.match(app, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
 assert.match(styles, /\.property-hero-actions \{[^}]*display: flex;[^}]*justify-content: flex-end;[^}]*flex-wrap: wrap;/, 'Property hero actions must match expense hero alignment');
+assert.match(styles, /\.sync-status \{[^}]*color: var\(--muted\)[^}]*text-align: right; \}[\s\S]*\.sync-status\.error \{ color: var\(--danger\); \}[\s\S]*\.sync-status\.synced \{ color: var\(--brand\); \}/, 'Shared sync-status styling is missing');
 assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.property-hero-actions \{[^}]*grid-template-columns: 1fr;[^}]*width: 100%; \}/, 'Property hero actions must stack on mobile');
 
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
