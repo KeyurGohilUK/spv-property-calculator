@@ -188,7 +188,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
     };
   });
 
-  expect(stored.metadata.name).toBe('iphone-receipt.jpg');
+  expect(stored.metadata.name).toMatch(/^large-phone-receipt-\\d{8}-\\d{6}\\.jpg$/);
   expect(stored.metadata.type).toBe('image/jpeg');
   expect(stored.metadata.size).toBeLessThanOrEqual(2 * 1024 * 1024);
   expect(stored.file).toEqual(stored.metadata);
