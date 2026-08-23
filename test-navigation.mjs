@@ -63,5 +63,8 @@ assert.match(styles, /\.field input, \.field textarea, \.field select, \.expense
 assert.match(styles, /\.field select \{[\s\S]*appearance: none[\s\S]*background-image:/, 'Dropdowns must use the shared custom arrow treatment');
 assert.match(styles, /select:focus-visible/, 'Dropdowns must provide the shared keyboard focus style');
 assert.match(styles, /\.field select:disabled/, 'Dropdowns must provide a disabled state');
+assert.match(styles, /dialog \{[\s\S]*scrollbar-width: thin[\s\S]*scrollbar-color:/, 'Every popup must use a thin Firefox scrollbar');
+assert.match(styles, /dialog::\-webkit-scrollbar \{[\s\S]*width: 7px/, 'Every popup must use a thin WebKit scrollbar');
+assert.match(styles, /dialog::\-webkit-scrollbar-thumb[\s\S]*var\(--brand\)/, 'Popup scrollbar thumb must use app theme colours');
 
 console.log('Primary navigation structure checks passed.');
