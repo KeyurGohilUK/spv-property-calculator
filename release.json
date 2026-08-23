@@ -1,8 +1,8 @@
 {
-  "version": "1.13.1",
+  "version": "1.13.2",
   "notes": [
-    "Expense Summary now lives inside Filter & Export",
-    "Monthly, category and allocation reports expand with the filters",
-    "Report totals continue to reflect the active filters"
+    "Expense filters now use a spacious two-column layout on iPad",
+    "From and To date fields no longer overlap at tablet widths",
+    "Desktop and iPhone layouts remain optimised for their screen sizes"
   ]
 }

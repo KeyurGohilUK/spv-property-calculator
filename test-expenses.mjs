@@ -38,6 +38,7 @@ assert.match(expenseStyles, /\.expense-dialog[\s\S]*overflow-x: hidden/, 'Expens
 assert.match(expenseStyles, /\.expense-filters \.field \{ min-width: 0;/, 'Filter fields must be allowed to shrink');
 assert.match(expenseStyles, /@media \(max-width: 620px\)[\s\S]*\.expense-filters \{ grid-template-columns: minmax\(0, 1fr\); \}/, 'Mobile expense filters must use one column');
 assert.match(expenseStyles, /\.expense-filters input\[type="date"\][\s\S]*max-width: 100%/, 'Mobile filter dates must stay inside their container');
+assert.match(expenseStyles, /@media \(max-width: 1100px\) and \(min-width: 621px\)[\s\S]*\.expense-filters \{ grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\); \}[\s\S]*\.expense-filter-actions \{ grid-column: 1 \/ -1; \}/, 'Tablet expense filters must use a two-column layout with full-width actions');
 assert.match(expenseHtml, /class="dialog-close expense-dialog-close"/, 'Expense popup must use the shared close control');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 
