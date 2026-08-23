@@ -59,5 +59,9 @@ assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu mu
 assert.match(index, /id="archiveBtn"/, 'Archived Properties must remain available under More');
 assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav[\s\S]*position: fixed/, 'Mobile fixed navigation styling missing');
 assert.match(styles, /safe-bottom/, 'Navigation must respect device safe-area spacing');
+assert.match(styles, /\.field input, \.field textarea, \.field select, \.expense-row input/, 'Dropdowns must share base input styling');
+assert.match(styles, /\.field select \{[\s\S]*appearance: none[\s\S]*background-image:/, 'Dropdowns must use the shared custom arrow treatment');
+assert.match(styles, /select:focus-visible/, 'Dropdowns must provide the shared keyboard focus style');
+assert.match(styles, /\.field select:disabled/, 'Dropdowns must provide a disabled state');
 
 console.log('Primary navigation structure checks passed.');
