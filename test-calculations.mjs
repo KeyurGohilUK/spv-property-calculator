@@ -37,8 +37,8 @@ const sdltBoundaries = [
   { price: 500000, expected: 40000, method: 'company-higher-rates' },
   { price: 500001, expected: 40000.10, method: 'company-higher-rates' },
   { price: 925000, expected: 82500, method: 'company-higher-rates' },
-  { price: 1500000, expected: 213750, method: 'company-higher-rates' },
-  { price: 1500001, expected: 213750.17, method: 'company-higher-rates' }
+  { price: 1500000, expected: 168750, method: 'company-higher-rates' },
+  { price: 1500001, expected: 168750.17, method: 'company-higher-rates' }
 ];
 
 for (const boundary of sdltBoundaries) {
