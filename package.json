@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test-calculations.mjs && node test-storage.mjs && node test-cloud-sync.mjs && node test-release.mjs"
+    "test": "node test-calculations.mjs && node test-storage.mjs && node test-cloud-sync.mjs && node test-release.mjs && node test-navigation.mjs"
   }
 }
