@@ -1,8 +1,9 @@
 {
-  "version": "1.12.9",
+  "version": "1.13.0",
   "notes": [
-    "Expense From and To date filters no longer overlap on iPhone",
-    "Mobile expense filters now use a clear single-column layout",
-    "Native iPhone date controls remain contained within the filter panel"
+    "Expense filtering and CSV export are now combined in one panel",
+    "The main action is renamed Filter & Export",
+    "CSV export continues to use the active filters",
+    "The separate report-card export button has been removed"
   ]
 }
