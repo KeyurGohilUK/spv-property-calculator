@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const bootstrap = fs.readFileSync(new URL('./database-scripts/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
 const expenseMigration = fs.readFileSync(new URL('./database-scripts/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
 const receiptMigration = fs.readFileSync(new URL('./database-scripts/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
+const revisionRepair = fs.readFileSync(new URL('./database-scripts/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('./cloudflare/receipt-worker/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('./cloudflare/receipt-worker/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('./database-scripts/README.md', import.meta.url), 'utf8');
@@ -18,6 +19,9 @@ assert.match(expenseMigration, /create table if not exists public\.expenses/, 'U
 assert.match(expenseMigration, /expenses_scope_property_check/, 'Expense scope/property integrity check missing');
 assert.match(receiptMigration, /add column if not exists receipt_object_path/, 'Update 11 must preserve a private R2 object key');
 assert.match(receiptMigration, /expenses_receipt_object_path_check/, 'Update 11 must constrain R2 object keys');
+assert.match(revisionRepair, /alter table public\.properties[\s\S]*add column if not exists revision bigint/, 'Update 12 must safely repair the property revision column');
+assert.match(revisionRepair, /alter table public\.expenses[\s\S]*add column if not exists revision bigint/, 'Update 12 must safely repair the expense revision column');
+assert.match(revisionRepair, /create or replace function public\.upsert_property_if_current/, 'Update 12 must restore conflict-safe property writes');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');
