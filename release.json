@@ -1,8 +1,8 @@
 {
-  "version": "1.11.3",
+  "version": "1.11.4",
   "notes": [
-    "More popup close button moved to the top-right corner",
-    "Removed the repeated More heading from the popup",
-    "Archived Properties remains the only action inside More"
+    "App Menu title aligned at the top-left of the popup",
+    "Close button aligned on the same row at the top-right",
+    "Clicking outside the popup now closes the menu"
   ]
 }
