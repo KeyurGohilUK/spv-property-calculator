@@ -11,9 +11,15 @@
 .expense-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
 .expense-list-heading > div { display: flex; align-items: center; gap: 10px; }
 .expense-list-heading h3 { margin: 0; }
-.expense-filter select { min-height: 42px; padding: 8px 34px 8px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); }
+.compact-expense-btn { min-height: 40px; padding: 8px 13px; }
+.expense-filters { display: grid; grid-template-columns: 1.3fr 1.3fr 1fr 1fr auto; align-items: end; gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.expense-filters .field { margin: 0; }
+.expense-filters select, .expense-filters input { min-height: 42px; width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
+.expense-filters .text-btn { white-space: nowrap; }
 .expense-list { display: grid; gap: 11px; }
-.expense-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-card { cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-card:hover { border-color: color-mix(in srgb, var(--brand) 30%, var(--border)); }
+.expense-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: 2px; }
 .expense-card-main { min-width: 0; }
 .expense-card-heading { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
 .expense-card-heading strong { font-size: 17px; }
@@ -34,6 +40,7 @@
 .expense-dialog .field { margin-bottom: 13px; }
 .expense-dialog select, .expense-dialog input[type="date"], .expense-dialog input[type="text"], .expense-dialog input[type="number"], .expense-dialog textarea { width: 100%; }
 .receipt-field input { padding: 10px; border: 1px dashed var(--border); border-radius: 12px; background: var(--surface-2); }
+.compact-switch { margin: 2px 0 13px; }
 .expense-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 10px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 620px) {
@@ -46,7 +53,8 @@
   .expense-summary-grid span { margin: 0; }
   .expense-summary-grid strong { font-size: 18px; }
   .expense-list-heading { align-items: stretch; flex-direction: column; }
-  .expense-filter select { width: 100%; }
+  .expense-filters { grid-template-columns: 1fr 1fr; }
+  .expense-filters .field:nth-child(-n+2), .expense-filters .text-btn { grid-column: 1 / -1; }
   .expense-card { align-items: start; }
   .expense-card-actions { flex-direction: column; }
   .expense-form-grid { grid-template-columns: 1fr; gap: 0; }

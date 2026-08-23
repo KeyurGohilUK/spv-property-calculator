@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.12.1-expense-cloud-sync';
+const CACHE_NAME = 'spv-property-calculator-v1.12.2-expense-edit-filters';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;

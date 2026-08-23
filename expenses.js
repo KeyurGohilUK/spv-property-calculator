@@ -11,6 +11,7 @@ let expenses = [];
 let cloudUser = null;
 let expenseSyncing = false;
 let cloudListenerAttached = false;
+let editingExpenseId = null;
 
 
 function asTime(value) {
@@ -175,9 +176,20 @@ function updateScope() {
   }
 }
 
-function openForm() {
+function openForm(expense = null) {
+  editingExpenseId = expense?.id || null;
   $('expenseForm').reset();
-  $('expenseDate').value = today();
+  $('expenseDialogTitle').textContent = expense ? 'Edit Expense' : 'Add Expense';
+  $('saveExpenseBtn').textContent = expense ? 'Save Changes' : 'Save Expense';
+  $('expenseDate').value = expense?.date || today();
+  $('expenseAmount').value = expense?.amount || '';
+  $('expenseCategory').value = expense?.category || $('expenseCategory').options[0].value;
+  $('expenseScope').value = expense?.scope || 'company';
+  $('expenseProperty').value = expense?.propertyId || '';
+  $('expenseDescription').value = expense?.description || '';
+  $('expenseNotes').value = expense?.notes || '';
+  $('removeExpenseReceipt').checked = false;
+  $('removeReceiptField').classList.toggle('hidden', !expense?.receipt);
   $('expenseSaveMessage').textContent = '';
   $('expenseAmountError').classList.add('hidden');
   $('expensePropertyError').classList.add('hidden');
@@ -187,13 +199,21 @@ function openForm() {
   window.setTimeout(() => $('expenseAmount').focus(), 0);
 }
 
-function closeForm() { $('expenseDialog').close(); }
+function closeForm() {
+  editingExpenseId = null;
+  $('expenseDialog').close();
+}
 
 function expenseMatchesFilter(expense) {
   const filter = $('expenseFilter').value;
-  if (filter === 'all') return true;
-  if (filter === 'company') return expense.scope === 'company';
-  if (filter.startsWith('property:')) return expense.scope === 'property' && expense.propertyId === filter.slice(9);
+  if (filter === 'company' && expense.scope !== 'company') return false;
+  if (filter.startsWith('property:') && !(expense.scope === 'property' && expense.propertyId === filter.slice(9))) return false;
+  const category = $('expenseCategoryFilter').value;
+  if (category !== 'all' && expense.category !== category) return false;
+  const from = $('expenseDateFrom').value;
+  const to = $('expenseDateTo').value;
+  if (from && String(expense.date || '') < from) return false;
+  if (to && String(expense.date || '') > to) return false;
   return true;
 }
 
@@ -214,6 +234,16 @@ function render() {
   visible.forEach((expense) => {
     const card = document.createElement('article');
     card.className = 'expense-card';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `Edit expense ${expense.description || money(expense.amount)}`);
+    card.addEventListener('click', () => openForm(expense));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openForm(expense);
+      }
+    });
     const main = document.createElement('div');
     main.className = 'expense-card-main';
     const heading = document.createElement('div');
@@ -252,6 +282,8 @@ function render() {
 
     const actions = document.createElement('div');
     actions.className = 'expense-card-actions';
+    actions.addEventListener('click', (event) => event.stopPropagation());
+    actions.addEventListener('keydown', (event) => event.stopPropagation());
     if (expense.receipt) {
       const view = document.createElement('button');
       view.type = 'button';
@@ -319,8 +351,12 @@ async function submitExpense(event) {
   submit.disabled = true;
   $('expenseSaveMessage').textContent = 'Saving…';
   let saved = null;
+  const previous = editingExpenseId ? getAllExpenses().find((item) => item.id === editingExpenseId) : null;
+  const removeReceipt = Boolean(previous?.receipt && $('removeExpenseReceipt').checked);
   try {
     saved = saveExpense({
+      ...previous,
+      id: editingExpenseId || undefined,
       amount,
       date: $('expenseDate').value || today(),
       category: $('expenseCategory').value,
@@ -328,16 +364,23 @@ async function submitExpense(event) {
       propertyId,
       description: $('expenseDescription').value.trim(),
       notes: $('expenseNotes').value.trim(),
-      receipt: receiptFile ? { name: receiptFile.name, type: receiptFile.type, size: receiptFile.size } : null
+      receipt: receiptFile
+        ? { name: receiptFile.name, type: receiptFile.type, size: receiptFile.size }
+        : (removeReceipt ? null : previous?.receipt || null)
     });
     if (receiptFile) await saveReceipt(saved.id, receiptFile);
+    else if (removeReceipt) await deleteReceipt(saved.id);
     closeForm();
     render();
     syncExpenses({ showFeedback: false });
   } catch (error) {
     if (saved) {
-      permanentlyRemoveLocalExpense(saved.id);
-      try { await deleteReceipt(saved.id); } catch {}
+      if (previous) {
+        replaceExpenses(getAllExpenses().map((item) => item.id === previous.id ? previous : item));
+      } else {
+        permanentlyRemoveLocalExpense(saved.id);
+        try { await deleteReceipt(saved.id); } catch {}
+      }
     }
     $('expenseSaveMessage').textContent = error.message || 'Could not save this expense.';
   } finally {
@@ -345,11 +388,26 @@ async function submitExpense(event) {
   }
 }
 
-$('openExpenseFormBtn').addEventListener('click', openForm);
+$('openExpenseFormBtn').addEventListener('click', () => openForm());
 $('closeExpenseDialogBtn').addEventListener('click', closeForm);
 $('cancelExpenseBtn').addEventListener('click', closeForm);
 $('expenseScope').addEventListener('change', updateScope);
 $('expenseFilter').addEventListener('change', render);
+$('expenseCategoryFilter').addEventListener('change', render);
+$('expenseDateFrom').addEventListener('change', render);
+$('expenseDateTo').addEventListener('change', render);
+$('toggleExpenseFiltersBtn').addEventListener('click', () => {
+  const opening = $('expenseFilters').classList.contains('hidden');
+  $('expenseFilters').classList.toggle('hidden', !opening);
+  $('toggleExpenseFiltersBtn').setAttribute('aria-expanded', String(opening));
+});
+$('clearExpenseFiltersBtn').addEventListener('click', () => {
+  $('expenseFilter').value = 'all';
+  $('expenseCategoryFilter').value = 'all';
+  $('expenseDateFrom').value = '';
+  $('expenseDateTo').value = '';
+  render();
+});
 $('expenseForm').addEventListener('submit', submitExpense);
 $('syncExpensesBtn').addEventListener('click', () => syncExpenses({ showFeedback: true }));
 window.addEventListener('online', () => syncExpenses({ showFeedback: false }));
@@ -361,6 +419,10 @@ $('expenseDialog').addEventListener('click', (event) => {
 });
 
 populateProperties();
+Array.from($('expenseCategory').options).forEach((option) => {
+  const filterOption = option.cloneNode(true);
+  $('expenseCategoryFilter').appendChild(filterOption);
+});
 $('expenseDate').value = today();
 render();
 setupExpenseCloud();

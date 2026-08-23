@@ -14,6 +14,14 @@ assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit
 assert.match(expenseHtml, /maximum 2 MB/, 'Receipt guidance must display the 2 MB limit');
 assert.match(expensePage, /remove\.innerHTML = '<svg[\s\S]*Delete expense/, 'Expense delete action must use an accessible icon');
 assert.doesNotMatch(expensePage, /remove\.textContent = 'Delete'/, 'Expense card must not show Delete text');
+assert.match(expensePage, /function openForm\(expense = null\)/, 'Expense editor must support existing records');
+assert.match(expensePage, /card\.addEventListener\('click', \(\) => openForm\(expense\)\)/, 'Clicking an expense card must open editing');
+assert.match(expensePage, /card\.setAttribute\('role', 'button'\)/, 'Clickable expense cards must be keyboard accessible');
+assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
+assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
+assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*expenseDateTo/, 'Category and date filters must be wired');
+assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
+assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 
 const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Office & administration', scope: 'company', propertyId: 'ignored' });
 assert.equal(company.scope, 'company');
