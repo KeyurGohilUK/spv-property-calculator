@@ -42,7 +42,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
   await expect.poll(() => worker.callsFor('PUT').length).toBe(1);
   const firstUpload = worker.callsFor('PUT')[0];
   expect(firstUpload.headers.authorization).toBe('Bearer playwright-access-token');
-  expect(firstUpload.headers['x-receipt-name']).toMatch(/^receipt-lifecycle-\\d{8}-\\d{6}\\.pdf$/);
+  expect(firstUpload.headers['x-receipt-name']).toMatch(/^receipt-lifecycle-\d{8}-\d{6}\.pdf$/);
   expect(firstUpload.body.length).toBeGreaterThan(0);
 
   await expect.poll(async () => (await storedExpense(page))?.receiptCloudPending).toBe(false);
@@ -56,7 +56,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
   await expect.poll(() => worker.callsFor('PUT').length).toBe(2);
   const replacement = worker.callsFor('PUT')[1];
   expect(replacement.headers['x-previous-object-key']).toBe('receipts/expense-playwright/current-receipt.pdf');
-  expect(replacement.headers['x-receipt-name']).toMatch(/^receipt-lifecycle-\\d{8}-\\d{6}\\.pdf$/);
+  expect(replacement.headers['x-receipt-name']).toMatch(/^receipt-lifecycle-\d{8}-\d{6}\.pdf$/);
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: /Delete expense/i }).click();
@@ -159,7 +159,7 @@ test('unauthorized Worker response keeps the receipt safely pending locally', as
 
   await expect.poll(() => worker.callsFor('PUT').length).toBeGreaterThan(0);
   const expense = await storedExpense(page);
-  expect(expense.receipt.name).toMatch(/^protected-receipt-\\d{8}-\\d{6}\\.pdf$/);
+  expect(expense.receipt.name).toMatch(/^protected-receipt-\d{8}-\d{6}\.pdf$/);
   expect(expense.receiptCloudPending).toBe(true);
   expect(expense.receiptObjectPath).toBe('');
   await expect(page.locator('#expenseSyncStatus')).toContainText(/pending|failed/i);
