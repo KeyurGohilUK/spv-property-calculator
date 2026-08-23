@@ -1,9 +1,9 @@
 {
-  "version": "1.12.4",
+  "version": "1.12.5",
   "notes": [
-    "Online, Account and Install controls now appear on every app page",
-    "Expenses and Forecast use the main app's account and install workflows",
-    "Connection status updates immediately when a device goes online or offline",
-    "Shared header behaviour is maintained from one reusable module"
+    "More now opens the App Menu popup without leaving the current page",
+    "App Menu styling now matches the Install App popup",
+    "The popup closes from its top-right button or by clicking outside",
+    "Archived Properties remains available inside App Menu"
   ]
 }
