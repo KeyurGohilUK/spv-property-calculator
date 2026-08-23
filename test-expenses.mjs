@@ -27,6 +27,10 @@ assert.match(expenseHtml, /id="exportExpensesBtn"/, 'CSV export action is missin
 assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV export is not implemented');
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
 assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
+const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.css', import.meta.url), 'utf8'));
+assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
+assert.match(expenseStyles, /input\[type="date"\][\s\S]*min-width: 0[\s\S]*max-width: 100%/, 'Expense date input must stay within the iPhone popup');
+assert.match(expenseStyles, /\.expense-dialog[\s\S]*overflow-x: hidden/, 'Expense popup must prevent horizontal overflow');
 assert.match(expenseHtml, /class="dialog-close expense-dialog-close"/, 'Expense popup must use the shared close control');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 
