@@ -22,6 +22,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 9 — property sync conflict protection
 - Update 10 — expense tracker schema
 - Update 11 — private Cloudflare R2 receipt references and Worker access grants
+- Update 12 — revision-column repair for conflict-safe property and expense sync
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
