@@ -15,20 +15,24 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 - Total purchase costs and total cash required
 - Local offline storage
 - Supabase email/password sign-in
-- Shared cloud property list for all authenticated users, protected by Row Level Security
+- Shared cloud property list restricted to approved workspace members
+- Viewer, editor and administrator workspace roles
+- Administrator-only permanent property deletion
 - Soft-delete Archived Properties page with restore support
 - Offline-first cloud sync; archived records remain stored locally and in Supabase
 - GitHub Pages and iPhone PWA support
 
 ## Before deploying
 
-For a new Supabase project follow **`SUPABASE_SETUP.md`**. If upgrading an existing shared edition, read **`SOFT_DELETE_UPGRADE.md`**. The short version is:
+For a new Supabase project follow **`SUPABASE_SETUP.md`**. Existing shared installations must also run **`database-scripts/Update 8 - Workspace Access Control.sql`**. The short version is:
 
 1. Create a free Supabase project.
 2. Run `supabase-schema.sql` in Supabase SQL Editor.
 3. Copy the Project URL and Publishable key into `supabase-config.js`.
 4. Upload this folder to GitHub Pages.
-5. Open the app and sign in with one of your small-team accounts.
+5. Run `database-scripts/Update 8 - Workspace Access Control.sql`. The oldest existing Auth account becomes the initial administrator.
+6. Review `workspace_members` and add only approved team accounts using the examples at the end of that script.
+7. Open the app and sign in with an approved account.
 
 Do **not** put a Supabase Secret key or `service_role` key in this project.
 
@@ -38,7 +42,8 @@ The app remains offline-first:
 
 - `localStorage` is used immediately when saving.
 - When signed in and online, the property is stored in the shared Supabase workspace.
-- Every authenticated account sees the same cloud rows. The app syncs on sign-in/app return and periodically while visible; local and shared-cloud versions are compared by `updatedAt`, so the newer copy wins.
+- Only active accounts listed in `workspace_members` can access cloud rows. Viewers can read; editors and administrators can save, archive and restore.
+- The app syncs on sign-in/app return and periodically while visible; local and shared-cloud versions are compared by `updatedAt`, so the newer copy wins.
 - Archiving is a normal synced update using a `deleted_at` timestamp; restoring clears it.
 - Legacy pending deletes from the older version are converted into archives during sync.
 - Signing out leaves the local device copy intact.
@@ -104,7 +109,7 @@ This is a planning estimator, not tax advice. Corporate property transactions ca
 
 ## Archived Properties and permanent deletion
 
-The main list uses soft-delete via **Archive**. Archived Properties provides **Restore Property** and **Permanently Delete**. Permanent deletion is online-only, requires sign-in, removes the property data for all users, and records a small deletion tombstone to prevent stale offline caches from recreating it. Run the latest `supabase-schema.sql` before deploying this version.
+The main list uses soft-delete via **Archive**. Archived Properties provides **Restore Property** and **Permanently Delete**. Permanent deletion is online-only, requires the administrator role, removes the property data for all users, and records a small deletion tombstone to prevent stale offline caches from recreating it. Run the latest `supabase-schema.sql` before deploying this version.
 
 ## UI refresh (v1.5)
 
