@@ -66,9 +66,7 @@ https://username.github.io/spv-property-calculator/
 
 ## Local testing
 
-You can double-click `index.html` to test the calculator UI. Cloud sync requires internet access and browser rules for `file://` origins vary, so the supported production mode is GitHub Pages.
-
-For a more realistic local test, serve the folder using a simple static server:
+The application uses browser modules so production and tests execute the same calculation code. Serve the folder through HTTP for local testing:
 
 ```bash
 python -m http.server 8080
