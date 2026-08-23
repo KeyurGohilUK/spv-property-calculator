@@ -62,7 +62,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.14.3';
+const APP_VERSION = '1.14.4';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -776,7 +776,34 @@ function setHeaderTooltip(element, label) {
   element.dataset.tooltip = label;
 }
 
+function renderPropertySyncStatus(isWarning = false) {
+  const status = $('propertySyncStatus');
+  if (!status) return;
+  const cloud = window.SPVCloud;
+  const state = cloud?.getConfigState?.() || { configured: false, available: false };
+  let message = 'Saved on this device';
+  let tone = '';
+
+  if (cloudUser && !navigator.onLine) {
+    message = 'Offline · changes will sync later';
+    tone = 'error';
+  } else if (cloudUser && cloudSyncing) {
+    message = 'Syncing…';
+  } else if (cloudUser && isWarning) {
+    message = 'Sync pending · saved on this device';
+    tone = 'error';
+  } else if (cloudUser && state.configured && state.available) {
+    message = 'Synced';
+    tone = 'synced';
+  }
+
+  status.textContent = message;
+  status.classList.toggle('error', tone === 'error');
+  status.classList.toggle('synced', tone === 'synced');
+}
+
 function renderCloudState(isWarning = false) {
+  renderPropertySyncStatus(isWarning);
   const cloud = window.SPVCloud;
   const state = cloud?.getConfigState?.() || { configured: false, available: false };
   const accountBtn = $('accountBtn');

@@ -87,10 +87,9 @@
             <h2 id="homeTitle">Your properties</h2>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed.</p>
           </div>
-          <div class="home-action-panel" aria-label="Property actions">
-            <div class="home-action-row">
-              <button id="newPropertyBtn" class="primary-btn action-main" type="button"><span aria-hidden="true">＋</span> New Property</button>
-            </div>
+          <div class="property-hero-actions" aria-label="Property actions">
+            <span id="propertySyncStatus" class="property-sync-status" role="status">Saved on this device</span>
+            <button id="newPropertyBtn" class="primary-btn" type="button">＋ New Property</button>
           </div>
         </div>
 
@@ -117,7 +116,7 @@
           <div>
             <p class="eyebrow">Soft-deleted records</p>
             <h2 id="archiveTitle">Archived Properties</h2>
-            <p class="muted">Archived properties are hidden from the main list but remain stored locally and in Supabase. Any signed-in user can restore them.</p>
+            <p class="muted">Archived properties are hidden from the main list and can be restored at any time.</p>
           </div>
         </div>
 
@@ -451,15 +450,15 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.14.3</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.14.4</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.14.3</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.14.4</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>Expense cards now use a receipt icon instead of View text</li>
-      <li>The receipt action retains an accessible label and tooltip</li>
-      <li>Receipt viewing behaviour remains unchanged</li>
-      <li>The Properties introduction is now shorter and more focused</li>
+      <li>New Property now matches the Expense Tracker primary action</li>
+      <li>Properties now displays the same live sync-status pattern as Expenses</li>
+      <li>Property actions stack cleanly on smaller screens</li>
+      <li>Archive guidance is clearer and backend-neutral</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">
