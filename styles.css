@@ -1392,3 +1392,13 @@ button.header-icon-control:active { transform: translateY(1px); }
     margin-bottom: calc(82px + var(--safe-bottom));
   }
 }
+
+
+/* More popup close control */
+.more-menu-dialog { position: relative; padding-top: 58px; }
+.more-menu-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+}
