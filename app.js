@@ -58,7 +58,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.11.0';
+const APP_VERSION = '1.11.1';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -535,7 +535,31 @@ function loadIntoForm(property) {
   captureSavedPropertyState();
 }
 
+function setPrimaryNavigation(activeItem = 'properties') {
+  const properties = $('propertiesNavLink');
+  const more = $('moreNavBtn');
+  properties?.classList.toggle('active', activeItem === 'properties');
+  more?.classList.toggle('active', activeItem === 'more');
+  if (activeItem === 'properties') properties?.setAttribute('aria-current', 'page');
+  else properties?.removeAttribute('aria-current');
+  if (activeItem === 'more') more?.setAttribute('aria-current', 'page');
+  else more?.removeAttribute('aria-current');
+}
+
+function renderMoreMenuState() {
+  const syncButton = $('moreSyncBtn');
+  if (!syncButton) return;
+  syncButton.disabled = cloudSyncing || !cloudUser || !navigator.onLine;
+  const detail = syncButton.querySelector('small');
+  if (detail) {
+    detail.textContent = !cloudUser
+      ? 'Sign in through Account & cloud to enable syncing'
+      : (!navigator.onLine ? 'Connect to the internet to sync' : 'Sync property changes with the shared workspace');
+  }
+}
+
 function showHome() {
+  setPrimaryNavigation('properties');
   $('editorView').classList.add('hidden');
   $('archiveView').classList.add('hidden');
   $('homeView').classList.remove('hidden');
@@ -544,10 +568,12 @@ function showHome() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showArchive() {
+  setPrimaryNavigation('more');
   $('homeView').classList.add('hidden'); $('editorView').classList.add('hidden'); $('archiveView').classList.remove('hidden');
   editingId = null; renderArchiveList(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showEditor(id = null) {
+  setPrimaryNavigation('properties');
   $('homeView').classList.add('hidden'); $('archiveView').classList.add('hidden'); $('editorView').classList.remove('hidden');
   resetEditorSectionState();
   if (id) { const property=getProperty(id); if (property && !property.deletedAt) loadIntoForm(property); else resetForm(); } else resetForm();
@@ -1141,9 +1167,33 @@ function init() {
     showHome();
   });
   $('newPropertyBtn').addEventListener('click', () => showEditor());
-  $('archiveBtn').addEventListener('click', showArchive);
+  $('archiveBtn').addEventListener('click', () => {
+    if ($('moreMenuDialog').open) $('moreMenuDialog').close();
+    showArchive();
+  });
   $('archiveBackBtn').addEventListener('click', showHome);
   $('backBtn').addEventListener('click', showHome);
+  $('propertiesNavLink').addEventListener('click', (event) => {
+    event.preventDefault();
+    showHome();
+  });
+  $('moreNavBtn').addEventListener('click', () => {
+    renderMoreMenuState();
+    $('moreMenuDialog').showModal();
+  });
+  $('closeMoreMenuDialog').addEventListener('click', () => $('moreMenuDialog').close());
+  $('moreAccountBtn').addEventListener('click', () => {
+    $('moreMenuDialog').close();
+    $('accountBtn').click();
+  });
+  $('moreInstallBtn').addEventListener('click', () => {
+    $('moreMenuDialog').close();
+    $('installBtn').click();
+  });
+  $('moreSyncBtn').addEventListener('click', async () => {
+    $('moreMenuDialog').close();
+    await syncCloud();
+  });
   $('addExpenseBtn').addEventListener('click', () => {
     addExpenseRow();
     updateSaveButtonState();
@@ -1213,6 +1263,16 @@ function init() {
   renderPropertyList();
   renderArchiveList();
   setupCloud();
+
+  const initialMenuUrl = new URL(window.location.href);
+  if (initialMenuUrl.searchParams.get('menu') === 'more') {
+    initialMenuUrl.searchParams.delete('menu');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(() => {
+      renderMoreMenuState();
+      $('moreMenuDialog').showModal();
+    }, 0);
+  }
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
