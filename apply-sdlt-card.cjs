@@ -1,0 +1,12 @@
+const fs = require('fs');
+let app = fs.readFileSync('app.js','utf8');
+app = app.replaceAll('<span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong>','<span>SDLT</span><strong>${money(calc.sdlt.total)}</strong>');
+app = app.replace("const APP_VERSION = '1.10.3';","const APP_VERSION = '1.10.4';");
+fs.writeFileSync('app.js', app);
+let release = JSON.parse(fs.readFileSync('release.json','utf8'));
+release.version = '1.10.4';
+release.notes = ['Property cards now label and show SDLT correctly','Viewed status after viewing time passes','Viewing date and time on property cards'];
+fs.writeFileSync('release.json', JSON.stringify(release,null,2)+'\n');
+let sw = fs.readFileSync('service-worker.js','utf8');
+sw = sw.replace(/const CACHE_NAME = '[^']+';/,"const CACHE_NAME = 'spv-property-calculator-v1.10.4-sdlt-card';");
+fs.writeFileSync('service-worker.js', sw);
