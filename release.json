@@ -1,8 +1,9 @@
 {
-  "version": "1.10.4",
+  "version": "1.10.5",
   "notes": [
-    "Property cards separate purchase cash from refurbishment",
-    "Total Investment shown as purchase cash plus refurbishment",
-    "Viewed status remains automatic after viewing time passes"
+    "Production and automated tests now use the same calculation code",
+    "Expanded SDLT checks at tax-band and company-rate boundaries",
+    "Forecast headline returns are clearly labelled as pre-tax",
+    "Approved workspace access and administrator-only permanent deletion"
   ]
 }
