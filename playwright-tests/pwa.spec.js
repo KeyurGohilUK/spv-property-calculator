@@ -178,7 +178,7 @@ test('keeps unsaved editor changes when an update reload is cancelled', async ({
 
   await expect(page.locator('#editorView')).not.toHaveClass(/hidden/);
   await expect(page.locator('#title')).toHaveValue('Unsaved update draft');
-  await expect(page.locator('#purchasePrice')).toHaveValue('275000');
+  await expect(page.locator('#purchasePrice')).toHaveValue('275,000');
   await expect(page.locator('#installDialog')).toHaveAttribute('open', '');
 });
 
