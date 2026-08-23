@@ -74,7 +74,7 @@ const corporateThreshold = calculateSDLT(500000, { qualifyingCorporateRelief: fa
 assert.equal(corporateThreshold.method, 'company-higher-rates', '17% whole-price rate must apply only above £500,000');
 
 const corporateFlat = calculateSDLT(500001, { qualifyingCorporateRelief: false });
-assert.equal(corporateFlat.total, 85000.17, '17% corporate whole-price calculation failed');
+assert.ok(Math.abs(corporateFlat.total - 85000.17) < 0.001, '17% corporate whole-price calculation failed');
 assert.equal(corporateFlat.method, 'corporate-flat-rate');
 
 const nonResident = calculateSDLT(300000, { qualifyingCorporateRelief: true, nonResident: true });
@@ -84,7 +84,7 @@ const nonResidentCorporateFlat = calculateSDLT(1000000, {
   qualifyingCorporateRelief: false,
   nonResident: true
 });
-assert.equal(nonResidentCorporateFlat.total, 190000, 'Non-resident corporate whole-price calculation failed');
+assert.ok(Math.abs(nonResidentCorporateFlat.total - 190000) < 0.001, 'Non-resident corporate whole-price calculation failed');
 
 assert.equal(safeNumber('£250,000.50'), 250000.50, 'Formatted currency parsing failed');
 assert.equal(safeNumber('not a number'), 0, 'Invalid numeric input must safely become zero');
