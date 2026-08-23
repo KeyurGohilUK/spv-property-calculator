@@ -124,8 +124,8 @@
       <label class="field"><span>Notes <em>optional</em></span><textarea id="expenseNotes" rows="3" maxlength="1000" placeholder="Payment details or reason for expense"></textarea></label>
 
       <label class="field receipt-field"><span>Receipt <em>optional</em></span>
-        <input id="expenseReceipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
-        <small>PDF, JPEG, PNG or WebP · maximum 2 MB · stored on this device.</small>
+        <input id="expenseReceipt" type="file" accept="image/*,application/pdf">
+        <small>Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · stored on this device.</small>
         <small id="expenseReceiptError" class="error-text hidden"></small>
       </label>
       <label id="removeReceiptField" class="switch-row compact-switch hidden">
