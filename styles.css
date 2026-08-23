@@ -37,9 +37,9 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; background: var(--bg); }
 body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px; }
 
 .app-header {
   position: sticky;
@@ -210,7 +210,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .field > span { font-weight: 750; font-size: 13px; }
 .field em { font-style: normal; color: var(--muted); font-weight: 500; font-size: 11px; }
 .field small { color: var(--muted); font-size: 11px; line-height: 1.4; }
-.field input, .field textarea, .expense-row input {
+.field input, .field textarea, .field select, .expense-row input {
   width: 100%;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -221,6 +221,27 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
   font-size: 16px;
 }
 .field textarea { resize: vertical; min-height: 100px; }
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 13px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.field select:hover { border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
+.field select:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+  background-color: var(--surface-2);
+}
+.field select option { background: var(--surface); color: var(--text); }
 .listing-link-input {
   display: flex;
   align-items: center;
