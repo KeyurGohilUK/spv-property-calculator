@@ -61,8 +61,15 @@
 
       <div class="expense-list-heading">
         <div><h3>Recorded expenses</h3><span id="expenseCount" class="count-badge">0</span></div>
-        <label class="expense-filter"><span class="sr-only">Filter expenses</span><select id="expenseFilter"><option value="all">All expenses</option><option value="company">General company</option></select></label>
+        <button id="toggleExpenseFiltersBtn" class="secondary-btn compact-expense-btn" type="button" aria-expanded="false" aria-controls="expenseFilters">Filters</button>
       </div>
+      <section id="expenseFilters" class="expense-filters hidden" aria-label="Expense filters">
+        <label class="field"><span>Allocation</span><select id="expenseFilter"><option value="all">All expenses</option><option value="company">General company</option></select></label>
+        <label class="field"><span>Category</span><select id="expenseCategoryFilter"><option value="all">All categories</option></select></label>
+        <label class="field"><span>From date</span><input id="expenseDateFrom" type="date"></label>
+        <label class="field"><span>To date</span><input id="expenseDateTo" type="date"></label>
+        <button id="clearExpenseFiltersBtn" class="text-btn" type="button">Clear filters</button>
+      </section>
 
       <div id="expenseList" class="expense-list"></div>
       <div id="expenseEmpty" class="empty-state">
@@ -76,7 +83,7 @@
   <dialog id="expenseDialog" class="app-dialog expense-dialog">
     <form id="expenseForm" novalidate>
       <div class="expense-dialog-header">
-        <div><p class="eyebrow">Actual spending</p><h3>Add Expense</h3></div>
+        <div><p class="eyebrow">Actual spending</p><h3 id="expenseDialogTitle">Add Expense</h3></div>
         <button id="closeExpenseDialogBtn" class="icon-btn expense-dialog-close" type="button" aria-label="Close expense form">×</button>
       </div>
 
@@ -109,9 +116,13 @@
         <small>PDF, JPEG, PNG or WebP · maximum 2 MB · stored on this device.</small>
         <small id="expenseReceiptError" class="error-text hidden"></small>
       </label>
+      <label id="removeReceiptField" class="switch-row compact-switch hidden">
+        <span><span class="switch-title">Remove current receipt</span><small>The locally stored receipt will be deleted when you save.</small></span>
+        <input id="removeExpenseReceipt" type="checkbox" role="switch">
+      </label>
 
       <p id="expenseSaveMessage" class="save-message" aria-live="polite"></p>
-      <div class="expense-form-actions"><button id="cancelExpenseBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save Expense</button></div>
+      <div class="expense-form-actions"><button id="cancelExpenseBtn" class="secondary-btn" type="button">Cancel</button><button id="saveExpenseBtn" class="primary-btn" type="submit">Save Expense</button></div>
     </form>
   </dialog>
 
