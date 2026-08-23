@@ -430,7 +430,9 @@ function render() {
     if (expense.receipt) {
       const receipt = document.createElement('span');
       receipt.className = 'expense-chip';
-      receipt.textContent = 'Receipt attached';
+      receipt.textContent = expense.receiptObjectPath && !expense.receiptCloudPending
+        ? 'Receipt synced'
+        : 'Receipt saved locally';
       meta.appendChild(receipt);
     }
     main.appendChild(meta);
