@@ -50,16 +50,52 @@ const MOCK_SUPABASE_SDK = `
     const conflict = name === 'upsert_property_if_current'
       ? options.propertyConflict
       : name === 'upsert_expense_if_current' && options.expenseConflict;
+    const newRevision = Math.max(1, Number(args?.p_expected_revision || 0) + 1);
     const result = conflict
       ? { data: null, error: { code: '40001', message: name.startsWith('upsert_property') ? 'PROPERTY_CONFLICT' : 'EXPENSE_CONFLICT' } }
       : {
           data: {
-            new_revision: Math.max(1, Number(args?.p_expected_revision || 0) + 1),
+            new_revision: newRevision,
             server_created_at: now,
             server_updated_at: now
           },
           error: null
         };
+
+    if (!conflict && name === 'upsert_property_if_current') {
+      const row = {
+        id: args.p_id,
+        data: args.p_data,
+        created_at: args.p_created_at || now,
+        updated_at: now,
+        deleted_at: args.p_deleted_at || null,
+        revision: newRevision
+      };
+      state.properties = state.properties.filter((item) => item.id !== row.id);
+      state.properties.push(row);
+    }
+
+    if (!conflict && name === 'upsert_expense_if_current') {
+      const row = {
+        id: args.p_id,
+        amount: args.p_amount,
+        expense_date: args.p_expense_date,
+        category: args.p_category,
+        scope: args.p_scope,
+        property_id: args.p_property_id,
+        description: args.p_description,
+        notes: args.p_notes,
+        receipt_metadata: args.p_receipt_metadata,
+        receipt_object_path: args.p_receipt_object_path,
+        created_at: now,
+        updated_at: now,
+        deleted_at: args.p_deleted_at || null,
+        revision: newRevision
+      };
+      state.expenses = state.expenses.filter((item) => item.id !== row.id);
+      state.expenses.push(row);
+    }
+
     return {
       single() { return Promise.resolve(result); },
       then(resolve, reject) { return Promise.resolve(result).then(resolve, reject); }
