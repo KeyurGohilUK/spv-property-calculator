@@ -1,9 +1,9 @@
 {
-  "version": "1.12.1",
+  "version": "1.12.2",
   "notes": [
-    "Expense records now sync across signed-in workspace devices",
-    "Offline expense changes sync automatically when connectivity returns",
-    "Conflict-safe revisions preserve local changes for review",
-    "Receipt files remain stored only on the device where they were uploaded"
+    "Edit existing expenses without deleting and recreating them",
+    "Replace or remove locally stored receipts while editing",
+    "Filter expenses by allocation, property, category and date range",
+    "Expense edits continue to sync safely across workspace devices"
   ]
 }
