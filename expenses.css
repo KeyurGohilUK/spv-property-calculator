@@ -17,7 +17,9 @@
 .expense-filters select, .expense-filters input { min-height: 42px; width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
 .expense-filters .text-btn { white-space: nowrap; }
 .expense-list { display: grid; gap: 11px; }
-.expense-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-card { cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-card:hover { border-color: color-mix(in srgb, var(--brand) 30%, var(--border)); }
+.expense-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: 2px; }
 .expense-card-main { min-width: 0; }
 .expense-card-heading { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
 .expense-card-heading strong { font-size: 17px; }
@@ -28,10 +30,8 @@
 .expense-chip.property { color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, var(--surface)); }
 .expense-card-actions { display: flex; gap: 7px; }
 .expense-card-actions button { min-width: 40px; min-height: 40px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 800; }
-.expense-card-actions .edit-expense, .expense-card-actions .delete-expense { display: grid; place-items: center; }
-.expense-card-actions .edit-expense { color: var(--brand); }
-.expense-card-actions .delete-expense { color: var(--danger); }
-.expense-card-actions .edit-expense svg, .expense-card-actions .delete-expense svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.expense-card-actions .delete-expense { display: grid; place-items: center; color: var(--danger); }
+.expense-card-actions .delete-expense svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .expense-dialog { width: min(620px, calc(100% - 24px)); max-height: calc(100dvh - 28px); }
 .expense-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
 .expense-dialog-header h3 { margin: 4px 0 0; }
