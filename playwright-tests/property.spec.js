@@ -84,6 +84,18 @@ test('mobile save control remains fixed while the editor scrolls', async ({ page
   expect(after.y + after.height).toBeLessThanOrEqual(844);
 });
 
+for (const route of ['/', '/expenses.html', '/forecast.html']) {
+  test(`only Forecast keeps the Beta badge on ${route}`, async ({ page }) => {
+    await page.goto(route);
+
+    const expenseItem = page.locator('.primary-nav-item[href="./expenses.html"]');
+    const forecastItem = page.locator('.primary-nav-item[href="./forecast.html"]');
+    await expect(expenseItem).toContainText('Expenses');
+    await expect(expenseItem.locator('small')).toHaveCount(0);
+    await expect(forecastItem.locator('small')).toHaveText('Beta');
+  });
+}
+
 test('home Account, Install and More controls open dialogs without navigation', async ({ page }) => {
   await page.goto('/');
   const originalUrl = page.url();
