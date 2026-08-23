@@ -39,3 +39,34 @@ if (header && !header.querySelector('.header-actions')) {
     window.location.href = './?dialog=install';
   });
 }
+
+
+const moreControl = document.querySelector('[data-more-menu]');
+if (moreControl) {
+  document.body.insertAdjacentHTML('beforeend', `
+    <dialog id="secondaryMoreMenuDialog" class="install-dialog more-menu-dialog">
+      <div class="more-menu-header">
+        <h3>App Menu</h3>
+        <button id="closeSecondaryMoreMenu" class="icon-btn more-menu-close" type="button" aria-label="Close menu">×</button>
+      </div>
+      <div class="more-menu-list">
+        <a class="more-menu-item" href="./?view=archive">
+          <span class="more-menu-icon" aria-hidden="true">↺</span>
+          <span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span>
+          <span aria-hidden="true">›</span>
+        </a>
+      </div>
+    </dialog>
+  `);
+  const dialog = document.getElementById('secondaryMoreMenuDialog');
+  moreControl.addEventListener('click', () => dialog.showModal());
+  document.getElementById('closeSecondaryMoreMenu').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => {
+    const bounds = dialog.getBoundingClientRect();
+    const clickedInside = event.clientX >= bounds.left
+      && event.clientX <= bounds.right
+      && event.clientY >= bounds.top
+      && event.clientY <= bounds.bottom;
+    if (!clickedInside) dialog.close();
+  });
+}
