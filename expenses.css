@@ -1,5 +1,9 @@
 .expense-shell { display: grid; gap: 18px; }
 .expense-hero h2 { margin: 5px 0 6px; }
+.expense-hero-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+.expense-sync-status { width: 100%; color: var(--muted); font-size: 11px; font-weight: 750; text-align: right; }
+.expense-sync-status.error { color: var(--danger); }
+.expense-sync-status.synced { color: var(--brand); }
 .expense-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .expense-summary-grid article { padding: 17px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
 .expense-summary-grid span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 12px; }
@@ -34,6 +38,9 @@
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 620px) {
   .expense-hero { align-items: stretch; flex-direction: column; }
+  .expense-hero-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .expense-sync-status { grid-column: 1 / -1; text-align: left; }
+  .expense-hero-actions #openExpenseFormBtn:only-of-type { grid-column: 1 / -1; }
   .expense-summary-grid { grid-template-columns: 1fr; gap: 8px; }
   .expense-summary-grid article { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; }
   .expense-summary-grid span { margin: 0; }
