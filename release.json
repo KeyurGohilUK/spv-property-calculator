@@ -1,9 +1,9 @@
 {
-  "version": "1.12.2",
+  "version": "1.12.3",
   "notes": [
-    "Edit existing expenses without deleting and recreating them",
-    "Replace or remove locally stored receipts while editing",
-    "Filter expenses by allocation, property, category and date range",
-    "Expense edits continue to sync safely across workspace devices"
+    "Expense reports show filtered totals by month, category and allocation",
+    "Export the active expense view as an accountant-friendly CSV",
+    "Expense-page Sync now removed to keep one central sync action",
+    "The account popup Sync now now synchronises properties and expenses together"
   ]
 }

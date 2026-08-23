@@ -24,8 +24,6 @@ function setSyncStatus(message, state = '') {
   status.textContent = message;
   status.classList.toggle('error', state === 'error');
   status.classList.toggle('synced', state === 'synced');
-  $('syncExpensesBtn').classList.toggle('hidden', !cloudUser);
-  $('syncExpensesBtn').disabled = expenseSyncing || !navigator.onLine;
 }
 
 function mergeExpenseSets(localItems, cloudItems) {
@@ -110,7 +108,6 @@ async function syncExpenses({ showFeedback = true } = {}) {
     );
   } finally {
     expenseSyncing = false;
-    $('syncExpensesBtn').disabled = !navigator.onLine;
   }
 }
 
@@ -217,6 +214,81 @@ function expenseMatchesFilter(expense) {
   return true;
 }
 
+
+function renderBreakdown(containerId, items, labelFor) {
+  const container = $(containerId);
+  container.innerHTML = '';
+  if (!items.length) {
+    const empty = document.createElement('span');
+    empty.className = 'expense-breakdown-empty';
+    empty.textContent = 'No matching expenses';
+    container.appendChild(empty);
+    return;
+  }
+  const totals = new Map();
+  items.forEach((item) => {
+    const label = labelFor(item);
+    totals.set(label, (totals.get(label) || 0) + Number(item.amount || 0));
+  });
+  [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([label, total]) => {
+      const row = document.createElement('div');
+      row.className = 'expense-breakdown-row';
+      const name = document.createElement('span');
+      name.textContent = label;
+      const value = document.createElement('strong');
+      value.textContent = money(total);
+      row.append(name, value);
+      container.appendChild(row);
+    });
+}
+
+function renderReports(items) {
+  renderBreakdown('expenseMonthlyReport', items, (item) => {
+    const match = /^(\d{4})-(\d{2})/.exec(String(item.date || ''));
+    if (!match) return 'Unknown month';
+    return new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' })
+      .format(new Date(Number(match[1]), Number(match[2]) - 1, 1));
+  });
+  renderBreakdown('expenseCategoryReport', items, (item) => item.category || 'Other');
+  renderBreakdown('expenseAllocationReport', items, (item) =>
+    item.scope === 'property' ? propertyName(item.propertyId) : 'General company'
+  );
+  $('exportExpensesBtn').disabled = items.length === 0;
+}
+
+function csvCell(value) {
+  return `"${String(value ?? '').replaceAll('"', '""')}"`;
+}
+
+function exportFilteredExpenses() {
+  const items = getExpenses().filter(expenseMatchesFilter);
+  if (!items.length) return;
+  const header = ['Date', 'Amount GBP', 'Category', 'Allocation', 'Property', 'Description', 'Notes', 'Receipt file', 'Cloud sync'];
+  const rows = items.map((item) => [
+    item.date,
+    Number(item.amount || 0).toFixed(2),
+    item.category || '',
+    item.scope === 'property' ? 'Specific property' : 'General company',
+    item.scope === 'property' ? propertyName(item.propertyId) : '',
+    item.description || '',
+    item.notes || '',
+    item.receipt?.name || '',
+    item._cloudDirty ? 'Pending' : 'Synced'
+  ]);
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `spv-expenses-${today()}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function render() {
   expenses = getExpenses();
   const companyTotal = expenses.filter((item) => item.scope === 'company').reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -226,6 +298,7 @@ function render() {
   $('propertyExpenses').textContent = money(propertyTotal);
 
   const visible = expenses.filter(expenseMatchesFilter);
+  renderReports(visible);
   $('expenseCount').textContent = String(visible.length);
   $('expenseEmpty').classList.toggle('hidden', visible.length > 0);
   const list = $('expenseList');
@@ -401,6 +474,7 @@ $('toggleExpenseFiltersBtn').addEventListener('click', () => {
   $('expenseFilters').classList.toggle('hidden', !opening);
   $('toggleExpenseFiltersBtn').setAttribute('aria-expanded', String(opening));
 });
+$('exportExpensesBtn').addEventListener('click', exportFilteredExpenses);
 $('clearExpenseFiltersBtn').addEventListener('click', () => {
   $('expenseFilter').value = 'all';
   $('expenseCategoryFilter').value = 'all';
@@ -409,7 +483,6 @@ $('clearExpenseFiltersBtn').addEventListener('click', () => {
   render();
 });
 $('expenseForm').addEventListener('submit', submitExpense);
-$('syncExpensesBtn').addEventListener('click', () => syncExpenses({ showFeedback: true }));
 window.addEventListener('online', () => syncExpenses({ showFeedback: false }));
 window.addEventListener('offline', () => setSyncStatus('Offline · changes will sync later'));
 $('expenseDialog').addEventListener('click', (event) => {
