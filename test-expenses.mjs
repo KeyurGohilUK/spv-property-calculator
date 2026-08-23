@@ -8,6 +8,11 @@ globalThis.localStorage = {
 
 const { getExpenses, saveExpense, deleteExpense } = await import('./expense-storage.js');
 
+const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
+const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'));
+assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit must remain 2 MB');
+assert.match(expenseHtml, /maximum 2 MB/, 'Receipt guidance must display the 2 MB limit');
+
 const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Office & administration', scope: 'company', propertyId: 'ignored' });
 assert.equal(company.scope, 'company');
 assert.equal(company.propertyId, '');
