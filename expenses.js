@@ -4,8 +4,10 @@ import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpens
 const $ = (id) => document.getElementById(id);
 const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 });
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 const MAX_RECEIPT_SIZE = 2 * 1024 * 1024;
+const TARGET_RECEIPT_SIZE = Math.floor(1.5 * 1024 * 1024);
+const MAX_RECEIPT_IMAGE_DIMENSION = 2000;
 let properties = [];
 let expenses = [];
 let cloudUser = null;
@@ -13,6 +15,75 @@ let expenseSyncing = false;
 let cloudListenerAttached = false;
 let editingExpenseId = null;
 
+
+function formatFileSize(bytes) {
+  return `${(Number(bytes || 0) / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not optimise this receipt image.')), type, quality);
+  });
+}
+
+async function loadReceiptImage(file) {
+  if ('createImageBitmap' in window) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch {}
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = 'async';
+    image.src = url;
+    await image.decode();
+    return image;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function optimiseReceiptImage(file) {
+  if (!file || file.type === 'application/pdf' || file.size <= TARGET_RECEIPT_SIZE) return file;
+  const source = await loadReceiptImage(file);
+  const sourceWidth = source.width || source.naturalWidth;
+  const sourceHeight = source.height || source.naturalHeight;
+  if (!sourceWidth || !sourceHeight) throw new Error('Could not read this receipt image.');
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d', { alpha: false });
+  if (!context) throw new Error('Image optimisation is not supported on this device.');
+
+  let maximumDimension = MAX_RECEIPT_IMAGE_DIMENSION;
+  let quality = 0.86;
+  let result = null;
+  try {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const scale = Math.min(1, maximumDimension / Math.max(sourceWidth, sourceHeight));
+      canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+      canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(source, 0, 0, canvas.width, canvas.height);
+      result = await canvasToBlob(canvas, 'image/jpeg', quality);
+      if (result.size <= TARGET_RECEIPT_SIZE) break;
+      if (quality > 0.58) quality -= 0.08;
+      else {
+        maximumDimension = Math.max(1000, Math.round(maximumDimension * 0.82));
+        quality = 0.78;
+      }
+    }
+  } finally {
+    if (typeof source.close === 'function') source.close();
+  }
+
+  if (!result || result.size > MAX_RECEIPT_SIZE) {
+    throw new Error('This image could not be reduced below 2 MB. Try retaking it closer to the receipt.');
+  }
+  const name = file.name.replace(/\.[^.]+$/, '') || 'receipt';
+  return new File([result], `${name}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+}
 
 function asTime(value) {
   const parsed = Date.parse(value || '');
@@ -404,17 +475,17 @@ async function submitExpense(event) {
   const amount = Number($('expenseAmount').value);
   const scope = $('expenseScope').value;
   const propertyId = $('expenseProperty').value;
-  const receiptFile = $('expenseReceipt').files[0] || null;
+  let receiptFile = $('expenseReceipt').files[0] || null;
   const amountInvalid = !Number.isFinite(amount) || amount <= 0;
   const propertyInvalid = scope === 'property' && !propertyId;
   $('expenseAmountError').classList.toggle('hidden', !amountInvalid);
   $('expensePropertyError').classList.toggle('hidden', !propertyInvalid);
   $('expenseReceiptError').classList.add('hidden');
 
-  if (receiptFile && (!allowedReceiptTypes.has(receiptFile.type) || receiptFile.size > MAX_RECEIPT_SIZE)) {
-    $('expenseReceiptError').textContent = receiptFile.size > MAX_RECEIPT_SIZE
-      ? 'Receipt must be 2 MB or smaller.'
-      : 'Choose a PDF, JPEG, PNG or WebP receipt.';
+  if (receiptFile && (!allowedReceiptTypes.has(receiptFile.type) || (receiptFile.type === 'application/pdf' && receiptFile.size > MAX_RECEIPT_SIZE))) {
+    $('expenseReceiptError').textContent = receiptFile.type === 'application/pdf' && receiptFile.size > MAX_RECEIPT_SIZE
+      ? 'PDF receipt must be 2 MB or smaller.'
+      : 'Choose a PDF, JPEG, PNG, WebP or supported iPhone photo.';
     $('expenseReceiptError').classList.remove('hidden');
     return;
   }
@@ -427,6 +498,12 @@ async function submitExpense(event) {
   const previous = editingExpenseId ? getAllExpenses().find((item) => item.id === editingExpenseId) : null;
   const removeReceipt = Boolean(previous?.receipt && $('removeExpenseReceipt').checked);
   try {
+    if (receiptFile?.type.startsWith('image/') && receiptFile.size > TARGET_RECEIPT_SIZE) {
+      const originalSize = receiptFile.size;
+      $('expenseSaveMessage').textContent = 'Optimising receipt…';
+      receiptFile = await optimiseReceiptImage(receiptFile);
+      $('expenseSaveMessage').textContent = `Receipt reduced from ${formatFileSize(originalSize)} to ${formatFileSize(receiptFile.size)}. Saving…`;
+    }
     saved = saveExpense({
       ...previous,
       id: editingExpenseId || undefined,
