@@ -1,9 +1,9 @@
 {
-  "version": "1.12.3",
+  "version": "1.12.4",
   "notes": [
-    "Expense reports show filtered totals by month, category and allocation",
-    "Export the active expense view as an accountant-friendly CSV",
-    "Expense-page Sync now removed to keep one central sync action",
-    "The account popup Sync now now synchronises properties and expenses together"
+    "Online, Account and Install controls now appear on every app page",
+    "Expenses and Forecast use the main app's account and install workflows",
+    "Connection status updates immediately when a device goes online or offline",
+    "Shared header behaviour is maintained from one reusable module"
   ]
 }
