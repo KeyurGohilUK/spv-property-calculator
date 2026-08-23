@@ -1,9 +1,8 @@
 {
-  "version": "1.12.6",
+  "version": "1.12.7",
   "notes": [
-    "Account opens locally on Expenses and Forecast without page navigation",
-    "Install and update controls open locally on every page",
-    "Sync now works from each local account popup",
-    "Online status remains informational and updates without navigation"
+    "Expense date field now stays within Add and Edit popups on iPhone",
+    "Native iPhone date picker behaviour is preserved",
+    "Expense popup prevents accidental horizontal overflow"
   ]
 }
