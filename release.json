@@ -1,9 +1,9 @@
 {
-  "version": "1.15.0",
+  "version": "1.16.0",
   "notes": [
-    "Private Cloudflare R2 receipt-service infrastructure is ready",
-    "Worker requests validate Supabase users and workspace permissions",
-    "Receipt binaries remain private while Supabase stores only object keys",
-    "Browser integration will be enabled after Worker deployment"
+    "Optimised receipts now upload securely to the private Cloudflare R2 bucket",
+    "Supabase stores the private object key so receipts work across signed-in devices",
+    "Receipt viewing prefers the offline copy and downloads from R2 when needed",
+    "Failed or offline uploads remain local and retry through Sync now"
   ]
 }

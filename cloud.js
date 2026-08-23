@@ -336,6 +336,8 @@
       description: row.description || '',
       notes: row.notes || '',
       receipt: row.receipt_metadata || null,
+      receiptObjectPath: row.receipt_object_path || '',
+      receiptCloudPending: false,
       createdAt: row.created_at || new Date().toISOString(),
       updatedAt: row.updated_at || new Date().toISOString(),
       deletedAt: row.deleted_at || null,
@@ -349,7 +351,7 @@
     await requireUser();
     const { data, error } = await supabaseClient
       .from('expenses')
-      .select('id,amount,expense_date,category,scope,property_id,description,notes,receipt_metadata,created_at,updated_at,deleted_at,revision')
+      .select('id,amount,expense_date,category,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision')
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data || []).map(fromCloudExpense);
@@ -375,7 +377,7 @@
         p_description: record.description || '',
         p_notes: record.notes || '',
         p_receipt_metadata: record.receipt || null,
-        p_receipt_object_path: null,
+        p_receipt_object_path: record.receiptObjectPath || null,
         p_deleted_at: record.deletedAt || null,
         p_expected_revision: expectedRevision
       })

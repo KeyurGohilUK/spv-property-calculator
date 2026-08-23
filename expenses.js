@@ -1,5 +1,11 @@
 import { getActiveProperties } from './storage.js';
 import { renderSyncStatus } from './sync-status.js';
+import {
+  uploadCloudReceipt,
+  downloadCloudReceipt,
+  deleteCloudReceipt,
+  prepareExpenseReceiptForSync
+} from './receipt-cloud.js';
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 
 const $ = (id) => document.getElementById(id);
@@ -151,7 +157,9 @@ async function syncExpenses({ showFeedback = true } = {}) {
     const merge = mergeExpenseSets(getAllExpenses(), cloudItems);
     for (const item of merge.upload) {
       try {
-        const synced = await cloud.upsertExpense(item);
+        const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
+        merge.merged.set(String(item.id), prepared);
+        const synced = await cloud.upsertExpense(prepared);
         merge.merged.set(String(item.id), synced);
       } catch (error) {
         if (cloud.isExpenseConflict?.(error)) {
@@ -422,7 +430,9 @@ function render() {
     if (expense.receipt) {
       const receipt = document.createElement('span');
       receipt.className = 'expense-chip';
-      receipt.textContent = 'Receipt attached';
+      receipt.textContent = expense.receiptObjectPath && !expense.receiptCloudPending
+        ? 'Receipt synced'
+        : 'Receipt saved locally';
       meta.appendChild(receipt);
     }
     main.appendChild(meta);
@@ -461,8 +471,16 @@ async function viewReceipt(expense) {
     viewer.document.body.textContent = 'Opening receipt…';
   }
   try {
-    const file = await getReceipt(expense.id);
-    if (!file) throw new Error('Receipt file is not available on this device.');
+    let file = await getReceipt(expense.id);
+    if (!file && expense.receiptObjectPath && cloudUser && navigator.onLine) {
+      file = await downloadCloudReceipt(expense.id, expense.receiptObjectPath, expense.receipt || {});
+      await saveReceipt(expense.id, file);
+    }
+    if (!file) {
+      throw new Error(expense.receiptObjectPath
+        ? 'Connect to the internet and sign in to download this receipt.'
+        : 'Receipt file is not available on this device.');
+    }
     const url = URL.createObjectURL(file);
     if (viewer) viewer.location.replace(url);
     else window.location.assign(url);
@@ -477,6 +495,10 @@ async function removeExpense(expense) {
   if (!window.confirm(`Delete this ${money(expense.amount)} expense? This cannot be undone.`)) return;
   if (deleteExpense(expense.id)) {
     try { await deleteReceipt(expense.id); } catch (error) { console.warn('Could not remove receipt file:', error); }
+    if (expense.receiptObjectPath && cloudUser && navigator.onLine) {
+      try { await deleteCloudReceipt(expense.id, expense.receiptObjectPath); }
+      catch (error) { console.warn('Cloud receipt cleanup is pending:', error); }
+    }
     render();
     syncExpenses({ showFeedback: false });
   }
@@ -528,10 +550,46 @@ async function submitExpense(event) {
       notes: $('expenseNotes').value.trim(),
       receipt: receiptFile
         ? { name: receiptFile.name, type: receiptFile.type, size: receiptFile.size }
-        : (removeReceipt ? null : previous?.receipt || null)
+        : (removeReceipt ? null : previous?.receipt || null),
+      receiptObjectPath: receiptFile ? (previous?.receiptObjectPath || '') : (removeReceipt ? '' : previous?.receiptObjectPath || ''),
+      receiptCloudPending: Boolean(receiptFile),
+      receiptDeleteObjectPath: removeReceipt ? (previous?.receiptObjectPath || '') : ''
     });
-    if (receiptFile) await saveReceipt(saved.id, receiptFile);
-    else if (removeReceipt) await deleteReceipt(saved.id);
+    if (receiptFile) {
+      await saveReceipt(saved.id, receiptFile);
+      if (cloudUser && navigator.onLine) {
+        $('expenseSaveMessage').textContent = 'Uploading receipt securely…';
+        try {
+          const uploaded = await uploadCloudReceipt(saved.id, receiptFile, previous?.receiptObjectPath || '');
+          saved = saveExpense({
+            ...saved,
+            receipt: {
+              ...saved.receipt,
+              name: uploaded.name,
+              type: uploaded.type,
+              size: uploaded.size,
+              uploadedAt: uploaded.uploadedAt
+            },
+            receiptObjectPath: uploaded.objectPath,
+            receiptCloudPending: false,
+            receiptDeleteObjectPath: ''
+          });
+        } catch (error) {
+          console.warn('Receipt saved locally; cloud upload will retry during sync:', error);
+          setSyncStatus('Receipt saved locally · cloud upload pending', 'error');
+        }
+      }
+    } else if (removeReceipt) {
+      await deleteReceipt(saved.id);
+      if (previous?.receiptObjectPath && cloudUser && navigator.onLine) {
+        try {
+          await deleteCloudReceipt(saved.id, previous.receiptObjectPath);
+          saved = saveExpense({ ...saved, receiptDeleteObjectPath: '' });
+        } catch (error) {
+          console.warn('Cloud receipt removal will retry during sync:', error);
+        }
+      }
+    }
     closeForm();
     render();
     syncExpenses({ showFeedback: false });
