@@ -31,7 +31,8 @@ assert.match(expensePage, /card\.addEventListener\('click', \(\) => openForm\(ex
 assert.match(expensePage, /card\.setAttribute\('role', 'button'\)/, 'Clickable expense cards must be keyboard accessible');
 assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
 assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
-assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*prepareExpenseReceiptForSync[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
+assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
+assert.match(expensePage, /syncExpenseWorkspace[\s\S]*from '.\/expense-cloud-sync\.js'/, 'Expense page must use the shared cloud sync service');
 assert.match(expensePage, /expectedObjectPath = expense\.receiptCloudPending \? '' : \(expense\.receiptObjectPath \|\| ''\)[\s\S]*getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*downloadCloudReceipt\(expense\.id, expense\.receiptObjectPath[\s\S]*saveReceipt\(expense\.id, file, expense\.receiptObjectPath\)/, 'Receipt viewing must invalidate stale local files and cache the current R2 version');
 assert.match(expensePage, /Receipt saved locally · cloud upload pending/, 'Failed R2 uploads must remain queued locally');
 assert.match(expensePage, /receiptObjectPath: uploaded\.objectPath[\s\S]*receiptCloudPending: false/, 'Successful R2 uploads must retain the private object key');
