@@ -47,7 +47,7 @@ export function clearPendingDeletes(ids) { const set=new Set((ids||[]).map(Strin
 
 export function saveProperty(property) {
   const properties=readRaw(); const now=new Date().toISOString();
-  const record={...property,id:property.id||makeId(),createdAt:property.createdAt||now,updatedAt:now};
+  const record={...property,id:property.id||makeId(),createdAt:property.createdAt||now,updatedAt:now,_cloudDirty:true};
   const index=properties.findIndex((item)=>item.id===record.id); if(index>=0) properties[index]=record; else properties.push(record);
   if(!writeRaw(properties)) throw new Error('Unable to save. Your browser may have storage disabled or full.');
   clearPendingDeletes([record.id]); return record;
@@ -65,6 +65,6 @@ export function permanentlyDeleteProperty(id) {
 }
 export function duplicateProperty(id) {
   const source=getProperty(id); if(!source || source.deletedAt) return null; const now=new Date().toISOString();
-  const copy={...source,id:makeId(),title:`${source.title||'Untitled Property'} (Copy)`,deletedAt:null,createdAt:now,updatedAt:now};
+  const copy={...source,id:makeId(),title:`${source.title||'Untitled Property'} (Copy)`,deletedAt:null,createdAt:now,updatedAt:now,_cloudRevision:0,_cloudDirty:true};
   const properties=readRaw(); properties.push(copy); if(!writeRaw(properties)) return null; return copy;
 }
