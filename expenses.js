@@ -1,5 +1,5 @@
 import { getActiveProperties } from './storage.js';
-import { getExpenses, saveExpense, deleteExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
+import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 
 const $ = (id) => document.getElementById(id);
 const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 });
@@ -8,6 +8,137 @@ const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png
 const MAX_RECEIPT_SIZE = 2 * 1024 * 1024;
 let properties = [];
 let expenses = [];
+let cloudUser = null;
+let expenseSyncing = false;
+let cloudListenerAttached = false;
+
+
+function asTime(value) {
+  const parsed = Date.parse(value || '');
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function setSyncStatus(message, state = '') {
+  const status = $('expenseSyncStatus');
+  status.textContent = message;
+  status.classList.toggle('error', state === 'error');
+  status.classList.toggle('synced', state === 'synced');
+  $('syncExpensesBtn').classList.toggle('hidden', !cloudUser);
+  $('syncExpensesBtn').disabled = expenseSyncing || !navigator.onLine;
+}
+
+function mergeExpenseSets(localItems, cloudItems) {
+  const localMap = new Map(localItems.map((item) => [String(item.id), item]));
+  const cloudMap = new Map(cloudItems.map((item) => [String(item.id), item]));
+  const merged = new Map();
+  const upload = [];
+  const conflicts = [];
+
+  for (const id of new Set([...localMap.keys(), ...cloudMap.keys()])) {
+    const local = localMap.get(id);
+    const cloud = cloudMap.get(id);
+    if (local && !cloud) {
+      merged.set(id, local);
+      upload.push(local);
+      continue;
+    }
+    if (!local && cloud) {
+      merged.set(id, cloud);
+      continue;
+    }
+    if (!local || !cloud) continue;
+
+    const localRevision = Math.max(0, Number(local._cloudRevision) || 0);
+    const cloudRevision = Math.max(0, Number(cloud._cloudRevision) || 0);
+    if (local._cloudDirty) {
+      merged.set(id, local);
+      if (localRevision === cloudRevision) upload.push(local);
+      else conflicts.push(id);
+    } else if (cloudRevision > localRevision || asTime(cloud.updatedAt) > asTime(local.updatedAt)) {
+      merged.set(id, cloud);
+    } else if (asTime(local.updatedAt) > asTime(cloud.updatedAt)) {
+      merged.set(id, local);
+      upload.push(local);
+    } else {
+      merged.set(id, cloud);
+    }
+  }
+  return { merged, upload, conflicts };
+}
+
+async function syncExpenses({ showFeedback = true } = {}) {
+  const cloud = window.SPVCloud;
+  if (!cloud || !cloudUser || expenseSyncing || !navigator.onLine) {
+    if (!cloudUser) setSyncStatus('Saved on this device · sign in from Properties to sync');
+    else if (!navigator.onLine) setSyncStatus('Offline · changes will sync later');
+    return;
+  }
+
+  expenseSyncing = true;
+  setSyncStatus('Syncing expenses…');
+  try {
+    const cloudItems = await cloud.listExpenses();
+    const merge = mergeExpenseSets(getAllExpenses(), cloudItems);
+    for (const item of merge.upload) {
+      try {
+        const synced = await cloud.upsertExpense(item);
+        merge.merged.set(String(item.id), synced);
+      } catch (error) {
+        if (cloud.isExpenseConflict?.(error)) {
+          merge.conflicts.push(String(item.id));
+          continue;
+        }
+        throw error;
+      }
+    }
+    replaceExpenses([...merge.merged.values()]);
+    render();
+    if (merge.conflicts.length) {
+      setSyncStatus(`${merge.conflicts.length} expense conflict${merge.conflicts.length === 1 ? '' : 's'} kept locally · review before retrying`, 'error');
+    } else {
+      setSyncStatus(showFeedback ? 'Expenses synced' : 'Synced', 'synced');
+    }
+  } catch (error) {
+    console.warn('Expense sync failed:', error);
+    const missingSchema = error?.code === '42P01'
+      || error?.code === 'PGRST202'
+      || /expenses|upsert_expense_if_current/i.test(String(error?.message || ''));
+    setSyncStatus(
+      missingSchema ? 'Cloud setup required · run database Update 10' : 'Expense sync failed · local changes are safe',
+      'error'
+    );
+  } finally {
+    expenseSyncing = false;
+    $('syncExpensesBtn').disabled = !navigator.onLine;
+  }
+}
+
+async function setupExpenseCloud() {
+  const cloud = window.SPVCloud;
+  if (!cloud) {
+    setSyncStatus('Saved on this device · cloud unavailable');
+    return;
+  }
+  if (!cloudListenerAttached) {
+    cloud.onAuthChange((user) => {
+      window.setTimeout(() => {
+        cloudUser = user || null;
+        if (cloudUser && navigator.onLine) syncExpenses({ showFeedback: false });
+        else setSyncStatus(cloudUser ? 'Offline · changes will sync later' : 'Saved on this device · sign in from Properties to sync');
+      }, 0);
+    });
+    cloudListenerAttached = true;
+  }
+  try {
+    const state = await cloud.init();
+    cloudUser = state.user || null;
+    if (cloudUser && navigator.onLine) await syncExpenses({ showFeedback: false });
+    else setSyncStatus(cloudUser ? 'Offline · changes will sync later' : 'Saved on this device · sign in from Properties to sync');
+  } catch (error) {
+    console.warn('Expense cloud setup failed:', error);
+    setSyncStatus('Saved locally · cloud setup failed', 'error');
+  }
+}
 
 function money(value) { return currency.format(Number(value) || 0); }
 function propertyName(id) { return properties.find((item) => item.id === id)?.title || 'Unknown property'; }
@@ -159,6 +290,7 @@ async function removeExpense(expense) {
   if (deleteExpense(expense.id)) {
     try { await deleteReceipt(expense.id); } catch (error) { console.warn('Could not remove receipt file:', error); }
     render();
+    syncExpenses({ showFeedback: false });
   }
 }
 
@@ -201,9 +333,10 @@ async function submitExpense(event) {
     if (receiptFile) await saveReceipt(saved.id, receiptFile);
     closeForm();
     render();
+    syncExpenses({ showFeedback: false });
   } catch (error) {
     if (saved) {
-      deleteExpense(saved.id);
+      permanentlyRemoveLocalExpense(saved.id);
       try { await deleteReceipt(saved.id); } catch {}
     }
     $('expenseSaveMessage').textContent = error.message || 'Could not save this expense.';
@@ -218,6 +351,9 @@ $('cancelExpenseBtn').addEventListener('click', closeForm);
 $('expenseScope').addEventListener('change', updateScope);
 $('expenseFilter').addEventListener('change', render);
 $('expenseForm').addEventListener('submit', submitExpense);
+$('syncExpensesBtn').addEventListener('click', () => syncExpenses({ showFeedback: true }));
+window.addEventListener('online', () => syncExpenses({ showFeedback: false }));
+window.addEventListener('offline', () => setSyncStatus('Offline · changes will sync later'));
 $('expenseDialog').addEventListener('click', (event) => {
   const dialog = event.currentTarget;
   const bounds = dialog.getBoundingClientRect();
@@ -227,3 +363,4 @@ $('expenseDialog').addEventListener('click', (event) => {
 populateProperties();
 $('expenseDate').value = today();
 render();
+setupExpenseCloud();
