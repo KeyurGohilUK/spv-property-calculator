@@ -26,6 +26,8 @@ assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryRe
 assert.match(expenseHtml, /id="exportExpensesBtn"/, 'CSV export action is missing');
 assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV export is not implemented');
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
+assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
+assert.match(expenseHtml, /class="dialog-close expense-dialog-close"/, 'Expense popup must use the shared close control');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 
 const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Office & administration', scope: 'company', propertyId: 'ignored' });

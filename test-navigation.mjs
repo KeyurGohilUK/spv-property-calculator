@@ -21,11 +21,15 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
 for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /secondary-page-header\.js/, `${name} must load shared header controls`);
 }
-assert.match(secondaryHeader, /id="connectionStatus"/, 'Shared header must include online status');
-assert.match(secondaryHeader, /id="accountBtn"/, 'Shared header must include Account');
-assert.match(secondaryHeader, /id="installBtn"/, 'Shared header must include Install');
-assert.match(secondaryHeader, /\.\/\?dialog=account/, 'Account must route to the master dialog');
-assert.match(secondaryHeader, /\.\/\?dialog=install/, 'Install must route to the master dialog');
+assert.match(secondaryHeader, /id="secondaryConnectionStatus"/, 'Shared header must include online status');
+assert.match(secondaryHeader, /id="secondaryAccountBtn"/, 'Shared header must include Account');
+assert.match(secondaryHeader, /id="secondaryInstallBtn"/, 'Shared header must include Install');
+assert.doesNotMatch(secondaryHeader, /window\.location\.href = '\.\/\?dialog=(?:account|install)'/, 'Account and Install must not navigate away');
+assert.match(secondaryHeader, /secondaryAccountBtn[\s\S]*secondaryAccountDialog[\s\S]*showModal/, 'Account must open a local popup');
+assert.match(secondaryHeader, /secondaryInstallBtn[\s\S]*secondaryInstallDialog[\s\S]*showModal/, 'Install must open a local popup');
+assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');
+assert.match(secondaryHeader, /secondaryUpdateBtn[\s\S]*handleUpdate/, 'Local Install popup must provide update handling');
+assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page-header\.js/, 'Forecast must load local account dependencies');
 assert.match(forecast, /<button class="primary-nav-item" type="button" data-more-menu/, 'Forecast More must be a local dialog button');
 assert.match(expenses, /<button class="primary-nav-item" type="button" data-more-menu/, 'Expenses More must be a local dialog button');
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
@@ -34,8 +38,6 @@ assert.match(secondaryHeader, /secondaryMoreMenuDialog[\s\S]*showModal\(\)/, 'Se
 assert.match(secondaryHeader, /class="install-dialog more-menu-dialog"/, 'Secondary App Menu must use Install dialog styling');
 assert.match(index, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Main App Menu must use Install dialog styling');
 assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
-assert.match(app, /requestedDialog === 'account'[\s\S]*authDialog/, 'Master page must open the routed Account dialog');
-assert.match(app, /requestedDialog === 'account' \|\| requestedDialog === 'install'[\s\S]*installDialog/, 'Master page must open the routed Install dialog');
 
 assert.equal((index.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
 assert.match(index, /id="moreMenuDialog"/, 'More menu dialog missing');

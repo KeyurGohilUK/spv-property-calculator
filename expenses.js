@@ -485,6 +485,10 @@ $('clearExpenseFiltersBtn').addEventListener('click', () => {
 $('expenseForm').addEventListener('submit', submitExpense);
 window.addEventListener('online', () => syncExpenses({ showFeedback: false }));
 window.addEventListener('offline', () => setSyncStatus('Offline · changes will sync later'));
+window.addEventListener('spv-workspace-synced', () => {
+  populateProperties();
+  render();
+});
 $('expenseDialog').addEventListener('click', (event) => {
   const dialog = event.currentTarget;
   const bounds = dialog.getBoundingClientRect();
