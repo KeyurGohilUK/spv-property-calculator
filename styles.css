@@ -98,6 +98,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .property-total { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 13px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .property-total span { color: var(--muted); font-size: 12px; }
 .property-total strong { font-size: 19px; color: var(--brand); }
+.property-cost-breakdown { display: grid; gap: 8px; align-items: stretch; }
+.property-cost-breakdown > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.property-cost-breakdown > div strong { font-size: 15px; color: var(--text); }
+.property-cost-breakdown .refurbishment-row { padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+.property-cost-breakdown .refurbishment-row span { color: var(--muted); }
+.property-cost-breakdown .investment-total { padding-top: 2px; }
+.property-cost-breakdown .investment-total span { color: var(--brand); font-weight: 800; }
+.property-cost-breakdown .investment-total strong { font-size: 19px; color: var(--brand); }
 .property-card-tools { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; gap: 6px; z-index: 2; }
 .property-card-icon-action {
   position: relative;
