@@ -1,8 +1,8 @@
 {
-  "version": "1.16.4",
+  "version": "1.16.5",
   "notes": [
-    "Receipt files now use the expense description and upload timestamp",
-    "Receipt names are consistent across this device, shared sync and secure cloud storage",
-    "Compressed phone photos keep the new descriptive filename"
+    "Expense Tracker is now out of Beta",
+    "The Expense Beta badge has been removed across the app menu",
+    "Forecast remains marked as Beta"
   ]
 }
