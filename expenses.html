@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f6b55">
+  <meta name="description" content="Track company and property expenses for your UK SPV.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV Expenses">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./expenses.css">
+  <title>Expenses · SPV Property Calculator</title>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="primary-app-nav" aria-label="Primary navigation">
+      <a class="primary-nav-item" href="./">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path></svg><span>Properties</span>
+      </a>
+      <a class="primary-nav-item active" href="./expenses.html" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h4"></path></svg><span>Expenses</span><small>Beta</small>
+      </a>
+      <a class="primary-nav-item" href="./forecast.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg><span>Forecast</span><small>Beta</small>
+      </a>
+      <a class="primary-nav-item" href="./?menu=more">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle></svg><span>More</span>
+      </a>
+    </nav>
+
+    <main class="main-shell expense-shell">
+      <section class="hero-card expense-hero">
+        <div>
+          <p class="eyebrow">Actual spending</p>
+          <h2>Expense Tracker</h2>
+          <p class="muted">Record company-wide or property-specific expenses separately from purchase estimates.</p>
+        </div>
+        <button id="openExpenseFormBtn" class="primary-btn" type="button">＋ Add Expense</button>
+      </section>
+
+      <section class="expense-summary-grid" aria-label="Expense totals">
+        <article><span>Total recorded</span><strong id="totalExpenses">£0</strong></article>
+        <article><span>Company expenses</span><strong id="companyExpenses">£0</strong></article>
+        <article><span>Property expenses</span><strong id="propertyExpenses">£0</strong></article>
+      </section>
+
+      <div class="expense-list-heading">
+        <div><h3>Recorded expenses</h3><span id="expenseCount" class="count-badge">0</span></div>
+        <label class="expense-filter"><span class="sr-only">Filter expenses</span><select id="expenseFilter"><option value="all">All expenses</option><option value="company">General company</option></select></label>
+      </div>
+
+      <div id="expenseList" class="expense-list"></div>
+      <div id="expenseEmpty" class="empty-state">
+        <div class="empty-icon" aria-hidden="true">£</div>
+        <h3>No expenses recorded</h3>
+        <p>Add your first actual SPV expense. It will be kept separate from estimated property calculations.</p>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="expenseDialog" class="app-dialog expense-dialog">
+    <form id="expenseForm" novalidate>
+      <div class="expense-dialog-header">
+        <div><p class="eyebrow">Actual spending</p><h3>Add Expense</h3></div>
+        <button id="closeExpenseDialogBtn" class="icon-btn expense-dialog-close" type="button" aria-label="Close expense form">×</button>
+      </div>
+
+      <label class="field currency-field">
+        <span>Amount <strong aria-hidden="true">*</strong></span>
+        <div class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required></div>
+        <small id="expenseAmountError" class="error-text hidden">Enter an amount greater than £0.</small>
+      </label>
+
+      <div class="expense-form-grid">
+        <label class="field"><span>Date</span><input id="expenseDate" type="date" required></label>
+        <label class="field"><span>Category</span>
+          <select id="expenseCategory">
+            <option>Legal & professional</option><option>Mortgage & finance</option><option>Repairs & maintenance</option>
+            <option>Refurbishment</option><option>Insurance</option><option>Utilities</option><option>Travel</option>
+            <option>Office & administration</option><option>Accountancy & tax</option><option>Other</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field"><span>Expense relates to</span>
+        <select id="expenseScope"><option value="company">General company expense</option><option value="property">Specific property</option></select>
+      </label>
+      <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
+      <label class="field"><span>Supplier / description <em>optional</em></span><input id="expenseDescription" type="text" maxlength="160" placeholder="e.g. Companies House filing fee"></label>
+      <label class="field"><span>Notes <em>optional</em></span><textarea id="expenseNotes" rows="3" maxlength="1000" placeholder="Payment details or reason for expense"></textarea></label>
+
+      <label class="field receipt-field"><span>Receipt <em>optional</em></span>
+        <input id="expenseReceipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+        <small>PDF, JPEG, PNG or WebP · maximum 2 MB · stored on this device.</small>
+        <small id="expenseReceiptError" class="error-text hidden"></small>
+      </label>
+
+      <p id="expenseSaveMessage" class="save-message" aria-live="polite"></p>
+      <div class="expense-form-actions"><button id="cancelExpenseBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save Expense</button></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./expenses.js"></script>
+</body>
+</html>
