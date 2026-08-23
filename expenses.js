@@ -206,10 +206,8 @@ function closeForm() {
 
 function expenseMatchesFilter(expense) {
   const filter = $('expenseFilter').value;
-  if (filter === 'all') return true;
-  if (filter === 'company') return expense.scope === 'company';
-  if (filter.startsWith('property:') && !(expense.scope === 'property' && expense.propertyId === filter.slice(9))) return false;
   if (filter === 'company' && expense.scope !== 'company') return false;
+  if (filter.startsWith('property:') && !(expense.scope === 'property' && expense.propertyId === filter.slice(9))) return false;
   const category = $('expenseCategoryFilter').value;
   if (category !== 'all' && expense.category !== category) return false;
   const from = $('expenseDateFrom').value;
