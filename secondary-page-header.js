@@ -1,7 +1,7 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
 import { getAllExpenses, replaceExpenses } from './expense-storage.js';
 
-const APP_VERSION = '1.14.1';
+const APP_VERSION = '1.14.2';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
