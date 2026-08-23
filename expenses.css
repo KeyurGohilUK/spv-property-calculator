@@ -20,7 +20,8 @@
 .expense-chip.property { color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, var(--surface)); }
 .expense-card-actions { display: flex; gap: 7px; }
 .expense-card-actions button { min-width: 40px; min-height: 40px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 800; }
-.expense-card-actions .delete-expense { color: var(--danger); }
+.expense-card-actions .delete-expense { display: grid; place-items: center; color: var(--danger); }
+.expense-card-actions .delete-expense svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .expense-dialog { width: min(620px, calc(100% - 24px)); max-height: calc(100dvh - 28px); }
 .expense-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
 .expense-dialog-header h3 { margin: 4px 0 0; }
