@@ -1,9 +1,9 @@
 {
-  "version": "1.14.5",
+  "version": "1.15.0",
   "notes": [
-    "Properties and Expenses now use one shared sync-status component",
-    "Offline status uses the same neutral styling throughout the app",
-    "Only genuine sync failures display in red",
-    "Successful sync status remains green"
+    "Private Cloudflare R2 receipt-service infrastructure is ready",
+    "Worker requests validate Supabase users and workspace permissions",
+    "Receipt binaries remain private while Supabase stores only object keys",
+    "Browser integration will be enabled after Worker deployment"
   ]
 }

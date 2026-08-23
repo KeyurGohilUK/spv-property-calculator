@@ -21,6 +21,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 8 — workspace access control
 - Update 9 — property sync conflict protection
 - Update 10 — expense tracker schema
+- Update 11 — private Cloudflare R2 receipt references and Worker access grants
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -28,7 +29,7 @@ All current scripts are designed to be safely rerunnable. Always take a database
 
 The table and function definitions use PostgreSQL SQL. Authentication references `auth.users`, `auth.uid()` and Row Level Security conventions supplied by Supabase. Moving to another Supabase project requires no structural rewrite. Moving to a different PostgreSQL host requires replacing those authentication helpers while keeping the public tables, constraints and indexes.
 
-Receipt binaries should live in object storage. The database stores only receipt metadata and an object path, which avoids coupling the core data model to one file-storage provider.
+Receipt binaries live in a private Cloudflare R2 bucket. The database stores only receipt metadata and a private object key in `receipt_object_path`; never store public or expiring presigned URLs. The Worker validates Supabase users and workspace permissions before accessing R2.
 
 ## Rules for future changes
 

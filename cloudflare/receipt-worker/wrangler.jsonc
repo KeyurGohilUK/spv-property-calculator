@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "spv-receipt-service",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-23",
+  "workers_dev": true,
+  "r2_buckets": [
+    {
+      "binding": "RECEIPTS",
+      "bucket_name": "spv-property-receipts"
+    }
+  ]
+}

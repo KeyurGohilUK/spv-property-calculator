@@ -63,7 +63,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.14.5';
+const APP_VERSION = '1.15.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
