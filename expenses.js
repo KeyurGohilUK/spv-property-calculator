@@ -3,10 +3,10 @@ import { renderSyncStatus } from './sync-status.js';
 import {
   uploadCloudReceipt,
   downloadCloudReceipt,
-  deleteCloudReceipt,
-  prepareExpenseReceiptForSync
+  deleteCloudReceipt
 } from './receipt-cloud.js';
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
+import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
 const $ = (id) => document.getElementById(id);
 const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 });
@@ -103,51 +103,9 @@ function setSyncStatus(message, state = '') {
   renderSyncStatus($('expenseSyncStatus'), message, state);
 }
 
-function mergeExpenseSets(localItems, cloudItems) {
-  const localMap = new Map(localItems.map((item) => [String(item.id), item]));
-  const cloudMap = new Map(cloudItems.map((item) => [String(item.id), item]));
-  const merged = new Map();
-  const upload = [];
-  const conflicts = [];
-
-  for (const id of new Set([...localMap.keys(), ...cloudMap.keys()])) {
-    const local = localMap.get(id);
-    const cloud = cloudMap.get(id);
-    if (local && !cloud) {
-      merged.set(id, local);
-      upload.push(local);
-      continue;
-    }
-    if (!local && cloud) {
-      merged.set(id, cloud);
-      continue;
-    }
-    if (!local || !cloud) continue;
-
-    const localRevision = Math.max(0, Number(local._cloudRevision) || 0);
-    const cloudRevision = Math.max(0, Number(cloud._cloudRevision) || 0);
-    if (local._cloudDirty) {
-      merged.set(id, local);
-      if (localRevision === cloudRevision) upload.push(local);
-      else conflicts.push(id);
-    } else if (cloudRevision > localRevision || asTime(cloud.updatedAt) > asTime(local.updatedAt)) {
-      merged.set(id, cloud);
-    } else if (asTime(local.updatedAt) > asTime(cloud.updatedAt)) {
-      merged.set(id, local);
-      upload.push(local);
-    } else {
-      merged.set(id, cloud);
-    }
-  }
-  return { merged, upload, conflicts };
-}
-
-async function syncExpenses({ showFeedback = true, lockHeld = false } = {}) {
-  if (!lockHeld && navigator.locks?.request) {
-    return navigator.locks.request('spv-expense-cloud-sync', () => syncExpenses({ showFeedback, lockHeld: true }));
-  }
+async function syncExpenses({ showFeedback = true } = {}) {
   const cloud = window.SPVCloud;
-  if (!cloud || !cloudUser || expenseSyncing || !navigator.onLine) {
+  if (!cloud || !cloudUser || !navigator.onLine) {
     if (!cloudUser) setSyncStatus('Saved on this device · sign in from Properties to sync');
     else if (!navigator.onLine) setSyncStatus('Offline · changes will sync later');
     return;
@@ -156,43 +114,22 @@ async function syncExpenses({ showFeedback = true, lockHeld = false } = {}) {
   expenseSyncing = true;
   setSyncStatus('Syncing expenses…');
   try {
-    const cloudItems = await cloud.listExpenses();
-    const merge = mergeExpenseSets(getAllExpenses(), cloudItems);
-    for (const item of merge.upload) {
-      try {
-        const prepared = await prepareExpenseReceiptForSync(item, getReceipt);
-        merge.merged.set(String(item.id), prepared);
-        const synced = await cloud.upsertExpense(prepared);
-        merge.merged.set(String(item.id), synced);
-      } catch (error) {
-        if (cloud.isExpenseConflict?.(error)) {
-          merge.conflicts.push(String(item.id));
-          continue;
-        }
-        throw error;
-      }
-    }
-    replaceExpenses([...merge.merged.values()]);
+    const result = await syncExpenseWorkspace(cloud);
+    expenses = getExpenses();
     render();
-    if (merge.conflicts.length) {
-      setSyncStatus(`${merge.conflicts.length} expense conflict${merge.conflicts.length === 1 ? '' : 's'} kept locally · review before retrying`, 'error');
+    if (result.conflicts.length) {
+      setSyncStatus(`${result.conflicts.length} expense conflict${result.conflicts.length === 1 ? '' : 's'} kept locally · review before retrying`, 'error');
     } else {
       setSyncStatus(showFeedback ? 'Expenses synced' : 'Synced', 'synced');
     }
   } catch (error) {
     console.warn('Expense sync failed:', error);
-    const missingSchema = error?.code === '42P01'
-      || error?.code === 'PGRST202'
-      || /expenses|upsert_expense_if_current/i.test(String(error?.message || ''));
-    setSyncStatus(
-      missingSchema ? 'Cloud setup required · run database Update 10' : 'Expense sync failed · local changes are safe',
-      'error'
-    );
+    const stage = error?.syncStage ? ` while ${error.syncStage}` : '';
+    setSyncStatus(`Expense sync pending${stage} · local changes are safe`, 'error');
   } finally {
     expenseSyncing = false;
   }
 }
-
 async function setupExpenseCloud() {
   const cloud = window.SPVCloud;
   if (!cloud) {
