@@ -17,7 +17,9 @@ let editingExpenseId = null;
 
 
 function formatFileSize(bytes) {
-  return `${(Number(bytes || 0) / (1024 * 1024)).toFixed(1)} MB`;
+  const size = Math.max(0, Number(bytes) || 0);
+  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function canvasToBlob(canvas, type, quality) {
@@ -262,8 +264,9 @@ function openForm(expense = null) {
   $('expenseAmountError').classList.add('hidden');
   $('expensePropertyError').classList.add('hidden');
   $('expenseReceiptError').classList.add('hidden');
-  $('expenseReceiptSize').textContent = '';
-  $('expenseReceiptSize').classList.add('hidden');
+  $('expenseReceiptSize').textContent = expense?.receipt
+    ? `Current receipt: ${expense.receipt.name || 'Receipt'} · ${formatFileSize(expense.receipt.size)}`
+    : 'No receipt selected';
   updateScope();
   $('expenseDialog').showModal();
   window.setTimeout(() => $('expenseAmount').focus(), 0);
@@ -452,13 +455,20 @@ function render() {
 }
 
 async function viewReceipt(expense) {
+  const viewer = window.open('', '_blank');
+  if (viewer) {
+    viewer.document.title = 'Opening receipt…';
+    viewer.document.body.textContent = 'Opening receipt…';
+  }
   try {
     const file = await getReceipt(expense.id);
     if (!file) throw new Error('Receipt file is not available on this device.');
     const url = URL.createObjectURL(file);
-    window.open(url, '_blank', 'noopener');
-    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    if (viewer) viewer.location.replace(url);
+    else window.location.assign(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 5 * 60 * 1000);
   } catch (error) {
+    if (viewer) viewer.close();
     window.alert(error.message || 'Could not open this receipt.');
   }
 }
@@ -544,19 +554,22 @@ $('openExpenseFormBtn').addEventListener('click', () => openForm());
 $('closeExpenseDialogBtn').addEventListener('click', closeForm);
 $('cancelExpenseBtn').addEventListener('click', closeForm);
 $('expenseScope').addEventListener('change', updateScope);
-$('expenseReceipt').addEventListener('change', () => {
+function updateReceiptSelectionDetails() {
   const file = $('expenseReceipt').files[0] || null;
   const size = $('expenseReceiptSize');
   $('expenseReceiptError').classList.add('hidden');
   if (!file) {
-    size.textContent = '';
-    size.classList.add('hidden');
+    const current = editingExpenseId ? getAllExpenses().find((item) => item.id === editingExpenseId)?.receipt : null;
+    size.textContent = current
+      ? `Current receipt: ${current.name || 'Receipt'} · ${formatFileSize(current.size)}`
+      : 'No receipt selected';
     return;
   }
   const willOptimise = file.type.startsWith('image/') && file.size > TARGET_RECEIPT_SIZE;
   size.textContent = `Selected: ${file.name} · ${formatFileSize(file.size)}${willOptimise ? ' · will be optimised when saved' : ''}`;
-  size.classList.remove('hidden');
-});
+}
+$('expenseReceipt').addEventListener('input', updateReceiptSelectionDetails);
+$('expenseReceipt').addEventListener('change', updateReceiptSelectionDetails);
 $('expenseFilter').addEventListener('change', render);
 $('expenseCategoryFilter').addEventListener('change', render);
 $('expenseDateFrom').addEventListener('change', render);
