@@ -1,9 +1,8 @@
 {
-  "version": "1.11.2",
+  "version": "1.11.3",
   "notes": [
-    "Simplified More menu with Archived Properties only",
-    "Removed duplicate Sync, Account and Install actions from More",
-    "Account and Install remain in the header",
-    "Manual Sync remains inside Account & cloud"
+    "More popup close button moved to the top-right corner",
+    "Removed the repeated More heading from the popup",
+    "Archived Properties remains the only action inside More"
   ]
 }
