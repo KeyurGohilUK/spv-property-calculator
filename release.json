@@ -1,8 +1,8 @@
 {
-  "version": "1.12.7",
+  "version": "1.12.8",
   "notes": [
-    "Expense date field now stays within Add and Edit popups on iPhone",
-    "Native iPhone date picker behaviour is preserved",
-    "Expense popup prevents accidental horizontal overflow"
+    "All app popups now use a thin themed scrollbar",
+    "Scrollbar colours adapt to light and dark mode",
+    "Chrome, Safari and Firefox scrollbar styling is supported"
   ]
 }
