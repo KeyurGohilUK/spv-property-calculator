@@ -557,26 +557,35 @@ async function submitExpense(event) {
       await saveReceipt(saved.id, receiptFile);
       if (cloudUser && navigator.onLine) {
         $('expenseSaveMessage').textContent = 'Uploading receipt securely…';
-        const uploaded = await uploadCloudReceipt(saved.id, receiptFile, previous?.receiptObjectPath || '');
-        saved = saveExpense({
-          ...saved,
-          receipt: {
-            ...saved.receipt,
-            name: uploaded.name,
-            type: uploaded.type,
-            size: uploaded.size,
-            uploadedAt: uploaded.uploadedAt
-          },
-          receiptObjectPath: uploaded.objectPath,
-          receiptCloudPending: false,
-          receiptDeleteObjectPath: ''
-        });
+        try {
+          const uploaded = await uploadCloudReceipt(saved.id, receiptFile, previous?.receiptObjectPath || '');
+          saved = saveExpense({
+            ...saved,
+            receipt: {
+              ...saved.receipt,
+              name: uploaded.name,
+              type: uploaded.type,
+              size: uploaded.size,
+              uploadedAt: uploaded.uploadedAt
+            },
+            receiptObjectPath: uploaded.objectPath,
+            receiptCloudPending: false,
+            receiptDeleteObjectPath: ''
+          });
+        } catch (error) {
+          console.warn('Receipt saved locally; cloud upload will retry during sync:', error);
+          setSyncStatus('Receipt saved locally · cloud upload pending', 'error');
+        }
       }
     } else if (removeReceipt) {
       await deleteReceipt(saved.id);
       if (previous?.receiptObjectPath && cloudUser && navigator.onLine) {
-        await deleteCloudReceipt(saved.id, previous.receiptObjectPath);
-        saved = saveExpense({ ...saved, receiptDeleteObjectPath: '' });
+        try {
+          await deleteCloudReceipt(saved.id, previous.receiptObjectPath);
+          saved = saveExpense({ ...saved, receiptDeleteObjectPath: '' });
+        } catch (error) {
+          console.warn('Cloud receipt removal will retry during sync:', error);
+        }
       }
     }
     closeForm();
