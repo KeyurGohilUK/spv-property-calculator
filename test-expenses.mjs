@@ -6,7 +6,7 @@ globalThis.localStorage = {
   setItem: (key, value) => memory.set(key, String(value))
 };
 
-const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense } = await import('./expense-storage.js');
+const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('./expense-storage.js');
 
 const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
 const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'));
@@ -32,7 +32,7 @@ assert.match(expensePage, /card\.setAttribute\('role', 'button'\)/, 'Clickable e
 assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
 assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
 assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*prepareExpenseReceiptForSync[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
-assert.match(expensePage, /let file = await getReceipt\(expense\.id\)[\s\S]*downloadCloudReceipt\(expense\.id, expense\.receiptObjectPath[\s\S]*saveReceipt\(expense\.id, file\)/, 'Receipt viewing must prefer local storage and cache an R2 download');
+assert.match(expensePage, /expectedObjectPath = expense\.receiptCloudPending \? '' : \(expense\.receiptObjectPath \|\| ''\)[\s\S]*getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*downloadCloudReceipt\(expense\.id, expense\.receiptObjectPath[\s\S]*saveReceipt\(expense\.id, file, expense\.receiptObjectPath\)/, 'Receipt viewing must invalidate stale local files and cache the current R2 version');
 assert.match(expensePage, /Receipt saved locally · cloud upload pending/, 'Failed R2 uploads must remain queued locally');
 assert.match(expensePage, /receiptObjectPath: uploaded\.objectPath[\s\S]*receiptCloudPending: false/, 'Successful R2 uploads must retain the private object key');
 assert.match(expenseHtml, /kept locally and securely synced when signed in/, 'Receipt guidance must explain local and private cloud storage');
@@ -84,5 +84,11 @@ assert.equal(deletedCompany._cloudDirty, true);
 replaceExpenses(getAllExpenses().map((item) => ({ ...item, _cloudDirty: false })));
 assert.equal(getAllExpenses().every((item) => item._cloudDirty === false), true);
 assert.equal(deleteExpense('missing'), false);
+
+const cachedBlob = new Blob(['new receipt'], { type: 'image/jpeg' });
+assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/new.jpg' }, 'receipts/e1/new.jpg'), cachedBlob);
+assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/old.jpg' }, 'receipts/e1/new.jpg'), null, 'Changed R2 object keys must invalidate stale local receipts');
+assert.equal(receiptFileFromCache(cachedBlob, 'receipts/e1/new.jpg'), null, 'Legacy unversioned files must be refreshed when a cloud object key exists');
+assert.equal(receiptFileFromCache(cachedBlob), cachedBlob, 'Legacy local-only receipts must remain available offline');
 
 console.log('Expense storage checks passed.');
