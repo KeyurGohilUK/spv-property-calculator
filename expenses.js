@@ -5,7 +5,7 @@ const $ = (id) => document.getElementById(id);
 const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 });
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
-const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
+const MAX_RECEIPT_SIZE = 2 * 1024 * 1024;
 let properties = [];
 let expenses = [];
 
@@ -175,7 +175,7 @@ async function submitExpense(event) {
 
   if (receiptFile && (!allowedReceiptTypes.has(receiptFile.type) || receiptFile.size > MAX_RECEIPT_SIZE)) {
     $('expenseReceiptError').textContent = receiptFile.size > MAX_RECEIPT_SIZE
-      ? 'Receipt must be 5 MB or smaller.'
+      ? 'Receipt must be 2 MB or smaller.'
       : 'Choose a PDF, JPEG, PNG or WebP receipt.';
     $('expenseReceiptError').classList.remove('hidden');
     return;
