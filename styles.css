@@ -37,6 +37,33 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; background: var(--bg); }
 body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+
+/* Thin, app-themed scrollbars for every popup. */
+dialog {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand) 52%, var(--muted)) transparent;
+}
+dialog::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+dialog::-webkit-scrollbar-track {
+  background: transparent;
+}
+dialog::-webkit-scrollbar-thumb {
+  min-height: 34px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 52%, var(--muted));
+  background-clip: content-box;
+}
+dialog::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+  background-clip: content-box;
+}
+dialog::-webkit-scrollbar-corner {
+  background: transparent;
+}
 button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px; }
