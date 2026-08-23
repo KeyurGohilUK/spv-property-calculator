@@ -113,12 +113,26 @@ function receiptTransaction(mode, action) {
   }));
 }
 
-export function saveReceipt(expenseId, file) {
-  return receiptTransaction('readwrite', (store) => store.put(file, expenseId));
+export function receiptFileFromCache(entry, expectedObjectPath = '') {
+  const legacyFile = typeof Blob !== 'undefined' && entry instanceof Blob ? entry : null;
+  if (legacyFile) return expectedObjectPath ? null : legacyFile;
+  if (!entry?.file) return null;
+  if (expectedObjectPath && entry.objectPath !== expectedObjectPath) return null;
+  return entry.file;
 }
 
-export function getReceipt(expenseId) {
-  return receiptTransaction('readonly', (store) => store.get(expenseId));
+export function saveReceipt(expenseId, file, objectPath = '') {
+  const entry = {
+    file,
+    objectPath: String(objectPath || ''),
+    cachedAt: new Date().toISOString()
+  };
+  return receiptTransaction('readwrite', (store) => store.put(entry, expenseId));
+}
+
+export function getReceipt(expenseId, expectedObjectPath = '') {
+  return receiptTransaction('readonly', (store) => store.get(expenseId))
+    .then((entry) => receiptFileFromCache(entry, expectedObjectPath));
 }
 
 export function deleteReceipt(expenseId) {
