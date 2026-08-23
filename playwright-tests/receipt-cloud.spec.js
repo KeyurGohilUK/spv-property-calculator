@@ -100,7 +100,23 @@ test('downloads a cloud receipt when this device has no cached file', async ({ p
 
   await expect.poll(() => worker.callsFor('GET').length).toBe(1);
   expect(worker.callsFor('GET')[0].headers.authorization).toBe('Bearer playwright-access-token');
-  await expect.poll(() => popup.url()).toMatch(/^blob:/);
+  const cached = await page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('spv-property-calculator.receipts.v1', 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('receipts', 'readonly');
+      const get = transaction.objectStore('receipts').get('expense-cloud-receipt');
+      get.onerror = () => reject(get.error);
+      get.onsuccess = () => resolve({
+        objectPath: get.result?.objectPath || '',
+        fileSize: get.result?.file?.size || 0
+      });
+      transaction.oncomplete = () => db.close();
+    };
+  }));
+  expect(cached.objectPath).toBe('receipts/expense-cloud-receipt/remote-receipt.pdf');
+  expect(cached.fileSize).toBeGreaterThan(0);
   await popup.close();
 });
 
