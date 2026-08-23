@@ -271,7 +271,7 @@ function renderRefinanceAndExit(forecast) {
   const legal = Math.max(0, num('exitLegalCost', 1500));
   const saleCash = last.value - last.balance - sellingFee - legal;
   const totalReceived = saleCash + last.cumulativeCashFlow;
-  $('exitResult').innerHTML = `<div><span>Projected sale price</span><strong>${money(last.value)}</strong></div><div><span>Mortgage to repay</span><strong>${money(last.balance)}</strong></div><div><span>Selling & legal costs</span><strong>${money(sellingFee + legal)}</strong></div><div><span>Estimated sale cash</span><strong>${money(saleCash)}</strong></div><div><span>Sale cash + rental cash flow</span><strong>${money(totalReceived)}</strong></div>`;
+  $('exitResult').innerHTML = `<div><span>Projected sale price</span><strong>${money(last.value)}</strong></div><div><span>Mortgage to repay</span><strong>${money(last.balance)}</strong></div><div><span>Selling & legal costs</span><strong>${money(sellingFee + legal)}</strong></div><div><span>Estimated pre-tax sale cash</span><strong>${money(saleCash)}</strong></div><div><span>Pre-tax sale cash + rental cash flow</span><strong>${money(totalReceived)}</strong></div>`;
 }
 
 function renderRows(forecast) {
