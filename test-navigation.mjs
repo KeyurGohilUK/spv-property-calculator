@@ -17,8 +17,10 @@ for (const [name, page] of [['home', index], ['forecast', forecast]]) {
 assert.equal((index.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
 assert.match(index, /id="moreMenuDialog"/, 'More menu dialog missing');
 assert.doesNotMatch(index, /<h3>More<\/h3>/, 'More popup must not repeat the word More');
+assert.match(index, /<h3>App Menu<\/h3>/, 'App Menu title must remain in the popup header');
 assert.match(index, /id="closeMoreMenuDialog" class="icon-btn more-menu-close"/, 'More popup close button class missing');
-assert.match(styles, /\.more-menu-close[\s\S]*position: absolute[\s\S]*top: 12px[\s\S]*right: 12px/, 'More popup close button must be in the top-right corner');
+assert.match(styles, /\.more-menu-header[\s\S]*display: flex[\s\S]*justify-content: space-between/, 'App Menu title and close button must share an aligned header row');
+assert.match(app, /moreMenuDialog.*getBoundingClientRect[\s\S]*clickedInside[\s\S]*dialog\.close/s, 'Backdrop click must close the App Menu');
 assert.match(index, /aria-disabled="true"[^>]*title="Expense tracking is coming next"/, 'Expenses placeholder must be visibly disabled');
 assert.match(app, /moreNavBtn.*addEventListener/s, 'More menu event handler missing');
 assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu must not duplicate header or account actions');
