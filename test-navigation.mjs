@@ -11,6 +11,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /class="primary-app-nav"/, `${name} page is missing primary navigation`);
   assert.match(page, />Properties</, `${name} navigation is missing Properties`);
   assert.match(page, />Expenses</, `${name} navigation is missing Expenses`);
+  assert.match(page, /<span>Expenses<\/span><small>Beta<\/small>/, `${name} navigation must label Expenses as Beta`);
   assert.match(page, />Forecast</, `${name} navigation is missing Forecast`);
   assert.match(page, />More</, `${name} navigation is missing More`);
 }
@@ -26,6 +27,7 @@ assert.match(index, /href="\.\/expenses\.html"/, 'Home navigation must link to E
 assert.match(forecast, /href="\.\/expenses\.html"/, 'Forecast navigation must link to Expenses');
 assert.match(expenses, /class="primary-nav-item active" href="\.\/expenses\.html" aria-current="page"/, 'Expenses navigation must be active on its page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
+assert.doesNotMatch(expenses, /aria-disabled="true"[^>]*Expenses/, 'Beta Expenses navigation must remain enabled');
 assert.match(app, /moreNavBtn.*addEventListener/s, 'More menu event handler missing');
 assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu must not duplicate header or account actions');
 assert.match(index, /id="archiveBtn"/, 'Archived Properties must remain available under More');
