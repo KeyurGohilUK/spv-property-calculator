@@ -111,7 +111,7 @@ test('expense allocation, filtering and CSV export work together', async ({ page
   await page.locator('#expenseFilter').selectOption({ label: 'Filter Property' });
   await expect(page.locator('#expenseCount')).toHaveText('1');
   await expect(page.getByText('Property insurance')).toBeVisible();
-  await expect(page.locator('#propertyExpenses')).toContainText('99.99');
+  await expect(page.locator('.expense-card')).toContainText('£99.99');
 
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export CSV' }).click();
