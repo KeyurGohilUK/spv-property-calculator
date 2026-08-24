@@ -509,6 +509,11 @@
       <span><strong>Help Guide</strong><small>Installation, account and app menu overview</small></span>
       <span aria-hidden="true">›</span>
     </button>
+    <a class="more-menu-item hidden" href="./manage-users.html" data-admin-users-link aria-hidden="true" tabindex="-1">
+      <span class="more-menu-icon" aria-hidden="true">♙</span>
+      <span><strong>Manage Users</strong><small>Approve accounts and assign workspace roles</small></span>
+      <span aria-hidden="true">›</span>
+    </a>
     <button id="archiveBtn" class="more-menu-item" type="button">
       <span class="more-menu-icon" aria-hidden="true">↺</span>
       <span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span>
@@ -519,6 +524,7 @@
 
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>
+  <script type="module" src="./admin-menu.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
