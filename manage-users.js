@@ -87,8 +87,8 @@ async function saveUser(card) {
   setMessage('');
   try {
     await window.SPVCloud.setWorkspaceUserAccess(userId, role, active);
-    setMessage('User access updated.');
     await loadUsers();
+    setMessage('User access updated.');
   } catch (error) {
     setMessage(error.message || 'Could not update user access.', true);
   } finally {
