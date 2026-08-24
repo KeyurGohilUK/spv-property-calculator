@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { blockExternalServices, createProperty, openContainingSection } from './support/app-helpers.js';
 
+async function downloadText(download) {
+  const stream = await download.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  return Buffer.concat(chunks).toString('utf8');
+}
+
 test.beforeEach(async ({ page }) => {
   await blockExternalServices(page);
 });
@@ -44,6 +51,40 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   const card = page.locator('.property-card').filter({ hasText: 'Updated Playwright Property' });
   await expect(card).toBeVisible();
   await expect(card).toContainText('£300,000');
+});
+
+test('downloads a calendar invite for a future property viewing', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#newPropertyBtn').click();
+  await page.locator('#title').fill('Calendar Viewing');
+  await page.locator('#details').fill('Meet the agent at the front entrance.');
+  await page.locator('#listingUrl').fill('https://example.com/calendar-viewing');
+  await page.locator('#viewingDate').fill('2099-12-01T14:30');
+  await page.locator('#purchasePrice').fill('260000');
+
+  await expect(page.locator('#addViewingToCalendarBtn')).toBeVisible();
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+
+  const card = page.locator('.property-card').filter({ hasText: 'Calendar Viewing' });
+  const calendarButton = card.getByRole('button', {
+    name: 'Add viewing for Calendar Viewing to calendar'
+  });
+  await expect(calendarButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await calendarButton.click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('calendar-viewing-viewing.ics');
+
+  const invite = await downloadText(download);
+  expect(invite).toContain('BEGIN:VCALENDAR');
+  expect(invite).toContain('SUMMARY:Property Viewing - Calendar Viewing');
+  expect(invite).toContain('Meet the agent at the front entrance.');
+  expect(invite).toContain('URL:https://example.com/calendar-viewing');
+  expect(invite).toContain('TRIGGER:-PT1H');
+  expect(invite).toMatch(/DTSTART:\d{8}T\d{6}Z/);
+  expect(invite).toMatch(/DTEND:\d{8}T\d{6}Z/);
 });
 
 test('archives and restores a property without losing its calculation', async ({ page }) => {

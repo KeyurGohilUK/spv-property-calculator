@@ -1288,6 +1288,22 @@ button.header-icon-control:active { transform: translateY(1px); }
   background: transparent !important;
   color: var(--text);
 }
+.viewing-calendar-btn {
+  width: fit-content;
+  margin: -4px 0 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.viewing-calendar-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .property-viewing-date {
   display: inline-flex;
   align-items: center;
@@ -1312,6 +1328,7 @@ button.header-icon-control:active { transform: translateY(1px); }
 }
 @media (max-width: 620px) {
   .viewing-date-field { max-width: none; }
+  .viewing-calendar-btn { width: 100%; justify-content: center; }
 }
 
 /* Primary application navigation */
