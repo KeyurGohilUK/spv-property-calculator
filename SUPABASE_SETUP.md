@@ -146,4 +146,4 @@ The calculator remains usable locally. Once online, reload the app if necessary;
 
 ## Shared access model
 
-All authenticated users in this Supabase project can read, create, edit, archive and restore all property rows. Keep the user list small and controlled. Once your 2–3 accounts exist, disable new public sign-ups in Supabase Authentication settings. Signed-out visitors have no access to the table.
+Only active, approved workspace members can access shared cloud data. Viewers have read-only access; editors can create, edit, archive and restore records; administrators have editor access plus permanent property deletion and user management. After a colleague creates an account, an administrator can open **More → Manage Users** to approve the account and assign its role. Signed-out and unapproved accounts have no shared workspace access.
