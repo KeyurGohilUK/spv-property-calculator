@@ -61,13 +61,14 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.16.5';
+const APP_VERSION = '1.17.0';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './calendar-invite.js',
   './cloud.js',
   './calculations.js',
   './tax-config.js',
