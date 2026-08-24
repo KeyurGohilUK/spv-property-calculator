@@ -1,7 +1,7 @@
 {
-  "version": "1.21.2",
+  "version": "1.21.3",
   "notes": [
-    "Install and update controls now use the same popup and behaviour on every page.",
-    "The shared updater preserves local data and refreshes the complete app shell."
+    "The Expense Tracker now uses a cleaner layout without redundant overview counters.",
+    "Detailed totals remain available in the filter and reporting section."
   ]
 }
