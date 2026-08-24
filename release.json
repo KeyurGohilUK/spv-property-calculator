@@ -1,7 +1,7 @@
 {
-  "version": "1.21.7",
+  "version": "1.21.8",
   "notes": [
-    "Upcoming and completed property viewings now use distinct status colours.",
-    "Long titles and financial values are aligned for easier card comparison."
+    "Property summary amounts now align directly beneath their labels.",
+    "Upcoming and completed property viewings retain their distinct status colours."
   ]
 }
