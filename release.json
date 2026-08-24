@@ -2,7 +2,7 @@
   "version": "1.21.3",
   "notes": [
     "The Expense Tracker now uses a cleaner layout without redundant overview counters.",
-    "The Forecast page no longer duplicates the main navigation with an additional top bar.",
+    "Forecast and Archived Properties no longer duplicate the main navigation with additional top bars.",
     "Detailed expense totals remain available in the filter and reporting section."
   ]
 }
