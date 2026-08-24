@@ -1,8 +1,8 @@
 {
-  "version": "1.18.0",
+  "version": "1.18.1",
   "notes": [
-    "A new warm cream and beige theme now runs throughout the app",
-    "Caramel actions, espresso text and muted green totals improve visual hierarchy",
-    "Dark mode now uses a matching warm neutral palette"
+    "The new SPV property-growth logo now appears throughout the app",
+    "Updated iPhone, iPad, Android and browser icons use the new identity",
+    "Dedicated maskable icons prevent cropping on different launcher shapes"
   ]
 }
