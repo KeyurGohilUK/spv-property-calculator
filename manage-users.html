@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="Manage SPV Property Calculator workspace access.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./theme.js"></script>
+  <script defer src="./help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./manage-users.css">
+  <title>Manage Users · SPV Property Calculator</title>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="primary-app-nav" aria-label="Primary navigation">
+      <a class="primary-nav-item" href="./">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path></svg><span>Properties</span>
+      </a>
+      <a class="primary-nav-item" href="./expenses.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h4"></path></svg><span>Expenses</span>
+      </a>
+      <a class="primary-nav-item" href="./forecast.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg><span>Forecast</span><small>Beta</small>
+      </a>
+      <button class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle></svg><span>More</span>
+      </button>
+    </nav>
+
+    <main class="main-shell user-management-shell">
+      <section class="hero-card user-management-hero">
+        <div>
+          <p class="eyebrow">Administrator</p>
+          <h2>Manage Users</h2>
+          <p class="muted">Approve workspace access and assign the appropriate role.</p>
+        </div>
+        <button id="refreshUsersBtn" class="secondary-btn" type="button">Refresh</button>
+      </section>
+
+      <section id="userAccessLoading" class="user-access-state" aria-live="polite">
+        <div class="empty-icon" aria-hidden="true">•••</div>
+        <h3>Checking administrator access</h3>
+        <p>Please wait while your workspace permissions are verified.</p>
+      </section>
+
+      <section id="userAccessDenied" class="user-access-state hidden" aria-live="polite">
+        <div class="empty-icon" aria-hidden="true">!</div>
+        <h3>Administrator access required</h3>
+        <p id="userAccessDeniedMessage">Only an active administrator can manage workspace users.</p>
+        <a class="primary-btn" href="./">Return to properties</a>
+      </section>
+
+      <section id="userManagementContent" class="hidden">
+        <div class="user-management-summary">
+          <div><span>Registered accounts</span><strong id="registeredUserCount">0</strong></div>
+          <div><span>Active members</span><strong id="activeUserCount">0</strong></div>
+          <div><span>Administrators</span><strong id="adminUserCount">0</strong></div>
+        </div>
+        <p id="userManagementMessage" class="save-message" role="status" aria-live="polite"></p>
+        <div id="userList" class="user-list" aria-label="Workspace users"></div>
+        <div id="userListEmpty" class="user-access-state hidden">
+          <div class="empty-icon" aria-hidden="true">👤</div>
+          <h3>No registered accounts</h3>
+          <p>New accounts will appear here after they sign up.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./secondary-page-header.js"></script>
+  <script type="module" src="./admin-menu.js"></script>
+  <script type="module" src="./manage-users.js"></script>
+</body>
+</html>
