@@ -67,7 +67,7 @@ create table if not exists public.expenses (
   ),
   constraint expenses_receipt_object_path_check check (
     receipt_object_path is null
-    or receipt_object_path ~ '^receipts/[A-Za-z0-9_-]{1,160}/[A-Za-z0-9_-]+\\.[A-Za-z0-9]+$'
+    or receipt_object_path ~ '^receipts/[A-Za-z0-9_-]{1,160}/[A-Za-z0-9_-]+\.[A-Za-z0-9]+$'
   )
 );
 create index if not exists expenses_date_idx on public.expenses(expense_date desc);
