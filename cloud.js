@@ -516,6 +516,35 @@
     };
   }
 
+  async function getWorkspaceAccess() {
+    if (!currentUser) return null;
+    const supabaseClient = ensureClient();
+    const { data, error } = await supabaseClient
+      .from('workspace_members')
+      .select('role,active')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    return data || null;
+  }
+
+  async function listWorkspaceUsers() {
+    const supabaseClient = ensureClient();
+    const { data, error } = await supabaseClient.rpc('list_workspace_users');
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function setWorkspaceUserAccess(userId, role, active) {
+    const supabaseClient = ensureClient();
+    const { error } = await supabaseClient.rpc('set_workspace_user_access', {
+      p_user_id: userId,
+      p_role: role,
+      p_active: Boolean(active)
+    });
+    if (error) throw error;
+  }
+
   function destroy() {
     authSubscription?.unsubscribe?.();
     authSubscription = null;
@@ -528,6 +557,9 @@
     init,
     onAuthChange,
     getSession,
+    getWorkspaceAccess,
+    listWorkspaceUsers,
+    setWorkspaceUserAccess,
     getCurrentUser: () => currentUser,
     getUserDisplayName,
     updateDisplayName,
