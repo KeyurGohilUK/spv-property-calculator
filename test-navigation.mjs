@@ -87,8 +87,8 @@ assert.match(styles, /\.field input, \.field textarea, \.field select, \.expense
 assert.match(styles, /\.field select \{[\s\S]*appearance: none[\s\S]*background-image:/, 'Dropdowns must use the shared custom arrow treatment');
 assert.match(styles, /select:focus-visible/, 'Dropdowns must provide the shared keyboard focus style');
 assert.match(styles, /\.field select:disabled/, 'Dropdowns must provide a disabled state');
-assert.match(styles, /\.property-cost-breakdown > div \{[^}]*grid-template-columns: minmax\(0, 1fr\) max-content;/, 'Property card cost rows must reserve the full remaining width before the amount');
-assert.match(styles, /\.property-cost-breakdown > div strong \{[^}]*justify-self: end;[^}]*text-align: right;/, 'Property card totals must anchor to the far-right edge');
+assert.match(styles, /\.property-cost-breakdown > div \{[^}]*display: flex;[^}]*width: 100%;[^}]*justify-content: space-between;/, 'Property card cost rows must span the full card width');
+assert.match(styles, /\.property-cost-breakdown > div strong \{[^}]*margin-left: auto;[^}]*text-align: right;/, 'Property card totals must anchor to the far-right edge');
 assert.match(styles, /\.property-list \{[^}]*align-items: start;/, 'Property cards must keep their content height instead of stretching to the tallest card');
 assert.match(app, /property-card-more[\s\S]*data-action="duplicate"[\s\S]*data-action="archive"/, 'Secondary property actions must use the overflow menu');
 assert.match(styles, /\.property-card:not\(\.archived-card\) \.property-card-header \{[^}]*min-height:/, 'Property card headers must keep financial rows aligned');

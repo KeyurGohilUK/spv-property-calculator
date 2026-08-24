@@ -1,7 +1,7 @@
 {
-  "version": "1.21.8",
+  "version": "1.21.9",
   "notes": [
-    "Property summary amounts now align directly beneath their labels.",
-    "Upcoming and completed property viewings retain their distinct status colours."
+    "Property card totals now use the full panel width on every screen size.",
+    "The total investment section has been rebuilt for clearer, consistent alignment."
   ]
 }

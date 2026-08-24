@@ -131,13 +131,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .property-total { margin-top: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .property-total span { color: var(--muted); font-size: 12px; }
 .property-total strong { font-size: 19px; color: var(--brand); }
-.property-cost-breakdown { display: grid; width: 100%; gap: 9px; align-items: stretch; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface-2) 55%, var(--surface)); padding: 13px; }
-.property-cost-breakdown > div { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; column-gap: 10px; }
+.property-cost-breakdown { display: block; width: 100%; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface-2) 55%, var(--surface)); padding: 0; }
+.property-cost-breakdown > div { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 12px; padding: 13px 14px 0; }
 .property-cost-breakdown > div span { min-width: 0; }
-.property-cost-breakdown > div strong { justify-self: end; text-align: right; font-size: 15px; color: var(--text); }
-.property-cost-breakdown .refurbishment-row { padding-bottom: 9px; }
+.property-cost-breakdown > div strong { flex: 0 0 auto; margin-left: auto; text-align: right; font-size: 15px; color: var(--text); }
+.property-cost-breakdown .refurbishment-row { padding-top: 9px; padding-bottom: 13px; }
 .property-cost-breakdown .refurbishment-row span { color: var(--muted); }
-.property-cost-breakdown .investment-total { margin: 0 -13px -13px; padding: 12px 13px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
+.property-cost-breakdown .investment-total { padding: 13px 14px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
 .property-cost-breakdown .investment-total span { color: var(--brand); font-weight: 800; }
 .property-cost-breakdown .investment-total strong { font-size: 19px; color: var(--brand); }
 .property-card-tools { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; gap: 6px; z-index: 2; }

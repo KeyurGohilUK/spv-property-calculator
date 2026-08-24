@@ -138,6 +138,26 @@ test('property cards keep their content height when another card is taller', asy
   expect(tallHeight - shortHeight).toBeGreaterThan(80);
 });
 
+
+test('property card cost amounts use the full totals panel width', async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 900 });
+  await createProperty(page, { title: 'Full Width Totals', price: '250000', refurbishment: '10000' });
+
+  const panel = page.locator('.property-card').filter({ hasText: 'Full Width Totals' }).locator('.property-cost-breakdown');
+  await expect(panel).toBeVisible();
+
+  const alignment = await panel.evaluate((element) => {
+    const panelRight = element.getBoundingClientRect().right;
+    return [...element.querySelectorAll(':scope > div strong')].map((amount) =>
+      panelRight - amount.getBoundingClientRect().right
+    );
+  });
+
+  expect(alignment).toHaveLength(3);
+  alignment.forEach((rightInset) => expect(rightInset).toBeGreaterThanOrEqual(12));
+  alignment.forEach((rightInset) => expect(rightInset).toBeLessThanOrEqual(16));
+});
+
 test('@mobile mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile WebKit regression');
   await page.goto('/');
