@@ -144,6 +144,10 @@ test('highlights the shared Install control on secondary pages', async ({ page }
 
   await expect(page.locator('#secondaryInstallBtn')).toHaveClass(/update-available/);
   await expect(page.locator('#secondaryInstallBtn')).toHaveAttribute('aria-label', 'Update 9.9.9 available');
+  await page.locator('#secondaryInstallBtn').click();
+  await expect(page.locator('#installDialog')).toHaveAttribute('open', '');
+  await expect(page.locator('#releaseNotes')).toContainText('Shared update indicator');
+  await expect(page.locator('#releaseStatus')).toContainText(`Installed ${CURRENT_VERSION}`);
 });
 
 test('downloads updates without removing saved properties or unrelated caches', async ({ page }) => {

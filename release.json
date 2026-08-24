@@ -1,7 +1,7 @@
 {
-  "version": "1.21.1",
+  "version": "1.21.2",
   "notes": [
-    "Manage Users now loads the current user list with the shared sync status.",
-    "Updated app files are refreshed together to prevent mixed cached versions."
+    "Install and update controls now use the same popup and behaviour on every page.",
+    "The shared updater preserves local data and refreshes the complete app shell."
   ]
 }

@@ -179,8 +179,8 @@ for (const route of ['/expenses.html', '/forecast.html']) {
     await page.locator('#closeSecondaryAccount').click();
 
     await page.locator('#secondaryInstallBtn').click();
-    await expect(page.locator('#secondaryInstallDialog')).toHaveAttribute('open', '');
-    await page.locator('#closeSecondaryInstall').click();
+    await expect(page.locator('#installDialog')).toHaveAttribute('open', '');
+    await page.locator('#closeInstallDialog').click();
 
     await page.locator('[data-more-menu]').click();
     await expect(page.getByRole('heading', { name: 'App Menu' })).toBeVisible();

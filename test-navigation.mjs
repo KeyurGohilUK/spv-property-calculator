@@ -11,6 +11,7 @@ const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'u
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
+const installComponent = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
@@ -35,14 +36,16 @@ for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
 assert.match(secondaryHeader, /id="secondaryConnectionStatus"/, 'Shared header must include online status');
 assert.match(secondaryHeader, /id="secondaryAccountBtn"/, 'Shared header must include Account');
 assert.match(secondaryHeader, /id="secondaryInstallBtn"/, 'Shared header must include Install');
-assert.match(app, /setupUpdateNotifier\(\$\('installBtn'\), APP_VERSION\)/, 'Home Install control must use the shared update notifier');
-assert.match(secondaryHeader, /setupUpdateNotifier\(\$\('secondaryInstallBtn'\), APP_VERSION\)/, 'Secondary Install controls must use the shared update notifier');
+assert.match(app, /setupInstallComponent\([\s\S]*button: \$\('installBtn'\)/, 'Home Install control must use the shared component');
+assert.match(secondaryHeader, /setupInstallComponent\(\{ button: \$\('secondaryInstallBtn'\) \}\)/, 'Secondary Install controls must use the shared component');
+assert.match(installComponent, /setupUpdateNotifier\(button, APP_VERSION\)/, 'Shared Install component must provide update notifications');
 assert.match(styles, /\.header-icon-control\.update-available[\s\S]*update-icon-pulse[\s\S]*::before/, 'Update available indicator styling is missing');
 assert.doesNotMatch(secondaryHeader, /window\.location\.href = '\.\/\?dialog=(?:account|install)'/, 'Account and Install must not navigate away');
 assert.match(secondaryHeader, /secondaryAccountBtn[\s\S]*secondaryAccountDialog[\s\S]*showModal/, 'Account must open a local popup');
-assert.match(secondaryHeader, /secondaryInstallBtn[\s\S]*secondaryInstallDialog[\s\S]*showModal/, 'Install must open a local popup');
+assert.doesNotMatch(secondaryHeader, /secondaryInstallDialog|secondaryNativeInstallBtn|secondaryUpdateBtn/, 'Secondary pages must not keep a duplicate Install popup');
+assert.match(installComponent, /id="installDialog"[\s\S]*id="nativeInstallBtn"[\s\S]*id="downloadUpdatesBtn"/, 'Shared Install popup is incomplete');
 assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');
-assert.match(secondaryHeader, /secondaryUpdateBtn[\s\S]*handleUpdate/, 'Local Install popup must provide update handling');
+assert.match(installComponent, /async function downloadUpdates[\s\S]*APP_UPDATE_ASSETS/, 'Shared Install popup must provide update handling');
 assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page-header\.js/, 'Forecast must load local account dependencies');
 assert.match(forecast, /<button class="primary-nav-item" type="button" data-more-menu/, 'Forecast More must be a local dialog button');
 assert.match(expenses, /<button class="primary-nav-item" type="button" data-more-menu/, 'Expenses More must be a local dialog button');
