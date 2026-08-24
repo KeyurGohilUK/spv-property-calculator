@@ -37,6 +37,14 @@ test('administrator can review and update workspace access', async ({ page }) =>
   await expect(page.locator('#userManagementSyncStatus')).toHaveText('Users up to date');
   await expect(page.getByRole('button', { name: 'Refresh' })).toHaveCount(0);
 
+  const roleGuide = page.locator('#userRoleGuide');
+  await expect(roleGuide).not.toHaveAttribute('open', '');
+  await roleGuide.locator('summary').click();
+  await expect(roleGuide).toHaveAttribute('open', '');
+  await expect(roleGuide.getByRole('heading', { name: 'Viewer' })).toBeVisible();
+  await expect(roleGuide.getByRole('heading', { name: 'Editor' })).toBeVisible();
+  await expect(roleGuide.getByRole('heading', { name: 'Admin' })).toBeVisible();
+
   const colleague = page.locator('[data-user-id="user-2"]');
   await colleague.locator('[data-user-role]').selectOption('editor');
   await colleague.locator('[data-user-active]').check();

@@ -1,10 +1,18 @@
 .user-management-shell { display: grid; gap: 18px; }
 .user-management-hero { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .user-management-hero h2 { margin-bottom: 6px; }
-.user-management-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-.user-management-summary > div { display: grid; gap: 5px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
-.user-management-summary span { color: var(--muted); font-size: 12px; }
-.user-management-summary strong { font-size: 24px; color: var(--brand); }
+.user-role-guide { margin-bottom: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); overflow: hidden; }
+.user-role-guide summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; cursor: pointer; list-style: none; }
+.user-role-guide summary::-webkit-details-marker { display: none; }
+.user-role-guide summary::after { content: '›'; color: var(--muted); font-size: 22px; transform: rotate(90deg); transition: transform .18s ease; }
+.user-role-guide[open] summary::after { transform: rotate(270deg); }
+.user-role-guide summary > span { display: grid; gap: 3px; }
+.user-role-guide summary small { color: var(--muted); font-weight: 400; }
+.user-role-guide-content { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.user-role-guide-content section { padding-top: 14px; }
+.user-role-guide-content h3 { margin: 0 0 6px; font-size: 14px; color: var(--brand); }
+.user-role-guide-content p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.user-role-note { grid-column: 1 / -1; padding: 12px; border-radius: 12px; background: var(--surface-2); }
 .user-list { display: grid; gap: 12px; }
 .user-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(130px, 170px) auto auto; align-items: end; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-soft); }
 .user-identity { min-width: 0; align-self: center; }
@@ -25,7 +33,7 @@
 }
 @media (max-width: 560px) {
   .user-management-hero { align-items: stretch; flex-direction: column; }
-  .user-management-summary { grid-template-columns: 1fr; }
+  .user-role-guide-content { grid-template-columns: 1fr; gap: 0; }
   .user-card { grid-template-columns: 1fr; align-items: stretch; }
   .user-role-field, .user-active-control, .user-save-btn { width: 100%; }
 }

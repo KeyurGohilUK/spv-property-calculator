@@ -40,14 +40,7 @@ async function withTimeout(promise, message, timeoutMs = 12_000) {
   }
 }
 
-function renderSummary() {
-  $('registeredUserCount').textContent = String(users.length);
-  $('activeUserCount').textContent = String(users.filter((user) => user.active).length);
-  $('adminUserCount').textContent = String(users.filter((user) => user.active && user.role === 'admin').length);
-}
-
 function renderUsers() {
-  renderSummary();
   $('userListEmpty').classList.toggle('hidden', users.length !== 0);
   $('userList').innerHTML = users.map((user) => {
     const isCurrentUser = user.user_id === currentUserId;

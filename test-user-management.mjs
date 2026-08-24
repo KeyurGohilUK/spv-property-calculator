@@ -33,6 +33,9 @@ assert.doesNotMatch(page + pageScript, /refreshUsersBtn|>Refresh<\//, 'Manage Us
 assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Manage Users page must save role and active access');
 assert.match(pageScript, /withTimeout[\s\S]*Account check timed out[\s\S]*Administrator check timed out/, 'Manage Users must not remain indefinitely in its checking state');
 assert.match(pageStyles, /@media \(max-width: 560px\)/, 'Manage Users page must provide a mobile layout');
+assert.match(page, /<details id="userRoleGuide" class="user-role-guide">/, 'Role guidance must use a collapsed details element');
+assert.doesNotMatch(page, /<details[^>]*userRoleGuide[^>]*\sopen(?:\s|>)/, 'Role guidance must be collapsed by default');
+for (const role of ['Viewer', 'Editor', 'Admin']) assert.match(page, new RegExp(`<h3>${role}<\\/h3>`), `${role} guidance is missing`);
 assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be available in the offline app shell');
 
 
