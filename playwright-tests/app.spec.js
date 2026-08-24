@@ -32,14 +32,14 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
   await addExpense(page);
 
   await expect(page.locator('#expenseCount')).toHaveText('1');
-  await expect(page.locator('#totalExpenses')).toContainText('125.50');
+  await expect(page.locator('.expense-card')).toContainText('£125.50');
   await expect(page.getByText('Companies House filing fee')).toBeVisible();
 
   await page.locator('.expense-card-main').click();
   await expect(page.getByRole('heading', { name: 'Edit Expense' })).toBeVisible();
   await page.locator('#expenseAmount').fill('150');
   await page.getByRole('button', { name: 'Save Changes' }).click();
-  await expect(page.locator('#totalExpenses')).toContainText('150.00');
+  await expect(page.locator('.expense-card')).toContainText('£150.00');
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: /Delete expense/i }).click();
