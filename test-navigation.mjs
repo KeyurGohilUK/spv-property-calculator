@@ -46,6 +46,8 @@ assert.match(expenses, /<button class="primary-nav-item" type="button" data-more
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
 assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not navigate away');
 assert.match(secondaryHeader, /secondaryMoreMenuDialog[\s\S]*showModal\(\)/, 'Secondary More must open a local popup');
+assert.match(index, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Home App Menu items must be ordered by priority');
+assert.match(secondaryHeader, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Secondary App Menu items must match the priority order');
 assert.match(secondaryHeader, /class="install-dialog more-menu-dialog"/, 'Secondary App Menu must use Install dialog styling');
 assert.match(index, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Main App Menu must use Install dialog styling');
 assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
