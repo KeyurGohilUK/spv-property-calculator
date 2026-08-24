@@ -74,7 +74,8 @@ assert.match(styles, /\.field input, \.field textarea, \.field select, \.expense
 assert.match(styles, /\.field select \{[\s\S]*appearance: none[\s\S]*background-image:/, 'Dropdowns must use the shared custom arrow treatment');
 assert.match(styles, /select:focus-visible/, 'Dropdowns must provide the shared keyboard focus style');
 assert.match(styles, /\.field select:disabled/, 'Dropdowns must provide a disabled state');
-assert.match(styles, /\.property-cost-breakdown > div strong \{[^}]*margin-left: auto;[^}]*text-align: right;/, 'Property card totals must align to the far-right edge');
+assert.match(styles, /\.property-cost-breakdown > div \{[^}]*grid-template-columns: minmax\(0, 1fr\) max-content;/, 'Property card cost rows must reserve the full remaining width before the amount');
+assert.match(styles, /\.property-cost-breakdown > div strong \{[^}]*justify-self: end;[^}]*text-align: right;/, 'Property card totals must anchor to the far-right edge');
 assert.match(styles, /dialog \{[\s\S]*scrollbar-width: thin[\s\S]*scrollbar-color:/, 'Every popup must use a thin Firefox scrollbar');
 assert.match(styles, /dialog::\-webkit-scrollbar \{[\s\S]*width: 7px/, 'Every popup must use a thin WebKit scrollbar');
 assert.match(styles, /dialog::\-webkit-scrollbar-thumb[\s\S]*var\(--brand\)/, 'Popup scrollbar thumb must use app theme colours');

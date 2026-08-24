@@ -1,7 +1,7 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
-const APP_VERSION = '1.20.3';
+const APP_VERSION = '1.20.4';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
