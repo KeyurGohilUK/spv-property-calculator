@@ -66,7 +66,7 @@ function renderUsers() {
 }
 
 async function loadUsers() {
-  if (loading) return;
+  if (loading) return false;
   loading = true;
   setSyncStatus('Loading users…');
   setMessage('');
@@ -74,10 +74,12 @@ async function loadUsers() {
     users = await window.SPVCloud.listWorkspaceUsers();
     renderUsers();
     setSyncStatus('Users up to date', 'synced');
+    return true;
   } catch (error) {
     const message = error.message || 'Could not load workspace users.';
     setSyncStatus('User sync failed', 'error');
     setMessage(message, true);
+    return false;
   } finally {
     loading = false;
   }
@@ -95,9 +97,9 @@ async function saveUser(card) {
   setMessage('');
   try {
     await window.SPVCloud.setWorkspaceUserAccess(userId, role, active);
-    await loadUsers();
-    setSyncStatus('Users up to date', 'synced');
-    setMessage('User access updated.');
+    const refreshed = await loadUsers();
+    if (refreshed) setMessage('User access updated.');
+    else setMessage('Access updated, but the latest user list could not be loaded.', true);
   } catch (error) {
     setSyncStatus('User sync failed', 'error');
     setMessage(error.message || 'Could not update user access.', true);
