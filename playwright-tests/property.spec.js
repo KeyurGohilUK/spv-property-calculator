@@ -115,7 +115,7 @@ test('archives and restores a property without losing its calculation', async ({
   await expect(archivedCard).toContainText('£12,000');
 
   await archivedCard.getByRole('button', { name: 'Restore Property' }).click();
-  await page.locator('#archiveBackBtn').click();
+  await page.locator('#propertiesNavLink').click();
   await expect(page.getByRole('heading', { name: 'Archive Journey' })).toBeVisible();
   await expect(page.locator('#propertyCount')).toHaveText('1');
 });
