@@ -20,6 +20,8 @@ assert.match(syncStatus, /export function renderSyncStatus\(element, message, st
 
 assert.match(app, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
 assert.match(styles, /\.property-hero-actions \{[^}]*display: flex;[^}]*justify-content: flex-end;[^}]*flex-wrap: wrap;/, 'Property hero actions must match expense hero alignment');
+assert.match(styles, /\.hero-card \{[\s\S]*radial-gradient\(circle at 100% 0%[\s\S]*var\(--surface\)/, 'Every page header card must share the raised corner treatment');
+assert.doesNotMatch(styles, /#homeView > \.hero-card/, 'Page header corner treatment must not be limited to Properties');
 assert.match(styles, /\.sync-status \{[^}]*color: var\(--muted\)[^}]*text-align: right; \}[\s\S]*\.sync-status\.error \{ color: var\(--danger\); \}[\s\S]*\.sync-status\.synced \{ color: var\(--brand\); \}/, 'Shared sync-status styling is missing');
 assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.property-hero-actions \{[^}]*grid-template-columns: 1fr;[^}]*width: 100%; \}/, 'Property hero actions must stack on mobile');
 
