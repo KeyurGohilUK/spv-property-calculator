@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.18.0-warm-cream';
+const CACHE_NAME = 'spv-property-calculator-v1.18.1-app-logo';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -32,7 +32,10 @@ const ASSETS = [
   './forecast-advanced.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png',
+  './icons/favicon-32.png'
 ].map((path) => new URL(path, self.location.href).href);
 
 self.addEventListener('install', (event) => {
