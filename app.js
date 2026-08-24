@@ -21,6 +21,7 @@ import {
   clearPendingDeletes
 } from './storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
+import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 
 /*
  * SPV Property Calculator - browser application
@@ -145,6 +146,22 @@ function isViewingPassed(value, now = new Date()) {
   return !Number.isNaN(viewing.getTime()) && viewing.getTime() <= now.getTime();
 }
 
+function downloadViewingCalendarInvite(property) {
+  if (!isFutureViewing(property?.viewingDate)) return false;
+  const invite = buildViewingCalendarInvite(property);
+  const blob = new Blob([invite.content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = invite.filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return true;
+}
+
+
 function normalizeListingUrl(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -218,6 +235,8 @@ function handlePropertyFormMutation(event) {
 
 function renderCalculation() {
   const model = getFormModel();
+  const calendarButton = $('addViewingToCalendarBtn');
+  if (calendarButton) calendarButton.classList.toggle('hidden', !isFutureViewing(model.viewingDate));
   const calc = calculateProperty(model);
 
   $('depositAmountInline').textContent = money(calc.depositAmount);
@@ -598,9 +617,11 @@ function renderPropertyList() {
       : viewingDateLabel
         ? `<p class="property-viewing-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path></svg><span>Viewing ${escapeHtml(viewingDateLabel)}</span></p>`
         : '';
+    const calendarAction = !viewingPassed && viewingDateLabel ? `<button class="property-card-icon-action calendar" type="button" data-action="calendar" aria-label="Add viewing for ${escapeHtml(propertyTitle)} to calendar" title="Add viewing to calendar" data-tooltip="Calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg></button>` : '';
     const listingAction = listingUrl ? `<button class="property-card-icon-action listing" type="button" data-action="listing" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></button>` : '';
-    card.innerHTML=`<div class="property-card-tools" aria-label="Property actions">${listingAction}<button class="property-card-icon-action" type="button" data-action="duplicate" aria-label="Duplicate ${escapeHtml(propertyTitle)}" title="Duplicate property" data-tooltip="Duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button class="property-card-icon-action archive" type="button" data-action="archive" aria-label="Archive ${escapeHtml(propertyTitle)}" title="Archive property" data-tooltip="Archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg></button></div><div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}</div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div>`;
+    card.innerHTML=`<div class="property-card-tools" aria-label="Property actions">${calendarAction}${listingAction}<button class="property-card-icon-action" type="button" data-action="duplicate" aria-label="Duplicate ${escapeHtml(propertyTitle)}" title="Duplicate property" data-tooltip="Duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button class="property-card-icon-action archive" type="button" data-action="archive" aria-label="Archive ${escapeHtml(propertyTitle)}" title="Archive property" data-tooltip="Archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg></button></div><div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}</div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div>`;
     card.addEventListener('click',(event)=>{ if(!event.target.closest('button')) showEditor(property.id); });
+    if (calendarAction) card.querySelector('[data-action="calendar"]').addEventListener('click',()=> downloadViewingCalendarInvite(property));
     if (listingUrl) card.querySelector('[data-action="listing"]').addEventListener('click',()=>{ window.open(listingUrl,'_blank','noopener,noreferrer'); });
     card.addEventListener('keydown',(event)=>{ if(event.target!==card)return; if(event.key==='Enter'||event.key===' '){event.preventDefault();showEditor(property.id);} });
     card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(copy);storeCloudSyncedProperty(synced);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
@@ -1222,6 +1243,9 @@ function init() {
     updateSaveButtonState();
   });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
+  $('addViewingToCalendarBtn').addEventListener('click', () => {
+    downloadViewingCalendarInvite(getFormModel());
+  });
 
   $('accountBtn').addEventListener('click', () => {
     renderAuthDialog();
