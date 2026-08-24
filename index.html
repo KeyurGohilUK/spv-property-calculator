@@ -13,6 +13,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <script src="./theme.js"></script>
+  <script defer src="./help-guide.js"></script>
   <link rel="stylesheet" href="./styles.css">
   <title>SPV Property Calculator</title>
 </head>
@@ -454,14 +455,14 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.19.0</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.20.0</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.19.0</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.20.0</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>The new SPV property-growth logo now appears throughout the app</li>
-      <li>Updated iPhone, iPad, Android and browser icons use the new identity</li>
-      <li>Dedicated maskable icons prevent cropping on different launcher shapes</li>
+      <li>New users now receive a short first-visit Help Guide</li>
+      <li>Installation and account sync directions are easier to find</li>
+      <li>Reopen the guide at any time from the More menu</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -502,6 +503,11 @@
       <span class="more-menu-icon" data-theme-icon aria-hidden="true">☀</span>
       <span><strong>Theme</strong><small data-theme-description>Light appearance</small></span>
       <span class="theme-switch" aria-hidden="true"></span>
+    </button>
+    <button class="more-menu-item" type="button" data-help-guide>
+      <span class="more-menu-icon" aria-hidden="true">?</span>
+      <span><strong>Help Guide</strong><small>Installation, account and app menu overview</small></span>
+      <span aria-hidden="true">›</span>
     </button>
     <button id="archiveBtn" class="more-menu-item" type="button">
       <span class="more-menu-icon" aria-hidden="true">↺</span>

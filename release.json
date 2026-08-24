@@ -1,8 +1,8 @@
 {
-  "version": "1.19.0",
+  "version": "1.20.0",
   "notes": [
-    "Choose Light or Dark appearance from the More menu",
-    "Light theme is now the default, even when the device uses Dark Mode",
-    "Your theme choice is remembered across the app"
+    "New users now receive a short first-visit Help Guide",
+    "Installation and account sync directions are easier to find",
+    "Reopen the guide at any time from the More menu"
   ]
 }
