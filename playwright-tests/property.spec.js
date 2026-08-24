@@ -80,6 +80,7 @@ test('downloads a calendar invite for a future property viewing', async ({ page 
   await page.locator('#backBtn').click();
 
   const card = page.locator('.property-card').filter({ hasText: 'Calendar Viewing' });
+  await expect(card.locator('.property-viewing-date')).not.toHaveClass(/viewed/);
   const calendarButton = card.getByRole('button', {
     name: 'Add viewing for Calendar Viewing to calendar'
   });

@@ -93,6 +93,9 @@ assert.match(styles, /\.property-list \{[^}]*align-items: start;/, 'Property car
 assert.match(app, /property-card-more[\s\S]*data-action="duplicate"[\s\S]*data-action="archive"/, 'Secondary property actions must use the overflow menu');
 assert.match(styles, /\.property-card:not\(\.archived-card\) \.property-card-header \{[^}]*min-height:/, 'Property card headers must keep financial rows aligned');
 assert.match(styles, /\.property-cost-breakdown[\s\S]*\.investment-total[^{]*\{[^}]*background:/, 'Total Investment must use the shared footer treatment');
+assert.match(styles, /\.property-card h3 \{[^}]*-webkit-line-clamp: 2;/, 'Long property titles must be limited to two lines');
+assert.match(styles, /\.property-stats strong \{[^}]*text-align: right;/, 'Property amounts must align for comparison');
+assert.match(styles, /\.property-viewing-date\.viewed \{[^}]*var\(--positive\)/, 'Viewed properties must use a distinct positive status');
 assert.match(styles, /dialog \{[\s\S]*scrollbar-width: thin[\s\S]*scrollbar-color:/, 'Every popup must use a thin Firefox scrollbar');
 assert.match(styles, /dialog::\-webkit-scrollbar \{[\s\S]*width: 7px/, 'Every popup must use a thin WebKit scrollbar');
 assert.match(styles, /dialog::\-webkit-scrollbar-thumb[\s\S]*var\(--brand\)/, 'Popup scrollbar thumb must use app theme colours');

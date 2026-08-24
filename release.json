@@ -1,7 +1,7 @@
 {
-  "version": "1.21.6",
+  "version": "1.21.7",
   "notes": [
-    "Property cards now use a cleaner action menu and consistent header alignment.",
-    "Total Investment has a clearer full-width footer treatment."
+    "Upcoming and completed property viewings now use distinct status colours.",
+    "Long titles and financial values are aligned for easier card comparison."
   ]
 }
