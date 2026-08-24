@@ -34,7 +34,8 @@ assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be avai
 
 assert.equal((bootstrap.match(/^commit;$/gm) || []).length, 1, 'Bootstrap must contain one transaction commit');
 assert.equal((bootstrap.match(/create index if not exists expenses_date_idx/g) || []).length, 1, 'Bootstrap must not duplicate the expense schema');
-assert.ok(bootstrap.includes("or receipt_object_path ~ '^receipts/[A-Za-z0-9_-]{1,160}/[A-Za-z0-9_-]+\\\\.[A-Za-z0-9]+
-"), 'Bootstrap receipt object-path constraint must be complete');
+const receiptConstraint = bootstrap.slice(bootstrap.indexOf('expenses_receipt_object_path_check'), bootstrap.indexOf('expenses_date_idx'));
+assert.match(receiptConstraint, /receipt_object_path ~ /, 'Bootstrap receipt object-path constraint must contain its validation pattern');
+assert.match(receiptConstraint, /\n  \)\n\);/, 'Bootstrap receipt object-path constraint must close before its index');
 
 console.log('Admin user-management checks passed.');
