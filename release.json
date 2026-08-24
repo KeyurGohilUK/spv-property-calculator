@@ -1,8 +1,8 @@
 {
-  "version": "1.18.1",
+  "version": "1.19.0",
   "notes": [
-    "The new SPV property-growth logo now appears throughout the app",
-    "Updated iPhone, iPad, Android and browser icons use the new identity",
-    "Dedicated maskable icons prevent cropping on different launcher shapes"
+    "Choose Light or Dark appearance from the More menu",
+    "Light theme is now the default, even when the device uses Dark Mode",
+    "Your theme choice is remembered across the app"
   ]
 }

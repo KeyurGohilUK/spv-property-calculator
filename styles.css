@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --bg: #f8f4ec;
   --surface: #fffcf7;
   --surface-2: #eee3d3;
@@ -21,8 +21,8 @@
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+html[data-theme="dark"] {
+    color-scheme: dark;
     --bg: #181411;
     --surface: #221d19;
     --surface-2: #2f2822;
@@ -37,7 +37,6 @@
     --danger: #ff9b88;
     --on-brand: #211914;
     --shadow: 0 14px 38px rgba(0, 0, 0, 0.22);
-  }
 }
 
 * { box-sizing: border-box; }
@@ -130,15 +129,15 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .property-stats strong { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .property-total { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 13px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .property-total span { color: var(--muted); font-size: 12px; }
-.property-total strong { font-size: 19px; color: var(--positive); }
+.property-total strong { font-size: 19px; color: var(--brand); }
 .property-cost-breakdown { display: grid; gap: 8px; align-items: stretch; }
 .property-cost-breakdown > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .property-cost-breakdown > div strong { font-size: 15px; color: var(--text); }
 .property-cost-breakdown .refurbishment-row { padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
 .property-cost-breakdown .refurbishment-row span { color: var(--muted); }
 .property-cost-breakdown .investment-total { padding-top: 2px; }
-.property-cost-breakdown .investment-total span { color: var(--positive); font-weight: 800; }
-.property-cost-breakdown .investment-total strong { font-size: 19px; color: var(--positive); }
+.property-cost-breakdown .investment-total span { color: var(--brand); font-weight: 800; }
+.property-cost-breakdown .investment-total strong { font-size: 19px; color: var(--brand); }
 .property-card-tools { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; gap: 6px; z-index: 2; }
 .property-card-icon-action {
   position: relative;
@@ -1047,17 +1046,17 @@ button.header-icon-control:active { transform: translateY(1px); }
   place-items: center;
   border: 0;
   border-radius: 13px;
-  background: color-mix(in srgb, var(--positive) 20%, var(--surface));
-  color: var(--positive);
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  color: var(--brand);
   cursor: pointer;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--positive) 24%, transparent);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 22%, transparent);
   transition: background .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease;
 }
 
 .editor-save-icon.is-saved {
-  background: color-mix(in srgb, var(--positive) 20%, var(--surface));
-  color: var(--positive);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--positive) 24%, transparent);
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  color: var(--brand);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 22%, transparent);
 }
 
 .editor-save-icon.is-unsaved {
@@ -1068,8 +1067,8 @@ button.header-icon-control:active { transform: translateY(1px); }
 
 .editor-save-icon.is-saved:hover,
 .editor-save-icon.is-saved:focus-visible {
-  background: color-mix(in srgb, var(--positive) 28%, var(--surface));
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--positive) 30%, transparent);
+  background: color-mix(in srgb, var(--brand) 24%, var(--surface));
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--brand) 28%, transparent);
 }
 
 .editor-save-icon.is-unsaved:hover,
@@ -1451,6 +1450,31 @@ button.header-icon-control:active { transform: translateY(1px); }
   color: var(--brand);
   background: color-mix(in srgb, var(--brand) 11%, transparent);
   font-weight: 850;
+}
+.theme-switch {
+  width: 46px;
+  height: 26px;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background .2s ease;
+}
+.theme-switch::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+  transition: transform .2s ease;
+}
+[data-theme-toggle][aria-pressed="true"] .theme-switch { background: var(--brand); }
+[data-theme-toggle][aria-pressed="true"] .theme-switch::before { transform: translateX(20px); }
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch,
+  .theme-switch::before { transition: none; }
 }
 
 @media (max-width: 700px) {
