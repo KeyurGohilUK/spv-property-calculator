@@ -26,6 +26,20 @@ function setSyncStatus(message, state = '') {
   renderSyncStatus($('userManagementSyncStatus'), message, state);
 }
 
+async function withTimeout(promise, message, timeoutMs = 12_000) {
+  let timeoutId;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+      })
+    ]);
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 function renderSummary() {
   $('registeredUserCount').textContent = String(users.length);
   $('activeUserCount').textContent = String(users.filter((user) => user.active).length);
@@ -71,7 +85,7 @@ async function loadUsers() {
   setSyncStatus('Loading users…');
   setMessage('');
   try {
-    users = await window.SPVCloud.listWorkspaceUsers();
+    users = await withTimeout(window.SPVCloud.listWorkspaceUsers(), 'User list request timed out. Check your connection and try again.');
     renderUsers();
     setSyncStatus('Users up to date', 'synced');
     return true;
@@ -96,7 +110,7 @@ async function saveUser(card) {
   setSyncStatus('Saving changes…');
   setMessage('');
   try {
-    await window.SPVCloud.setWorkspaceUserAccess(userId, role, active);
+    await withTimeout(window.SPVCloud.setWorkspaceUserAccess(userId, role, active), 'Access update timed out. Check your connection and try again.');
     const refreshed = await loadUsers();
     if (refreshed) setMessage('User access updated.');
     else setMessage('Access updated, but the latest user list could not be loaded.', true);
@@ -125,13 +139,13 @@ async function initialise() {
     return;
   }
   try {
-    const state = await cloud.init();
+    const state = await withTimeout(cloud.init(), 'Account check timed out. Check your connection and try again.');
     const user = state.user || null;
     if (!user) {
       showDenied('Sign in with an administrator account to manage users.');
       return;
     }
-    const access = await cloud.getWorkspaceAccess();
+    const access = await withTimeout(cloud.getWorkspaceAccess(), 'Administrator check timed out. Check your connection and try again.');
     if (!access?.active || access.role !== 'admin') {
       showDenied('Only an active administrator can manage workspace users.');
       return;

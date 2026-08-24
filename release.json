@@ -1,8 +1,7 @@
 {
-  "version": "1.21.0",
+  "version": "1.21.1",
   "notes": [
-    "Administrators can approve users and assign workspace roles.",
-    "Manage Users is visible only to active administrators.",
-    "User access changes are protected by server-side checks."
+    "Manage Users now loads the current user list with the shared sync status.",
+    "Updated app files are refreshed together to prevent mixed cached versions."
   ]
 }

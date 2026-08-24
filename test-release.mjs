@@ -14,6 +14,7 @@ assert.ok(appVersion, 'APP_VERSION was not found in app.js');
 assert.ok(cacheVersion, 'Semantic cache version was not found in service-worker.js');
 assert.equal(release.version, appVersion, 'release.json and APP_VERSION must match');
 assert.equal(cacheVersion, appVersion, 'Service-worker cache version and APP_VERSION must match');
+assert.match(workerSource, /App assets are network-first[\s\S]*fetch\(event\.request\)[\s\S]*catch\(\(\) => caches\.match\(event\.request\)\)/, 'App assets must refresh online and fall back to cache offline');
 assert.match(indexSource, new RegExp(`Version ${appVersion.replaceAll('.', '\\.')}<\\/span>`), 'Install dialog fallback version is stale');
 assert.ok(Array.isArray(release.notes) && release.notes.length > 0, 'Release notes must not be empty');
 
