@@ -27,6 +27,9 @@ assert.match(index, /data-admin-users-link[^>]*aria-hidden="true"/, 'Home admin 
 assert.match(secondaryHeader, /data-admin-users-link[^>]*aria-hidden="true"/, 'Secondary admin menu item must be hidden by default');
 assert.match(page, /id="userAccessDenied"[\s\S]*id="userManagementContent"/, 'Manage Users page must include a guarded access state');
 assert.match(pageScript, /access\.role !== 'admin'/, 'Manage Users page must reject non-admin users');
+assert.match(pageScript, /import \{ renderSyncStatus \} from '.\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');
+assert.match(page, /id="userManagementSyncStatus" class="sync-status"/, 'Manage Users hero sync status is missing');
+assert.doesNotMatch(page + pageScript, /refreshUsersBtn|>Refresh<\//, 'Manage Users must not include a manual refresh action');
 assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Manage Users page must save role and active access');
 assert.match(pageStyles, /@media \(max-width: 560px\)/, 'Manage Users page must provide a mobile layout');
 assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be available in the offline app shell');
