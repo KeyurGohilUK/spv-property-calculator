@@ -1,6 +1,6 @@
 import { TAX_CONFIG } from './tax-config.js';
 import { renderSyncStatus } from './sync-status.js';
-import { setupUpdateNotifier } from './update-notifier.js';
+import { setupInstallComponent } from './install-component.js';
 import {
   safeNumber,
   clamp,
@@ -51,7 +51,6 @@ const FEE_FIELDS = [
 
 let editingId = null;
 let editingCreatedAt = null;
-let deferredInstallPrompt = null;
 let cloudUser = null;
 let cloudSyncing = false;
 let cloudLastMessage = '';
@@ -62,40 +61,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.21.1';
-const APP_CACHE_PREFIX = 'spv-property-calculator-';
-const APP_UPDATE_ASSETS = Object.freeze([
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './calendar-invite.js',
-  './cloud.js',
-  './calculations.js',
-  './tax-config.js',
-  './storage.js',
-  './manifest.json',
-  './supabase-config.js',
-  './release.json',
-  './expenses.html',
-  './secondary-page-header.js',
-  './expenses.css',
-  './expenses.js',
-  './expense-storage.js',
-  './sync-status.js',
-  './receipt-cloud.js',
-  './forecast.html',
-  './forecast.css',
-  './forecast.js',
-  './forecast-advanced.js',
-  './forecast-advanced.css',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-192.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-32.png'
-]);
+let installComponent = null;
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -1044,210 +1010,6 @@ function updateConnectionStatus() {
   renderCloudState(!online && Boolean(cloudUser));
 }
 
-function renderReleaseInfo(release) {
-  if (!release || typeof release !== 'object') return;
-  const version = String(release.version || '').trim();
-  const notes = Array.isArray(release.notes)
-    ? release.notes.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 5)
-    : [];
-  const updateAvailable = Boolean(version && version !== APP_VERSION);
-  const updateButton = $('downloadUpdatesBtn');
-
-  if (version) $('releaseVersion').textContent = `Version ${version}`;
-  if (updateAvailable) {
-    $('releaseStatus').textContent = `Latest ${version} · Installed ${APP_VERSION}`;
-    $('releaseStatus').classList.add('update-available');
-  } else {
-    $('releaseStatus').textContent = `Up to date · ${APP_VERSION}`;
-    $('releaseStatus').classList.remove('update-available');
-  }
-
-  if (updateButton) {
-    updateButton.dataset.updateAvailable = updateAvailable ? 'true' : 'false';
-    const label = updateButton.querySelector('[data-update-label]');
-    if (label && !updateButton.disabled) {
-      label.textContent = updateAvailable ? 'Download updates' : 'Check for updates';
-    }
-  }
-
-  if (notes.length) {
-    const list = $('releaseNotes');
-    list.innerHTML = '';
-    notes.forEach((note) => {
-      const item = document.createElement('li');
-      item.textContent = note;
-      list.appendChild(item);
-    });
-  }
-}
-
-async function loadReleaseInfo() {
-  if (!navigator.onLine) return null;
-  try {
-    const response = await fetch(new URL('./release.json', document.baseURI), {
-      cache: 'no-store',
-      credentials: 'same-origin'
-    });
-    if (!response.ok) throw new Error(`Release metadata returned ${response.status}.`);
-    const release = await response.json();
-    renderReleaseInfo(release);
-    return release;
-  } catch (error) {
-    console.warn('Could not load latest release information:', error);
-    return null;
-  }
-}
-
-function setDownloadUpdatesBusy(busy, busyLabel = '') {
-  const button = $('downloadUpdatesBtn');
-  if (!button) return;
-  button.disabled = busy;
-  button.classList.toggle('is-loading', busy);
-  const label = button.querySelector('[data-update-label]');
-  if (!label) return;
-  if (busy) {
-    label.textContent = busyLabel || 'Checking…';
-  } else {
-    label.textContent = button.dataset.updateAvailable === 'true'
-      ? 'Download updates'
-      : 'Check for updates';
-  }
-}
-
-async function handleUpdateAction() {
-  const button = $('downloadUpdatesBtn');
-  const message = $('updateMessage');
-  if (!button || !message) return;
-
-  if (button.dataset.updateAvailable === 'true') {
-    await downloadAppUpdates();
-    return;
-  }
-
-  if (!navigator.onLine) {
-    message.textContent = 'Connect to the internet to check for updates.';
-    return;
-  }
-
-  setDownloadUpdatesBusy(true, 'Checking…');
-  message.textContent = 'Checking for updates…';
-  const release = await loadReleaseInfo();
-  setDownloadUpdatesBusy(false);
-
-  if (!release) {
-    message.textContent = 'Could not check for updates. Try again when online.';
-    return;
-  }
-
-  if (button.dataset.updateAvailable === 'true') {
-    message.textContent = `Version ${release.version} is available. Tap Download updates.`;
-  } else {
-    message.textContent = 'You’re up to date.';
-  }
-}
-
-async function downloadAppUpdates() {
-  const message = $('updateMessage');
-  if (!navigator.onLine) {
-    message.textContent = 'Connect to the internet to download updates.';
-    return;
-  }
-
-  const editorIsOpen = !$('editorView').classList.contains('hidden');
-  const hasUnsavedChanges = editorIsOpen && getEditablePropertySnapshot() !== savedPropertySnapshot;
-  if (hasUnsavedChanges && !window.confirm('You have unsaved property changes. Downloading updates reloads the app and will discard those unsaved changes. Continue?')) {
-    return;
-  }
-
-  setDownloadUpdatesBusy(true, 'Downloading…');
-  message.textContent = 'Refreshing cached app files…';
-
-  try {
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames
-          .filter((name) => name.startsWith(APP_CACHE_PREFIX))
-          .map((name) => caches.delete(name))
-      );
-    }
-
-    // Re-fetch every local app-shell file with browser HTTP caching bypassed.
-    // The active service worker will store these fresh responses back into its cache.
-    await Promise.all(APP_UPDATE_ASSETS.map(async (path) => {
-      const url = new URL(path, document.baseURI);
-      const response = await fetch(url, {
-        cache: 'reload',
-        credentials: 'same-origin'
-      });
-      if (!response.ok) throw new Error(`Could not refresh ${path} (${response.status}).`);
-      return response;
-    }));
-
-    // Explicitly ask the browser to check service-worker.js now instead of waiting
-    // for its normal update interval. New workers already use skipWaiting().
-    if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        try {
-          await registration.update();
-        } catch (error) {
-          console.warn('Service worker update check failed after cache refresh:', error);
-        }
-      }
-    }
-
-    message.textContent = 'Updates downloaded. Reloading the app…';
-    window.setTimeout(() => window.location.reload(), 350);
-  } catch (error) {
-    console.warn('App update download failed:', error);
-    message.textContent = 'Could not download updates. Check your connection and try again.';
-    setDownloadUpdatesBusy(false);
-  }
-}
-
-function setupInstall() {
-  setupUpdateNotifier($('installBtn'), APP_VERSION);
-  window.addEventListener('beforeinstallprompt', (event) => {
-    event.preventDefault();
-    deferredInstallPrompt = event;
-    $('nativeInstallBtn').classList.remove('hidden');
-  });
-
-  $('installBtn').addEventListener('click', () => {
-    $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
-    $('updateMessage').textContent = '';
-    loadReleaseInfo();
-    $('installDialog').showModal();
-  });
-
-  $('nativeInstallBtn').addEventListener('click', async () => {
-    if (!deferredInstallPrompt) return;
-    const prompt = deferredInstallPrompt;
-    deferredInstallPrompt = null;
-    $('nativeInstallBtn').disabled = true;
-    try {
-      prompt.prompt();
-      const choice = await prompt.userChoice;
-      if (choice?.outcome === 'accepted') $('installDialog').close();
-    } finally {
-      $('nativeInstallBtn').disabled = false;
-      $('nativeInstallBtn').classList.add('hidden');
-    }
-  });
-
-  $('downloadUpdatesBtn').addEventListener('click', handleUpdateAction);
-
-  $('closeInstallDialog').addEventListener('click', () => $('installDialog').close());
-
-  window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null;
-    $('nativeInstallBtn').classList.add('hidden');
-    if ($('installDialog').open) $('installDialog').close();
-    setHeaderTooltip($('installBtn'), 'App installed');
-  });
-}
-
 function init() {
   populateViewingTimeOptions();
   $('homeBrandLink').addEventListener('click', (event) => {
@@ -1348,7 +1110,14 @@ function init() {
   });
 
   updateConnectionStatus();
-  setupInstall();
+  installComponent = setupInstallComponent({
+    button: $('installBtn'),
+    beforeUpdate: () => {
+      const editorIsOpen = !$('editorView').classList.contains('hidden');
+      const hasUnsavedChanges = editorIsOpen && getEditablePropertySnapshot() !== savedPropertySnapshot;
+      return !hasUnsavedChanges || window.confirm('You have unsaved property changes. Downloading updates reloads the app and will discard those unsaved changes. Continue?');
+    }
+  });
   renderPropertyList();
   renderArchiveList();
   setupCloud();
@@ -1363,10 +1132,7 @@ function init() {
         renderAuthDialog();
         $('authDialog').showModal();
       } else {
-        $('nativeInstallBtn').classList.toggle('hidden', !deferredInstallPrompt);
-        $('updateMessage').textContent = '';
-        loadReleaseInfo();
-        $('installDialog').showModal();
+        installComponent.open();
       }
     }, 350);
   }
