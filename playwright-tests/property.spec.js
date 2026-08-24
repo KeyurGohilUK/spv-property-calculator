@@ -68,7 +68,7 @@ test('downloads a calendar invite for a future property viewing', async ({ page 
   await expect(editorCalendarButton).toHaveText('');
 
   const viewingRow = await page.locator('.viewing-date-input').boundingBox();
-  const viewingInput = await page.locator('#viewingDate').boundingBox();
+  const viewingInput = await page.locator('#viewingDateDay').boundingBox();
   const calendarIcon = await editorCalendarButton.boundingBox();
   expect(viewingRow && viewingInput && calendarIcon).toBeTruthy();
   expect(Math.abs(
@@ -120,7 +120,7 @@ test('archives and restores a property without losing its calculation', async ({
   await expect(page.locator('#propertyCount')).toHaveText('1');
 });
 
-test('mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
+test('@mobile mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile WebKit regression');
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
