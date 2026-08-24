@@ -1,3 +1,5 @@
+import { renderSyncStatus } from './sync-status.js';
+
 const $ = (id) => document.getElementById(id);
 let currentUserId = '';
 let users = [];
@@ -18,6 +20,10 @@ function setMessage(message = '', isError = false) {
   const element = $('userManagementMessage');
   element.textContent = message;
   element.classList.toggle('error-text', isError);
+}
+
+function setSyncStatus(message, state = '') {
+  renderSyncStatus($('userManagementSyncStatus'), message, state);
 }
 
 function renderSummary() {
@@ -62,17 +68,18 @@ function renderUsers() {
 async function loadUsers() {
   if (loading) return;
   loading = true;
-  $('refreshUsersBtn').disabled = true;
-  setMessage('Loading users…');
+  setSyncStatus('Loading users…');
+  setMessage('');
   try {
     users = await window.SPVCloud.listWorkspaceUsers();
     renderUsers();
-    setMessage('');
+    setSyncStatus('Users up to date', 'synced');
   } catch (error) {
-    setMessage(error.message || 'Could not load workspace users.', true);
+    const message = error.message || 'Could not load workspace users.';
+    setSyncStatus('User sync failed', 'error');
+    setMessage(message, true);
   } finally {
     loading = false;
-    $('refreshUsersBtn').disabled = false;
   }
 }
 
@@ -84,12 +91,15 @@ async function saveUser(card) {
   const active = card.querySelector('[data-user-active]').checked;
   button.disabled = true;
   button.textContent = 'Saving…';
+  setSyncStatus('Saving changes…');
   setMessage('');
   try {
     await window.SPVCloud.setWorkspaceUserAccess(userId, role, active);
     await loadUsers();
+    setSyncStatus('Users up to date', 'synced');
     setMessage('User access updated.');
   } catch (error) {
+    setSyncStatus('User sync failed', 'error');
     setMessage(error.message || 'Could not update user access.', true);
   } finally {
     button.disabled = false;
@@ -98,6 +108,7 @@ async function saveUser(card) {
 }
 
 function showDenied(message) {
+  setSyncStatus('Access unavailable', 'error');
   $('userAccessLoading').classList.add('hidden');
   $('userManagementContent').classList.add('hidden');
   $('userAccessDenied').classList.remove('hidden');
@@ -105,6 +116,7 @@ function showDenied(message) {
 }
 
 async function initialise() {
+  setSyncStatus('Checking access…');
   const cloud = window.SPVCloud;
   if (!cloud) {
     showDenied('Cloud account services are unavailable.');
@@ -132,5 +144,4 @@ async function initialise() {
   }
 }
 
-$('refreshUsersBtn').addEventListener('click', loadUsers);
 initialise();
