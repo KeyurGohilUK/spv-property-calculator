@@ -1,5 +1,5 @@
 {
-  "version": "1.21.3",
+  "version": "1.21.4",
   "notes": [
     "The Expense Tracker now uses a cleaner layout without redundant overview counters.",
     "Forecast and Archived Properties no longer duplicate the main navigation with additional top bars.",
