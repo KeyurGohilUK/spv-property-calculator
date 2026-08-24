@@ -1,8 +1,8 @@
 {
-  "version": "1.17.0",
+  "version": "1.17.1",
   "notes": [
-    "Add future property viewings to Apple, Google or Outlook calendars",
-    "Calendar invites are available from property cards and the Edit Property page",
-    "Invites include a one-hour viewing, property details, listing link and one-hour reminder"
+    "The Edit Property calendar action is now an icon beside the viewing date and time",
+    "Calendar controls stay aligned within the viewing field on iPhone, iPad and desktop",
+    "Property-card calendar behaviour remains unchanged"
   ]
 }
