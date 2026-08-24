@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const migration = fs.readFileSync(new URL('./database-scripts/Update 13 - Admin User Management.sql', import.meta.url), 'utf8');
+const bootstrap = fs.readFileSync(new URL('./database-scripts/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
+const cloud = fs.readFileSync(new URL('./cloud.js', import.meta.url), 'utf8');
+const adminMenu = fs.readFileSync(new URL('./admin-menu.js', import.meta.url), 'utf8');
+const page = fs.readFileSync(new URL('./manage-users.html', import.meta.url), 'utf8');
+const pageScript = fs.readFileSync(new URL('./manage-users.js', import.meta.url), 'utf8');
+const pageStyles = fs.readFileSync(new URL('./manage-users.css', import.meta.url), 'utf8');
+const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
+const worker = fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8');
+
+for (const sql of [migration, bootstrap]) {
+  assert.match(sql, /create or replace function public\.list_workspace_users\(\)/, 'User listing RPC is missing');
+  assert.match(sql, /create or replace function public\.set_workspace_user_access/, 'User access update RPC is missing');
+  assert.match(sql, /not public\.is_workspace_admin\(\)/, 'User management must require an administrator');
+  assert.match(sql, /p_user_id\s*=\s*auth\.uid\(\)/, 'Administrator self-lockout protection is missing');
+  assert.match(sql, /p_role not in \('viewer'\s*,\s*'editor'\s*,\s*'admin'\)/, 'Role validation is missing');
+  assert.match(sql, /from auth\.users/, 'Registered Auth users must be available for approval');
+  assert.match(sql, /revoke all on function public\.set_workspace_user_access/, 'Public user-management access must be revoked');
+}
+assert.match(cloud, /getWorkspaceAccess[\s\S]*listWorkspaceUsers[\s\S]*setWorkspaceUserAccess/, 'Cloud API must expose user-management operations');
+assert.match(adminMenu, /access\.role === 'admin'/, 'Manage Users menu must be admin-only');
+assert.match(index, /data-admin-users-link[^>]*aria-hidden="true"/, 'Home admin menu item must be hidden by default');
+assert.match(secondaryHeader, /data-admin-users-link[^>]*aria-hidden="true"/, 'Secondary admin menu item must be hidden by default');
+assert.match(page, /id="userAccessDenied"[\s\S]*id="userManagementContent"/, 'Manage Users page must include a guarded access state');
+assert.match(pageScript, /access\.role !== 'admin'/, 'Manage Users page must reject non-admin users');
+assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Manage Users page must save role and active access');
+assert.match(pageStyles, /@media \(max-width: 560px\)/, 'Manage Users page must provide a mobile layout');
+assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be available in the offline app shell');
+
+console.log('Admin user-management checks passed.');
