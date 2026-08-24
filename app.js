@@ -627,7 +627,7 @@ function renderPropertyList() {
       <div class="property-card-tools" aria-label="Property actions">
         ${calendarAction}${listingAction}
         <details class="property-card-more">
-          <summary class="property-card-icon-action" aria-label="More actions for ${escapeHtml(propertyTitle)}" title="More actions" data-tooltip="More">
+          <summary class="property-card-icon-action" role="button" aria-haspopup="menu" aria-label="More actions for ${escapeHtml(propertyTitle)}" title="More actions" data-tooltip="More">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2"></circle><circle cx="12" cy="12" r="1.2"></circle><circle cx="19" cy="12" r="1.2"></circle></svg>
           </summary>
           <div class="property-card-action-menu" role="menu">
