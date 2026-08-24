@@ -1,6 +1,6 @@
 {
-  "version": "1.20.2",
+  "version": "1.20.3",
   "notes": [
-    "iPhone viewing-time choices now show only 15-minute intervals"
+    "Property card totals now align cleanly to the far-right edge"
   ]
 }
