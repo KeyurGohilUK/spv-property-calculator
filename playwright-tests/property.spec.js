@@ -62,7 +62,19 @@ test('downloads a calendar invite for a future property viewing', async ({ page 
   await page.locator('#viewingDate').fill('2099-12-01T14:30');
   await page.locator('#purchasePrice').fill('260000');
 
-  await expect(page.locator('#addViewingToCalendarBtn')).toBeVisible();
+  const editorCalendarButton = page.locator('#addViewingToCalendarBtn');
+  await expect(editorCalendarButton).toBeVisible();
+  await expect(editorCalendarButton).toHaveText('');
+
+  const viewingRow = await page.locator('.viewing-date-input').boundingBox();
+  const viewingInput = await page.locator('#viewingDate').boundingBox();
+  const calendarIcon = await editorCalendarButton.boundingBox();
+  expect(viewingRow && viewingInput && calendarIcon).toBeTruthy();
+  expect(Math.abs(
+    (viewingInput.y + viewingInput.height / 2) - (calendarIcon.y + calendarIcon.height / 2)
+  )).toBeLessThanOrEqual(2);
+  expect(calendarIcon.x + calendarIcon.width).toBeLessThanOrEqual(viewingRow.x + viewingRow.width + 1);
+
   await page.locator('#savePropertyBtn').click();
   await page.locator('#backBtn').click();
 
