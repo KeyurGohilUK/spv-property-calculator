@@ -1,5 +1,6 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
+import { setupUpdateNotifier } from './update-notifier.js';
 
 const APP_VERSION = '1.21.1';
 const $ = (id) => document.getElementById(id);
@@ -154,6 +155,8 @@ if (header && !header.querySelector('.header-actions')) {
       <section class="install-platform-card"><strong>iPhone / iPad</strong><p>In Safari, tap Share, choose Add to Home Screen, then Add.</p></section></div>
     </dialog>
   `);
+
+  setupUpdateNotifier($('secondaryInstallBtn'), APP_VERSION);
 
   const updateConnection = () => {
     const status = $('secondaryConnectionStatus');
