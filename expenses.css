@@ -14,7 +14,7 @@
 .expense-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .expense-summary-grid article { padding: 17px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
 .expense-summary-grid span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 12px; }
-.expense-summary-grid strong { color: var(--brand); font-size: 22px; }
+.expense-summary-grid strong { color: var(--positive); font-size: 22px; }
 .expense-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
 .expense-list-heading > div { display: flex; align-items: center; gap: 10px; }
 .expense-list-heading h3 { margin: 0; }
