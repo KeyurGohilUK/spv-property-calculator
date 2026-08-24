@@ -7,20 +7,24 @@ const users = [
 ];
 
 async function mockCloud(page, role = 'admin') {
-  await page.route('**/cloud.js', async (route) => {
-    await route.fulfill({
-      contentType: 'application/javascript',
-      body: `window.SPVCloud = {
-        init: async () => ({ configured: true, available: true, user: ${JSON.stringify(adminUser)} }),
-        onAuthChange: () => () => {},
-        getCurrentUser: () => ${JSON.stringify(adminUser)},
-        getConfigState: () => ({ configured: true, available: true }),
-        getWorkspaceAccess: async () => ({ role: '${role}', active: true }),
-        listWorkspaceUsers: async () => ${JSON.stringify(users)},
-        setWorkspaceUserAccess: async (userId, nextRole, active) => { window.savedUserAccess = { userId, role: nextRole, active }; }
-      };`
-    });
-  });
+  await page.addInitScript(({ user, workspaceUsers, workspaceRole }) => {
+    localStorage.setItem('spv-help-guide-seen', 'true');
+    window.SPVCloud = {
+      init: async () => ({ configured: true, available: true, user }),
+      onAuthChange: () => () => {},
+      getCurrentUser: () => user,
+      getConfigState: () => ({ configured: true, available: true }),
+      getWorkspaceAccess: async () => ({ role: workspaceRole, active: true }),
+      listWorkspaceUsers: async () => workspaceUsers,
+      setWorkspaceUserAccess: async (userId, nextRole, active) => {
+        window.savedUserAccess = { userId, role: nextRole, active };
+      }
+    };
+  }, { user: adminUser, workspaceUsers: users, workspaceRole: role });
+  await page.route('**/cloud.js', (route) => route.fulfill({
+    contentType: 'application/javascript',
+    body: '// SPVCloud is supplied by the test init script.'
+  }));
 }
 
 test('administrator can review and update workspace access', async ({ page }) => {
