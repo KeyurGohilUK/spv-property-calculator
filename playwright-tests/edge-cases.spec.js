@@ -47,7 +47,8 @@ test('non-resident SDLT surcharge changes a known £250,000 calculation', async 
 test('duplicate property creates an independent copy with the same values', async ({ page }) => {
   await createProperty(page, { title: 'Original Investment', price: '280000' });
 
-  await page.getByRole('button', { name: 'Duplicate Original Investment' }).click();
+  await page.getByRole('button', { name: 'More actions for Original Investment' }).click();
+  await page.getByRole('menuitem', { name: 'Duplicate' }).click();
   await expect(page.locator('#propertyCount')).toHaveText('2');
   await expect(page.getByRole('heading', { name: 'Original Investment', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Original Investment.*Copy/i })).toBeVisible();
