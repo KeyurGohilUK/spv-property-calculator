@@ -7,7 +7,10 @@ import {
 import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
-assert.match(index, /id="viewingDate"[^>]*type="datetime-local"[^>]*step="900"/, 'Viewing time input must use 15-minute intervals');
+assert.match(index, /id="viewingDateDay"[^>]*type="date"/, 'Viewing picker must provide a date control');
+assert.match(index, /id="viewingTime"[^>]*disabled/, 'Viewing picker must provide a dedicated time selector');
+const appSource = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
+assert.match(appSource, /minute < 60; minute \+= 15/, 'Viewing time selector must use 15-minute intervals');
 
 const property = {
   id: 'property-123',

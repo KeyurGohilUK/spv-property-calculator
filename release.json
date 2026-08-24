@@ -1,6 +1,6 @@
 {
-  "version": "1.20.1",
+  "version": "1.20.2",
   "notes": [
-    "Viewing times now use convenient 15-minute intervals"
+    "iPhone viewing-time choices now show only 15-minute intervals"
   ]
 }
