@@ -83,7 +83,7 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
   await expect(page.getByRole('button', { name: /View receipt/i })).toBeVisible();
 });
 
-test('iPad filter date fields remain inside the filter panel without overlapping', async ({ page, browserName }) => {
+test('@mobile iPad filter date fields remain inside the filter panel without overlapping', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Responsive WebKit regression');
   await page.setViewportSize({ width: 1024, height: 1366 });
   await page.goto('/expenses.html');
