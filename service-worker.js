@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.20.4-card-total-grid';
+const CACHE_NAME = 'spv-property-calculator-v1.21.0-user-management';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -21,6 +21,10 @@ const ASSETS = [
   './release.json',
   './expenses.html',
   './secondary-page-header.js',
+  './admin-menu.js',
+  './manage-users.html',
+  './manage-users.css',
+  './manage-users.js',
   './expenses.css',
   './expenses.js',
   './expense-storage.js',

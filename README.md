@@ -18,6 +18,7 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 - Shared cloud property list restricted to approved workspace members
 - Viewer, editor and administrator workspace roles
 - Administrator-only permanent property deletion
+- Administrator user-management page for account approval and role assignment
 - Soft-delete Archived Properties page with restore support
 - Offline-first cloud sync; archived records remain stored locally and in Supabase
 - GitHub Pages and iPhone PWA support
@@ -28,7 +29,7 @@ For a new or replacement Supabase project follow **`SUPABASE_SETUP.md`** and run
 
 1. Create a Supabase project and its first Auth account.
 2. Run `database-scripts/00 - Bootstrap Complete Schema.sql` in the SQL Editor.
-3. Review `workspace_members` and add only approved team accounts.
+3. Sign in as the initial administrator, then use **More → Manage Users** to approve accounts and assign roles.
 4. Copy the Project URL and Publishable key into `supabase-config.js`.
 5. Upload this folder to GitHub Pages and verify sign-in and sync.
 

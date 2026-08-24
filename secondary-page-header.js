@@ -1,7 +1,7 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
-const APP_VERSION = '1.20.4';
+const APP_VERSION = '1.21.0';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
@@ -204,6 +204,7 @@ if (moreControl) {
       <div class="more-menu-list">
         <button class="more-menu-item" type="button" data-theme-toggle aria-pressed="false"><span class="more-menu-icon" data-theme-icon aria-hidden="true">☀</span><span><strong>Theme</strong><small data-theme-description>Light appearance</small></span><span class="theme-switch" aria-hidden="true"></span></button>
         <button class="more-menu-item" type="button" data-help-guide><span class="more-menu-icon" aria-hidden="true">?</span><span><strong>Help Guide</strong><small>Installation, account and app menu overview</small></span><span aria-hidden="true">›</span></button>
+        <a class="more-menu-item hidden" href="./manage-users.html" data-admin-users-link aria-hidden="true" tabindex="-1"><span class="more-menu-icon" aria-hidden="true">♙</span><span><strong>Manage Users</strong><small>Approve accounts and assign workspace roles</small></span><span aria-hidden="true">›</span></a>
         <a class="more-menu-item" href="./?view=archive"><span class="more-menu-icon" aria-hidden="true">↺</span><span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span><span aria-hidden="true">›</span></a>
       </div>
     </dialog>`);

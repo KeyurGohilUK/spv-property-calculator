@@ -457,9 +457,9 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.20.4</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.21.0</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.20.4</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.21.0</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
       <li>Property card amounts now use a fixed far-right alignment on iPhone</li>
@@ -509,6 +509,11 @@
       <span><strong>Help Guide</strong><small>Installation, account and app menu overview</small></span>
       <span aria-hidden="true">›</span>
     </button>
+    <a class="more-menu-item hidden" href="./manage-users.html" data-admin-users-link aria-hidden="true" tabindex="-1">
+      <span class="more-menu-icon" aria-hidden="true">♙</span>
+      <span><strong>Manage Users</strong><small>Approve accounts and assign workspace roles</small></span>
+      <span aria-hidden="true">›</span>
+    </a>
     <button id="archiveBtn" class="more-menu-item" type="button">
       <span class="more-menu-icon" aria-hidden="true">↺</span>
       <span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span>
@@ -519,6 +524,7 @@
 
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>
+  <script type="module" src="./admin-menu.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
