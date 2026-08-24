@@ -350,12 +350,6 @@ function exportFilteredExpenses() {
 
 function render() {
   expenses = getExpenses();
-  const companyTotal = expenses.filter((item) => item.scope === 'company').reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const propertyTotal = expenses.filter((item) => item.scope === 'property').reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  $('totalExpenses').textContent = money(companyTotal + propertyTotal);
-  $('companyExpenses').textContent = money(companyTotal);
-  $('propertyExpenses').textContent = money(propertyTotal);
-
   const visible = expenses.filter(expenseMatchesFilter);
   renderReports(visible);
   $('expenseCount').textContent = String(visible.length);
