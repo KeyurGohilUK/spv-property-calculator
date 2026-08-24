@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 export async function blockExternalServices(page) {
+  await page.addInitScript(() => localStorage.setItem('spv-help-guide-seen', 'true'));
   await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
 }
 
