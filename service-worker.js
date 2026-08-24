@@ -122,16 +122,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // App assets are network-first so a newly deployed HTML page cannot run
+  // against stale JavaScript from an earlier release. Cached files remain the
+  // offline fallback when the network is unavailable.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
+    fetch(event.request)
+      .then((response) => {
         if (response.ok && requestUrl.href.startsWith(ROOT)) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
