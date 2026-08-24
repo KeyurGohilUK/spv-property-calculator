@@ -10,7 +10,7 @@ After the bootstrap completes:
 
 1. Create the first Auth user before running the script, so that account becomes the initial workspace administrator.
 2. Review `public.workspace_members`.
-3. Add approved users by their Auth user ID.
+3. Sign in as the initial administrator and use **Manage Users** to approve accounts and assign roles.
 4. Configure the app's new Project URL and Publishable key in `supabase-config.js`.
 5. Test sign-in, property sync and access restrictions before switching production.
 
@@ -23,6 +23,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 10 — expense tracker schema
 - Update 11 — private Cloudflare R2 receipt references and Worker access grants
 - Update 12 — revision-column repair for conflict-safe property and expense sync
+- Update 13 — administrator user approval and workspace role management
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
