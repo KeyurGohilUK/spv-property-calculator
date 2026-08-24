@@ -120,6 +120,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .property-card:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--brand) 28%, var(--border)); }
 .property-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 32%, transparent); outline-offset: 3px; }
 .property-card-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding-right: 124px; }
+.property-card:not(.archived-card) .property-card-header { min-height: 104px; }
 .property-card-header > div { min-width: 0; }
 .property-card h3 { margin: 0; font-size: 18px; line-height: 1.25; }
 .property-meta { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
@@ -127,16 +128,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .property-stats div { min-width: 0; }
 .property-stats span { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
 .property-stats strong { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.property-total { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 13px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.property-total { margin-top: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .property-total span { color: var(--muted); font-size: 12px; }
 .property-total strong { font-size: 19px; color: var(--brand); }
-.property-cost-breakdown { display: grid; width: 100%; gap: 8px; align-items: stretch; }
+.property-cost-breakdown { display: grid; width: 100%; gap: 9px; align-items: stretch; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface-2) 55%, var(--surface)); padding: 13px; }
 .property-cost-breakdown > div { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; column-gap: 10px; }
 .property-cost-breakdown > div span { min-width: 0; }
 .property-cost-breakdown > div strong { justify-self: end; text-align: right; font-size: 15px; color: var(--text); }
-.property-cost-breakdown .refurbishment-row { padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+.property-cost-breakdown .refurbishment-row { padding-bottom: 9px; }
 .property-cost-breakdown .refurbishment-row span { color: var(--muted); }
-.property-cost-breakdown .investment-total { padding-top: 2px; }
+.property-cost-breakdown .investment-total { margin: 0 -13px -13px; padding: 12px 13px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
 .property-cost-breakdown .investment-total span { color: var(--brand); font-weight: 800; }
 .property-cost-breakdown .investment-total strong { font-size: 19px; color: var(--brand); }
 .property-card-tools { position: absolute; top: 13px; right: 13px; display: flex; align-items: center; gap: 6px; z-index: 2; }
@@ -179,6 +180,15 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.property-card-more { position: relative; }
+.property-card-more > summary { list-style: none; }
+.property-card-more > summary::-webkit-details-marker { display: none; }
+.property-card-action-menu { position: absolute; top: calc(100% + 7px); right: 0; z-index: 30; display: grid; min-width: 150px; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+.property-card-action-menu button { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 42px; padding: 9px 12px; border: 0; background: transparent; color: var(--text); cursor: pointer; font-weight: 750; text-align: left; }
+.property-card-action-menu button + button { border-top: 1px solid var(--border); }
+.property-card-action-menu button:hover, .property-card-action-menu button:focus-visible { background: var(--surface-2); }
+.property-card-action-menu button.archive { color: var(--danger); }
+.property-card-action-menu svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .property-card-icon-action::after {
   content: attr(data-tooltip);
   position: absolute;
