@@ -1,6 +1,6 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 
-export const APP_VERSION = '1.21.4';
+export const APP_VERSION = '1.21.5';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
