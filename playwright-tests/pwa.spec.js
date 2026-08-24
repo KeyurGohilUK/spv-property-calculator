@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { blockExternalServices, createProperty } from './support/app-helpers.js';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
-const CURRENT_VERSION = '1.20.0';
+const CURRENT_VERSION = '1.20.1';
 
 async function waitForServiceWorkerControl(page) {
   await page.goto('/');

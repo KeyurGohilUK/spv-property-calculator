@@ -4,6 +4,10 @@ import {
   isFutureViewing,
   parseViewingDateTime
 } from './calendar-invite.js';
+import fs from 'node:fs';
+
+const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+assert.match(index, /id="viewingDate"[^>]*type="datetime-local"[^>]*step="900"/, 'Viewing time input must use 15-minute intervals');
 
 const property = {
   id: 'property-123',

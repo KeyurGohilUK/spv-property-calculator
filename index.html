@@ -186,7 +186,7 @@
                 <label for="viewingDate">Viewing Date &amp; Time <em>optional</em></label>
                 <div class="viewing-date-input">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path><circle cx="12" cy="15" r="3"></circle><path d="M12 13.5V15l1 1"></path></svg>
-                  <input id="viewingDate" name="viewingDate" type="datetime-local" step="60" autocomplete="off">
+                  <input id="viewingDate" name="viewingDate" type="datetime-local" step="900" autocomplete="off">
                   <button id="addViewingToCalendarBtn" class="viewing-calendar-btn hidden" type="button" aria-label="Add viewing to calendar" title="Add viewing to calendar">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg>
                   </button>
@@ -455,14 +455,12 @@
     <div class="release-update-heading">
       <div>
         <p class="eyebrow">Latest release</p>
-        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.20.0</span></h4>
+        <h4 id="releaseUpdateTitle"><span id="releaseVersion">Version 1.20.1</span></h4>
       </div>
-      <span id="releaseStatus" class="release-status">Up to date · 1.20.0</span>
+      <span id="releaseStatus" class="release-status">Up to date · 1.20.1</span>
     </div>
     <ul id="releaseNotes" class="release-notes">
-      <li>New users now receive a short first-visit Help Guide</li>
-      <li>Installation and account sync directions are easier to find</li>
-      <li>Reopen the guide at any time from the More menu</li>
+      <li>Viewing times now use convenient 15-minute intervals</li>
     </ul>
     <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true">
