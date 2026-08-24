@@ -35,6 +35,9 @@ for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
 assert.match(secondaryHeader, /id="secondaryConnectionStatus"/, 'Shared header must include online status');
 assert.match(secondaryHeader, /id="secondaryAccountBtn"/, 'Shared header must include Account');
 assert.match(secondaryHeader, /id="secondaryInstallBtn"/, 'Shared header must include Install');
+assert.match(app, /setupUpdateNotifier\(\$\('installBtn'\), APP_VERSION\)/, 'Home Install control must use the shared update notifier');
+assert.match(secondaryHeader, /setupUpdateNotifier\(\$\('secondaryInstallBtn'\), APP_VERSION\)/, 'Secondary Install controls must use the shared update notifier');
+assert.match(styles, /\.header-icon-control\.update-available[\s\S]*update-icon-pulse[\s\S]*::before/, 'Update available indicator styling is missing');
 assert.doesNotMatch(secondaryHeader, /window\.location\.href = '\.\/\?dialog=(?:account|install)'/, 'Account and Install must not navigate away');
 assert.match(secondaryHeader, /secondaryAccountBtn[\s\S]*secondaryAccountDialog[\s\S]*showModal/, 'Account must open a local popup');
 assert.match(secondaryHeader, /secondaryInstallBtn[\s\S]*secondaryInstallDialog[\s\S]*showModal/, 'Install must open a local popup');
