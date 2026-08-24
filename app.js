@@ -1,5 +1,6 @@
 import { TAX_CONFIG } from './tax-config.js';
 import { renderSyncStatus } from './sync-status.js';
+import { setupUpdateNotifier } from './update-notifier.js';
 import {
   safeNumber,
   clamp,
@@ -1206,6 +1207,7 @@ async function downloadAppUpdates() {
 }
 
 function setupInstall() {
+  setupUpdateNotifier($('installBtn'), APP_VERSION);
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;

@@ -683,6 +683,32 @@ button.header-icon-control:active { transform: translateY(1px); }
   transform: translateY(0);
 }
 
+.header-icon-control.update-available {
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 46%, var(--border));
+  background: color-mix(in srgb, var(--warning) 13%, var(--surface));
+  animation: update-icon-pulse .9s ease-out 1;
+}
+.header-icon-control.update-available::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--warning) 22%, transparent);
+}
+@keyframes update-icon-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--warning) 38%, transparent); }
+  100% { box-shadow: 0 0 0 9px transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header-icon-control.update-available { animation: none; }
+}
+
 .connection-icon { color: var(--brand); }
 .connection-icon.offline {
   color: var(--warning);

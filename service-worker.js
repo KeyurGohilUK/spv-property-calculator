@@ -30,6 +30,7 @@ const ASSETS = [
   './expense-storage.js',
   './expense-cloud-sync.js',
   './sync-status.js',
+  './update-notifier.js',
   './receipt-cloud.js',
   './forecast.html',
   './forecast.css',

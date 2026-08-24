@@ -117,6 +117,8 @@ test('opens the cached expense tracker while offline', async ({ page, context })
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {
   await mockRelease(page, '9.9.9', ['Improved offline updates']);
   await page.goto('/');
+  await expect(page.locator('#installBtn')).toHaveClass(/update-available/);
+  await expect(page.locator('#installBtn')).toHaveAttribute('aria-label', 'Update 9.9.9 available');
   await openInstallDialog(page);
 
   await expect(page.locator('#releaseVersion')).toHaveText('Version 9.9.9');
@@ -128,10 +130,20 @@ test('shows a newer release and its notes in the install dialog', async ({ page 
 test('reports when the installed release is current', async ({ page }) => {
   await mockRelease(page, CURRENT_VERSION, ['Current release']);
   await page.goto('/');
+  await expect(page.locator('#installBtn')).not.toHaveClass(/update-available/);
+  await expect(page.locator('#installBtn')).toHaveAttribute('aria-label', 'Install app');
   await openInstallDialog(page);
 
   await expect(page.locator('#releaseStatus')).toHaveText(`Up to date · ${CURRENT_VERSION}`);
   await expect(page.locator('#downloadUpdatesBtn')).toContainText('Check for updates');
+});
+
+test('highlights the shared Install control on secondary pages', async ({ page }) => {
+  await mockRelease(page, '9.9.9', ['Shared update indicator']);
+  await page.goto('/expenses.html');
+
+  await expect(page.locator('#secondaryInstallBtn')).toHaveClass(/update-available/);
+  await expect(page.locator('#secondaryInstallBtn')).toHaveAttribute('aria-label', 'Update 9.9.9 available');
 });
 
 test('downloads updates without removing saved properties or unrelated caches', async ({ page }) => {
