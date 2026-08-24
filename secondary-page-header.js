@@ -1,7 +1,7 @@
 import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 
-const APP_VERSION = '1.16.3';
+const APP_VERSION = '1.19.0';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
@@ -201,9 +201,13 @@ if (moreControl) {
   document.body.insertAdjacentHTML('beforeend', `
     <dialog id="secondaryMoreMenuDialog" class="install-dialog more-menu-dialog">
       <div class="more-menu-header"><h3>App Menu</h3><button id="closeSecondaryMoreMenu" class="icon-btn more-menu-close" type="button" aria-label="Close menu">×</button></div>
-      <div class="more-menu-list"><a class="more-menu-item" href="./?view=archive"><span class="more-menu-icon" aria-hidden="true">↺</span><span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span><span aria-hidden="true">›</span></a></div>
+      <div class="more-menu-list">
+        <button class="more-menu-item" type="button" data-theme-toggle aria-pressed="false"><span class="more-menu-icon" data-theme-icon aria-hidden="true">☀</span><span><strong>Theme</strong><small data-theme-description>Light appearance</small></span><span class="theme-switch" aria-hidden="true"></span></button>
+        <a class="more-menu-item" href="./?view=archive"><span class="more-menu-icon" aria-hidden="true">↺</span><span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span><span aria-hidden="true">›</span></a>
+      </div>
     </dialog>`);
   const dialog = $('secondaryMoreMenuDialog');
+  window.SPVTheme?.bindThemeControls(dialog);
   moreControl.addEventListener('click', () => dialog.showModal());
   $('closeSecondaryMoreMenu').addEventListener('click', () => dialog.close());
   closeOnBackdrop(dialog);

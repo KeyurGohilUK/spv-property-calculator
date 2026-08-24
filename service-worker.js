@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.18.1-app-logo';
+const CACHE_NAME = 'spv-property-calculator-v1.19.0-theme-choice';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -9,6 +9,7 @@ const ASSETS = [
   './',
   './index.html',
   './styles.css',
+  './theme.js',
   './app.js',
   './calendar-invite.js',
   './cloud.js',
