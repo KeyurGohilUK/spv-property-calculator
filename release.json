@@ -1,6 +1,6 @@
 {
-  "version": "1.20.3",
+  "version": "1.20.4",
   "notes": [
-    "Property card totals now align cleanly to the far-right edge"
+    "Property card amounts now use a fixed far-right alignment on iPhone"
   ]
 }
