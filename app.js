@@ -1021,7 +1021,6 @@ function init() {
     if ($('moreMenuDialog').open) $('moreMenuDialog').close();
     showArchive();
   });
-  $('archiveBackBtn').addEventListener('click', showHome);
   $('backBtn').addEventListener('click', showHome);
   $('propertiesNavLink').addEventListener('click', (event) => {
     event.preventDefault();
