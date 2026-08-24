@@ -1,7 +1,7 @@
 {
-  "version": "1.21.5",
+  "version": "1.21.6",
   "notes": [
-    "Property cards now keep their natural content height instead of leaving unused space at the bottom.",
-    "Page header cards share the same raised corner treatment throughout the app."
+    "Property cards now use a cleaner action menu and consistent header alignment.",
+    "Total Investment has a clearer full-width footer treatment."
   ]
 }
