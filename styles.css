@@ -542,7 +542,7 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   letter-spacing: -.035em;
 }
 
-#homeView > .hero-card {
+.hero-card {
   background:
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--brand-soft) 70%, transparent), transparent 38%),
     var(--surface);
