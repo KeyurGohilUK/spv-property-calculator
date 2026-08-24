@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.1-manage-users-status';
+const CACHE_NAME = 'spv-property-calculator-v1.21.2-shared-install';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -12,6 +12,7 @@ const ASSETS = [
   './theme.js',
   './help-guide.js',
   './app.js',
+  './install-component.js',
   './calendar-invite.js',
   './cloud.js',
   './calculations.js',
