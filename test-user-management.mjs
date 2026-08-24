@@ -31,4 +31,10 @@ assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Mana
 assert.match(pageStyles, /@media \(max-width: 560px\)/, 'Manage Users page must provide a mobile layout');
 assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be available in the offline app shell');
 
+
+assert.equal((bootstrap.match(/^commit;$/gm) || []).length, 1, 'Bootstrap must contain one transaction commit');
+assert.equal((bootstrap.match(/create index if not exists expenses_date_idx/g) || []).length, 1, 'Bootstrap must not duplicate the expense schema');
+assert.ok(bootstrap.includes("or receipt_object_path ~ '^receipts/[A-Za-z0-9_-]{1,160}/[A-Za-z0-9_-]+\\\\.[A-Za-z0-9]+
+"), 'Bootstrap receipt object-path constraint must be complete');
+
 console.log('Admin user-management checks passed.');
