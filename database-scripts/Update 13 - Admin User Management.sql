@@ -79,3 +79,13 @@ grant execute on function public.list_workspace_users() to authenticated;
 grant execute on function public.set_workspace_user_access(uuid, text, boolean) to authenticated;
 
 commit;
+
+-- Verification: both RPCs should be security-definer functions owned by the
+-- database role that deployed this migration.
+select
+  routine_name,
+  security_type
+from information_schema.routines
+where routine_schema = 'public'
+  and routine_name in ('list_workspace_users', 'set_workspace_user_access')
+order by routine_name;
