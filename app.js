@@ -61,7 +61,7 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
-const APP_VERSION = '1.20.1';
+const APP_VERSION = '1.20.2';
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
   './',
@@ -136,6 +136,37 @@ function normalizeViewingDateTime(value) {
   return match ? match[1] : '';
 }
 
+function populateViewingTimeOptions() {
+  const select = $('viewingTime');
+  for (let hour = 0; hour < 24; hour += 1) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      const value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+      select.add(new Option(value, value));
+    }
+  }
+}
+
+function syncViewingDateFromPicker() {
+  const day = $('viewingDateDay').value;
+  const time = $('viewingTime').value;
+  $('viewingTime').disabled = !day;
+  $('viewingDate').value = day && time ? `${day}T${time}` : '';
+}
+
+function setViewingDatePicker(value) {
+  const normalized = normalizeViewingDateTime(value);
+  const day = normalized.slice(0, 10);
+  const time = normalized.slice(11, 16);
+  const select = $('viewingTime');
+  if (time && ![...select.options].some((option) => option.value === time)) {
+    select.add(new Option(`${time} (saved)`, time));
+  }
+  $('viewingDateDay').value = day;
+  select.disabled = !day;
+  select.value = time;
+  $('viewingDate').value = normalized;
+}
+
 function isViewingPassed(value, now = new Date()) {
   const raw = String(value || '').trim();
   const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(raw);
@@ -180,6 +211,7 @@ function normalizeListingUrl(value) {
 }
 
 function getFormModel() {
+  syncViewingDateFromPicker();
   const customExpenses = [...document.querySelectorAll('.expense-row')].map((row) => ({
     id: row.dataset.id,
     name: row.querySelector('[data-expense-name]').value.trim(),
@@ -519,6 +551,7 @@ function resetForm() {
   editingId = null;
   editingCreatedAt = null;
   $('propertyForm').reset();
+  syncViewingDateFromPicker();
   $('depositPercent').value = '25';
   $('qualifyingCorporateRelief').checked = true;
   $('nonResident').checked = false;
@@ -548,7 +581,7 @@ function loadIntoForm(property) {
   $('title').value = property.title || '';
   $('details').value = property.details || '';
   $('listingUrl').value = property.listingUrl || '';
-  $('viewingDate').value = normalizeViewingDateTime(property.viewingDate || '');
+  setViewingDatePicker(property.viewingDate || '');
   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
@@ -1214,6 +1247,7 @@ function setupInstall() {
 }
 
 function init() {
+  populateViewingTimeOptions();
   $('homeBrandLink').addEventListener('click', (event) => {
     event.preventDefault();
     showHome();
@@ -1277,6 +1311,8 @@ function init() {
     if (event.key === 'Enter') handleSignIn();
   });
 
+  $('viewingDateDay').addEventListener('change', syncViewingDateFromPicker);
+  $('viewingTime').addEventListener('change', syncViewingDateFromPicker);
   $('propertyForm').addEventListener('input', handlePropertyFormMutation);
   $('propertyForm').addEventListener('change', handlePropertyFormMutation);
 

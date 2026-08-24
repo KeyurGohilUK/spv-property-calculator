@@ -59,7 +59,8 @@ test('downloads a calendar invite for a future property viewing', async ({ page 
   await page.locator('#title').fill('Calendar Viewing');
   await page.locator('#details').fill('Meet the agent at the front entrance.');
   await page.locator('#listingUrl').fill('https://example.com/calendar-viewing');
-  await page.locator('#viewingDate').fill('2099-12-01T14:30');
+  await page.locator('#viewingDateDay').fill('2099-12-01');
+  await page.locator('#viewingTime').selectOption('14:30');
   await page.locator('#purchasePrice').fill('260000');
 
   const editorCalendarButton = page.locator('#addViewingToCalendarBtn');

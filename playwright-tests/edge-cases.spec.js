@@ -63,7 +63,8 @@ test('past viewing date is represented as Viewed on the property card', async ({
   await page.locator('#newPropertyBtn').click();
   await page.locator('#title').fill('Completed Viewing');
   await page.locator('#purchasePrice').fill('210000');
-  await page.locator('#viewingDate').fill('2020-01-01T10:30');
+  await page.locator('#viewingDateDay').fill('2020-01-01');
+  await page.locator('#viewingTime').selectOption('10:30');
   await page.locator('#savePropertyBtn').click();
   await page.locator('#backBtn').click();
 

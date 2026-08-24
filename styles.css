@@ -1286,7 +1286,7 @@ button.header-icon-control:active { transform: translateY(1px); }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
- .viewing-date-input input {
+ .viewing-date-input input[type="date"] {
   flex: 1 1 auto;
   width: auto;
   min-width: 0;
@@ -1296,6 +1296,15 @@ button.header-icon-control:active { transform: translateY(1px); }
   background: transparent !important;
   color: var(--text);
 }
+.viewing-date-input select {
+  flex: 0 0 132px;
+  min-height: 38px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background-color: transparent;
+}
+.viewing-date-input select:disabled { opacity: .55; }
  .viewing-calendar-btn {
   position: relative;
   flex: 0 0 38px;
@@ -1351,6 +1360,8 @@ button.header-icon-control:active { transform: translateY(1px); }
 }
 @media (max-width: 620px) {
   .viewing-date-field { max-width: none; }
+  .viewing-date-input { gap: 7px; padding-inline: 10px; }
+  .viewing-date-input select { flex-basis: 118px; padding-left: 9px; }
 }
 
 /* Primary application navigation */
