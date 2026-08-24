@@ -14,6 +14,7 @@ const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', im
 const installComponent = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
+assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecasting/, 'Forecast must not duplicate the main navigation with an upper back bar');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
 assert.match(app, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
