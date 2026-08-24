@@ -127,7 +127,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .property-stats { margin: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .property-stats div { min-width: 0; }
 .property-stats span { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
-.property-stats strong { display: block; overflow: hidden; font-size: 14px; white-space: nowrap; text-align: right; text-overflow: ellipsis; }
+.property-stats strong { display: block; overflow: hidden; font-size: 14px; white-space: nowrap; text-align: left; text-overflow: ellipsis; }
 .property-total { margin-top: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .property-total span { color: var(--muted); font-size: 12px; }
 .property-total strong { font-size: 19px; color: var(--brand); }
