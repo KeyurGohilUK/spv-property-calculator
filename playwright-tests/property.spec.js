@@ -120,6 +120,22 @@ test('archives and restores a property without losing its calculation', async ({
   await expect(page.locator('#propertyCount')).toHaveText('1');
 });
 
+test('property cards keep their content height when another card is taller', async ({ page }) => {
+  await createProperty(page, { title: 'Short Card', price: '200000' });
+  await createProperty(page, { title: 'Tall Card', price: '300000' });
+
+  await page.locator('.property-card').filter({ hasText: 'Tall Card' }).evaluate((card) => {
+    const spacer = document.createElement('div');
+    spacer.style.height = '100px';
+    spacer.setAttribute('aria-hidden', 'true');
+    card.appendChild(spacer);
+  });
+
+  const shortHeight = await page.locator('.property-card').filter({ hasText: 'Short Card' }).evaluate((card) => card.getBoundingClientRect().height);
+  const tallHeight = await page.locator('.property-card').filter({ hasText: 'Tall Card' }).evaluate((card) => card.getBoundingClientRect().height);
+  expect(tallHeight - shortHeight).toBeGreaterThan(80);
+});
+
 test('@mobile mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile WebKit regression');
   await page.goto('/');

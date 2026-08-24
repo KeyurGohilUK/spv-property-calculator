@@ -1,8 +1,7 @@
 {
-  "version": "1.21.4",
+  "version": "1.21.5",
   "notes": [
-    "The Expense Tracker now uses a cleaner layout without redundant overview counters.",
-    "Forecast and Archived Properties no longer duplicate the main navigation with additional top bars.",
-    "Page header cards now share the same raised corner treatment throughout the app."
+    "Property cards now keep their natural content height instead of leaving unused space at the bottom.",
+    "Page header cards share the same raised corner treatment throughout the app."
   ]
 }

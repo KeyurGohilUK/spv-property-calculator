@@ -115,7 +115,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
 .list-heading { display: flex; align-items: center; gap: 10px; margin: 26px 4px 12px; }
 .list-heading h3 { margin: 0; }
-.property-list { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 315px), 1fr)); }
+.property-list { display: grid; align-items: start; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 315px), 1fr)); }
 .property-card { position: relative; cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .property-card:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--brand) 28%, var(--border)); }
 .property-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 32%, transparent); outline-offset: 3px; }
