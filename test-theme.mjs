@@ -15,6 +15,8 @@ assert.match(theme, /localStorage\.setItem\(STORAGE_KEY, selectedTheme\)/, 'Them
 assert.match(theme, /document\.documentElement\.dataset\.theme = selectedTheme/, 'Theme must be applied to the document');
 assert.match(styles, /html\[data-theme="dark"\]/, 'Dark tokens must require an explicit app theme');
 assert.doesNotMatch(styles, /@media \(prefers-color-scheme: dark\)/, 'Device Dark Mode must not override the app preference');
+assert.match(styles, /\.property-cost-breakdown \.investment-total strong \{[^}]*color: var\(--brand\)/, 'Property total must use the selected theme colour');
+assert.match(styles, /\.editor-save-icon\.is-saved \{[^}]*var\(--brand\)/, 'Saved property action must use the selected theme colour');
 
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /<script src="\.\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the theme before loading styles`);
