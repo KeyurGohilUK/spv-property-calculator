@@ -1,8 +1,8 @@
 {
-  "version": "1.16.5",
+  "version": "1.17.0",
   "notes": [
-    "Expense Tracker is now out of Beta",
-    "The Expense Beta badge has been removed across the app menu",
-    "Forecast remains marked as Beta"
+    "Add future property viewings to Apple, Google or Outlook calendars",
+    "Calendar invites are available from property cards and the Edit Property page",
+    "Invites include a one-hour viewing, property details, listing link and one-hour reminder"
   ]
 }
