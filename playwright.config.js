@@ -10,6 +10,13 @@ export default defineConfig({
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://127.0.0.1:4173',
+    storageState: {
+      cookies: [],
+      origins: [{
+        origin: 'http://127.0.0.1:4173',
+        localStorage: [{ name: 'spv-help-guide-seen', value: 'true' }]
+      }]
+    },
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'off'
