@@ -1,8 +1,6 @@
 {
-  "version": "1.20.0",
+  "version": "1.20.1",
   "notes": [
-    "New users now receive a short first-visit Help Guide",
-    "Installation and account sync directions are easier to find",
-    "Reopen the guide at any time from the More menu"
+    "Viewing times now use convenient 15-minute intervals"
   ]
 }
