@@ -70,6 +70,26 @@
           <div><span>Active members</span><strong id="activeUserCount">0</strong></div>
           <div><span>Administrators</span><strong id="adminUserCount">0</strong></div>
         </div>
+        <details id="userRoleGuide" class="user-role-guide">
+          <summary>
+            <span><strong>User roles &amp; feature access</strong><small>What each workspace role can do</small></span>
+          </summary>
+          <div class="user-role-guide-content">
+            <section>
+              <h3>Viewer</h3>
+              <p>Can view shared properties, archived properties, notes, expenses and receipts.</p>
+            </section>
+            <section>
+              <h3>Editor</h3>
+              <p>Includes Viewer access, plus creating, editing, archiving and restoring properties and expenses; adding notes; deleting their own notes; and managing receipts.</p>
+            </section>
+            <section>
+              <h3>Admin</h3>
+              <p>Includes Editor access, plus permanently deleting archived properties and managing user access and roles.</p>
+            </section>
+            <p class="user-role-note"><strong>Note:</strong> Inactive accounts cannot access the shared workspace, regardless of their assigned role.</p>
+          </div>
+        </details>
         <p id="userManagementMessage" class="save-message" role="status" aria-live="polite"></p>
         <div id="userList" class="user-list" aria-label="Workspace users"></div>
         <div id="userListEmpty" class="user-access-state hidden">
