@@ -34,6 +34,8 @@ test('administrator can review and update workspace access', async ({ page }) =>
   await expect(page.getByRole('heading', { name: 'Manage Users' })).toBeVisible();
   await expect(page.locator('.user-card')).toHaveCount(2);
   await expect(page.getByText('colleague@example.com')).toBeVisible();
+  await expect(page.locator('#userManagementSyncStatus')).toHaveText('Users up to date');
+  await expect(page.getByRole('button', { name: 'Refresh' })).toHaveCount(0);
 
   const colleague = page.locator('[data-user-id="user-2"]');
   await colleague.locator('[data-user-role]').selectOption('editor');
@@ -45,6 +47,7 @@ test('administrator can review and update workspace access', async ({ page }) =>
     role: 'editor',
     active: true
   });
+  await expect(page.locator('#userManagementSyncStatus')).toHaveText('Users up to date');
 });
 
 test('non-admin is denied and does not see Manage Users in the menu', async ({ page }) => {
