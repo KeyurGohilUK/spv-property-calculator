@@ -1,7 +1,7 @@
 {
-  "version": "1.21.33",
+  "version": "1.21.34",
   "notes": [
-    "Theme behaviour is now organised with the shared UI components.",
-    "Previous script addresses remain available so installed versions continue updating safely."
+    "Application startup, shell and primary navigation are now organised together under the app layer.",
+    "Previously published script addresses remain available so installed versions continue updating safely."
   ]
 }

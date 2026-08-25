@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.33';
+export const APP_VERSION = '1.21.34';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -12,7 +12,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './styles/features/properties.css', './styles/features/summary.css',
   './styles/features/archive.css', './styles/features/editor.css', './styles/features/statuses.css',
   './src/components/theme.js', './theme.js', './src/components/help-guide.js', './help-guide.js',
-  './app.js', './src/components/install-component.js', './install-component.js',
+  './src/app/app.js', './app.js', './src/components/install-component.js', './install-component.js',
   './src/components/update-notifier.js', './update-notifier.js',
   './src/utils/format-utils.js', './src/utils/validation.js',
   './format-utils.js', './validation.js',
@@ -25,8 +25,8 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './expense-cloud-sync.js', './src/components/sync-status.js', './sync-status.js', './receipt-cloud.js',
   './workspace-sync.js',
   './account-controller.js',
-  './src/components/primary-navigation.js', './primary-navigation.js',
-  './src/components/app-shell.js', './app-shell.js',
+  './src/app/primary-navigation.js', './src/components/primary-navigation.js', './primary-navigation.js',
+  './src/app/app-shell.js', './src/components/app-shell.js', './app-shell.js',
   './src/components/dialog-helper.js', './dialog-helper.js',
   './forecast/', './forecast.html', './forecast.css', './forecast.js',
   './forecast-property.js',

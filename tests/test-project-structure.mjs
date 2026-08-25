@@ -8,6 +8,7 @@ const requiredDirectories = [
   'docs/setup/',
   'docs/planning/',
   'docs/history/',
+  'src/app/',
   'src/utils/',
   'src/components/',
   'tests/e2e/'
@@ -28,11 +29,32 @@ for (const utility of ['format-utils.js', 'validation.js', 'calendar-invite.js']
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/utils\\/${utility.replace('.', '\\.')}';`), `${utility} must retain its previous URL as a compatibility export`);
 }
 
-for (const component of ['dialog-helper.js', 'sync-status.js', 'primary-navigation.js', 'app-shell.js', 'install-component.js', 'update-notifier.js']) {
+for (const component of ['dialog-helper.js', 'sync-status.js', 'install-component.js', 'update-notifier.js']) {
   assert.equal(fs.existsSync(new URL(`src/components/${component}`, projectRoot)), true, `${component} must remain under src/components`);
   const compatibilitySource = fs.readFileSync(new URL(component, projectRoot), 'utf8');
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/components\\/${component.replace('.', '\\.')}';`), `${component} must retain its previous URL as a compatibility export`);
 }
+
+for (const appModule of ['app-shell.js', 'primary-navigation.js']) {
+  assert.equal(fs.existsSync(new URL(`src/app/${appModule}`, projectRoot)), true, `${appModule} must remain under src/app`);
+  assert.equal(
+    fs.readFileSync(new URL(`src/components/${appModule}`, projectRoot), 'utf8').includes(`export * from '../app/${appModule}';`),
+    true,
+    `${appModule} must retain its previous component URL as a compatibility export`
+  );
+  assert.equal(
+    fs.readFileSync(new URL(appModule, projectRoot), 'utf8').includes(`export * from './src/app/${appModule}';`),
+    true,
+    `${appModule} must retain its root URL as a compatibility export`
+  );
+}
+
+assert.equal(fs.existsSync(new URL('src/app/app.js', projectRoot)), true, 'app.js must remain under src/app');
+assert.match(
+  fs.readFileSync(new URL('app.js', projectRoot), 'utf8'),
+  /export \* from '\.\/src\/app\/app\.js';/,
+  'app.js must retain its root URL as a compatibility entry point'
+);
 
 assert.equal(fs.existsSync(new URL('src/components/secondary-page-header.js', projectRoot)), true, 'secondary-page-header.js must remain under src/components');
 assert.match(
