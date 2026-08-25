@@ -26,6 +26,7 @@ import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 import { createPropertyCard } from './property-card.js';
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from './format-utils.js';
+import { clearFieldValidation, setFieldValidation } from './validation.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });
@@ -229,6 +230,13 @@ function captureSavedPropertyState() {
 function handlePropertyFormMutation(event) {
   // Notes have their own save lifecycle and must not mark the property itself dirty.
   if (event.target?.closest?.('#notesSection')) return;
+  const errorId = {
+    title: 'titleError',
+    purchasePrice: 'priceError',
+    listingUrl: 'listingUrlError',
+    depositPercent: 'depositPercentError'
+  }[event.target?.id];
+  if (errorId) clearFieldValidation(event.target, $(errorId));
   renderCalculation();
   updateSaveButtonState();
 }
@@ -485,11 +493,10 @@ function validateForm() {
   const listingUrl = normalizeListingUrl(listingRaw);
   const listingValid = !listingRaw || Boolean(listingUrl);
 
-  $('titleError').classList.toggle('hidden', titleValid);
-  $('priceError').classList.toggle('hidden', priceValid);
-  $('listingUrlError').classList.toggle('hidden', listingValid);
-  $('listingUrl').setCustomValidity(listingValid ? '' : 'Enter a valid http:// or https:// property listing link.');
-  $('depositPercent').setCustomValidity(depositValid ? '' : 'Deposit must be between 0% and 100%.');
+  setFieldValidation($('title'), $('titleError'), { invalid: !titleValid });
+  setFieldValidation($('purchasePrice'), $('priceError'), { invalid: !priceValid });
+  setFieldValidation($('listingUrl'), $('listingUrlError'), { invalid: !listingValid });
+  setFieldValidation($('depositPercent'), $('depositPercentError'), { invalid: !depositValid });
 
   if (!titleValid || !priceValid || !depositValid || !listingValid) openPrimaryDetailsSection();
 
@@ -514,10 +521,10 @@ function resetForm() {
   $('refurbishmentCost').value = '0';
   $('customExpenses').innerHTML = '';
   $('saveMessage').textContent = '';
-  $('titleError').classList.add('hidden');
-  $('priceError').classList.add('hidden');
-  $('listingUrlError').classList.add('hidden');
-  $('listingUrl').setCustomValidity('');
+  clearFieldValidation($('title'), $('titleError'));
+  clearFieldValidation($('purchasePrice'), $('priceError'));
+  clearFieldValidation($('listingUrl'), $('listingUrlError'));
+  clearFieldValidation($('depositPercent'), $('depositPercentError'));
   $('editorModeLabel').textContent = 'New calculation';
   currentNotes = [];
   if ($('noteText')) $('noteText').value = '';

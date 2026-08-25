@@ -85,7 +85,7 @@
 
       <label class="field currency-field">
         <span>Amount <strong aria-hidden="true">*</strong></span>
-        <div class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required></div>
+        <div class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required aria-describedby="expenseAmountError"></div>
         <small id="expenseAmountError" class="error-text hidden">Enter an amount greater than £0.</small>
       </label>
 
@@ -103,14 +103,14 @@
       <label class="field"><span>Expense relates to</span>
         <select id="expenseScope"><option value="company">General company expense</option><option value="property">Specific property</option></select>
       </label>
-      <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
+      <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty" aria-describedby="expensePropertyError"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
       <label class="field"><span>Supplier / description <em>optional</em></span><input id="expenseDescription" type="text" maxlength="160" placeholder="e.g. Companies House filing fee"></label>
       <label class="field"><span>Notes <em>optional</em></span><textarea id="expenseNotes" rows="3" maxlength="1000" placeholder="Payment details or reason for expense"></textarea></label>
 
       <label class="field receipt-field"><span>Receipt <em>optional</em></span>
-        <input id="expenseReceipt" type="file" accept="image/*,application/pdf">
+        <input id="expenseReceipt" type="file" accept="image/*,application/pdf" aria-describedby="expenseReceiptSize expenseReceiptHelp expenseReceiptError">
         <div id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected</div>
-        <small>Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in.</small>
+        <small id="expenseReceiptHelp">Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in.</small>
         <small id="expenseReceiptError" class="error-text hidden"></small>
       </label>
       <label id="removeReceiptField" class="switch-row compact-switch hidden">

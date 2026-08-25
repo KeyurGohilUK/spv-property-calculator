@@ -1,7 +1,7 @@
 {
-  "version": "1.21.21",
+  "version": "1.21.22",
   "notes": [
-    "Screen-reader structure is now clearer across cards, controls and status messages.",
-    "Redundant accessibility attributes were removed without changing behaviour or design."
+    "Validation errors are now announced against the correct property and expense fields.",
+    "Invalid fields clear their accessibility error state as soon as you edit them."
   ]
 }
