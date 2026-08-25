@@ -24,6 +24,7 @@ import {
 } from './storage.js';
 import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
+import { createPropertyCard } from './property-card.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });
@@ -612,7 +613,7 @@ function updatePropertyCounts() {
 function renderPropertyList() {
   const properties=getActiveProperties(); updatePropertyCounts(); $('emptyState').classList.toggle('hidden', properties.length>0); $('propertyList').innerHTML='';
   properties.forEach((property)=>{
-    const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card';
+    const calc=calculateProperty(property);
     const propertyTitle=property.title||'Untitled Property';
     const listingUrl = normalizeListingUrl(property.listingUrl);
     const viewingDateLabel = formatViewingDate(property.viewingDate);
@@ -624,9 +625,7 @@ function renderPropertyList() {
         : '';
     const calendarAction = !viewingPassed && viewingDateLabel ? `<button class="property-card-icon-action calendar" type="button" data-action="calendar" aria-label="Add viewing for ${escapeHtml(propertyTitle)} to calendar" title="Add viewing to calendar" data-tooltip="Calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg></button>` : '';
     const listingAction = listingUrl ? `<button class="property-card-icon-action listing" type="button" data-action="listing" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></button>` : '';
-    card.innerHTML=`
-      <button class="property-card-open" type="button" aria-label="Open ${escapeHtml(propertyTitle)} for editing"></button>
-      <div class="property-card-tools" aria-label="Property actions">
+    const toolsHtml=`<div class="property-card-tools" aria-label="Property actions">
         ${calendarAction}${listingAction}
         <details class="property-card-more">
           <summary class="property-card-icon-action" role="button" aria-haspopup="menu" aria-label="More actions for ${escapeHtml(propertyTitle)}" title="More actions" data-tooltip="More">
@@ -637,10 +636,13 @@ function renderPropertyList() {
             <button class="archive" type="button" data-action="archive" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg><span>Archive</span></button>
           </div>
         </details>
-      </div>
-      <div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}</div></div>
-      <div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div>
-      <div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div>`;
+      </div>`;
+    const card=createPropertyCard({
+      property, calc,
+      headerHtml:`<h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}`,
+      toolsHtml,
+      formatters:{ money, number:(value)=>numberFormat.format(value), escape:escapeHtml }
+    });
     card.querySelector('.property-card-open').addEventListener('click',()=> showEditor(property.id));
     if (calendarAction) card.querySelector('[data-action="calendar"]').addEventListener('click',()=> downloadViewingCalendarInvite(property));
     if (listingUrl) card.querySelector('[data-action="listing"]').addEventListener('click',()=>{ window.open(listingUrl,'_blank','noopener,noreferrer'); });
@@ -652,8 +654,13 @@ function renderPropertyList() {
 function renderArchiveList() {
   const properties=getArchivedProperties(); updatePropertyCounts(); $('archiveEmptyState').classList.toggle('hidden',properties.length>0); $('archivePropertyList').innerHTML='';
   properties.forEach((property)=>{
-    const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card archived-card';
-    card.innerHTML=`<div class="property-card-header"><div><div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p></div></div><div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div><div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div><div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button><button class="danger-btn" type="button" data-action="permanent-delete">Permanently Delete</button></div>`;
+    const calc=calculateProperty(property);
+    const card=createPropertyCard({
+      property, calc, archived:true,
+      headerHtml:`<div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p>`,
+      actionsHtml:'<div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button><button class="danger-btn" type="button" data-action="permanent-delete">Permanently Delete</button></div>',
+      formatters:{ money, number:(value)=>numberFormat.format(value), escape:escapeHtml }
+    });
     card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(restored);storeCloudSyncedProperty(synced);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
     card.querySelector('[data-action="permanent-delete"]').addEventListener('click',async(event)=>{
       if(!cloudUser){ window.alert('Please sign in before permanently deleting a shared property.'); return; }

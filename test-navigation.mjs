@@ -16,6 +16,7 @@ const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url),
 const primaryNavigation = fs.readFileSync(new URL('./primary-navigation.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 const dialogHelper = fs.readFileSync(new URL('./dialog-helper.js', import.meta.url), 'utf8');
+const propertyCard = fs.readFileSync(new URL('./property-card.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
 assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecasting/, 'Forecast must not duplicate the main navigation with an upper back bar');
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
@@ -85,7 +86,10 @@ assert.match(styles, /\.property-cost-breakdown > div \{[^}]*display: flex;[^}]*
 assert.match(styles, /\.property-cost-breakdown > div strong \{[^}]*margin-left: auto;[^}]*text-align: right;/, 'Property card totals must anchor to the far-right edge');
 assert.match(styles, /\.property-list \{[^}]*align-items: start;/, 'Property cards must keep their content height instead of stretching to the tallest card');
 assert.match(app, /property-card-more[\s\S]*data-action="duplicate"[\s\S]*data-action="archive"/, 'Secondary property actions must use the overflow menu');
-assert.match(app, /class="property-card-open"[^>]*aria-label="Open/, 'Property cards must use a dedicated accessible edit control');
+assert.match(app, /createPropertyCard\(\{[\s\S]*createPropertyCard\(\{[\s\S]*archived:true/, 'Active and archived cards must use the shared renderer');
+assert.match(propertyCard, /class="property-card-open"[^>]*aria-label="Open/, 'Property cards must use a dedicated accessible edit control');
+assert.equal((propertyCard.match(/class="property-stats"/g) || []).length, 1, 'Property financial stats must have one shared template');
+assert.equal((propertyCard.match(/property-cost-breakdown/g) || []).length, 1, 'Property cost breakdown must have one shared template');
 assert.doesNotMatch(app, /card\.setAttribute\('role','button'\)|card\.setAttribute\('tabindex','0'\)/, 'Property articles must not masquerade as buttons');
 assert.match(styles, /\.property-card:not\(\.archived-card\) \.property-card-header \{[^}]*min-height:/, 'Property card headers must keep financial rows aligned');
 assert.match(styles, /\.property-cost-breakdown[\s\S]*\.investment-total[^{]*\{[^}]*background:/, 'Total Investment must use the shared footer treatment');
