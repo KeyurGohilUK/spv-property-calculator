@@ -1,7 +1,7 @@
 {
-  "version": "1.21.27",
+  "version": "1.21.28",
   "notes": [
-    "Shared formatting, validation and calendar utilities are now organised under the application source folder.",
-    "There are no intended UI or calculation changes; download this update to verify existing journeys continue working normally."
+    "Fixed Download Updates failing on devices upgrading from the previous release.",
+    "Backward-compatible utility addresses now keep installed versions working throughout the cache refresh."
   ]
 }

@@ -114,6 +114,18 @@ test('opens the cached expense tracker while offline', async ({ page, context })
   await expect(page.getByRole('button', { name: /Add Expense/i })).toBeVisible();
 });
 
+test('keeps previous utility URLs available during the cache migration', async ({ page }) => {
+  await page.goto('/');
+
+  const legacyModules = await page.evaluate(async () => Promise.all([
+    import('/format-utils.js').then((module) => typeof module.formatCurrency),
+    import('/validation.js').then((module) => typeof module.setFieldValidation),
+    import('/calendar-invite.js').then((module) => typeof module.buildViewingCalendarInvite)
+  ]));
+
+  expect(legacyModules).toEqual(['function', 'function', 'function']);
+});
+
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {
   await mockRelease(page, '9.9.9', ['Improved offline updates']);
   await page.goto('/');

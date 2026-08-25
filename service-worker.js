@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.27-shared-utils';
+const CACHE_NAME = 'spv-property-calculator-v1.21.28-update-compatibility';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -27,9 +27,12 @@ const ASSETS = [
   './app.js',
   './src/utils/format-utils.js',
   './src/utils/validation.js',
+  './format-utils.js',
+  './validation.js',
   './property-card.js',
   './install-component.js',
   './src/utils/calendar-invite.js',
+  './calendar-invite.js',
   './cloud.js',
   './calculations.js',
   './tax-config.js',
