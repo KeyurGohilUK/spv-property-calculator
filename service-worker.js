@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.28-update-compatibility';
+const CACHE_NAME = 'spv-property-calculator-v1.21.29-component-foundations';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -51,11 +51,13 @@ const ASSETS = [
   './expenses.js',
   './expense-storage.js',
   './expense-cloud-sync.js',
+  './src/components/sync-status.js',
   './sync-status.js',
   './workspace-sync.js',
   './account-controller.js',
   './primary-navigation.js',
   './app-shell.js',
+  './src/components/dialog-helper.js',
   './dialog-helper.js',
   './update-notifier.js',
   './receipt-cloud.js',

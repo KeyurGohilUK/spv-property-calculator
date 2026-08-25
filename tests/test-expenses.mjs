@@ -42,7 +42,7 @@ assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*exp
 assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
 assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not show a separate Sync now button');
 assert.match(expenseHtml, /id="expenseSyncStatus" class="sync-status"/, 'Expenses must use the shared sync-status component');
-assert.match(expensePage, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
+assert.match(expensePage, /import \{ renderSyncStatus \} from '.\/src\/components\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
 assert.match(expenseHtml, /id="toggleExpenseFiltersBtn"[\s\S]*Filter &amp; Export/, 'Combined Filter & Export action is missing');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"/, 'CSV export must live inside the filter panel');

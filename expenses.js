@@ -1,6 +1,6 @@
 import { getActiveProperties } from './storage.js';
-import { renderSyncStatus } from './sync-status.js';
-import { setupDialog } from './dialog-helper.js';
+import { renderSyncStatus } from './src/components/sync-status.js';
+import { setupDialog } from './src/components/dialog-helper.js';
 import {
   uploadCloudReceipt,
   downloadCloudReceipt,

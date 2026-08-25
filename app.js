@@ -1,5 +1,5 @@
 import { TAX_CONFIG } from './tax-config.js';
-import { renderSyncStatus } from './sync-status.js';
+import { renderSyncStatus } from './src/components/sync-status.js';
 import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from './account-controller.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';

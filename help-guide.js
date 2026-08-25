@@ -1,4 +1,4 @@
-import { setupDialog } from './dialog-helper.js';
+import { setupDialog } from './src/components/dialog-helper.js';
 
 (function initialiseHelpGuide() {
   'use strict';

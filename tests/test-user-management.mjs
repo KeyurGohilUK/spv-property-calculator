@@ -25,7 +25,7 @@ assert.match(adminMenu, /access\.role === 'admin'/, 'Manage Users menu must be a
 assert.match(appShell, /data-admin-users-link[^>]*aria-hidden="true"/, 'Shared admin menu item must be hidden by default');
 assert.match(page, /id="userAccessDenied"[\s\S]*id="userManagementContent"/, 'Manage Users page must include a guarded access state');
 assert.match(pageScript, /access\.role !== 'admin'/, 'Manage Users page must reject non-admin users');
-assert.match(pageScript, /import \{ renderSyncStatus \} from '.\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');
+assert.match(pageScript, /import \{ renderSyncStatus \} from '.\/src\/components\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');
 assert.match(page, /id="userManagementSyncStatus" class="sync-status"/, 'Manage Users hero sync status is missing');
 assert.doesNotMatch(page + pageScript, /refreshUsersBtn|>Refresh<\//, 'Manage Users must not include a manual refresh action');
 assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Manage Users page must save role and active access');

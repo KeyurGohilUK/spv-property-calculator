@@ -126,6 +126,17 @@ test('keeps previous utility URLs available during the cache migration', async (
   expect(legacyModules).toEqual(['function', 'function', 'function']);
 });
 
+test('keeps previous component URLs available during the cache migration', async ({ page }) => {
+  await page.goto('/');
+
+  const legacyModules = await page.evaluate(async () => Promise.all([
+    import('/dialog-helper.js').then((module) => typeof module.setupDialog),
+    import('/sync-status.js').then((module) => typeof module.renderSyncStatus)
+  ]));
+
+  expect(legacyModules).toEqual(['function', 'function']);
+});
+
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {
   await mockRelease(page, '9.9.9', ['Improved offline updates']);
   await page.goto('/');
