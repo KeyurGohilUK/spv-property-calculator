@@ -9,7 +9,7 @@ const page = fs.readFileSync(new URL('../admin/users/index.html', import.meta.ur
 const pageScript = fs.readFileSync(new URL('../src/features/users/manage-users.js', import.meta.url), 'utf8');
 const pageStyles = fs.readFileSync(new URL('../styles/features/users.css', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
-const worker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
+const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
 for (const sql of [migration, bootstrap]) {
   assert.match(sql, /create or replace function public\.list_workspace_users\(\)/, 'User listing RPC is missing');
@@ -34,7 +34,7 @@ assert.match(pageStyles, /@media \(max-width: 560px\)/, 'Manage Users page must 
 assert.match(page, /<details id="userRoleGuide" class="user-role-guide">/, 'Role guidance must use a collapsed details element');
 assert.doesNotMatch(page, /<details[^>]*userRoleGuide[^>]*\sopen(?:\s|>)/, 'Role guidance must be collapsed by default');
 for (const role of ['Viewer', 'Editor', 'Admin']) assert.match(page, new RegExp(`<h3>${role}<\\/h3>`), `${role} guidance is missing`);
-assert.match(worker, /'\.\/manage-users\.html'/, 'Manage Users page must be available in the offline app shell');
+assert.ok(appAssets.includes('./manage-users.html'), 'Manage Users page must be available in the offline app shell');
 
 
 assert.equal((bootstrap.match(/^commit;$/gm) || []).length, 1, 'Bootstrap must contain one transaction commit');

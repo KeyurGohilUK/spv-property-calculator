@@ -13,13 +13,26 @@ function readBaseFile(path) {
   return git('show', `${baseSha}:${path}`);
 }
 
+function readBaseFileIfExists(path) {
+  try {
+    execFileSync('git', ['cat-file', '-e', `${baseSha}:${path}`], { stdio: 'ignore' });
+    return readBaseFile(path);
+  } catch {
+    return '';
+  }
+}
+
 const changedPaths = git('diff', '--name-only', `${baseSha}...HEAD`).split('\n').filter(Boolean);
 const baseRelease = JSON.parse(readBaseFile('release.json'));
 const currentRelease = JSON.parse(fs.readFileSync(new URL('./release.json', import.meta.url), 'utf8'));
+const baseManifest = readBaseFileIfExists('app-assets.json');
+const currentManifestUrl = new URL('./app-assets.json', import.meta.url);
 const changedCachedPaths = cachedAppChanges(
   changedPaths,
-  readBaseFile('service-worker.js'),
-  fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8')
+  baseManifest || readBaseFile('service-worker.js'),
+  fs.existsSync(currentManifestUrl)
+    ? fs.readFileSync(currentManifestUrl, 'utf8')
+    : fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8')
 );
 
 assertReleaseBumped({

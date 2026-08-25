@@ -20,9 +20,9 @@ for (const route of routes) {
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'));
 assert.equal(manifest.shortcuts[0].url, './forecast/');
 
-const worker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
+const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 for (const path of ['./expenses/', './forecast/', './admin/users/']) {
-  assert.match(worker, new RegExp(`'${path.replaceAll('/', '\\/')}'`), `${path} must be available offline`);
+  assert.ok(appAssets.includes(path), `${path} must be available offline`);
 }
 
 console.log('Clean URL routing checks passed.');

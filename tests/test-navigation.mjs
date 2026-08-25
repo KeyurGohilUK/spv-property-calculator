@@ -55,7 +55,7 @@ assert.match(secondaryHeader, /button: shell\.accountButton, dialog: \$\('second
 assert.doesNotMatch(secondaryHeader, /secondaryInstallDialog|secondaryNativeInstallBtn|secondaryUpdateBtn/, 'Secondary pages must not keep a duplicate Install popup');
 assert.match(installComponent, /id="installDialog"[\s\S]*id="nativeInstallBtn"[\s\S]*id="downloadUpdatesBtn"/, 'Shared Install popup is incomplete');
 assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');
-assert.match(installComponent, /async function downloadUpdates[\s\S]*APP_UPDATE_ASSETS/, 'Shared Install popup must provide update handling');
+assert.match(installComponent, /APP_ASSET_MANIFEST = '\.\/app-assets\.json'[\s\S]*async function loadAppAssets[\s\S]*async function downloadUpdates[\s\S]*loadAppAssets\(\)/, 'Shared Install popup must load updates from the asset manifest');
 assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page-header\.js/, 'Forecast must load local account dependencies');
 assert.match(primaryNavigation, /class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog"/, 'Shared More must be a local dialog button');
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
