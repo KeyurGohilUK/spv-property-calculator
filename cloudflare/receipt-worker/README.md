@@ -11,7 +11,7 @@ This Worker stores SPV expense receipts in the private `spv-property-receipts` R
 
 Never add a Supabase secret/service-role key or R2 API credentials to this repository.
 
-Every request validates the Supabase access token. Downloads require `is_workspace_member()`; uploads and deletes require `is_workspace_editor()`. Run `database-scripts/Update 11 - Private R2 Receipts.sql` before testing authenticated routes.
+Every request validates the Supabase access token. Downloads require `is_workspace_member()`; uploads and deletes require `is_workspace_editor()`. Run `database/migrations/Update 11 - Private R2 Receipts.sql` before testing authenticated routes.
 
 ## Routes
 
