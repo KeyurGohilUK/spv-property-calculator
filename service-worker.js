@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.33-theme-component';
+const CACHE_NAME = 'spv-property-calculator-v1.21.34-app-layer';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -26,6 +26,7 @@ const ASSETS = [
   './theme.js',
   './src/components/help-guide.js',
   './help-guide.js',
+  './src/app/app.js',
   './app.js',
   './src/utils/format-utils.js',
   './src/utils/validation.js',
@@ -60,8 +61,10 @@ const ASSETS = [
   './sync-status.js',
   './workspace-sync.js',
   './account-controller.js',
+  './src/app/primary-navigation.js',
   './src/components/primary-navigation.js',
   './primary-navigation.js',
+  './src/app/app-shell.js',
   './src/components/app-shell.js',
   './app-shell.js',
   './src/components/dialog-helper.js',

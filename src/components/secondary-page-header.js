@@ -1,7 +1,7 @@
 import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from '../../account-controller.js';
-import { setupPrimaryNavigation } from './primary-navigation.js';
-import { setupAppShell } from './app-shell.js';
+import { setupPrimaryNavigation } from '../app/primary-navigation.js';
+import { setupAppShell } from '../app/app-shell.js';
 import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from '../../workspace-sync.js';
 
 const $ = (id) => document.getElementById(id);

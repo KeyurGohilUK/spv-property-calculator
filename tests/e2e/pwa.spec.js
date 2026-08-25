@@ -97,6 +97,7 @@ test('installs the app shell and controls the page', async ({ page }) => {
     '/',
     '/index.html',
     '/expenses/',
+    '/src/app/app.js',
     '/app.js',
     '/styles.css'
   ]));
@@ -134,6 +135,8 @@ test('keeps previous component URLs available during the cache migration', async
     import('/sync-status.js').then((module) => typeof module.renderSyncStatus),
     import('/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
     import('/app-shell.js').then((module) => typeof module.setupAppShell),
+    import('/src/components/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
+    import('/src/components/app-shell.js').then((module) => typeof module.setupAppShell),
     import('/install-component.js').then((module) => typeof module.setupInstallComponent),
     import('/update-notifier.js').then((module) => typeof module.setupUpdateNotifier),
     fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing'),
@@ -143,7 +146,7 @@ test('keeps previous component URLs available during the cache migration', async
   ]));
 
   expect(legacyModules).toEqual([
-    'function', 'function', 'function', 'function', 'function', 'function',
+    'function', 'function', 'function', 'function', 'function', 'function', 'function', 'function',
     'available', 'available', 'available', 'available'
   ]);
 });

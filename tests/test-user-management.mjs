@@ -8,7 +8,7 @@ const adminMenu = fs.readFileSync(new URL('../src/components/admin-menu.js', imp
 const page = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
 const pageScript = fs.readFileSync(new URL('../manage-users.js', import.meta.url), 'utf8');
 const pageStyles = fs.readFileSync(new URL('../manage-users.css', import.meta.url), 'utf8');
-const appShell = fs.readFileSync(new URL('../src/components/app-shell.js', import.meta.url), 'utf8');
+const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
 
 for (const sql of [migration, bootstrap]) {
