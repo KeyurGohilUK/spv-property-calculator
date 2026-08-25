@@ -5,7 +5,7 @@ const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8')
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const users = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
-const shell = fs.readFileSync(new URL('../app-shell.js', import.meta.url), 'utf8');
+const shell = fs.readFileSync(new URL('../src/components/app-shell.js', import.meta.url), 'utf8');
 
 assert.match(shell, /class="header-actions" role="group" aria-label="App controls"/, 'App control label must be attached to a group');
 assert.match(index, /class="property-hero-actions" role="group" aria-label="Property actions"/, 'Property action label must be attached to a group');
