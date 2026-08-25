@@ -1,7 +1,7 @@
 {
-  "version": "1.21.10",
+  "version": "1.21.11",
   "notes": [
-    "Property and expense syncing now use one shared, consistent sync engine across every page.",
-    "Sync conflicts and failures now show the same clear status wherever they occur."
+    "Sign-in, account creation and sign-out now use one shared account controller across every page.",
+    "Account validation, loading states and cloud initialisation now behave consistently throughout the app."
   ]
 }

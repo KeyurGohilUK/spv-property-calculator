@@ -1,6 +1,7 @@
 import { TAX_CONFIG } from './tax-config.js';
 import { renderSyncStatus } from './sync-status.js';
 import { setupInstallComponent } from './install-component.js';
+import { setupAccountController } from './account-controller.js';
 import {
   safeNumber,
   clamp,
@@ -53,13 +54,13 @@ let cloudUser = null;
 let cloudSyncing = false;
 let cloudLastMessage = '';
 let cloudInitialized = false;
-let cloudListenerAttached = false;
 let currentNotes = [];
 let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 
 let installComponent = null;
+let accountController = null;
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -800,38 +801,7 @@ function renderCloudState(isWarning = false) {
 }
 
 function renderAuthDialog() {
-  const cloud = window.SPVCloud;
-  const state = cloud?.getConfigState?.() || { configured: false, available: false };
-  const configured = state.configured && state.available;
-
-  $('authNotConfigured').classList.toggle('hidden', configured);
-  $('authSignedOut').classList.toggle('hidden', !configured || Boolean(cloudUser));
-  $('authSignedIn').classList.toggle('hidden', !configured || !cloudUser);
-
-  if (!configured) {
-    const paragraph = $('authNotConfigured').querySelector('p:not(.eyebrow):not(.muted)');
-    if (paragraph && state.configured && !state.available) {
-      paragraph.innerHTML = 'Supabase is configured, but the browser library is unavailable. Check your internet connection and reload the page.';
-    }
-    return;
-  }
-
-  if (cloudUser) {
-    $('signedInEmail').textContent = cloudUser.email || 'Signed-in Supabase user';
-    $('accountDisplayName').value = getCloudDisplayName(cloudUser) === cloudUser.email ? '' : getCloudDisplayName(cloudUser);
-    $('dialogSyncBtn').disabled = cloudSyncing || !navigator.onLine;
-    $('dialogSyncBtn').textContent = cloudSyncing ? 'Syncing…' : 'Sync now';
-    $('accountSyncText').textContent = navigator.onLine
-      ? (cloudLastMessage || 'All signed-in users share the same Supabase property list.')
-      : 'Offline now. Local changes will be retained until the next sync.';
-  }
-}
-
-function setAuthBusy(busy) {
-  ['signInBtn', 'signUpBtn', 'signOutBtn', 'dialogSyncBtn', 'saveDisplayNameBtn'].forEach((id) => {
-    const element = $(id);
-    if (element) element.disabled = busy;
-  });
+  accountController?.render();
 }
 
 async function syncCloud({ showFeedback = true } = {}) {
@@ -871,99 +841,6 @@ async function syncCloud({ showFeedback = true } = {}) {
   }
 }
 
-async function handleSignIn() {
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value;
-  if (!email || !password) {
-    $('authMessage').textContent = 'Enter your email and password.';
-    return;
-  }
-
-  setAuthBusy(true);
-  $('authMessage').textContent = 'Signing in…';
-  try {
-    const data = await window.SPVCloud.signIn(email, password);
-    cloudUser = data?.user || data?.session?.user || window.SPVCloud.getCurrentUser();
-    $('authMessage').textContent = '';
-    $('authPassword').value = '';
-    renderCloudState();
-    renderAuthDialog();
-    await syncCloud({ showFeedback: false });
-  } catch (error) {
-    $('authMessage').textContent = error.message || 'Could not sign in.';
-  } finally {
-    setAuthBusy(false);
-    renderAuthDialog();
-  }
-}
-
-async function handleSignUp() {
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value;
-  const displayName = $('authDisplayName').value.trim();
-  if (!email || password.length < 6) {
-    $('authMessage').textContent = 'Enter a valid email and a password of at least 6 characters.';
-    return;
-  }
-
-  setAuthBusy(true);
-  $('authMessage').textContent = 'Creating account…';
-  try {
-    const data = await window.SPVCloud.signUp(email, password, displayName);
-    if (data?.session?.user) {
-      cloudUser = data.session.user;
-      $('authMessage').textContent = '';
-      $('authPassword').value = '';
-      renderCloudState();
-      renderAuthDialog();
-      await syncCloud({ showFeedback: false });
-    } else {
-      $('authMessage').textContent = 'Account created. Confirm the email if your Supabase project requires email confirmation, then sign in.';
-    }
-  } catch (error) {
-    $('authMessage').textContent = error.message || 'Could not create the account.';
-  } finally {
-    setAuthBusy(false);
-    renderAuthDialog();
-  }
-}
-
-async function handleSaveDisplayName() {
-  if (!cloudUser) return;
-  const name = $('accountDisplayName').value.trim();
-  if (!name) { $('signedInMessage').textContent = 'Enter your name first.'; return; }
-  setAuthBusy(true);
-  $('signedInMessage').textContent = 'Saving name…';
-  try {
-    cloudUser = await window.SPVCloud.updateDisplayName(name);
-    $('signedInMessage').textContent = 'Display name saved. New notes will use this name.';
-    renderCloudState();
-    renderNotes();
-  } catch (error) {
-    $('signedInMessage').textContent = error.message || 'Could not save your display name.';
-  } finally {
-    setAuthBusy(false);
-    renderAuthDialog();
-  }
-}
-
-async function handleSignOut() {
-  setAuthBusy(true);
-  $('signedInMessage').textContent = 'Signing out…';
-  try {
-    await window.SPVCloud.signOut();
-    cloudUser = null;
-    cloudLastMessage = 'Signed out. Your local offline copy is still on this device.';
-    $('authDialog').close();
-  } catch (error) {
-    $('signedInMessage').textContent = error.message || 'Could not sign out.';
-  } finally {
-    setAuthBusy(false);
-    renderCloudState();
-    renderAuthDialog();
-  }
-}
-
 async function setupCloud() {
   const cloud = window.SPVCloud;
   if (!cloud) {
@@ -971,33 +848,44 @@ async function setupCloud() {
     return;
   }
 
-  if (!cloudListenerAttached) {
-    cloud.onAuthChange((user) => {
-      window.setTimeout(() => {
-        cloudUser = user || null;
-        renderCloudState();
-        renderAuthDialog();
-        renderNotes();
-        if (editingId && cloudUser) loadNotes();
-        if (cloudUser && navigator.onLine) syncCloud({ showFeedback: false });
-      }, 0);
-    });
-    cloudListenerAttached = true;
-  }
-
-  try {
-    const state = await cloud.init();
-    cloudInitialized = !state.configured || Boolean(state.available);
-    cloudUser = state.user || null;
-    renderCloudState();
-    renderAuthDialog();
-    if (cloudUser && navigator.onLine) await syncCloud({ showFeedback: false });
-  } catch (error) {
-    console.warn('Supabase initialization failed:', error);
-    cloudInitialized = false;
-    cloudLastMessage = error.message || 'Supabase initialization failed.';
-    renderCloudState(true);
-  }
+  accountController = setupAccountController({
+    cloud,
+    elements: {
+      button: $('accountBtn'), dialog: $('authDialog'), closeButton: $('closeAuthDialog'),
+      signedOut: $('authSignedOut'), signedIn: $('authSignedIn'), notConfigured: $('authNotConfigured'),
+      setupMessage: $('authNotConfigured').querySelector('p:not(.eyebrow):not(.muted)'),
+      name: $('authDisplayName'), email: $('authEmail'), password: $('authPassword'),
+      authMessage: $('authMessage'), signedInEmail: $('signedInEmail'),
+      signInButton: $('signInBtn'), signUpButton: $('signUpBtn'), signOutButton: $('signOutBtn'),
+      syncButton: $('dialogSyncBtn'), accountMessage: $('signedInMessage'),
+      displayNameInput: $('accountDisplayName'), saveDisplayNameButton: $('saveDisplayNameBtn')
+    },
+    sync: () => syncCloud(),
+    isSyncing: () => cloudSyncing,
+    getDisplayName: getCloudDisplayName,
+    onUserChange: async (user, { reason }) => {
+      cloudUser = user;
+      renderCloudState();
+      renderNotes();
+      if (editingId && cloudUser) loadNotes();
+      if (cloudUser && navigator.onLine && reason !== 'profile') await syncCloud({ showFeedback: false });
+      if (!cloudUser && reason === 'sign-out') cloudLastMessage = 'Signed out. Your local offline copy is still on this device.';
+    },
+    onInitialised: (state) => { cloudInitialized = !state.configured || Boolean(state.available); },
+    onInitialisationError: (error) => {
+      cloudInitialized = false;
+      cloudLastMessage = error.message || 'Supabase initialization failed.';
+      renderCloudState(true);
+    },
+    onDisplayNameSaved: () => renderNotes(),
+    onRender: ({ user }) => {
+      if (!user) return;
+      $('accountSyncText').textContent = navigator.onLine
+        ? (cloudLastMessage || 'All signed-in users share the same Supabase property list.')
+        : 'Offline now. Local changes will be retained until the next sync.';
+    }
+  });
+  await accountController.initialise();
 }
 
 function updateConnectionStatus() {
@@ -1046,16 +934,6 @@ function init() {
     downloadViewingCalendarInvite(getFormModel());
   });
 
-  $('accountBtn').addEventListener('click', () => {
-    renderAuthDialog();
-    $('authDialog').showModal();
-  });
-  $('closeAuthDialog').addEventListener('click', () => $('authDialog').close());
-  $('signInBtn').addEventListener('click', handleSignIn);
-  $('signUpBtn').addEventListener('click', handleSignUp);
-  $('signOutBtn').addEventListener('click', handleSignOut);
-  $('saveDisplayNameBtn').addEventListener('click', handleSaveDisplayName);
-  $('dialogSyncBtn').addEventListener('click', () => syncCloud());
   $('saveNoteBtn').addEventListener('click', saveNote);
   $('noteText').addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
@@ -1067,9 +945,6 @@ function init() {
   $('notesList').addEventListener('click', (event) => {
     const deleteBtn = event.target.closest('.note-delete-btn');
     if (deleteBtn) deleteOwnNote(deleteBtn.dataset.noteId);
-  });
-  $('authPassword').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') handleSignIn();
   });
 
   $('viewingDateDay').addEventListener('change', syncViewingDateFromPicker);
