@@ -1,6 +1,6 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 
-export const APP_VERSION = '1.21.11';
+export const APP_VERSION = '1.21.12';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -14,6 +14,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './expense-cloud-sync.js', './sync-status.js', './receipt-cloud.js',
   './workspace-sync.js',
   './account-controller.js',
+  './primary-navigation.js',
   './forecast.html', './forecast.css', './forecast.js',
   './forecast-advanced.js', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',
