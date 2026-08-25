@@ -1,7 +1,7 @@
 {
-  "version": "1.21.30",
+  "version": "1.21.31",
   "notes": [
-    "Shared navigation, app menu and secondary-page header components are now organised together.",
-    "Previous component addresses remain available so installed versions continue updating safely."
+    "Help Guide and administrator-menu behaviour are now organised with the shared UI components.",
+    "Previous script addresses remain available so installed versions continue updating safely."
   ]
 }

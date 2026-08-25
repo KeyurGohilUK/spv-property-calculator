@@ -134,10 +134,15 @@ test('keeps previous component URLs available during the cache migration', async
     import('/sync-status.js').then((module) => typeof module.renderSyncStatus),
     import('/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
     import('/app-shell.js').then((module) => typeof module.setupAppShell),
-    fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing')
+    fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing'),
+    fetch('/help-guide.js').then((response) => response.ok ? 'available' : 'missing'),
+    fetch('/admin-menu.js').then((response) => response.ok ? 'available' : 'missing')
   ]));
 
-  expect(legacyModules).toEqual(['function', 'function', 'function', 'function', 'available']);
+  expect(legacyModules).toEqual([
+    'function', 'function', 'function', 'function',
+    'available', 'available', 'available'
+  ]);
 });
 
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {

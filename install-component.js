@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './src/components/dialog-helper.js';
 
-export const APP_VERSION = '1.21.30';
+export const APP_VERSION = '1.21.31';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -11,14 +11,14 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './styles/app-shell-home.css', './styles/app-shell-navigation.css',
   './styles/features/properties.css', './styles/features/summary.css',
   './styles/features/archive.css', './styles/features/editor.css', './styles/features/statuses.css',
-  './theme.js', './help-guide.js',
+  './theme.js', './src/components/help-guide.js', './help-guide.js',
   './app.js', './install-component.js', './update-notifier.js',
   './src/utils/format-utils.js', './src/utils/validation.js',
   './format-utils.js', './validation.js',
   './property-card.js',
   './src/utils/calendar-invite.js', './calendar-invite.js', './cloud.js', './calculations.js', './tax-config.js',
   './storage.js', './manifest.json', './supabase-config.js', './release.json',
-  './expenses/', './expenses.html', './src/components/secondary-page-header.js', './secondary-page-header.js', './admin-menu.js',
+  './expenses/', './expenses.html', './src/components/secondary-page-header.js', './secondary-page-header.js', './src/components/admin-menu.js', './admin-menu.js',
   './admin/users/', './manage-users.html', './manage-users.css', './manage-users.js',
   './expenses.css', './expenses.js', './expense-storage.js',
   './expense-cloud-sync.js', './src/components/sync-status.js', './sync-status.js', './receipt-cloud.js',
