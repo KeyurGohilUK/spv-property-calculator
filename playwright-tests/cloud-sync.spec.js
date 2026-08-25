@@ -150,7 +150,7 @@ test('secondary-page automatic and manual sync share one expense operation', asy
   await seedLocalWorkspace(page, { expenses: [pendingExpense()] });
 
   await page.goto('/expenses.html');
-  await expect(page.locator('#secondaryAccountBtn')).toHaveClass(/is-signed-in/);
+  await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
   await expect(page.locator('#expenseSyncStatus')).toContainText('Synced');
 
   await expect.poll(async () => {
@@ -158,7 +158,7 @@ test('secondary-page automatic and manual sync share one expense operation', asy
     return calls.filter((call) => call.name === 'upsert_expense_if_current').length;
   }).toBe(1);
 
-  await page.locator('#secondaryAccountBtn').click();
+  await page.locator('#accountBtn').click();
   await page.locator('#secondarySyncBtn').click();
   await expect(page.locator('#secondaryAccountMessage')).toHaveText('Cloud is up to date.');
 

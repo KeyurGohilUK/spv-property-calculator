@@ -32,7 +32,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
     objectPath: 'receipts/expense-playwright/current-receipt.pdf'
   });
   await page.goto('/expenses.html');
-  await expect(page.locator('#secondaryAccountBtn')).toHaveClass(/is-signed-in/);
+  await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await openNewExpense(page);
   await page.locator('#expenseDescription').fill('Receipt lifecycle');
@@ -124,7 +124,7 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
   await installCloudMock(page);
   const worker = await installReceiptWorkerMock(page);
   await page.goto('/expenses.html');
-  await expect(page.locator('#secondaryAccountBtn')).toHaveClass(/is-signed-in/);
+  await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await context.setOffline(true);
   await openNewExpense(page, '31');
@@ -140,7 +140,7 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
   await expect.poll(async () => (await storedExpense(page))?.receiptCloudPending).toBe(false);
   const uploadsAfterReconnect = worker.callsFor('PUT').length;
 
-  await page.locator('#secondaryAccountBtn').click();
+  await page.locator('#accountBtn').click();
   await page.locator('#secondarySyncBtn').click();
   await expect(page.locator('#secondaryAccountMessage')).toHaveText('Cloud is up to date.');
   expect(worker.callsFor('PUT')).toHaveLength(uploadsAfterReconnect);
@@ -150,7 +150,7 @@ test('unauthorized Worker response keeps the receipt safely pending locally', as
   await installCloudMock(page);
   const worker = await installReceiptWorkerMock(page, { uploadStatus: 401 });
   await page.goto('/expenses.html');
-  await expect(page.locator('#secondaryAccountBtn')).toHaveClass(/is-signed-in/);
+  await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await openNewExpense(page, '19');
   await page.locator('#expenseDescription').fill('Protected receipt');

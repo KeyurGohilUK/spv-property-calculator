@@ -212,17 +212,17 @@ for (const route of ['/expenses.html', '/forecast.html']) {
     await page.goto(route);
     const originalUrl = page.url();
 
-    await page.locator('#secondaryAccountBtn').click();
+    await page.locator('#accountBtn').click();
     await expect(page.locator('#secondaryAccountDialog')).toHaveAttribute('open', '');
     await page.locator('#closeSecondaryAccount').click();
 
-    await page.locator('#secondaryInstallBtn').click();
+    await page.locator('#installBtn').click();
     await expect(page.locator('#installDialog')).toHaveAttribute('open', '');
     await page.locator('#closeInstallDialog').click();
 
     await page.locator('[data-more-menu]').click();
     await expect(page.getByRole('heading', { name: 'App Menu' })).toBeVisible();
-    await page.locator('#closeSecondaryMoreMenu').click();
+    await page.locator('#closeMoreMenuDialog').click();
 
     await expect(page).toHaveURL(originalUrl);
   });

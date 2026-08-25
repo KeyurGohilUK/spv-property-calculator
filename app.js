@@ -3,6 +3,7 @@ import { renderSyncStatus } from './sync-status.js';
 import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from './account-controller.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';
+import { setupAppShell } from './app-shell.js';
 import {
   safeNumber,
   clamp,
@@ -25,6 +26,7 @@ import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 
 setupPrimaryNavigation();
+setupAppShell({ home: true });
 
 /*
  * SPV Property Calculator - browser application
@@ -906,7 +908,8 @@ function init() {
     showHome();
   });
   $('newPropertyBtn').addEventListener('click', () => showEditor());
-  $('archiveBtn').addEventListener('click', () => {
+  $('archiveBtn').addEventListener('click', (event) => {
+    event.preventDefault();
     if ($('moreMenuDialog').open) $('moreMenuDialog').close();
     showArchive();
   });
@@ -914,19 +917,6 @@ function init() {
   $('propertiesNavLink').addEventListener('click', (event) => {
     event.preventDefault();
     showHome();
-  });
-  $('moreNavBtn').addEventListener('click', () => {
-    $('moreMenuDialog').showModal();
-  });
-  $('closeMoreMenuDialog').addEventListener('click', () => $('moreMenuDialog').close());
-  $('moreMenuDialog').addEventListener('click', (event) => {
-    const dialog = event.currentTarget;
-    const bounds = dialog.getBoundingClientRect();
-    const clickedInside = event.clientX >= bounds.left
-      && event.clientX <= bounds.right
-      && event.clientY >= bounds.top
-      && event.clientY <= bounds.bottom;
-    if (!clickedInside) dialog.close();
   });
   $('addExpenseBtn').addEventListener('click', () => {
     addExpenseRow();

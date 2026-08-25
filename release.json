@@ -1,7 +1,7 @@
 {
-  "version": "1.21.12",
+  "version": "1.21.13",
   "notes": [
-    "Every page now uses one shared primary navigation component.",
-    "Menu order, active-page state, icons and the Forecast badge are now maintained in one place."
+    "Every page now uses the same header controls and App Menu.",
+    "Connection, account and install controls now stay consistent across the app."
   ]
 }

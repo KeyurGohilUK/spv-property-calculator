@@ -7,9 +7,9 @@ This list records the August 2026 HTML5, accessibility and duplication audit. Wo
 - [x] Consolidate account and workspace-sync behaviour.
   - [x] Extract one shared property-and-expense workspace sync engine.
   - [x] Replace the separate home and secondary-page account controllers with one shared account component.
-- [ ] Create one shared app shell for the header, connection state, account/install controls, primary navigation and App Menu.
+- [x] Create one shared app shell for the header, connection state, account/install controls, primary navigation and App Menu.
   - [x] Render primary navigation from one shared component.
-  - [ ] Move header, account/install controls and App Menu into the shared shell.
+  - [x] Move header, account/install controls and App Menu into the shared shell.
 - [ ] Remove nested interactive controls from clickable property and expense cards.
 - [ ] Add a shared accessible-dialog helper for labels, close controls, backdrop clicks, initial focus and focus restoration.
 

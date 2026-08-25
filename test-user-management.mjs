@@ -8,8 +8,7 @@ const adminMenu = fs.readFileSync(new URL('./admin-menu.js', import.meta.url), '
 const page = fs.readFileSync(new URL('./manage-users.html', import.meta.url), 'utf8');
 const pageScript = fs.readFileSync(new URL('./manage-users.js', import.meta.url), 'utf8');
 const pageStyles = fs.readFileSync(new URL('./manage-users.css', import.meta.url), 'utf8');
-const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
-const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
+const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8');
 
 for (const sql of [migration, bootstrap]) {
@@ -23,8 +22,7 @@ for (const sql of [migration, bootstrap]) {
 }
 assert.match(cloud, /getWorkspaceAccess[\s\S]*listWorkspaceUsers[\s\S]*setWorkspaceUserAccess/, 'Cloud API must expose user-management operations');
 assert.match(adminMenu, /access\.role === 'admin'/, 'Manage Users menu must be admin-only');
-assert.match(index, /data-admin-users-link[^>]*aria-hidden="true"/, 'Home admin menu item must be hidden by default');
-assert.match(secondaryHeader, /data-admin-users-link[^>]*aria-hidden="true"/, 'Secondary admin menu item must be hidden by default');
+assert.match(appShell, /data-admin-users-link[^>]*aria-hidden="true"/, 'Shared admin menu item must be hidden by default');
 assert.match(page, /id="userAccessDenied"[\s\S]*id="userManagementContent"/, 'Manage Users page must include a guarded access state');
 assert.match(pageScript, /access\.role !== 'admin'/, 'Manage Users page must reject non-admin users');
 assert.match(pageScript, /import \{ renderSyncStatus \} from '.\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');

@@ -6,7 +6,7 @@ const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
-const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
+const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8');
 
 assert.match(theme, /DEFAULT_THEME = 'light'/, 'First launch must default to Light theme');
@@ -21,8 +21,7 @@ assert.match(styles, /\.editor-save-icon\.is-saved \{[^}]*var\(--brand\)/, 'Save
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /<script src="\.\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the theme before loading styles`);
 }
-assert.match(index, /data-theme-toggle/, 'Home More menu must include the theme switch');
-assert.match(secondaryHeader, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Secondary More menus must include and bind the theme switch');
+assert.match(appShell, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Shared App Menu must include and bind the theme switch');
 assert.match(serviceWorker, /'\.\/theme\.js'/, 'Theme support must work offline');
 
 console.log('Theme preference checks passed.');
