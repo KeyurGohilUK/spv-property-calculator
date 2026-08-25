@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const backing = new Map();
 globalThis.localStorage = { getItem:k=>backing.has(k)?backing.get(k):null, setItem:(k,v)=>backing.set(k,String(v)), removeItem:k=>backing.delete(k), clear:()=>backing.clear() };
-const { getProperties,getActiveProperties,getArchivedProperties,getProperty,saveProperty,archiveProperty,restoreProperty,permanentlyDeleteProperty,duplicateProperty } = await import('../storage.js');
+const { getProperties,getActiveProperties,getArchivedProperties,getProperty,saveProperty,archiveProperty,restoreProperty,permanentlyDeleteProperty,duplicateProperty } = await import('../src/features/properties/storage.js');
 const saved=saveProperty({title:'Test Property',purchasePrice:200000,depositPercent:25});
 assert.ok(saved.id); assert.equal(getActiveProperties().length,1); assert.equal(getArchivedProperties().length,0);
 const updated=saveProperty({...saved,title:'Updated Property'}); assert.equal(getProperty(saved.id).title,'Updated Property');

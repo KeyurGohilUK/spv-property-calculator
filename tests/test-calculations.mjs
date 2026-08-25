@@ -4,7 +4,7 @@ import {
   calculateProperty,
   calculateSDLT,
   safeNumber
-} from '../calculations.js';
+} from '../src/features/properties/calculations.js';
 
 const scenarios = [
   { price: 100000, deposit: 25, expectedDeposit: 25000, expectedMortgage: 75000, expectedSDLT: 5000 },
@@ -102,8 +102,8 @@ assert.equal(clamped.refurbishment, 0, 'Refurbishment must not become negative')
 // The browser must execute the exact modules tested above. This prevents a second,
 // untested copy of the tax rules from drifting inside app.js.
 const productionApp = fs.readFileSync(new URL('../src/app/app.js', import.meta.url), 'utf8');
-assert.match(productionApp, /from '\.\.\/\.\.\/calculations\.js'/, 'Production app must import calculations.js');
-assert.match(productionApp, /from '\.\.\/\.\.\/storage\.js'/, 'Production app must import storage.js');
+assert.match(productionApp, /from '\.\.\/features\/properties\/calculations\.js'/, 'Production app must import the property calculations feature');
+assert.match(productionApp, /from '\.\.\/features\/properties\/storage\.js'/, 'Production app must import the property storage feature');
 assert.doesNotMatch(productionApp, /function calculateSDLT\s*\(/, 'Production app contains a duplicated SDLT implementation');
 assert.doesNotMatch(productionApp, /const TAX_CONFIG\s*=\s*Object\.freeze/, 'Production app contains duplicated tax configuration');
 

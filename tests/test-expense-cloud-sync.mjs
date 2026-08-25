@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
-const expenses = fs.readFileSync(new URL('../expenses.js', import.meta.url), 'utf8');
+const expenses = fs.readFileSync(new URL('../src/features/expenses/expenses.js', import.meta.url), 'utf8');
 const page = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('../src/app/app.js', import.meta.url), 'utf8');
 const secondaryHeader = fs.readFileSync(new URL('../src/components/secondary-page-header.js', import.meta.url), 'utf8');
-const sharedSync = fs.readFileSync(new URL('../expense-cloud-sync.js', import.meta.url), 'utf8');
-const workspaceSync = fs.readFileSync(new URL('../workspace-sync.js', import.meta.url), 'utf8');
+const sharedSync = fs.readFileSync(new URL('../src/features/expenses/expense-cloud-sync.js', import.meta.url), 'utf8');
+const workspaceSync = fs.readFileSync(new URL('../src/services/workspace-sync.js', import.meta.url), 'utf8');
 
 assert.match(cloud, /async function listExpenses\(\)/, 'Cloud expense listing is missing');
 assert.match(cloud, /async function upsertExpense\(record\)/, 'Cloud expense upsert is missing');

@@ -1,7 +1,7 @@
-import { TAX_CONFIG } from '../../tax-config.js';
+import { TAX_CONFIG } from '../config/tax-config.js';
 import { renderSyncStatus } from '../components/sync-status.js';
 import { setupInstallComponent } from '../components/install-component.js';
-import { setupAccountController } from '../../account-controller.js';
+import { setupAccountController } from '../services/account-controller.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';
 import { setupAppShell } from './app-shell.js';
 import {
@@ -9,7 +9,7 @@ import {
   clamp,
   calculateProperty,
   formatPercent
-} from '../../calculations.js';
+} from '../features/properties/calculations.js';
 import {
   getProperties,
   getActiveProperties,
@@ -21,10 +21,10 @@ import {
   permanentlyDeleteProperty as permanentlyDeleteLocalProperty,
   duplicateProperty,
   replaceProperties as replaceLocalProperties
-} from '../../storage.js';
-import { syncWorkspace, formatWorkspaceSyncError } from '../../workspace-sync.js';
-import { buildViewingCalendarInvite, isFutureViewing } from '../utils/calendar-invite.js';
-import { createPropertyCard } from '../../property-card.js';
+} from '../features/properties/storage.js';
+import { syncWorkspace, formatWorkspaceSyncError } from '../services/workspace-sync.js';
+import { buildViewingCalendarInvite, isFutureViewing } from '../features/properties/calendar-invite.js';
+import { createPropertyCard } from '../features/properties/property-card.js';
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from '../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../utils/validation.js';
 
