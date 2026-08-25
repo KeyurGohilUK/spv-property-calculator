@@ -111,7 +111,7 @@ test('archives and restores a property without losing its calculation', async ({
   page.once('dialog', (dialog) => dialog.accept());
   const propertyCard = page.locator('.property-card').filter({ hasText: 'Archive Journey' });
   await propertyCard.locator('summary[aria-label="More actions for Archive Journey"]').click();
-  await propertyCard.getByRole('button', { name: 'Archive' }).click();
+  await propertyCard.getByRole('button', { name: 'Archive', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Archive Journey' })).toBeHidden();
 
   await page.locator('#moreNavBtn').click();
