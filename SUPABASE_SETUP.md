@@ -14,7 +14,7 @@ This app keeps a local offline copy in `localStorage` and syncs a shared propert
 
 1. In the Supabase dashboard open **SQL Editor**.
 2. Choose **New query**.
-3. Open the supplied file `database-scripts/00 - Bootstrap Complete Schema.sql` from this project.
+3. Open the supplied file `database/bootstrap/00 - Bootstrap Complete Schema.sql` from this project.
 4. Copy the whole SQL file into the SQL Editor.
 5. Click **Run**.
 
@@ -90,7 +90,7 @@ Upload all files in this folder to the root of your GitHub repository, including
 - `app.js`
 - `cloud.js`
 - `supabase-config.js`
-- `database-scripts/00 - Bootstrap Complete Schema.sql`
+- `database/bootstrap/00 - Bootstrap Complete Schema.sql`
 - `styles.css`
 - `service-worker.js`
 - `manifest.json`
@@ -138,7 +138,7 @@ Re-copy the **Publishable** key and Project URL from Supabase. Do not use a Secr
 Your Supabase project probably has **Confirm Email** enabled. Confirm the email and return to the app, or temporarily disable Confirm Email for the initial personal setup.
 
 ### Database returns permission/RLS errors
-Run `database-scripts/00 - Bootstrap Complete Schema.sql` again and check that RLS is enabled. For an existing installation, confirm every numbered migration has been applied in order.
+Run `database/bootstrap/00 - Bootstrap Complete Schema.sql` again and check that RLS is enabled. For an existing installation, confirm every numbered migration has been applied in order.
 
 ### Cloud library unavailable while offline
 The calculator remains usable locally. Once online, reload the app if necessary; the Supabase SDK is then cached for later PWA use.

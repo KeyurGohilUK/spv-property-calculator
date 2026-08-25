@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const bootstrap = fs.readFileSync(new URL('../database-scripts/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
-const expenseMigration = fs.readFileSync(new URL('../database-scripts/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
-const receiptMigration = fs.readFileSync(new URL('../database-scripts/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
-const revisionRepair = fs.readFileSync(new URL('../database-scripts/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
+const bootstrap = fs.readFileSync(new URL('../database/bootstrap/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
+const expenseMigration = fs.readFileSync(new URL('../database/migrations/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
+const receiptMigration = fs.readFileSync(new URL('../database/migrations/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
+const revisionRepair = fs.readFileSync(new URL('../database/migrations/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../cloudflare/receipt-worker/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../cloudflare/receipt-worker/wrangler.jsonc', import.meta.url), 'utf8');
-const migrationGuide = fs.readFileSync(new URL('../database-scripts/README.md', import.meta.url), 'utf8');
+const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
+const projectRoot = new URL('../', import.meta.url);
+const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 
 for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
@@ -29,5 +31,8 @@ assert.match(receiptWorker, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Worker must
 assert.doesNotMatch(receiptWorker, /service_role|R2_ACCESS_KEY|R2_SECRET/, 'Worker source must not contain privileged credentials');
 assert.match(workerConfig, /"binding": "RECEIPTS"[\s\S]*"bucket_name": "spv-property-receipts"/, 'Worker must use the configured private R2 binding');
 assert.match(migrationGuide, /Never edit an already-deployed numbered migration/, 'Migration immutability rule missing');
+assert.match(migrationGuide, /bootstrap\/.*new or replacement Supabase project[\s\S]*migrations\/.*existing database/, 'Database workflow directories must be documented');
+assert.equal(fs.existsSync(new URL('database-scripts/', projectRoot)), false, 'Legacy database-scripts directory must not be recreated');
+assert.ok(fs.readdirSync(migrationDirectory).every((name) => name.endsWith('.sql')), 'Migration directory must contain only SQL migration files');
 
 console.log('Database bootstrap and migration checks passed.');

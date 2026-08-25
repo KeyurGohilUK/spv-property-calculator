@@ -25,10 +25,10 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 
 ## Before deploying
 
-For a new or replacement Supabase project follow **`SUPABASE_SETUP.md`** and run **`database-scripts/00 - Bootstrap Complete Schema.sql`**. Existing installations should apply newer numbered scripts from **`database-scripts/`** in order. See **`database-scripts/README.md`** for the migration policy.
+For a new or replacement Supabase project follow **`SUPABASE_SETUP.md`** and run **`database/bootstrap/00 - Bootstrap Complete Schema.sql`**. Existing installations should apply newer numbered scripts from **`database/migrations/`** in order. See **`database/README.md`** for the migration policy.
 
 1. Create a Supabase project and its first Auth account.
-2. Run `database-scripts/00 - Bootstrap Complete Schema.sql` in the SQL Editor.
+2. Run `database/bootstrap/00 - Bootstrap Complete Schema.sql` in the SQL Editor.
 3. Sign in as the initial administrator, then use **More → Manage Users** to approve accounts and assign roles.
 4. Copy the Project URL and Publishable key into `supabase-config.js`.
 5. Upload this folder to GitHub Pages and verify sign-in and sync.

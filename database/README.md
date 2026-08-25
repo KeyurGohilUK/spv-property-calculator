@@ -1,10 +1,17 @@
-# Database scripts
+# Database
 
 These files are the reproducible source of truth for the app's Supabase/PostgreSQL structure.
 
+## Directory layout
+
+- `bootstrap/` contains the complete schema for a new or replacement Supabase project.
+- `migrations/` contains immutable, ordered changes for an existing database.
+
+Keeping these workflows separate prevents a fresh-install bootstrap from being mistaken for an incremental production migration.
+
 ## Fresh database or replacement Supabase project
 
-Run **`00 - Bootstrap Complete Schema.sql` once** in the SQL editor. It creates the current base structure, indexes, Row Level Security policies and conflict-safe write functions.
+Run **`bootstrap/00 - Bootstrap Complete Schema.sql` once** in the SQL editor. It creates the current base structure, indexes, Row Level Security policies and conflict-safe write functions.
 
 After the bootstrap completes:
 
@@ -37,6 +44,6 @@ Receipt binaries live in a private Cloudflare R2 bucket. The database stores onl
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.
-- Also fold that change into `00 - Bootstrap Complete Schema.sql`.
+- Also fold that change into `bootstrap/00 - Bootstrap Complete Schema.sql`.
 - Keep destructive data changes separate and clearly labelled.
 - Include verification queries at the end of each migration.
