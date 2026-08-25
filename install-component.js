@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.16';
+export const APP_VERSION = '1.21.17';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -20,6 +20,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './app-shell.js',
   './dialog-helper.js',
   './forecast.html', './forecast.css', './forecast.js',
+  './forecast-property.js',
   './forecast-advanced.js', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-maskable-192.png', './icons/icon-maskable-512.png',

@@ -1,7 +1,8 @@
+import { getForecastProperties, getPurchaseNumbers } from './forecast-property.js';
+
 (() => {
 'use strict';
 
-const STORAGE_KEY = 'spv-property-calculator.properties.v1';
 const FORECAST_KEY = 'spv-property-calculator.forecasts.v1';
 const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 });
@@ -42,23 +43,11 @@ function money(value) { return currency.format(Number.isFinite(Number(value)) ? 
 function pct(value) { return `${percent.format(Number.isFinite(Number(value)) ? Number(value) : 0)}%`; }
 function num(id, fallback = 0) { const value = Number($(id)?.value); return Number.isFinite(value) ? value : fallback; }
 function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value) || 0)); }
-function readProperties() { try { const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(data) ? data.filter((item) => !item.deletedAt) : []; } catch { return []; } }
 function readForecasts() { try { const data = JSON.parse(localStorage.getItem(FORECAST_KEY) || '{}'); return data && typeof data === 'object' ? data : {}; } catch { return {}; } }
 function writeForecasts(data) { try { localStorage.setItem(FORECAST_KEY, JSON.stringify(data)); } catch {} }
 
-function purchaseNumbers(item) {
-  const price = Math.max(0, Number(item?.purchasePrice) || 0);
-  const depositPercent = clamp(item?.depositPercent ?? 25, 0, 100);
-  const deposit = price * depositPercent / 100;
-  const mortgage = Math.max(0, price - deposit);
-  const calc = item?.calculated || {};
-  const cash = Number(calc.totalCashRequired) || deposit + Number(calc.totalInvestmentCostsExcludingDeposit || 0);
-  const refurbishment = Number(item?.refurbishmentCost) || Number(calc.refurbishment) || 0;
-  return { price, deposit, mortgage, cash: Math.max(cash, deposit), refurbishment };
-}
-
 function defaultsFor(item) {
-  const purchase = purchaseNumbers(item);
+  const purchase = getPurchaseNumbers(item);
   const existing = readForecasts()[item.id] || {};
   const suggestedRent = purchase.price ? Math.round((purchase.price * 0.065 / 12) / 25) * 25 : DEFAULTS.monthlyRent;
   return {
@@ -138,7 +127,7 @@ function assumptions(overrides = {}) {
 }
 
 function buildForecast(input = assumptions(), forecastYears = years) {
-  const purchase = purchaseNumbers(property);
+  const purchase = getPurchaseNumbers(property);
   const startValue = input.postRefurbValue > 0 ? input.postRefurbValue : purchase.price;
   let value = startValue;
   let balance = purchase.mortgage;
@@ -295,7 +284,7 @@ function updatePeriodButtons() {
 }
 
 function selectProperty(id) {
-  const items = readProperties();
+  const items = getForecastProperties();
   property = items.find((item) => item.id === id) || items[0] || null;
   if (!property) return;
   $('forecastProperty').value = property.id;
@@ -304,7 +293,7 @@ function selectProperty(id) {
 }
 
 function populateProperties() {
-  const items = readProperties();
+  const items = getForecastProperties();
   const select = $('forecastProperty');
   select.innerHTML = items.map((item) => `<option value="${String(item.id).replaceAll('"','&quot;')}">${String(item.title || 'Untitled Property').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</option>`).join('');
   $('forecastEmpty').classList.toggle('hidden', items.length > 0);

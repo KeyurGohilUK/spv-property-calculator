@@ -1,7 +1,7 @@
 {
-  "version": "1.21.16",
+  "version": "1.21.17",
   "notes": [
-    "Active and archived property cards now share one reliable financial summary.",
-    "This maintenance update keeps card values consistent without changing the design."
+    "Forecast now reads properties through the same storage used by the calculator.",
+    "Purchase, deposit, mortgage and cash figures now use the same calculation engine everywhere."
   ]
 }

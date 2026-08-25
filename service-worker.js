@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.16-shared-property-cards';
+const CACHE_NAME = 'spv-property-calculator-v1.21.17-shared-forecast-property';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -42,6 +42,7 @@ const ASSETS = [
   './forecast.html',
   './forecast.css',
   './forecast.js',
+  './forecast-property.js',
   './forecast-advanced.js',
   './forecast-advanced.css',
   './icons/icon-192.png',
