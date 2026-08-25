@@ -29,7 +29,7 @@ async function mockCloud(page, role = 'admin') {
 
 test('administrator can review and update workspace access', async ({ page }) => {
   await mockCloud(page);
-  await page.goto('./manage-users.html');
+  await page.goto('./admin/users/');
 
   await expect(page.getByRole('heading', { name: 'Manage Users' })).toBeVisible();
   await expect(page.locator('.user-card')).toHaveCount(2);
@@ -60,7 +60,7 @@ test('administrator can review and update workspace access', async ({ page }) =>
 
 test('non-admin is denied and does not see Manage Users in the menu', async ({ page }) => {
   await mockCloud(page, 'viewer');
-  await page.goto('./manage-users.html');
+  await page.goto('./admin/users/');
 
   await expect(page.getByRole('heading', { name: 'Administrator access required' })).toBeVisible();
   await page.locator('[data-more-menu]').click();

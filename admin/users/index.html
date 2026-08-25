@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="../../">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="Manage SPV Property Calculator workspace access.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./theme.js"></script>
+  <script type="module" src="./help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./manage-users.css">
+  <title>Manage Users · SPV Property Calculator</title>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="manage-users"></nav>
+
+    <main class="main-shell user-management-shell">
+      <section class="hero-card user-management-hero">
+        <div>
+          <p class="eyebrow">Administrator</p>
+          <h1>Manage Users</h1>
+          <p class="muted">Approve workspace access and assign the appropriate role.</p>
+        </div>
+        <span id="userManagementSyncStatus" class="sync-status" role="status">Checking access…</span>
+      </section>
+
+      <section id="userAccessLoading" class="user-access-state" aria-live="polite">
+        <div class="empty-icon" aria-hidden="true">•••</div>
+        <h3>Checking administrator access</h3>
+        <p>Please wait while your workspace permissions are verified.</p>
+      </section>
+
+      <section id="userAccessDenied" class="user-access-state hidden" aria-live="polite">
+        <div class="empty-icon" aria-hidden="true">!</div>
+        <h3>Administrator access required</h3>
+        <p id="userAccessDeniedMessage">Only an active administrator can manage workspace users.</p>
+        <a class="primary-btn" href="./">Return to properties</a>
+      </section>
+
+      <section id="userManagementContent" class="hidden">
+        <details id="userRoleGuide" class="user-role-guide">
+          <summary>
+            <span><strong>User roles &amp; feature access</strong><small>What each workspace role can do</small></span>
+          </summary>
+          <div class="user-role-guide-content">
+            <section>
+              <h3>Viewer</h3>
+              <p>Can view shared properties, archived properties, notes, expenses and receipts.</p>
+            </section>
+            <section>
+              <h3>Editor</h3>
+              <p>Includes Viewer access, plus creating, editing, archiving and restoring properties and expenses; adding notes; deleting their own notes; and managing receipts.</p>
+            </section>
+            <section>
+              <h3>Admin</h3>
+              <p>Includes Editor access, plus permanently deleting archived properties and managing user access and roles.</p>
+            </section>
+            <p class="user-role-note"><strong>Note:</strong> Inactive accounts cannot access the shared workspace, regardless of their assigned role.</p>
+          </div>
+        </details>
+        <p id="userManagementMessage" class="save-message" role="status"></p>
+        <div id="userList" class="user-list"></div>
+        <div id="userListEmpty" class="user-access-state hidden">
+          <div class="empty-icon" aria-hidden="true">👤</div>
+          <h3>No registered accounts</h3>
+          <p>New accounts will appear here after they sign up.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./secondary-page-header.js"></script>
+  <script type="module" src="./admin-menu.js"></script>
+  <script type="module" src="./manage-users.js"></script>
+</body>
+</html>

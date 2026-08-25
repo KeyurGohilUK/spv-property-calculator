@@ -96,7 +96,7 @@ test('installs the app shell and controls the page', async ({ page }) => {
   expect(cacheState.urls).toEqual(expect.arrayContaining([
     '/',
     '/index.html',
-    '/expenses.html',
+    '/expenses/',
     '/app.js',
     '/styles.css'
   ]));
@@ -104,7 +104,7 @@ test('installs the app shell and controls the page', async ({ page }) => {
 
 test('opens the cached expense tracker while offline', async ({ page, context }) => {
   await waitForServiceWorkerControl(page);
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.getByRole('heading', { name: 'Expense Tracker' })).toBeVisible();
 
   await context.setOffline(true);
@@ -140,7 +140,7 @@ test('reports when the installed release is current', async ({ page }) => {
 
 test('highlights the shared Install control on secondary pages', async ({ page }) => {
   await mockRelease(page, '9.9.9', ['Shared update indicator']);
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
 
   await expect(page.locator('#installBtn')).toHaveClass(/update-available/);
   await expect(page.locator('#installBtn')).toHaveAttribute('aria-label', 'Update 9.9.9 available');

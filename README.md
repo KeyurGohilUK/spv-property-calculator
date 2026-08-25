@@ -63,6 +63,17 @@ All application paths are relative, so repository subdirectory URLs such as this
 https://username.github.io/spv-property-calculator/
 ```
 
+### Application routes
+
+User-facing navigation uses directory-based paths so GitHub Pages can serve clean URLs without a server-side rewrite:
+
+- Properties: `./`
+- Expenses: `./expenses/`
+- Forecast: `./forecast/`
+- Manage Users: `./admin/users/`
+
+The former `.html` URLs remain as compatibility redirects for existing bookmarks. Keep the trailing slash on clean routes so shared assets resolve consistently on both custom domains and repository-subdirectory deployments.
+
 ## Local testing
 
 The application uses browser modules so production and tests execute the same calculation code. Serve the folder through HTTP for local testing:

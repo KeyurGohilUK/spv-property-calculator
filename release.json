@@ -1,7 +1,7 @@
 {
-  "version": "1.21.24",
+  "version": "1.21.25",
   "notes": [
-    "Form controls now use fully standards-compliant HTML without validator exemptions.",
-    "Property details can now be saved naturally from the keyboard using Enter."
+    "Expenses, Forecast and Manage Users now use clean, readable URL paths.",
+    "Existing saved links using the previous .html addresses continue to work."
   ]
 }

@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   const originalUrl = page.url();
 
   await page.getByRole('button', { name: 'More' }).click();
@@ -29,7 +29,7 @@ test('More opens a modal without navigating and closes from the backdrop', async
 });
 
 test('adds, edits by clicking the listing, and deletes an expense', async ({ page }) => {
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await addExpense(page);
 
   await expect(page.locator('#expenseCount')).toHaveText('1');
@@ -51,7 +51,7 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
 });
 
 test('shows selected receipt size and keeps receipt metadata locally', async ({ page, browserName }) => {
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   const receipt = {
     name: 'test-receipt.png',
     mimeType: 'image/png',
@@ -89,7 +89,7 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
 test('@mobile iPad filter date fields remain inside the filter panel without overlapping', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Responsive WebKit regression');
   await page.setViewportSize({ width: 1024, height: 1366 });
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await page.getByRole('button', { name: 'Filter & Export' }).click();
 
   const panel = await page.locator('#expenseFilters').boundingBox();
@@ -108,7 +108,7 @@ test('@mobile iPad filter date fields remain inside the filter panel without ove
 
 test('iPhone expense date input stays within the modal', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile WebKit regression');
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await page.getByRole('button', { name: /Add Expense/i }).click();
 
   const dialog = await page.locator('#expenseDialog').boundingBox();

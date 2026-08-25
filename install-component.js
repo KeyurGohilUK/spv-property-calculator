@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.24';
+export const APP_VERSION = '1.21.25';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -17,8 +17,8 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './property-card.js',
   './calendar-invite.js', './cloud.js', './calculations.js', './tax-config.js',
   './storage.js', './manifest.json', './supabase-config.js', './release.json',
-  './expenses.html', './secondary-page-header.js', './admin-menu.js',
-  './manage-users.html', './manage-users.css', './manage-users.js',
+  './expenses/', './expenses.html', './secondary-page-header.js', './admin-menu.js',
+  './admin/users/', './manage-users.html', './manage-users.css', './manage-users.js',
   './expenses.css', './expenses.js', './expense-storage.js',
   './expense-cloud-sync.js', './sync-status.js', './receipt-cloud.js',
   './workspace-sync.js',
@@ -26,7 +26,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './primary-navigation.js',
   './app-shell.js',
   './dialog-helper.js',
-  './forecast.html', './forecast.css', './forecast.js',
+  './forecast/', './forecast.html', './forecast.css', './forecast.js',
   './forecast-property.js',
   './forecast-advanced.js', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',

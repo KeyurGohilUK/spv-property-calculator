@@ -102,7 +102,7 @@ test('properties survive a full browser reload from offline storage', async ({ p
 
 test('expense validation requires an amount and a selected property', async ({ page }) => {
   await createProperty(page, { title: 'Allocated Property', price: '200000' });
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseScope').selectOption('property');
@@ -119,7 +119,7 @@ test('expense validation requires an amount and a selected property', async ({ p
 
 test('expense allocation, filtering and CSV export work together', async ({ page }) => {
   await createProperty(page, { title: 'Filter Property', price: '240000' });
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseAmount').fill('99.99');
@@ -145,7 +145,7 @@ test('expense allocation, filtering and CSV export work together', async ({ page
 });
 
 test('large receipt photos are compressed below 2 MB before being saved', async ({ page }) => {
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseAmount').fill('45');
   await page.locator('#expenseDescription').fill('Large phone receipt');
@@ -219,7 +219,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
 });
 
 test('receipt PDFs larger than 2 MB are rejected before local save', async ({ page }) => {
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseAmount').fill('25');
   await page.locator('#expenseReceipt').setInputFiles({
