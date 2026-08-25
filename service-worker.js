@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.35-features-services';
+const CACHE_NAME = 'spv-property-calculator-v1.21.36-feature-styles';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -56,9 +56,11 @@ const ASSETS = [
   './admin-menu.js',
   './admin/users/',
   './manage-users.html',
+  './styles/features/users.css',
   './manage-users.css',
   './src/features/users/manage-users.js',
   './manage-users.js',
+  './styles/features/expenses.css',
   './expenses.css',
   './src/features/expenses/expenses.js',
   './expenses.js',
@@ -86,6 +88,7 @@ const ASSETS = [
   './receipt-cloud.js',
   './forecast/',
   './forecast.html',
+  './styles/features/forecast.css',
   './forecast.css',
   './src/features/forecast/forecast.js',
   './forecast.js',
@@ -93,6 +96,7 @@ const ASSETS = [
   './forecast-property.js',
   './src/features/forecast/forecast-advanced.js',
   './forecast-advanced.js',
+  './styles/features/forecast-advanced.css',
   './forecast-advanced.css',
   './icons/icon-192.png',
   './icons/icon-512.png',

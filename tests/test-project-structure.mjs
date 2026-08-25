@@ -17,6 +17,7 @@ const requiredDirectories = [
   'src/config/',
   'src/utils/',
   'src/components/',
+  'workers/receipt/',
   'tests/e2e/'
 ];
 
@@ -28,6 +29,7 @@ const rootMarkdown = fs.readdirSync(projectRoot).filter((name) => name.endsWith(
 assert.deepEqual(rootMarkdown, ['README.md'], 'Only the main README should remain at the repository root');
 assert.equal(fs.existsSync(new URL('database-scripts/', projectRoot)), false, 'Legacy database-scripts directory must not return');
 assert.equal(fs.existsSync(new URL('playwright-tests/', projectRoot)), false, 'Legacy playwright-tests directory must not return');
+assert.equal(fs.existsSync(new URL('cloudflare/receipt-worker/', projectRoot)), false, 'Legacy receipt-worker directory must not return');
 
 for (const utility of ['format-utils.js', 'validation.js']) {
   assert.equal(fs.existsSync(new URL(`src/utils/${utility}`, projectRoot)), true, `${utility} must remain under src/utils`);

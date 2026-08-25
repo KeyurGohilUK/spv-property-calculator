@@ -22,4 +22,21 @@ assert.match(fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 
 assert.match(fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8'), /\.primary-app-nav/);
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 
+const featureStyles = {
+  'expenses.css': 'expenses.css',
+  'forecast.css': 'forecast.css',
+  'forecast-advanced.css': 'forecast-advanced.css',
+  'users.css': 'manage-users.css'
+};
+
+for (const [canonicalName, compatibilityName] of Object.entries(featureStyles)) {
+  const canonicalPath = `styles/features/${canonicalName}`;
+  assert.ok(fs.readFileSync(new URL(`../${canonicalPath}`, import.meta.url), 'utf8').trim(), `${canonicalPath} must not be empty`);
+  assert.match(
+    fs.readFileSync(new URL(`../${compatibilityName}`, import.meta.url), 'utf8'),
+    new RegExp(`@import url\\('\\.\\/${canonicalPath.replaceAll('.', '\\.')}\\'\\);`),
+    `${compatibilityName} must retain its previous URL as a compatibility stylesheet`
+  );
+}
+
 console.log('Split stylesheet architecture checks passed.');
