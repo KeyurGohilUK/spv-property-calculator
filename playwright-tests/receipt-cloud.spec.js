@@ -49,7 +49,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
   const uploadedExpense = await storedExpense(page);
   expect(uploadedExpense.receiptObjectPath).toBe('receipts/expense-playwright/current-receipt.pdf');
 
-  await page.locator('.expense-card-main').click();
+  await page.getByRole('button', { name: 'Edit expense Receipt lifecycle' }).click();
   await page.locator('#expenseReceipt').setInputFiles(smallPdf('replacement-receipt.pdf'));
   await page.getByRole('button', { name: 'Save Changes' }).click();
 
