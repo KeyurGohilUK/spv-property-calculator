@@ -1,7 +1,7 @@
 {
-  "version": "1.21.36",
+  "version": "1.21.37",
   "notes": [
-    "Expense, forecast and user-management styles are now organised with feature styles, and the receipt Worker has a dedicated workers folder.",
-    "Previous stylesheet addresses remain available so installed versions continue updating safely."
+    "App updates now use a versioned asset manifest, making folder migrations safer and easier to verify.",
+    "This bridge release keeps previous file addresses for one final update before obsolete root compatibility files are removed."
   ]
 }

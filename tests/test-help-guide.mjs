@@ -6,7 +6,7 @@ const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8')
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
-const serviceWorker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
+const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
 assert.match(guide, /spv-help-guide-seen/, 'Guide must remember that a first-time user has seen it');
 assert.match(guide, /if \(!hasSeenGuide\(\)\).*openGuide/, 'Guide must open automatically for a new user');
@@ -19,6 +19,6 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /help-guide\.js/, `${name} must load the shared Help Guide`);
 }
 assert.match(appShell, /data-help-guide[\s\S]*<strong>Help Guide<\/strong>[\s\S]*SPVHelpGuide\?\.bindTriggers\(dialog\)/, 'Shared App Menu must provide Help Guide access');
-assert.match(serviceWorker, /'\.\/src\/components\/help-guide\.js'[\s\S]*'\.\/help-guide\.js'/, 'Current and compatibility Help Guide scripts must be available offline');
+assert.ok(appAssets.includes('./src/components/help-guide.js') && appAssets.includes('./help-guide.js'), 'Current and compatibility Help Guide scripts must be available offline');
 
 console.log('First-visit Help Guide checks passed.');

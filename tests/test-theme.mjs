@@ -8,7 +8,7 @@ const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8')
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
-const serviceWorker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
+const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
 assert.match(theme, /DEFAULT_THEME = 'light'/, 'First launch must default to Light theme');
 assert.match(theme, /localStorage\.getItem\(STORAGE_KEY\)/, 'Saved theme must be restored');
@@ -23,6 +23,6 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /<script src="\.\/src\/components\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the canonical theme component before loading styles`);
 }
 assert.match(appShell, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Shared App Menu must include and bind the theme switch');
-assert.match(serviceWorker, /'\.\/src\/components\/theme\.js'[\s\S]*'\.\/theme\.js'/, 'Current and compatibility Theme scripts must work offline');
+assert.ok(appAssets.includes('./src/components/theme.js') && appAssets.includes('./theme.js'), 'Current and compatibility Theme scripts must work offline');
 
 console.log('Theme preference checks passed.');

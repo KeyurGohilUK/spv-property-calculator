@@ -1,44 +1,9 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.36';
+export const APP_VERSION = '1.21.37';
 
-const APP_CACHE_PREFIX = 'spv-property-calculator-';
-const APP_UPDATE_ASSETS = Object.freeze([
-  './', './index.html', './styles.css',
-  './styles/tokens.css', './styles/base.css', './styles/app-shell-core.css',
-  './styles/forms.css', './styles/dialogs.css', './styles/dialogs-updates.css',
-  './styles/app-shell-home.css', './styles/app-shell-navigation.css',
-  './styles/features/properties.css', './styles/features/summary.css',
-  './styles/features/archive.css', './styles/features/editor.css', './styles/features/statuses.css',
-  './src/components/theme.js', './theme.js', './src/components/help-guide.js', './help-guide.js',
-  './src/app/app.js', './app.js', './src/components/install-component.js', './install-component.js',
-  './src/components/update-notifier.js', './update-notifier.js',
-  './src/utils/format-utils.js', './src/utils/validation.js',
-  './format-utils.js', './validation.js',
-  './src/features/properties/property-card.js', './property-card.js',
-  './src/features/properties/calendar-invite.js', './src/utils/calendar-invite.js', './calendar-invite.js',
-  './cloud.js', './src/features/properties/calculations.js', './calculations.js',
-  './src/config/tax-config.js', './tax-config.js', './src/features/properties/storage.js', './storage.js',
-  './manifest.json', './supabase-config.js', './release.json',
-  './expenses/', './expenses.html', './src/components/secondary-page-header.js', './secondary-page-header.js', './src/components/admin-menu.js', './admin-menu.js',
-  './admin/users/', './manage-users.html', './styles/features/users.css', './manage-users.css', './src/features/users/manage-users.js', './manage-users.js',
-  './styles/features/expenses.css', './expenses.css', './src/features/expenses/expenses.js', './expenses.js',
-  './src/features/expenses/expense-storage.js', './expense-storage.js',
-  './src/features/expenses/expense-cloud-sync.js', './expense-cloud-sync.js',
-  './src/components/sync-status.js', './sync-status.js', './src/services/receipt-cloud.js', './receipt-cloud.js',
-  './src/services/workspace-sync.js', './workspace-sync.js',
-  './src/services/account-controller.js', './account-controller.js',
-  './src/app/primary-navigation.js', './src/components/primary-navigation.js', './primary-navigation.js',
-  './src/app/app-shell.js', './src/components/app-shell.js', './app-shell.js',
-  './src/components/dialog-helper.js', './dialog-helper.js',
-  './forecast/', './forecast.html', './styles/features/forecast.css', './forecast.css', './src/features/forecast/forecast.js', './forecast.js',
-  './src/features/forecast/forecast-property.js', './forecast-property.js',
-  './src/features/forecast/forecast-advanced.js', './forecast-advanced.js', './styles/features/forecast-advanced.css', './forecast-advanced.css',
-  './icons/icon-192.png', './icons/icon-512.png',
-  './icons/icon-maskable-192.png', './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png', './icons/favicon-32.png'
-]);
+const APP_ASSET_MANIFEST = './app-assets.json';
 
 let deferredInstallPrompt = null;
 let promptListenerAttached = false;
@@ -105,6 +70,20 @@ async function loadRelease() {
   }
 }
 
+async function loadAppAssets() {
+  const response = await fetch(new URL(APP_ASSET_MANIFEST, document.baseURI), {
+    cache: 'reload',
+    credentials: 'same-origin'
+  });
+  if (!response.ok) throw new Error(`App asset manifest returned ${response.status}.`);
+  const manifest = await response.json();
+  if (!Array.isArray(manifest.assets) || !manifest.assets.length
+      || manifest.assets.some((path) => typeof path !== 'string' || !path.startsWith('./'))) {
+    throw new Error('App asset manifest is invalid.');
+  }
+  return [APP_ASSET_MANIFEST, ...manifest.assets];
+}
+
 function setBusy(busy, label = '') {
   const button = document.getElementById('downloadUpdatesBtn');
   button.disabled = busy;
@@ -121,11 +100,8 @@ async function downloadUpdates(beforeUpdate) {
   setBusy(true, 'Downloading…');
   message.textContent = 'Refreshing cached app files…';
   try {
-    if ('caches' in window) {
-      const names = await caches.keys();
-      await Promise.all(names.filter((name) => name.startsWith(APP_CACHE_PREFIX)).map((name) => caches.delete(name)));
-    }
-    await Promise.all(APP_UPDATE_ASSETS.map(async (path) => {
+    const assets = await loadAppAssets();
+    await Promise.all(assets.map(async (path) => {
       const response = await fetch(new URL(path, document.baseURI), { cache: 'reload', credentials: 'same-origin' });
       if (!response.ok) throw new Error(`Could not refresh ${path} (${response.status}).`);
     }));

@@ -14,8 +14,18 @@ export function compareVersions(left, right) {
   return 0;
 }
 
-export function extractCachedAssetPaths(workerSource) {
-  const assetsBlock = String(workerSource || '').match(/const ASSETS = \[([\s\S]*?)\]\.map/)?.[1] || '';
+export function extractCachedAssetPaths(assetSource) {
+  try {
+    const manifest = JSON.parse(String(assetSource || ''));
+    if (Array.isArray(manifest.assets)) {
+      return new Set(manifest.assets
+        .map((path) => String(path).replace(/^\.\//, ''))
+        .filter(Boolean));
+    }
+  } catch {
+    // Older releases stored the asset list directly in the service worker.
+  }
+  const assetsBlock = String(assetSource || '').match(/const ASSETS = \[([\s\S]*?)\]\.map/)?.[1] || '';
   return new Set(
     [...assetsBlock.matchAll(/['"]\.\/([^'"]+)['"]/g)]
       .map((match) => match[1])
@@ -23,10 +33,11 @@ export function extractCachedAssetPaths(workerSource) {
   );
 }
 
-export function cachedAppChanges(changedPaths, baseWorkerSource, currentWorkerSource) {
+export function cachedAppChanges(changedPaths, baseAssetSource, currentAssetSource) {
   const cachedPaths = new Set([
-    ...extractCachedAssetPaths(baseWorkerSource),
-    ...extractCachedAssetPaths(currentWorkerSource),
+    ...extractCachedAssetPaths(baseAssetSource),
+    ...extractCachedAssetPaths(currentAssetSource),
+    'app-assets.json',
     'service-worker.js'
   ]);
   return changedPaths.filter((path) => cachedPaths.has(path) && path !== 'release.json');
