@@ -360,16 +360,11 @@ function render() {
   visible.forEach((expense) => {
     const card = document.createElement('article');
     card.className = 'expense-card';
-    card.tabIndex = 0;
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `Edit expense ${expense.description || money(expense.amount)}`);
-    card.addEventListener('click', () => openForm(expense));
-    card.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        openForm(expense);
-      }
-    });
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'expense-card-open';
+    open.setAttribute('aria-label', `Edit expense ${expense.description || money(expense.amount)}`);
+    open.addEventListener('click', () => openForm(expense));
     const main = document.createElement('div');
     main.className = 'expense-card-main';
     const heading = document.createElement('div');
@@ -410,8 +405,6 @@ function render() {
 
     const actions = document.createElement('div');
     actions.className = 'expense-card-actions';
-    actions.addEventListener('click', (event) => event.stopPropagation());
-    actions.addEventListener('keydown', (event) => event.stopPropagation());
     if (expense.receipt) {
       const view = document.createElement('button');
       view.type = 'button';
@@ -430,7 +423,7 @@ function render() {
     remove.title = 'Delete expense';
     remove.addEventListener('click', () => removeExpense(expense));
     actions.appendChild(remove);
-    card.append(main, actions);
+    card.append(open, main, actions);
     list.appendChild(card);
   });
 }
