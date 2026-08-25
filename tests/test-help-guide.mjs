@@ -19,6 +19,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /help-guide\.js/, `${name} must load the shared Help Guide`);
 }
 assert.match(appShell, /data-help-guide[\s\S]*<strong>Help Guide<\/strong>[\s\S]*SPVHelpGuide\?\.bindTriggers\(dialog\)/, 'Shared App Menu must provide Help Guide access');
-assert.ok(appAssets.includes('./src/components/help-guide.js') && appAssets.includes('./help-guide.js'), 'Current and compatibility Help Guide scripts must be available offline');
+assert.ok(appAssets.includes('./src/components/help-guide.js'), 'Canonical Help Guide script must be available offline');
+assert.ok(!appAssets.includes('./help-guide.js'), 'Removed Help Guide compatibility path must not return to the cache manifest');
 
 console.log('First-visit Help Guide checks passed.');
