@@ -1,8 +1,3 @@
 {
-  "extends": ["html-validate:recommended"],
-  "rules": {
-    "element-permitted-content": "off",
-    "multiple-labeled-controls": "off",
-    "wcag/h32": "off"
-  }
+  "extends": ["html-validate:recommended"]
 }

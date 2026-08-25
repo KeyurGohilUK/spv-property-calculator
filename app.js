@@ -917,6 +917,10 @@ function init() {
     updateSaveButtonState();
   });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
+  $('propertyForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    saveCurrentProperty();
+  });
   $('addViewingToCalendarBtn').addEventListener('click', () => {
     downloadViewingCalendarInvite(getFormModel());
   });

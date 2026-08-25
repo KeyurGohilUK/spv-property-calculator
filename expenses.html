@@ -85,7 +85,7 @@
 
       <label class="field currency-field">
         <span>Amount <strong aria-hidden="true">*</strong></span>
-        <div class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required aria-describedby="expenseAmountError"></div>
+        <span class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required aria-describedby="expenseAmountError"></span>
         <small id="expenseAmountError" class="error-text hidden">Enter an amount greater than £0.</small>
       </label>
 
@@ -109,7 +109,7 @@
 
       <label class="field receipt-field"><span>Receipt <em>optional</em></span>
         <input id="expenseReceipt" type="file" accept="image/*,application/pdf" aria-describedby="expenseReceiptSize expenseReceiptHelp expenseReceiptError">
-        <div id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected</div>
+        <span id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected</span>
         <small id="expenseReceiptHelp">Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in.</small>
         <small id="expenseReceiptError" class="error-text hidden"></small>
       </label>

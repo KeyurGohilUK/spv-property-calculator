@@ -66,20 +66,20 @@
           </div>
 
           <div class="forecast-field-grid">
-            <label class="field currency-field"><span>Monthly Rent</span><div class="input-prefix"><span>£</span><input id="monthlyRent" type="number" min="0" step="10" inputmode="decimal"></div></label>
+            <label class="field currency-field"><span>Monthly Rent</span><span class="input-prefix"><span>£</span><input id="monthlyRent" type="number" min="0" step="10" inputmode="decimal"></span></label>
             <label class="field"><span>Mortgage Type</span><select id="mortgageType"><option value="interest-only">Interest only</option><option value="repayment">Repayment</option></select></label>
-            <label class="field"><span>Mortgage Interest Rate</span><div class="forecast-suffix-input"><input id="interestRate" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
-            <label class="field"><span>Mortgage Term</span><div class="forecast-suffix-input"><input id="mortgageTerm" type="number" min="1" max="40" step="1" inputmode="numeric"><span>years</span></div></label>
-            <label class="field"><span>Annual Rent Growth</span><div class="forecast-suffix-input"><input id="rentGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
-            <label class="field"><span>Property Value Growth</span><div class="forecast-suffix-input"><input id="propertyGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></div></label>
-            <label class="field"><span>Maintenance</span><div class="forecast-suffix-input"><input id="maintenancePercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></div></label>
-            <label class="field"><span>Management Fee</span><div class="forecast-suffix-input"><input id="managementPercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></div></label>
-            <label class="field"><span>Void Allowance</span><div class="forecast-suffix-input"><input id="voidWeeks" type="number" min="0" max="20" step="0.5" inputmode="decimal"><span>weeks</span></div></label>
-            <label class="field currency-field"><span>Insurance / Year</span><div class="input-prefix"><span>£</span><input id="annualInsurance" type="number" min="0" step="50" inputmode="decimal"></div></label>
-            <label class="field currency-field"><span>Service Charge / Year</span><div class="input-prefix"><span>£</span><input id="annualServiceCharge" type="number" min="0" step="50" inputmode="decimal"></div></label>
-            <label class="field currency-field"><span>Other Costs / Year</span><div class="input-prefix"><span>£</span><input id="annualOtherCosts" type="number" min="0" step="50" inputmode="decimal"></div></label>
-            <label class="field currency-field"><span>SPV Admin / Accountancy</span><div class="input-prefix"><span>£</span><input id="annualSpvAdmin" type="number" min="0" step="50" inputmode="decimal"></div></label>
-            <label class="field currency-field"><span>Post-refurb Value <em>optional</em></span><div class="input-prefix"><span>£</span><input id="postRefurbValue" type="number" min="0" step="1000" inputmode="decimal"></div></label>
+            <label class="field"><span>Mortgage Interest Rate</span><span class="forecast-suffix-input"><input id="interestRate" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>Mortgage Term</span><span class="forecast-suffix-input"><input id="mortgageTerm" type="number" min="1" max="40" step="1" inputmode="numeric"><span>years</span></span></label>
+            <label class="field"><span>Annual Rent Growth</span><span class="forecast-suffix-input"><input id="rentGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>Property Value Growth</span><span class="forecast-suffix-input"><input id="propertyGrowth" type="number" min="-10" max="20" step="0.1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>Maintenance</span><span class="forecast-suffix-input"><input id="maintenancePercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></span></label>
+            <label class="field"><span>Management Fee</span><span class="forecast-suffix-input"><input id="managementPercent" type="number" min="0" max="30" step="0.1" inputmode="decimal"><span>% rent</span></span></label>
+            <label class="field"><span>Void Allowance</span><span class="forecast-suffix-input"><input id="voidWeeks" type="number" min="0" max="20" step="0.5" inputmode="decimal"><span>weeks</span></span></label>
+            <label class="field currency-field"><span>Insurance / Year</span><span class="input-prefix"><span>£</span><input id="annualInsurance" type="number" min="0" step="50" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Service Charge / Year</span><span class="input-prefix"><span>£</span><input id="annualServiceCharge" type="number" min="0" step="50" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Other Costs / Year</span><span class="input-prefix"><span>£</span><input id="annualOtherCosts" type="number" min="0" step="50" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>SPV Admin / Accountancy</span><span class="input-prefix"><span>£</span><input id="annualSpvAdmin" type="number" min="0" step="50" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Post-refurb Value <em>optional</em></span><span class="input-prefix"><span>£</span><input id="postRefurbValue" type="number" min="0" step="1000" inputmode="decimal"></span></label>
           </div>
           <p class="muted tiny forecast-save-note">Forecast assumptions are saved locally on this device for each property.</p>
         </section>
@@ -119,15 +119,15 @@
             <p class="eyebrow">Refinance</p><h3>Potential cash release</h3>
             <div class="forecast-mini-fields">
               <label class="field"><span>Refinance Year</span><input id="refinanceYear" type="number" min="1" max="25" step="1"></label>
-              <label class="field"><span>New LTV</span><div class="forecast-suffix-input"><input id="refinanceLtv" type="number" min="0" max="95" step="1"><span>%</span></div></label>
+              <label class="field"><span>New LTV</span><span class="forecast-suffix-input"><input id="refinanceLtv" type="number" min="0" max="95" step="1"><span>%</span></span></label>
             </div>
             <div id="refinanceResult" class="forecast-result-box"></div>
           </div>
           <div>
             <p class="eyebrow">Exit</p><h3>Sale at forecast end</h3>
             <div class="forecast-mini-fields">
-              <label class="field"><span>Agent / selling fee</span><div class="forecast-suffix-input"><input id="sellingFeePercent" type="number" min="0" max="10" step="0.1"><span>%</span></div></label>
-              <label class="field currency-field"><span>Legal / exit cost</span><div class="input-prefix"><span>£</span><input id="exitLegalCost" type="number" min="0" step="100"></div></label>
+              <label class="field"><span>Agent / selling fee</span><span class="forecast-suffix-input"><input id="sellingFeePercent" type="number" min="0" max="10" step="0.1"><span>%</span></span></label>
+              <label class="field currency-field"><span>Legal / exit cost</span><span class="input-prefix"><span>£</span><input id="exitLegalCost" type="number" min="0" step="100"></span></label>
             </div>
             <div id="exitResult" class="forecast-result-box"></div>
           </div>

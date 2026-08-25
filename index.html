@@ -121,10 +121,10 @@
 
               <label class="field listing-link-field">
                 <span>Property Listing Link <em>optional</em></span>
-                <div class="listing-link-input">
+                <span class="listing-link-input">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg>
                   <input id="listingUrl" name="listingUrl" type="url" inputmode="url" autocomplete="url" maxlength="1000" placeholder="https://www.rightmove.co.uk/..." aria-describedby="listingUrlHelp listingUrlError">
-                </div>
+                </span>
                 <small id="listingUrlHelp">Rightmove, Zoopla, estate-agent or other web listing.</small>
                 <small id="listingUrlError" class="error-text hidden">Enter a valid http:// or https:// property listing link.</small>
               </label>
@@ -145,19 +145,19 @@
               <div class="field-grid">
                 <label class="field currency-field">
                   <span>Purchase Price</span>
-                  <div class="input-prefix"><span>£</span><input id="purchasePrice" name="purchasePrice" type="text" inputmode="decimal" autocomplete="off" placeholder="250,000" aria-describedby="priceError"></div>
+                  <span class="input-prefix"><span>£</span><input id="purchasePrice" name="purchasePrice" type="text" inputmode="decimal" autocomplete="off" placeholder="250,000" aria-describedby="priceError"></span>
                   <small id="priceError" class="error-text hidden">Enter a purchase price greater than £0.</small>
                 </label>
 
-                <label class="field deposit-range-field">
+                <div class="field deposit-range-field">
                   <span class="deposit-range-heading">
-                    <span>Deposit Percentage</span>
+                    <label for="depositPercent">Deposit Percentage</label>
                     <output id="depositPercentValue" class="deposit-range-value" for="depositPercent">25%</output>
                   </span>
                   <input id="depositPercent" name="depositPercent" class="deposit-range" type="range" min="0" max="100" step="5" value="25" aria-label="Deposit percentage in 5 percent steps" aria-describedby="depositPercentError">
                   <span class="deposit-range-scale" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></span>
                   <small id="depositPercentError" class="error-text hidden">Deposit must be between 0% and 100%.</small>
-                </label>
+                </div>
               </div>
 
               <div class="mini-summary">
@@ -177,18 +177,18 @@
               </summary>
 
               <label class="switch-row">
-                <div>
+                <span>
                   <span class="switch-title">Qualifying corporate relief</span>
                   <small>Assume the SPV qualifies for relief from the 17% corporate whole-price rate where relevant, such as an eligible property rental business.</small>
-                </div>
+                </span>
                 <input id="qualifyingCorporateRelief" type="checkbox" role="switch" checked>
               </label>
 
               <label class="switch-row">
-                <div>
+                <span>
                   <span class="switch-title">Non-UK resident SDLT surcharge</span>
                   <small>Add the 2 percentage point surcharge for a transaction that is non-resident for SDLT purposes.</small>
-                </div>
+                </span>
                 <input id="nonResident" type="checkbox" role="switch">
               </label>
 
@@ -202,34 +202,34 @@
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Professional</span><span class="section-title">Legal &amp; survey costs</span></span><strong id="legalInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
-                <label class="field currency-field"><span>Solicitor / Conveyancing Fee</span><div class="input-prefix"><span>£</span><input id="solicitorFee" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>Survey / Property Inspection</span><div class="input-prefix"><span>£</span><input id="surveyCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Solicitor / Conveyancing Fee</span><span class="input-prefix"><span>£</span><input id="solicitorFee" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>Survey / Property Inspection</span><span class="input-prefix"><span>£</span><input id="surveyCost" type="text" inputmode="decimal" placeholder="0"></span></label>
               </div>
             </details>
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Finance</span><span class="section-title">Mortgage costs</span></span><strong id="mortgageCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
-                <label class="field currency-field"><span>Arrangement / Product Fee</span><div class="input-prefix"><span>£</span><input id="mortgageArrangementFee" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>Mortgage Broker Fee</span><div class="input-prefix"><span>£</span><input id="mortgageBrokerFee" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>Mortgage Valuation Fee</span><div class="input-prefix"><span>£</span><input id="mortgageValuationFee" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Arrangement / Product Fee</span><span class="input-prefix"><span>£</span><input id="mortgageArrangementFee" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>Mortgage Broker Fee</span><span class="input-prefix"><span>£</span><input id="mortgageBrokerFee" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>Mortgage Valuation Fee</span><span class="input-prefix"><span>£</span><input id="mortgageValuationFee" type="text" inputmode="decimal" placeholder="0"></span></label>
               </div>
             </details>
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">SPV</span><span class="section-title">Company costs</span></span><strong id="companyCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
-                <label class="field currency-field"><span>Company Formation Cost</span><div class="input-prefix"><span>£</span><input id="companyFormationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>SPV Mortgage Administration Costs</span><div class="input-prefix"><span>£</span><input id="spvAdministrationCost" type="text" inputmode="decimal" placeholder="0"></div></label>
+                <label class="field currency-field"><span>Company Formation Cost</span><span class="input-prefix"><span>£</span><input id="companyFormationCost" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>SPV Mortgage Administration Costs</span><span class="input-prefix"><span>£</span><input id="spvAdministrationCost" type="text" inputmode="decimal" placeholder="0"></span></label>
               </div>
             </details>
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Other</span><span class="section-title">Purchase costs</span></span><strong id="purchaseCostsInline" class="section-total">£0</strong></summary>
               <div class="field-grid">
-                <label class="field currency-field"><span>Land Registry / Searches</span><div class="input-prefix"><span>£</span><input id="landRegistrySearches" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>Insurance / Initial Insurance</span><div class="input-prefix"><span>£</span><input id="insuranceCost" type="text" inputmode="decimal" placeholder="0"></div></label>
-                <label class="field currency-field"><span>Auction / Reservation Fee</span><div class="input-prefix"><span>£</span><input id="auctionReservationFee" type="text" inputmode="decimal" value="0"></div></label>
+                <label class="field currency-field"><span>Land Registry / Searches</span><span class="input-prefix"><span>£</span><input id="landRegistrySearches" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>Insurance / Initial Insurance</span><span class="input-prefix"><span>£</span><input id="insuranceCost" type="text" inputmode="decimal" placeholder="0"></span></label>
+                <label class="field currency-field"><span>Auction / Reservation Fee</span><span class="input-prefix"><span>£</span><input id="auctionReservationFee" type="text" inputmode="decimal" value="0"></span></label>
               </div>
 
               <div class="custom-expenses-header">
@@ -243,7 +243,7 @@
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Works</span><span class="section-title">Refurbishment</span></span><strong id="refurbishmentInline" class="section-total">£0</strong></summary>
               <label class="field currency-field">
                 <span>Estimated Refurbishment Cost</span>
-                <div class="input-prefix"><span>£</span><input id="refurbishmentCost" type="text" inputmode="decimal" value="0"></div>
+                <span class="input-prefix"><span>£</span><input id="refurbishmentCost" type="text" inputmode="decimal" value="0"></span>
                 <small>Excluded from SDLT purchase price, but included in total cash required.</small>
               </label>
             </details>
@@ -286,6 +286,7 @@
               <summary>Important disclaimer</summary>
               <p>This calculator provides estimates for property investment planning only. Tax, legal and mortgage costs may vary. Always confirm applicable taxes and fees with a qualified professional before completing a property purchase.</p>
             </details>
+            <button type="submit" hidden>Save property</button>
           </form>
 
           <aside class="summary-column" aria-label="Calculation summary">
@@ -359,13 +360,13 @@
       <p class="eyebrow">Cloud sync</p>
       <h3>Signed in</h3>
       <p id="signedInEmail" class="muted"></p>
-      <label class="field account-name-field">
-        <span>Display name <em>(shown on notes)</em></span>
+      <div class="field account-name-field">
+        <label for="accountDisplayName">Display name <em>(shown on notes)</em></label>
         <div class="account-name-row">
           <input id="accountDisplayName" type="text" autocomplete="name" maxlength="80" placeholder="Your name">
           <button id="saveDisplayNameBtn" class="secondary-btn compact-btn" type="button">Save name</button>
         </div>
-      </label>
+      </div>
       <div class="auth-account-card">
         <strong id="accountSyncTitle">Supabase connected</strong>
         <small id="accountSyncText">All signed-in users share the same Supabase property list.</small>

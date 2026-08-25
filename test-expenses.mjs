@@ -18,7 +18,7 @@ assert.match(expensePage, /Optimising receipt…[\s\S]*Receipt reduced from/, 'R
 assert.match(expensePage, /file\.type === 'application\/pdf' && file\.size <= TARGET_RECEIPT_SIZE|file\.type === 'application\/pdf'/, 'PDF receipts must bypass image optimisation');
 assert.match(expenseHtml, /Photos are automatically reduced below 2 MB/, 'Receipt guidance must explain automatic image reduction');
 assert.match(expenseHtml, /accept="image\/\*,application\/pdf"/, 'Receipt picker must allow supported iPhone photos');
-assert.match(expenseHtml, /id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected<\/div>/, 'Visible receipt size status is missing');
+assert.match(expenseHtml, /id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected<\/span>/, 'Visible receipt size status is missing');
 assert.match(expensePage, /function updateReceiptSelectionDetails\(\)[\s\S]*Selected: \$\{file\.name\} · \$\{formatFileSize\(file\.size\)\}[\s\S]*will be optimised when saved[\s\S]*addEventListener\('input', updateReceiptSelectionDetails\)[\s\S]*addEventListener\('change', updateReceiptSelectionDetails\)/, 'Selected receipt details must update reliably on iOS');
 assert.match(expensePage, /Current receipt: \$\{expense\.receipt\.name[\s\S]*formatFileSize\(expense\.receipt\.size\)/, 'Existing receipt details must display while editing');
 assert.match(expensePage, /async function viewReceipt\(expense\)[\s\S]*window\.open\('', '_blank'\)[\s\S]*await getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*viewer\.location\.replace\(url\)/, 'Receipt viewer must open synchronously before version-aware IndexedDB access for iOS Safari');
