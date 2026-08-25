@@ -102,6 +102,11 @@ The bundled SDLT configuration is for England & Northern Ireland from 1 April 20
 
 ## Tests
 
+Automated checks are grouped by purpose:
+
+- `tests/test-*.mjs` contains Node-based unit, integration and structural regression checks.
+- `tests/e2e/` contains Playwright browser journeys and shared browser-test support.
+
 If Node.js is installed:
 
 ```bash

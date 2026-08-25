@@ -6,10 +6,10 @@ globalThis.localStorage = {
   setItem: (key, value) => memory.set(key, String(value))
 };
 
-const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('./expense-storage.js');
+const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('../expense-storage.js');
 
-const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
-const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses/index.html', import.meta.url), 'utf8'));
+const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses.js', import.meta.url), 'utf8'));
+const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8'));
 assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit must remain 2 MB');
 assert.match(expensePage, /TARGET_RECEIPT_SIZE = Math\.floor\(1\.5 \* 1024 \* 1024\)/, 'Receipt images should target approximately 1.5 MB');
 assert.match(expensePage, /MAX_RECEIPT_IMAGE_DIMENSION = 2000/, 'Large receipt images must be resized');
@@ -51,7 +51,7 @@ assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV e
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
 assert.equal((expenseHtml.match(/id="exportExpensesBtn"/g) || []).length, 1, 'Export action must not be duplicated in the report card');
 assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
-const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.css', import.meta.url), 'utf8'));
+const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses.css', import.meta.url), 'utf8'));
 assert.match(expenseStyles, /\.receipt-file-size \{[^}]*min-height: 38px;[^}]*overflow-wrap: anywhere;/, 'Receipt details must remain visible and wrap safely');
 assert.match(expenseStyles, /\.expense-report-inline \{[\s\S]*grid-column: 1 \/ -1[\s\S]*box-shadow: none/, 'Nested Expense Summary must span the filter panel without a second shadow');
 assert.doesNotMatch(expenseStyles, /\.expense-sync-status/, 'Expense page must not define a separate sync-status component');

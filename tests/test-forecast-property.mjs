@@ -6,7 +6,7 @@ const records = [
 ];
 globalThis.localStorage = { getItem: (key) => key.includes('properties') ? JSON.stringify(records) : null };
 
-const { getForecastProperties, getForecastProperty, getPurchaseNumbers } = await import('./forecast-property.js');
+const { getForecastProperties, getForecastProperty, getPurchaseNumbers } = await import('../forecast-property.js');
 const properties = getForecastProperties();
 assert.deepEqual(properties.map((item) => item.id), ['active'], 'Forecast must use active properties from shared storage');
 assert.equal(getForecastProperty('active')?.title, 'Active');

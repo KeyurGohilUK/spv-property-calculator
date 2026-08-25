@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { blockExternalServices, createProperty } from './support/app-helpers.js';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
-const CURRENT_VERSION = JSON.parse(fs.readFileSync(new URL('../release.json', import.meta.url), 'utf8')).version;
+const CURRENT_VERSION = JSON.parse(fs.readFileSync(new URL('../../release.json', import.meta.url), 'utf8')).version;
 
 async function waitForServiceWorkerControl(page) {
   await page.goto('/');

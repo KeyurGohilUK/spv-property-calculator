@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { escapeHtml, formatCurrency, formatDate, formatNumber, formatPercentage, parseNumber } from './format-utils.js';
+import { escapeHtml, formatCurrency, formatDate, formatNumber, formatPercentage, parseNumber } from '../format-utils.js';
 
 assert.equal(parseNumber('£250,000.50'), 250000.5);
 assert.equal(parseNumber('invalid', 7), 7);
