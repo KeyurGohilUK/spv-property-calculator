@@ -1,7 +1,7 @@
 {
   "version": "1.21.23",
   "notes": [
-    "Every page is now automatically checked for HTML quality during development.",
-    "Browser tests now detect common WCAG accessibility regressions before release."
+    "Navigation labels now have clearer contrast against the beige app background.",
+    "HTML and browser checks now detect common accessibility regressions before release."
   ]
 }
