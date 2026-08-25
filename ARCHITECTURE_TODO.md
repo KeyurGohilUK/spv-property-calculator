@@ -10,7 +10,7 @@ This list records the August 2026 HTML5, accessibility and duplication audit. Wo
 - [x] Create one shared app shell for the header, connection state, account/install controls, primary navigation and App Menu.
   - [x] Render primary navigation from one shared component.
   - [x] Move header, account/install controls and App Menu into the shared shell.
-- [ ] Remove nested interactive controls from clickable property and expense cards.
+- [x] Remove nested interactive controls from clickable property and expense cards.
 - [ ] Add a shared accessible-dialog helper for labels, close controls, backdrop clicks, initial focus and focus restoration.
 
 ## Maintainability

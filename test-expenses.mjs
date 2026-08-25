@@ -27,8 +27,9 @@ assert.match(expensePage, /view\.className = 'view-receipt'[\s\S]*view\.innerHTM
 assert.doesNotMatch(expensePage, /view\.textContent = 'View'/, 'Expense card must not display View text');
 assert.doesNotMatch(expensePage, /remove\.textContent = 'Delete'/, 'Expense card must not show Delete text');
 assert.match(expensePage, /function openForm\(expense = null\)/, 'Expense editor must support existing records');
-assert.match(expensePage, /card\.addEventListener\('click', \(\) => openForm\(expense\)\)/, 'Clicking an expense card must open editing');
-assert.match(expensePage, /card\.setAttribute\('role', 'button'\)/, 'Clickable expense cards must be keyboard accessible');
+assert.match(expensePage, /open\.className = 'expense-card-open'[\s\S]*open\.addEventListener\('click', \(\) => openForm\(expense\)\)/, 'Expense cards must use a dedicated edit control');
+assert.doesNotMatch(expensePage, /card\.setAttribute\('role', 'button'\)|card\.tabIndex/, 'Expense articles must not masquerade as buttons');
+assert.doesNotMatch(expensePage, /stopPropagation\(\)/, 'Expense actions must not rely on event propagation workarounds');
 assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
 assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
 assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');

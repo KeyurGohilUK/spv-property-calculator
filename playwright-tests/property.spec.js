@@ -36,7 +36,11 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
 test('saves a property and edits it by clicking its card', async ({ page }) => {
   await createProperty(page);
 
-  await page.locator('.property-card').filter({ hasText: 'Playwright Test Property' }).click();
+  const savedCard = page.locator('.property-card').filter({ hasText: 'Playwright Test Property' });
+  await expect(savedCard).not.toHaveAttribute('role', 'button');
+  const openCard = savedCard.getByRole('button', { name: 'Open Playwright Test Property for editing' });
+  await openCard.focus();
+  await openCard.press('Enter');
   await expect(page.locator('#editorView')).not.toHaveClass(/hidden/);
   await expect(page.locator('#title')).toHaveValue('Playwright Test Property');
 
