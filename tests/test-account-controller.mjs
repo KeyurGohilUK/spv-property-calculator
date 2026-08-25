@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { validateAccountCredentials } from '../account-controller.js';
 
 const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
-const secondary = fs.readFileSync(new URL('../secondary-page-header.js', import.meta.url), 'utf8');
+const secondary = fs.readFileSync(new URL('../src/components/secondary-page-header.js', import.meta.url), 'utf8');
 const controller = fs.readFileSync(new URL('../account-controller.js', import.meta.url), 'utf8');
 
 assert.equal(validateAccountCredentials('', ''), 'Enter your email and password.');

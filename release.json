@@ -1,7 +1,7 @@
 {
-  "version": "1.21.29",
+  "version": "1.21.30",
   "notes": [
-    "Shared dialog and sync-status components are now organised under the application source folder.",
-    "Previous component addresses remain available so installed versions can update safely."
+    "Shared navigation, app menu and secondary-page header components are now organised together.",
+    "Previous component addresses remain available so installed versions continue updating safely."
   ]
 }

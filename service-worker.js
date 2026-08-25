@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.29-component-foundations';
+const CACHE_NAME = 'spv-property-calculator-v1.21.30-navigation-components';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -41,6 +41,7 @@ const ASSETS = [
   './release.json',
   './expenses/',
   './expenses.html',
+  './src/components/secondary-page-header.js',
   './secondary-page-header.js',
   './admin-menu.js',
   './admin/users/',
@@ -55,7 +56,9 @@ const ASSETS = [
   './sync-status.js',
   './workspace-sync.js',
   './account-controller.js',
+  './src/components/primary-navigation.js',
   './primary-navigation.js',
+  './src/components/app-shell.js',
   './app-shell.js',
   './src/components/dialog-helper.js',
   './dialog-helper.js',

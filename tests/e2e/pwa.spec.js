@@ -131,10 +131,13 @@ test('keeps previous component URLs available during the cache migration', async
 
   const legacyModules = await page.evaluate(async () => Promise.all([
     import('/dialog-helper.js').then((module) => typeof module.setupDialog),
-    import('/sync-status.js').then((module) => typeof module.renderSyncStatus)
+    import('/sync-status.js').then((module) => typeof module.renderSyncStatus),
+    import('/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
+    import('/app-shell.js').then((module) => typeof module.setupAppShell),
+    fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing')
   ]));
 
-  expect(legacyModules).toEqual(['function', 'function']);
+  expect(legacyModules).toEqual(['function', 'function', 'function', 'function', 'available']);
 });
 
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {
