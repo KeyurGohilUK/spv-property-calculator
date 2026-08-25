@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const guide = fs.readFileSync(new URL('../help-guide.js', import.meta.url), 'utf8');
+const guide = fs.readFileSync(new URL('../src/components/help-guide.js', import.meta.url), 'utf8');
 const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
@@ -19,6 +19,6 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /help-guide\.js/, `${name} must load the shared Help Guide`);
 }
 assert.match(appShell, /data-help-guide[\s\S]*<strong>Help Guide<\/strong>[\s\S]*SPVHelpGuide\?\.bindTriggers\(dialog\)/, 'Shared App Menu must provide Help Guide access');
-assert.match(serviceWorker, /'\.\/help-guide\.js'/, 'Help Guide must be available offline');
+assert.match(serviceWorker, /'\.\/src\/components\/help-guide\.js'[\s\S]*'\.\/help-guide\.js'/, 'Current and compatibility Help Guide scripts must be available offline');
 
 console.log('First-visit Help Guide checks passed.');

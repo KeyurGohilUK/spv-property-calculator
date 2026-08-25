@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const migration = fs.readFileSync(new URL('../database/migrations/Update 13 - Admin User Management.sql', import.meta.url), 'utf8');
 const bootstrap = fs.readFileSync(new URL('../database/bootstrap/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
 const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
-const adminMenu = fs.readFileSync(new URL('../admin-menu.js', import.meta.url), 'utf8');
+const adminMenu = fs.readFileSync(new URL('../src/components/admin-menu.js', import.meta.url), 'utf8');
 const page = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
 const pageScript = fs.readFileSync(new URL('../manage-users.js', import.meta.url), 'utf8');
 const pageStyles = fs.readFileSync(new URL('../manage-users.css', import.meta.url), 'utf8');

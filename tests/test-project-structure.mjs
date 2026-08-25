@@ -41,4 +41,14 @@ assert.match(
   'secondary-page-header.js must retain its previous URL as a compatibility entry point'
 );
 
+for (const component of ['help-guide.js', 'admin-menu.js']) {
+  assert.equal(fs.existsSync(new URL(`src/components/${component}`, projectRoot)), true, `${component} must remain under src/components`);
+  const compatibilitySource = fs.readFileSync(new URL(component, projectRoot), 'utf8');
+  assert.match(
+    compatibilitySource,
+    new RegExp(`import '\\.\\/src\\/components\\/${component.replace('.', '\\.')}';`),
+    `${component} must retain its previous URL as a compatibility entry point`
+  );
+}
+
 console.log('Project folder structure checks passed.');
