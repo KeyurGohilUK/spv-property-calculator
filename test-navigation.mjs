@@ -13,6 +13,7 @@ const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
 const installComponent = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
+const primaryNavigation = fs.readFileSync(new URL('./primary-navigation.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
 assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecasting/, 'Forecast must not duplicate the main navigation with an upper back bar');
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
@@ -26,14 +27,11 @@ assert.match(styles, /\.sync-status \{[^}]*color: var\(--muted\)[^}]*text-align:
 assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.property-hero-actions \{[^}]*grid-template-columns: 1fr;[^}]*width: 100%; \}/, 'Property hero actions must stack on mobile');
 
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
-  assert.match(page, /class="primary-app-nav"/, `${name} page is missing primary navigation`);
-  assert.match(page, />Properties</, `${name} navigation is missing Properties`);
-  assert.match(page, />Expenses</, `${name} navigation is missing Expenses`);
-  assert.doesNotMatch(page, /<span>Expenses<\/span><small>Beta<\/small>/, `${name} navigation must not label Expenses as Beta`);
-  assert.match(page, />Forecast</, `${name} navigation is missing Forecast`);
-  assert.match(page, /<span>Forecast<\/span><small>Beta<\/small>/, `${name} navigation must label Forecast as Beta`);
-  assert.match(page, />More</, `${name} navigation is missing More`);
+  assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
+assert.match(primaryNavigation, /Properties[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label only Forecast as Beta');
+assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
 
 for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /secondary-page-header\.js/, `${name} must load shared header controls`);
@@ -52,8 +50,7 @@ assert.match(installComponent, /id="installDialog"[\s\S]*id="nativeInstallBtn"[\
 assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');
 assert.match(installComponent, /async function downloadUpdates[\s\S]*APP_UPDATE_ASSETS/, 'Shared Install popup must provide update handling');
 assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page-header\.js/, 'Forecast must load local account dependencies');
-assert.match(forecast, /<button class="primary-nav-item" type="button" data-more-menu/, 'Forecast More must be a local dialog button');
-assert.match(expenses, /<button class="primary-nav-item" type="button" data-more-menu/, 'Expenses More must be a local dialog button');
+assert.match(primaryNavigation, /class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog"/, 'Shared More must be a local dialog button');
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
 assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not navigate away');
 assert.match(secondaryHeader, /secondaryMoreMenuDialog[\s\S]*showModal\(\)/, 'Secondary More must open a local popup');
@@ -70,14 +67,11 @@ assert.match(index, /<h3>App Menu<\/h3>/, 'App Menu title must remain in the pop
 assert.match(index, /id="closeMoreMenuDialog" class="icon-btn more-menu-close"/, 'More popup close button class missing');
 assert.match(styles, /\.more-menu-header[\s\S]*display: flex[\s\S]*justify-content: space-between/, 'App Menu title and close button must share an aligned header row');
 assert.match(app, /moreMenuDialog.*getBoundingClientRect[\s\S]*clickedInside[\s\S]*dialog\.close/s, 'Backdrop click must close the App Menu');
-assert.match(index, /href="\.\/expenses\.html"/, 'Home navigation must link to Expenses');
-assert.match(forecast, /href="\.\/expenses\.html"/, 'Forecast navigation must link to Expenses');
-assert.match(expenses, /class="primary-nav-item active" href="\.\/expenses\.html" aria-current="page"/, 'Expenses navigation must be active on its page');
+assert.match(primaryNavigation, /href: '\.\/expenses\.html'/, 'Shared navigation must link to Expenses');
+assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
 assert.doesNotMatch(expenses, /aria-disabled="true"[^>]*Expenses/, 'Expenses navigation must remain enabled');
-for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
-  assert.equal((page.match(/<small>Beta<\/small>/g) || []).length, 1, `${name} must show Beta only for Forecast`);
-}
+assert.equal((primaryNavigation.match(/badge: 'Beta'/g) || []).length, 1, 'Shared navigation must show Beta only for Forecast');
 assert.match(app, /moreNavBtn.*addEventListener/s, 'More menu event handler missing');
 assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu must not duplicate header or account actions');
 assert.match(index, /id="archiveBtn"/, 'Archived Properties must remain available under More');
