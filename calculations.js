@@ -1,5 +1,5 @@
 import { TAX_CONFIG } from './tax-config.js';
-import { parseNumber } from './format-utils.js';
+import { parseNumber } from './src/utils/format-utils.js';
 
 export function safeNumber(value) {
   return parseNumber(value);

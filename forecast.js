@@ -1,5 +1,5 @@
 import { getForecastProperties, getPurchaseNumbers } from './forecast-property.js';
-import { escapeHtml, formatCurrency, formatPercentage, parseNumber } from './format-utils.js';
+import { escapeHtml, formatCurrency, formatPercentage, parseNumber } from './src/utils/format-utils.js';
 
 (() => {
 'use strict';

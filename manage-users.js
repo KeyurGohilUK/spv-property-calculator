@@ -1,5 +1,5 @@
 import { renderSyncStatus } from './sync-status.js';
-import { escapeHtml, formatDate as formatSharedDate } from './format-utils.js';
+import { escapeHtml, formatDate as formatSharedDate } from './src/utils/format-utils.js';
 
 const $ = (id) => document.getElementById(id);
 let currentUserId = '';

@@ -41,6 +41,7 @@ Do **not** put a Supabase Secret key or `service_role` key in this project.
 - `docs/planning/` contains active architecture and improvement backlogs.
 - `docs/history/` contains completed upgrade notes retained for project history.
 - `database/` documents and stores database bootstrap and migration workflows.
+- `src/utils/` contains shared stateless application utilities.
 - `tests/` documents and stores automated regression and browser checks.
 
 ## Cloud behaviour

@@ -8,8 +8,8 @@ import {
 } from './receipt-cloud.js';
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
-import { formatCurrency, formatDate } from './format-utils.js';
-import { clearFieldValidation, setFieldValidation } from './validation.js';
+import { formatCurrency, formatDate } from './src/utils/format-utils.js';
+import { clearFieldValidation, setFieldValidation } from './src/utils/validation.js';
 
 const $ = (id) => document.getElementById(id);
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);

@@ -3,7 +3,7 @@ import {
   buildViewingCalendarInvite,
   isFutureViewing,
   parseViewingDateTime
-} from '../calendar-invite.js';
+} from '../src/utils/calendar-invite.js';
 import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
