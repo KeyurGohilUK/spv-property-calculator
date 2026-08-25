@@ -1,7 +1,7 @@
 {
-  "version": "1.21.19",
+  "version": "1.21.20",
   "notes": [
-    "App styling is now organised into focused, maintainable files.",
-    "The visual design remains unchanged while future UI updates become safer."
+    "Every page now has a clear main heading for assistive technology.",
+    "Heading improvements preserve the existing visual design and layout."
   ]
 }
