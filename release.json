@@ -1,7 +1,7 @@
 {
-  "version": "1.21.22",
+  "version": "1.21.23",
   "notes": [
-    "Validation errors are now announced against the correct property and expense fields.",
-    "Invalid fields clear their accessibility error state as soon as you edit them."
+    "Navigation labels now have clearer contrast against the beige app background.",
+    "HTML and browser checks now detect common accessibility regressions before release."
   ]
 }

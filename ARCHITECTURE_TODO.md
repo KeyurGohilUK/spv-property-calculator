@@ -25,4 +25,4 @@ This list records the August 2026 HTML5, accessibility and duplication audit. Wo
 - [x] Give each page one clear `h1` while preserving the current visual hierarchy.
 - [x] Remove ineffective ARIA attributes and redundant roles.
 - [x] Apply `aria-invalid` and connected error descriptions consistently during custom validation.
-- [ ] Add automated HTML validation and axe accessibility checks to CI.
+- [x] Add automated HTML validation and axe accessibility checks to CI.
