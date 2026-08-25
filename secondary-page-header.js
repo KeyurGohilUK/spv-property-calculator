@@ -1,6 +1,5 @@
-import { getProperties, replaceProperties, getPendingDeletes, clearPendingDeletes } from './storage.js';
-import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 import { setupInstallComponent } from './install-component.js';
+import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from './workspace-sync.js';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
@@ -17,24 +16,16 @@ function closeOnBackdrop(dialog) {
 
 async function syncWorkspace() {
   if (syncing || !cloudUser || !navigator.onLine) return;
-  const cloud = window.SPVCloud;
   syncing = true;
   renderAccount();
   $('secondaryAccountMessage').textContent = 'Syncing properties and expenses…';
   try {
-    const properties = await cloud.syncAll(getProperties(), getPendingDeletes());
-    replaceProperties(properties.merged);
-    clearPendingDeletes(properties.clearedDeleteIds || []);
-    const expenses = await syncExpenseWorkspace(cloud);
-    const conflicts = (properties.conflicts?.length || 0) + expenses.conflicts.length;
-    $('secondaryAccountMessage').textContent = conflicts
-      ? `${conflicts} conflict${conflicts === 1 ? '' : 's'} kept locally for review.`
-      : 'Properties and expenses are up to date.';
+    const result = await syncWorkspaceData(window.SPVCloud);
+    $('secondaryAccountMessage').textContent = result.message;
     window.dispatchEvent(new CustomEvent('spv-workspace-synced'));
   } catch (error) {
     console.warn('Workspace sync failed:', error);
-    const stage = error?.syncStage ? ` while ${error.syncStage}` : '';
-    $('secondaryAccountMessage').textContent = `Sync pending${stage}. Local changes remain safe. Try again.`;
+    $('secondaryAccountMessage').textContent = formatWorkspaceSyncError(error);
   } finally {
     syncing = false;
     renderAccount();
