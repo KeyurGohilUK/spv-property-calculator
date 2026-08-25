@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.31-menu-components';
+const CACHE_NAME = 'spv-property-calculator-v1.21.32-install-components';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -31,6 +31,7 @@ const ASSETS = [
   './format-utils.js',
   './validation.js',
   './property-card.js',
+  './src/components/install-component.js',
   './install-component.js',
   './src/utils/calendar-invite.js',
   './calendar-invite.js',
@@ -64,6 +65,7 @@ const ASSETS = [
   './app-shell.js',
   './src/components/dialog-helper.js',
   './dialog-helper.js',
+  './src/components/update-notifier.js',
   './update-notifier.js',
   './receipt-cloud.js',
   './forecast/',

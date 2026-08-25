@@ -28,7 +28,7 @@ for (const utility of ['format-utils.js', 'validation.js', 'calendar-invite.js']
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/utils\\/${utility.replace('.', '\\.')}';`), `${utility} must retain its previous URL as a compatibility export`);
 }
 
-for (const component of ['dialog-helper.js', 'sync-status.js', 'primary-navigation.js', 'app-shell.js']) {
+for (const component of ['dialog-helper.js', 'sync-status.js', 'primary-navigation.js', 'app-shell.js', 'install-component.js', 'update-notifier.js']) {
   assert.equal(fs.existsSync(new URL(`src/components/${component}`, projectRoot)), true, `${component} must remain under src/components`);
   const compatibilitySource = fs.readFileSync(new URL(component, projectRoot), 'utf8');
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/components\\/${component.replace('.', '\\.')}';`), `${component} must retain its previous URL as a compatibility export`);
