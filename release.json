@@ -1,7 +1,7 @@
 {
-  "version": "1.21.25",
+  "version": "1.21.26",
   "notes": [
-    "Expenses, Forecast and Manage Users now use clean, readable URL paths.",
-    "Existing saved links using the previous .html addresses continue to work."
+    "Project tests, database scripts and documentation are now organised into clearer folders.",
+    "There are no intended UI or calculation changes in this update; download it to verify the app continues working normally."
   ]
 }
