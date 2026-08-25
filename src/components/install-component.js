@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.35';
+export const APP_VERSION = '1.21.36';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -22,8 +22,8 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './src/config/tax-config.js', './tax-config.js', './src/features/properties/storage.js', './storage.js',
   './manifest.json', './supabase-config.js', './release.json',
   './expenses/', './expenses.html', './src/components/secondary-page-header.js', './secondary-page-header.js', './src/components/admin-menu.js', './admin-menu.js',
-  './admin/users/', './manage-users.html', './manage-users.css', './src/features/users/manage-users.js', './manage-users.js',
-  './expenses.css', './src/features/expenses/expenses.js', './expenses.js',
+  './admin/users/', './manage-users.html', './styles/features/users.css', './manage-users.css', './src/features/users/manage-users.js', './manage-users.js',
+  './styles/features/expenses.css', './expenses.css', './src/features/expenses/expenses.js', './expenses.js',
   './src/features/expenses/expense-storage.js', './expense-storage.js',
   './src/features/expenses/expense-cloud-sync.js', './expense-cloud-sync.js',
   './src/components/sync-status.js', './sync-status.js', './src/services/receipt-cloud.js', './receipt-cloud.js',
@@ -32,9 +32,9 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './src/app/primary-navigation.js', './src/components/primary-navigation.js', './primary-navigation.js',
   './src/app/app-shell.js', './src/components/app-shell.js', './app-shell.js',
   './src/components/dialog-helper.js', './dialog-helper.js',
-  './forecast/', './forecast.html', './forecast.css', './src/features/forecast/forecast.js', './forecast.js',
+  './forecast/', './forecast.html', './styles/features/forecast.css', './forecast.css', './src/features/forecast/forecast.js', './forecast.js',
   './src/features/forecast/forecast-property.js', './forecast-property.js',
-  './src/features/forecast/forecast-advanced.js', './forecast-advanced.js', './forecast-advanced.css',
+  './src/features/forecast/forecast-advanced.js', './forecast-advanced.js', './styles/features/forecast-advanced.css', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-maskable-192.png', './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-32.png'

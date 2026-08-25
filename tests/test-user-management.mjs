@@ -7,7 +7,7 @@ const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const adminMenu = fs.readFileSync(new URL('../src/components/admin-menu.js', import.meta.url), 'utf8');
 const page = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
 const pageScript = fs.readFileSync(new URL('../src/features/users/manage-users.js', import.meta.url), 'utf8');
-const pageStyles = fs.readFileSync(new URL('../manage-users.css', import.meta.url), 'utf8');
+const pageStyles = fs.readFileSync(new URL('../styles/features/users.css', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
 

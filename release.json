@@ -1,7 +1,7 @@
 {
-  "version": "1.21.35",
+  "version": "1.21.36",
   "notes": [
-    "Property, expense, forecast and user code is now organised by feature, with shared sync and account code under services.",
-    "Previously published script addresses remain available so installed versions continue updating safely."
+    "Expense, forecast and user-management styles are now organised with feature styles, and the receipt Worker has a dedicated workers folder.",
+    "Previous stylesheet addresses remain available so installed versions continue updating safely."
   ]
 }

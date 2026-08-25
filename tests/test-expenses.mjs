@@ -51,7 +51,7 @@ assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV e
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
 assert.equal((expenseHtml.match(/id="exportExpensesBtn"/g) || []).length, 1, 'Export action must not be duplicated in the report card');
 assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
-const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses.css', import.meta.url), 'utf8'));
+const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/features/expenses.css', import.meta.url), 'utf8'));
 assert.match(expenseStyles, /\.receipt-file-size \{[^}]*min-height: 38px;[^}]*overflow-wrap: anywhere;/, 'Receipt details must remain visible and wrap safely');
 assert.match(expenseStyles, /\.expense-report-inline \{[\s\S]*grid-column: 1 \/ -1[\s\S]*box-shadow: none/, 'Nested Expense Summary must span the filter panel without a second shadow');
 assert.doesNotMatch(expenseStyles, /\.expense-sync-status/, 'Expense page must not define a separate sync-status component');
