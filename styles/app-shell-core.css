@@ -1,0 +1,39 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding-top: var(--safe-top);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+.header-inner { max-width: 1120px; margin: 0 auto; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.header-inner h1 { font-size: clamp(20px, 4vw, 27px); margin: 2px 0 0; letter-spacing: -0.035em; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.eyebrow { margin: 0; color: var(--brand); text-transform: uppercase; letter-spacing: .09em; font-size: 11px; font-weight: 800; }
+.status-pill, .count-badge, .mode-label { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 700; }
+.status-pill.offline { background: color-mix(in srgb, var(--warning) 18%, var(--surface)); color: var(--warning); }
+
+.main-shell { max-width: 1120px; margin: 0 auto; padding: 20px 16px calc(40px + var(--safe-bottom)); }
+.hidden { display: none !important; }
+.hero-card, .section-card, .summary-card, .disclaimer-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.hero-card { padding: 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.hero-card h2 { font-size: 28px; letter-spacing: -.035em; margin: 5px 0 6px; }
+.hero-card p { margin-bottom: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; line-height: 1.45; }
+
+.primary-btn, .secondary-btn, .icon-btn, .text-btn, .danger-btn, .card-action {
+  border: 0;
+  border-radius: 13px;
+  min-height: 44px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.primary-btn { background: var(--brand); color: var(--on-brand); box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 24%, transparent); }
+.primary-btn:hover { background: var(--brand-strong); }
+.secondary-btn, .icon-btn, .text-btn, .card-action { background: var(--surface-2); color: var(--text); }
+.text-btn { padding-inline: 12px; }
+.danger-btn { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--danger); }
+.full-width { width: 100%; }

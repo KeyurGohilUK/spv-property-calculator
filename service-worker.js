@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.18-shared-format-utils';
+const CACHE_NAME = 'spv-property-calculator-v1.21.19-split-styles';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -9,6 +9,19 @@ const ASSETS = [
   './',
   './index.html',
   './styles.css',
+  './styles/tokens.css',
+  './styles/base.css',
+  './styles/app-shell-core.css',
+  './styles/forms.css',
+  './styles/dialogs.css',
+  './styles/dialogs-updates.css',
+  './styles/app-shell-home.css',
+  './styles/app-shell-navigation.css',
+  './styles/features/properties.css',
+  './styles/features/summary.css',
+  './styles/features/archive.css',
+  './styles/features/editor.css',
+  './styles/features/statuses.css',
   './theme.js',
   './help-guide.js',
   './app.js',
