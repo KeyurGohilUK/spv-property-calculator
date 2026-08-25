@@ -1,6 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
+import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.14';
+export const APP_VERSION = '1.21.15';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -16,6 +17,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './account-controller.js',
   './primary-navigation.js',
   './app-shell.js',
+  './dialog-helper.js',
   './forecast.html', './forecast.css', './forecast.js',
   './forecast-advanced.js', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',
@@ -142,14 +144,10 @@ export function setupInstallComponent({ button, beforeUpdate } = {}) {
     nativeButton.classList.toggle('hidden', !deferredInstallPrompt);
     document.getElementById('updateMessage').textContent = '';
     loadRelease();
-    dialog.showModal();
+    dialogController.open(button);
   };
+  const dialogController = setupDialog(dialog, { closeButtons: [document.getElementById('closeInstallDialog')] });
   button.addEventListener('click', open);
-  document.getElementById('closeInstallDialog').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', (event) => {
-    const bounds = dialog.getBoundingClientRect();
-    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
-  });
   nativeButton.addEventListener('click', async () => {
     if (!deferredInstallPrompt) return;
     const prompt = deferredInstallPrompt;
