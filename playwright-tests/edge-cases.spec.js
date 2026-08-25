@@ -42,6 +42,7 @@ test('property form supports native keyboard submission', async ({ page }) => {
   await page.locator('#title').press('Enter');
 
   await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await page.locator('#backBtn').click();
   await expect(page.locator('#propertyCount')).toHaveText('1');
 });
 
