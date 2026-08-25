@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.15-accessible-dialogs';
+const CACHE_NAME = 'spv-property-calculator-v1.21.16-shared-property-cards';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -12,6 +12,7 @@ const ASSETS = [
   './theme.js',
   './help-guide.js',
   './app.js',
+  './property-card.js',
   './install-component.js',
   './calendar-invite.js',
   './cloud.js',

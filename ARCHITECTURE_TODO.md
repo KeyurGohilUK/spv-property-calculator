@@ -15,7 +15,7 @@ This list records the August 2026 HTML5, accessibility and duplication audit. Wo
 
 ## Maintainability
 
-- [ ] Share active and archived property-card rendering, including the cost breakdown.
+- [x] Share active and archived property-card rendering, including the cost breakdown.
 - [ ] Make Forecast use the shared property storage and calculation modules.
 - [ ] Extract common currency, date, percentage, numeric parsing and HTML-escaping utilities.
 - [ ] Split the global stylesheet into tokens, base, forms, dialogs, app-shell and feature styles without changing the visual design.
