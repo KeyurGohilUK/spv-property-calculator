@@ -1,8 +1,10 @@
 import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from './account-controller.js';
+import { setupPrimaryNavigation } from './primary-navigation.js';
 import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from './workspace-sync.js';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
+setupPrimaryNavigation();
 let cloudUser = null;
 let syncing = false;
 let accountController = null;
