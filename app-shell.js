@@ -1,17 +1,10 @@
+import { setupDialog } from './dialog-helper.js';
+
 const $ = (id, root = document) => root.getElementById(id);
 
 const connectionIcons = `
   <svg class="connection-online-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9.5a10.2 10.2 0 0 1 14 0"></path><path d="M8 13a5.8 5.8 0 0 1 8 0"></path><path d="M10.8 16.3a1.8 1.8 0 0 1 2.4 0"></path><circle cx="12" cy="18.5" r="1"></circle></svg>
   <svg class="connection-offline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5 19.5 19.5"></path><path d="M5 9.5a10.2 10.2 0 0 1 10.8-2.1"></path><path d="M18.8 10.7c.1.1.1.1.2.2"></path><path d="M8 13a5.8 5.8 0 0 1 3-1.5"></path><path d="M14.8 13.8c.4.2.8.5 1.2.8"></path><circle cx="12" cy="18.5" r="1"></circle></svg>`;
-
-function closeOnBackdrop(dialog) {
-  dialog.addEventListener('click', (event) => {
-    const bounds = dialog.getBoundingClientRect();
-    const inside = event.clientX >= bounds.left && event.clientX <= bounds.right
-      && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-    if (!inside) dialog.close();
-  });
-}
 
 function renderHeaderControls(root) {
   const header = root.querySelector('.header-inner');
@@ -42,20 +35,17 @@ function renderAppMenu(root, { home }) {
 export function setupAppShell({ root = document, home = false } = {}) {
   renderHeaderControls(root);
   const dialog = renderAppMenu(root, { home });
+  const dialogController = setupDialog(dialog, { closeButtons: [$('closeMoreMenuDialog', root)] });
   root.querySelectorAll('[data-more-menu]').forEach((control) => {
     if (control.dataset.appMenuBound) return;
     control.dataset.appMenuBound = 'true';
-    control.addEventListener('click', () => dialog.showModal());
+    control.addEventListener('click', () => dialogController.open(control));
   });
-  $('closeMoreMenuDialog', root)?.addEventListener('click', () => dialog.close());
-  closeOnBackdrop(dialog);
   window.SPVTheme?.bindThemeControls(dialog);
   window.SPVHelpGuide?.bindTriggers(dialog);
   window.dispatchEvent(new CustomEvent('spv-admin-menu-rendered'));
   return {
     connectionStatus: $('connectionStatus', root), accountButton: $('accountBtn', root),
-    installButton: $('installBtn', root), menuDialog: dialog
+    installButton: $('installBtn', root), menuDialog: dialog, menuDialogController: dialogController
   };
 }
-
-export { closeOnBackdrop };
