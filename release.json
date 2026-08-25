@@ -1,7 +1,7 @@
 {
-  "version": "1.21.13",
+  "version": "1.21.14",
   "notes": [
-    "Every page now uses the same header controls and App Menu.",
-    "Connection, account and install controls now stay consistent across the app."
+    "Property and expense card actions now respond independently and more reliably.",
+    "Keyboard and screen-reader navigation has been improved without changing the card design."
   ]
 }
