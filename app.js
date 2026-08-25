@@ -802,10 +802,6 @@ function renderCloudState(isWarning = false) {
 
 function renderAuthDialog() {
   accountController?.render();
-  if (!cloudUser) return;
-  $('accountSyncText').textContent = navigator.onLine
-    ? (cloudLastMessage || 'All signed-in users share the same Supabase property list.')
-    : 'Offline now. Local changes will be retained until the next sync.';
 }
 
 async function syncCloud({ showFeedback = true } = {}) {
@@ -881,7 +877,13 @@ async function setupCloud() {
       cloudLastMessage = error.message || 'Supabase initialization failed.';
       renderCloudState(true);
     },
-    onDisplayNameSaved: () => renderNotes()
+    onDisplayNameSaved: () => renderNotes(),
+    onRender: ({ user }) => {
+      if (!user) return;
+      $('accountSyncText').textContent = navigator.onLine
+        ? (cloudLastMessage || 'All signed-in users share the same Supabase property list.')
+        : 'Offline now. Local changes will be retained until the next sync.';
+    }
   });
   await accountController.initialise();
 }
