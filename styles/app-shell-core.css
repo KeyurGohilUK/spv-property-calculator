@@ -18,7 +18,7 @@
 .hidden { display: none !important; }
 .hero-card, .section-card, .summary-card, .disclaimer-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .hero-card { padding: 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-.hero-card h2 { font-size: 28px; letter-spacing: -.035em; margin: 5px 0 6px; }
+.hero-card h1, .hero-card h2 { font-size: 28px; letter-spacing: -.035em; margin: 5px 0 6px; }
 .hero-card p { margin-bottom: 0; }
 .muted { color: var(--muted); }
 .small { font-size: 12px; line-height: 1.45; }
