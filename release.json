@@ -1,7 +1,7 @@
 {
-  "version": "1.21.11",
+  "version": "1.21.12",
   "notes": [
-    "Sign-in, account creation and sign-out now use one shared account controller across every page.",
-    "Account validation, loading states and cloud initialisation now behave consistently throughout the app."
+    "Every page now uses one shared primary navigation component.",
+    "Menu order, active-page state, icons and the Forecast badge are now maintained in one place."
   ]
 }
