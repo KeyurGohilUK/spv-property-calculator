@@ -41,7 +41,7 @@
             <h1 id="homeTitle">Your properties</h1>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed.</p>
           </div>
-          <div class="property-hero-actions" aria-label="Property actions">
+          <div class="property-hero-actions" role="group" aria-label="Property actions">
             <span id="propertySyncStatus" class="sync-status" role="status">Saved on this device</span>
             <button id="newPropertyBtn" class="primary-btn" type="button">＋ New Property</button>
           </div>
@@ -268,7 +268,7 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 9m0 0V4m0 5h5M4 13a8.1 8.1 0 0 0 14.9 4L21 15m0 0v5m0-5h-5"/></svg>
                   </button>
                 </div>
-                <div id="notesList" class="notes-list" role="log" aria-live="polite" aria-label="Property notes conversation"></div>
+                <div id="notesList" class="notes-list" role="log" aria-label="Property notes conversation"></div>
                 <div class="note-composer-wrap">
                   <div class="note-composer">
                     <textarea id="noteText" rows="1" maxlength="2000" aria-label="Write a note" placeholder="Write a note..."></textarea>
