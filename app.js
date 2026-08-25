@@ -26,7 +26,7 @@ import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 
 setupPrimaryNavigation();
-setupAppShell({ home: true });
+const appShell = setupAppShell({ home: true });
 
 /*
  * SPV Property Calculator - browser application
@@ -991,8 +991,7 @@ function init() {
     window.history.replaceState({}, '', initialMenuUrl);
     window.setTimeout(() => {
       if (requestedDialog === 'account') {
-        renderAuthDialog();
-        $('authDialog').showModal();
+        accountController?.open();
       } else {
         installComponent.open();
       }
@@ -1007,7 +1006,7 @@ function init() {
     initialMenuUrl.searchParams.delete('menu');
     window.history.replaceState({}, '', initialMenuUrl);
     window.setTimeout(() => {
-      $('moreMenuDialog').showModal();
+      appShell.menuDialogController.open($('moreNavBtn'));
     }, 0);
   }
 
