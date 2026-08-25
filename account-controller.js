@@ -153,8 +153,12 @@ export function setupAccountController({
     }
   };
 
-  elements.button.addEventListener('click', () => { render(); elements.dialog.showModal(); });
-  elements.closeButton.addEventListener('click', () => elements.dialog.close());
+  const dialogController = setupDialog(elements.dialog, {
+    closeButtons: [elements.closeButton],
+    label: 'Account',
+    initialFocus: () => elements.signedOut.classList.contains('hidden') ? elements.syncButton : elements.name
+  });
+  elements.button.addEventListener('click', () => { render(); dialogController.open(elements.button); });
   elements.signInButton.addEventListener('click', signIn);
   elements.signUpButton.addEventListener('click', signUp);
   elements.signOutButton.addEventListener('click', signOut);
@@ -177,5 +181,6 @@ export function setupAccountController({
   };
 
   render();
-  return { initialise, render, getUser: () => user, signIn, signUp, signOut };
+  return { initialise, render, open: () => { render(); dialogController.open(elements.button); }, getUser: () => user, signIn, signUp, signOut };
 }
+import { setupDialog } from './dialog-helper.js';
