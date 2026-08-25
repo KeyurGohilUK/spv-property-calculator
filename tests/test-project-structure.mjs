@@ -9,6 +9,7 @@ const requiredDirectories = [
   'docs/planning/',
   'docs/history/',
   'src/utils/',
+  'src/components/',
   'tests/e2e/'
 ];
 
@@ -25,6 +26,12 @@ for (const utility of ['format-utils.js', 'validation.js', 'calendar-invite.js']
   assert.equal(fs.existsSync(new URL(`src/utils/${utility}`, projectRoot)), true, `${utility} must remain under src/utils`);
   const compatibilitySource = fs.readFileSync(new URL(utility, projectRoot), 'utf8');
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/utils\\/${utility.replace('.', '\\.')}';`), `${utility} must retain its previous URL as a compatibility export`);
+}
+
+for (const component of ['dialog-helper.js', 'sync-status.js']) {
+  assert.equal(fs.existsSync(new URL(`src/components/${component}`, projectRoot)), true, `${component} must remain under src/components`);
+  const compatibilitySource = fs.readFileSync(new URL(component, projectRoot), 'utf8');
+  assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/components\\/${component.replace('.', '\\.')}';`), `${component} must retain its previous URL as a compatibility export`);
 }
 
 console.log('Project folder structure checks passed.');

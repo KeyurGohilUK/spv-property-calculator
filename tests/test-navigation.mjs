@@ -13,10 +13,10 @@ const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
 const styles = readStyles();
 const secondaryHeader = fs.readFileSync(new URL('../secondary-page-header.js', import.meta.url), 'utf8');
 const installComponent = fs.readFileSync(new URL('../install-component.js', import.meta.url), 'utf8');
-const syncStatus = fs.readFileSync(new URL('../sync-status.js', import.meta.url), 'utf8');
+const syncStatus = fs.readFileSync(new URL('../src/components/sync-status.js', import.meta.url), 'utf8');
 const primaryNavigation = fs.readFileSync(new URL('../primary-navigation.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../app-shell.js', import.meta.url), 'utf8');
-const dialogHelper = fs.readFileSync(new URL('../dialog-helper.js', import.meta.url), 'utf8');
+const dialogHelper = fs.readFileSync(new URL('../src/components/dialog-helper.js', import.meta.url), 'utf8');
 const propertyCard = fs.readFileSync(new URL('../property-card.js', import.meta.url), 'utf8');
 const forecastProperty = fs.readFileSync(new URL('../forecast-property.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
@@ -26,7 +26,7 @@ assert.match(forecastProperty, /getActiveProperties[\s\S]*calculateProperty/, 'F
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
-assert.match(app, /import \{ renderSyncStatus \} from '.\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
+assert.match(app, /import \{ renderSyncStatus \} from '.\/src\/components\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
 assert.match(styles, /\.property-hero-actions \{[^}]*display: flex;[^}]*justify-content: flex-end;[^}]*flex-wrap: wrap;/, 'Property hero actions must match expense hero alignment');
 assert.match(styles, /\.hero-card \{[\s\S]*radial-gradient\(circle at 100% 0%[\s\S]*var\(--surface\)/, 'Every page header card must share the raised corner treatment');
 assert.doesNotMatch(styles, /#homeView > \.hero-card/, 'Page header corner treatment must not be limited to Properties');

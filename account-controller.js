@@ -183,4 +183,4 @@ export function setupAccountController({
   render();
   return { initialise, render, open: () => { render(); dialogController.open(elements.button); }, getUser: () => user, signIn, signUp, signOut };
 }
-import { setupDialog } from './dialog-helper.js';
+import { setupDialog } from './src/components/dialog-helper.js';

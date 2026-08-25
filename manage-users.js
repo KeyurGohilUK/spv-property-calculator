@@ -1,4 +1,4 @@
-import { renderSyncStatus } from './sync-status.js';
+import { renderSyncStatus } from './src/components/sync-status.js';
 import { escapeHtml, formatDate as formatSharedDate } from './src/utils/format-utils.js';
 
 const $ = (id) => document.getElementById(id);

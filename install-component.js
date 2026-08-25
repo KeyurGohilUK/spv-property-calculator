@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
-import { setupDialog } from './dialog-helper.js';
+import { setupDialog } from './src/components/dialog-helper.js';
 
-export const APP_VERSION = '1.21.28';
+export const APP_VERSION = '1.21.29';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -21,12 +21,12 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './expenses/', './expenses.html', './secondary-page-header.js', './admin-menu.js',
   './admin/users/', './manage-users.html', './manage-users.css', './manage-users.js',
   './expenses.css', './expenses.js', './expense-storage.js',
-  './expense-cloud-sync.js', './sync-status.js', './receipt-cloud.js',
+  './expense-cloud-sync.js', './src/components/sync-status.js', './sync-status.js', './receipt-cloud.js',
   './workspace-sync.js',
   './account-controller.js',
   './primary-navigation.js',
   './app-shell.js',
-  './dialog-helper.js',
+  './src/components/dialog-helper.js', './dialog-helper.js',
   './forecast/', './forecast.html', './forecast.css', './forecast.js',
   './forecast-property.js',
   './forecast-advanced.js', './forecast-advanced.css',

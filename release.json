@@ -1,7 +1,7 @@
 {
-  "version": "1.21.28",
+  "version": "1.21.29",
   "notes": [
-    "Fixed Download Updates failing on devices upgrading from the previous release.",
-    "Backward-compatible utility addresses now keep installed versions working throughout the cache refresh."
+    "Shared dialog and sync-status components are now organised under the application source folder.",
+    "Previous component addresses remain available so installed versions can update safely."
   ]
 }
