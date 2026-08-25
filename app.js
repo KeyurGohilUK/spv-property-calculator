@@ -614,9 +614,6 @@ function renderPropertyList() {
   properties.forEach((property)=>{
     const calc=calculateProperty(property); const card=document.createElement('article'); card.className='property-card';
     const propertyTitle=property.title||'Untitled Property';
-    card.setAttribute('role','button');
-    card.setAttribute('tabindex','0');
-    card.setAttribute('aria-label',`Open ${propertyTitle} for editing`);
     const listingUrl = normalizeListingUrl(property.listingUrl);
     const viewingDateLabel = formatViewingDate(property.viewingDate);
     const viewingPassed = isViewingPassed(property.viewingDate);
@@ -628,6 +625,7 @@ function renderPropertyList() {
     const calendarAction = !viewingPassed && viewingDateLabel ? `<button class="property-card-icon-action calendar" type="button" data-action="calendar" aria-label="Add viewing for ${escapeHtml(propertyTitle)} to calendar" title="Add viewing to calendar" data-tooltip="Calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg></button>` : '';
     const listingAction = listingUrl ? `<button class="property-card-icon-action listing" type="button" data-action="listing" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></button>` : '';
     card.innerHTML=`
+      <button class="property-card-open" type="button" aria-label="Open ${escapeHtml(propertyTitle)} for editing"></button>
       <div class="property-card-tools" aria-label="Property actions">
         ${calendarAction}${listingAction}
         <details class="property-card-more">
@@ -643,10 +641,9 @@ function renderPropertyList() {
       <div class="property-card-header"><div><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}</div></div>
       <div class="property-stats"><div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div><div><span>Deposit</span><strong>${numberFormat.format(calc.depositPercent)}% · ${money(calc.depositAmount)}</strong></div><div><span>Mortgage</span><strong>${money(calc.mortgageRequired)}</strong></div><div><span>Purchase Costs</span><strong>${money(calc.totalPurchaseCostsExcludingDeposit)}</strong></div></div>
       <div class="property-total property-cost-breakdown"><div><span>Cash to Buy Property</span><strong>${money(calc.totalCashRequired - calc.refurbishment)}</strong></div><div class="refurbishment-row"><span>+ Refurbishment</span><strong>${money(calc.refurbishment)}</strong></div><div class="investment-total"><span>Total Investment</span><strong>${money(calc.totalCashRequired)}</strong></div></div>`;
-    card.addEventListener('click',(event)=>{ if(!event.target.closest('button, .property-card-more')) showEditor(property.id); });
+    card.querySelector('.property-card-open').addEventListener('click',()=> showEditor(property.id));
     if (calendarAction) card.querySelector('[data-action="calendar"]').addEventListener('click',()=> downloadViewingCalendarInvite(property));
     if (listingUrl) card.querySelector('[data-action="listing"]').addEventListener('click',()=>{ window.open(listingUrl,'_blank','noopener,noreferrer'); });
-    card.addEventListener('keydown',(event)=>{ if(event.target!==card)return; if(event.key==='Enter'||event.key===' '){event.preventDefault();showEditor(property.id);} });
     card.querySelector('[data-action="duplicate"]').addEventListener('click',async()=>{ card.querySelector('.property-card-more').removeAttribute('open'); const copy=duplicateProperty(property.id); if(!copy)return; renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(copy);storeCloudSyncedProperty(synced);setCloudMessage('Duplicate synced to Supabase.');}catch(error){console.warn('Cloud duplicate sync failed:',error);setCloudMessage('Duplicate saved locally; cloud sync is pending.',true);}} });
     card.querySelector('[data-action="archive"]').addEventListener('click',async()=>{ card.querySelector('.property-card-more').removeAttribute('open'); if(!window.confirm(`Move “${property.title||'this property'}” to Archived Properties? You can restore it later.`))return; const archived=archiveProperty(property.id); if(!archived)return; renderPropertyList();renderArchiveList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(archived);storeCloudSyncedProperty(synced);setCloudMessage('Property archived and synced to Supabase.');}catch(error){console.warn('Cloud archive sync failed:',error);setCloudMessage('Property archived locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property archived locally; it will sync when online.',true);} });
     $('propertyList').appendChild(card);
