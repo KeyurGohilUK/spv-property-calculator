@@ -6,7 +6,7 @@ const bootstrap = fs.readFileSync(new URL('../database/bootstrap/00 - Bootstrap 
 const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const adminMenu = fs.readFileSync(new URL('../src/components/admin-menu.js', import.meta.url), 'utf8');
 const page = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
-const pageScript = fs.readFileSync(new URL('../manage-users.js', import.meta.url), 'utf8');
+const pageScript = fs.readFileSync(new URL('../src/features/users/manage-users.js', import.meta.url), 'utf8');
 const pageStyles = fs.readFileSync(new URL('../manage-users.css', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
@@ -25,7 +25,7 @@ assert.match(adminMenu, /access\.role === 'admin'/, 'Manage Users menu must be a
 assert.match(appShell, /data-admin-users-link[^>]*aria-hidden="true"/, 'Shared admin menu item must be hidden by default');
 assert.match(page, /id="userAccessDenied"[\s\S]*id="userManagementContent"/, 'Manage Users page must include a guarded access state');
 assert.match(pageScript, /access\.role !== 'admin'/, 'Manage Users page must reject non-admin users');
-assert.match(pageScript, /import \{ renderSyncStatus \} from '.\/src\/components\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');
+assert.match(pageScript, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/components\/sync-status\.js';/, 'Manage Users must use the shared sync-status component');
 assert.match(page, /id="userManagementSyncStatus" class="sync-status"/, 'Manage Users hero sync status is missing');
 assert.doesNotMatch(page + pageScript, /refreshUsersBtn|>Refresh<\//, 'Manage Users must not include a manual refresh action');
 assert.match(pageScript, /setWorkspaceUserAccess\(userId, role, active\)/, 'Manage Users page must save role and active access');

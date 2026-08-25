@@ -1,7 +1,7 @@
 {
-  "version": "1.21.34",
+  "version": "1.21.35",
   "notes": [
-    "Application startup, shell and primary navigation are now organised together under the app layer.",
+    "Property, expense, forecast and user code is now organised by feature, with shared sync and account code under services.",
     "Previously published script addresses remain available so installed versions continue updating safely."
   ]
 }

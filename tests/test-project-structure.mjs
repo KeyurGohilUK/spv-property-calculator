@@ -9,6 +9,12 @@ const requiredDirectories = [
   'docs/planning/',
   'docs/history/',
   'src/app/',
+  'src/features/properties/',
+  'src/features/expenses/',
+  'src/features/forecast/',
+  'src/features/users/',
+  'src/services/',
+  'src/config/',
   'src/utils/',
   'src/components/',
   'tests/e2e/'
@@ -23,11 +29,43 @@ assert.deepEqual(rootMarkdown, ['README.md'], 'Only the main README should remai
 assert.equal(fs.existsSync(new URL('database-scripts/', projectRoot)), false, 'Legacy database-scripts directory must not return');
 assert.equal(fs.existsSync(new URL('playwright-tests/', projectRoot)), false, 'Legacy playwright-tests directory must not return');
 
-for (const utility of ['format-utils.js', 'validation.js', 'calendar-invite.js']) {
+for (const utility of ['format-utils.js', 'validation.js']) {
   assert.equal(fs.existsSync(new URL(`src/utils/${utility}`, projectRoot)), true, `${utility} must remain under src/utils`);
   const compatibilitySource = fs.readFileSync(new URL(utility, projectRoot), 'utf8');
   assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/utils\\/${utility.replace('.', '\\.')}';`), `${utility} must retain its previous URL as a compatibility export`);
 }
+
+const organisedModules = {
+  'src/features/properties/': ['calculations.js', 'property-card.js', 'storage.js'],
+  'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
+  'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js'],
+  'src/features/users/': ['manage-users.js'],
+  'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js'],
+  'src/config/': ['tax-config.js']
+};
+
+for (const [directory, modules] of Object.entries(organisedModules)) {
+  for (const module of modules) {
+    assert.equal(fs.existsSync(new URL(`${directory}${module}`, projectRoot)), true, `${module} must remain under ${directory}`);
+    assert.equal(
+      fs.readFileSync(new URL(module, projectRoot), 'utf8').includes(`export * from './${directory}${module}';`),
+      true,
+      `${module} must retain its root URL as a compatibility export`
+    );
+  }
+}
+
+assert.equal(fs.existsSync(new URL('src/features/properties/calendar-invite.js', projectRoot)), true, 'calendar-invite.js must remain with the property feature');
+assert.equal(
+  fs.readFileSync(new URL('src/utils/calendar-invite.js', projectRoot), 'utf8').includes("export * from '../features/properties/calendar-invite.js';"),
+  true,
+  'calendar-invite.js must retain its previous utility URL as a compatibility export'
+);
+assert.equal(
+  fs.readFileSync(new URL('calendar-invite.js', projectRoot), 'utf8').includes("export * from './src/features/properties/calendar-invite.js';"),
+  true,
+  'calendar-invite.js must retain its root URL as a compatibility export'
+);
 
 for (const component of ['dialog-helper.js', 'sync-status.js', 'install-component.js', 'update-notifier.js']) {
   assert.equal(fs.existsSync(new URL(`src/components/${component}`, projectRoot)), true, `${component} must remain under src/components`);

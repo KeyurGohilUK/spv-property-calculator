@@ -6,9 +6,9 @@ globalThis.localStorage = {
   setItem: (key, value) => memory.set(key, String(value))
 };
 
-const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('../expense-storage.js');
+const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('../src/features/expenses/expense-storage.js');
 
-const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses.js', import.meta.url), 'utf8'));
+const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('../src/features/expenses/expenses.js', import.meta.url), 'utf8'));
 const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8'));
 assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit must remain 2 MB');
 assert.match(expensePage, /TARGET_RECEIPT_SIZE = Math\.floor\(1\.5 \* 1024 \* 1024\)/, 'Receipt images should target approximately 1.5 MB');
@@ -32,7 +32,7 @@ assert.doesNotMatch(expensePage, /card\.setAttribute\('role', 'button'\)|card\.t
 assert.doesNotMatch(expensePage, /stopPropagation\(\)/, 'Expense actions must not rely on event propagation workarounds');
 assert.doesNotMatch(expensePage, /edit\.className = 'edit-expense'/, 'Expense cards must not show a separate edit button');
 assert.match(expensePage, /removeExpenseReceipt/, 'Expense editing must support receipt removal');
-assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*from '.\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
+assert.match(expensePage, /uploadCloudReceipt[\s\S]*downloadCloudReceipt[\s\S]*deleteCloudReceipt[\s\S]*from '\.\.\/\.\.\/services\/receipt-cloud\.js'/, 'Expense page must use the private receipt cloud client');
 assert.match(expensePage, /syncExpenseWorkspace[\s\S]*from '.\/expense-cloud-sync\.js'/, 'Expense page must use the shared cloud sync service');
 assert.match(expensePage, /expectedObjectPath = expense\.receiptCloudPending \? '' : \(expense\.receiptObjectPath \|\| ''\)[\s\S]*getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*downloadCloudReceipt\(expense\.id, expense\.receiptObjectPath[\s\S]*saveReceipt\(expense\.id, file, expense\.receiptObjectPath\)/, 'Receipt viewing must invalidate stale local files and cache the current R2 version');
 assert.match(expensePage, /Receipt saved locally · cloud upload pending/, 'Failed R2 uploads must remain queued locally');
@@ -42,7 +42,7 @@ assert.match(expensePage, /expenseCategoryFilter[\s\S]*expenseDateFrom[\s\S]*exp
 assert.doesNotMatch(expenseHtml, /separately from purchase estimates|separate from estimated property calculations/, 'Expense page must not repeat purchase-estimate separation wording');
 assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not show a separate Sync now button');
 assert.match(expenseHtml, /id="expenseSyncStatus" class="sync-status"/, 'Expenses must use the shared sync-status component');
-assert.match(expensePage, /import \{ renderSyncStatus \} from '.\/src\/components\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
+assert.match(expensePage, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/components\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
 assert.match(expenseHtml, /id="toggleExpenseFiltersBtn"[\s\S]*Filter &amp; Export/, 'Combined Filter & Export action is missing');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"/, 'CSV export must live inside the filter panel');

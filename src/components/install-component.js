@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.34';
+export const APP_VERSION = '1.21.35';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -16,21 +16,25 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './src/components/update-notifier.js', './update-notifier.js',
   './src/utils/format-utils.js', './src/utils/validation.js',
   './format-utils.js', './validation.js',
-  './property-card.js',
-  './src/utils/calendar-invite.js', './calendar-invite.js', './cloud.js', './calculations.js', './tax-config.js',
-  './storage.js', './manifest.json', './supabase-config.js', './release.json',
+  './src/features/properties/property-card.js', './property-card.js',
+  './src/features/properties/calendar-invite.js', './src/utils/calendar-invite.js', './calendar-invite.js',
+  './cloud.js', './src/features/properties/calculations.js', './calculations.js',
+  './src/config/tax-config.js', './tax-config.js', './src/features/properties/storage.js', './storage.js',
+  './manifest.json', './supabase-config.js', './release.json',
   './expenses/', './expenses.html', './src/components/secondary-page-header.js', './secondary-page-header.js', './src/components/admin-menu.js', './admin-menu.js',
-  './admin/users/', './manage-users.html', './manage-users.css', './manage-users.js',
-  './expenses.css', './expenses.js', './expense-storage.js',
-  './expense-cloud-sync.js', './src/components/sync-status.js', './sync-status.js', './receipt-cloud.js',
-  './workspace-sync.js',
-  './account-controller.js',
+  './admin/users/', './manage-users.html', './manage-users.css', './src/features/users/manage-users.js', './manage-users.js',
+  './expenses.css', './src/features/expenses/expenses.js', './expenses.js',
+  './src/features/expenses/expense-storage.js', './expense-storage.js',
+  './src/features/expenses/expense-cloud-sync.js', './expense-cloud-sync.js',
+  './src/components/sync-status.js', './sync-status.js', './src/services/receipt-cloud.js', './receipt-cloud.js',
+  './src/services/workspace-sync.js', './workspace-sync.js',
+  './src/services/account-controller.js', './account-controller.js',
   './src/app/primary-navigation.js', './src/components/primary-navigation.js', './primary-navigation.js',
   './src/app/app-shell.js', './src/components/app-shell.js', './app-shell.js',
   './src/components/dialog-helper.js', './dialog-helper.js',
-  './forecast/', './forecast.html', './forecast.css', './forecast.js',
-  './forecast-property.js',
-  './forecast-advanced.js', './forecast-advanced.css',
+  './forecast/', './forecast.html', './forecast.css', './src/features/forecast/forecast.js', './forecast.js',
+  './src/features/forecast/forecast-property.js', './forecast-property.js',
+  './src/features/forecast/forecast-advanced.js', './forecast-advanced.js', './forecast-advanced.css',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-maskable-192.png', './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-32.png'
