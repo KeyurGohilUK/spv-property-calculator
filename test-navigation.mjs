@@ -14,6 +14,7 @@ const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', im
 const installComponent = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
 const primaryNavigation = fs.readFileSync(new URL('./primary-navigation.js', import.meta.url), 'utf8');
+const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
 assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecasting/, 'Forecast must not duplicate the main navigation with an upper back bar');
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
@@ -36,15 +37,15 @@ assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must e
 for (const [name, page] of [['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /secondary-page-header\.js/, `${name} must load shared header controls`);
 }
-assert.match(secondaryHeader, /id="secondaryConnectionStatus"/, 'Shared header must include online status');
-assert.match(secondaryHeader, /id="secondaryAccountBtn"/, 'Shared header must include Account');
-assert.match(secondaryHeader, /id="secondaryInstallBtn"/, 'Shared header must include Install');
+assert.match(appShell, /id="connectionStatus"/, 'Shared header must include online status');
+assert.match(appShell, /id="accountBtn"/, 'Shared header must include Account');
+assert.match(appShell, /id="installBtn"/, 'Shared header must include Install');
 assert.match(app, /setupInstallComponent\([\s\S]*button: \$\('installBtn'\)/, 'Home Install control must use the shared component');
-assert.match(secondaryHeader, /setupInstallComponent\(\{ button: \$\('secondaryInstallBtn'\) \}\)/, 'Secondary Install controls must use the shared component');
+assert.match(secondaryHeader, /setupInstallComponent\(\{ button: shell\.installButton \}\)/, 'Secondary Install controls must use the shared component');
 assert.match(installComponent, /setupUpdateNotifier\(button, APP_VERSION\)/, 'Shared Install component must provide update notifications');
 assert.match(styles, /\.header-icon-control\.update-available[\s\S]*update-icon-pulse[\s\S]*::before/, 'Update available indicator styling is missing');
 assert.doesNotMatch(secondaryHeader, /window\.location\.href = '\.\/\?dialog=(?:account|install)'/, 'Account and Install must not navigate away');
-assert.match(secondaryHeader, /secondaryAccountBtn[\s\S]*secondaryAccountDialog[\s\S]*showModal/, 'Account must open a local popup');
+assert.match(secondaryHeader, /button: shell\.accountButton, dialog: \$\('secondaryAccountDialog'\)/, 'Account must use the shared header control with a local popup');
 assert.doesNotMatch(secondaryHeader, /secondaryInstallDialog|secondaryNativeInstallBtn|secondaryUpdateBtn/, 'Secondary pages must not keep a duplicate Install popup');
 assert.match(installComponent, /id="installDialog"[\s\S]*id="nativeInstallBtn"[\s\S]*id="downloadUpdatesBtn"/, 'Shared Install popup is incomplete');
 assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');
@@ -53,28 +54,25 @@ assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page
 assert.match(primaryNavigation, /class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog"/, 'Shared More must be a local dialog button');
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
 assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not navigate away');
-assert.match(secondaryHeader, /secondaryMoreMenuDialog[\s\S]*showModal\(\)/, 'Secondary More must open a local popup');
-assert.match(index, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Home App Menu items must be ordered by priority');
-assert.match(secondaryHeader, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Secondary App Menu items must match the priority order');
-assert.match(secondaryHeader, /class="install-dialog more-menu-dialog"/, 'Secondary App Menu must use Install dialog styling');
-assert.match(index, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Main App Menu must use Install dialog styling');
+assert.match(appShell, /data-more-menu[\s\S]*dialog\.showModal\(\)/, 'Shared More must open a local popup');
+assert.match(appShell, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Shared App Menu items must be ordered by priority');
+assert.match(appShell, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Shared App Menu must use Install dialog styling');
 assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
 
-assert.equal((index.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
-assert.match(index, /id="moreMenuDialog"/, 'More menu dialog missing');
-assert.doesNotMatch(index, /<h3>More<\/h3>/, 'More popup must not repeat the word More');
-assert.match(index, /<h3>App Menu<\/h3>/, 'App Menu title must remain in the popup header');
-assert.match(index, /id="closeMoreMenuDialog" class="icon-btn more-menu-close"/, 'More popup close button class missing');
+assert.equal((appShell.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');
+assert.doesNotMatch(appShell, /<h3[^>]*>More<\/h3>/, 'More popup must not repeat the word More');
+assert.match(appShell, /<h3 id="appMenuTitle">App Menu<\/h3>/, 'App Menu title must remain in the popup header');
+assert.match(appShell, /id="closeMoreMenuDialog" class="icon-btn more-menu-close"/, 'More popup close button class missing');
 assert.match(styles, /\.more-menu-header[\s\S]*display: flex[\s\S]*justify-content: space-between/, 'App Menu title and close button must share an aligned header row');
-assert.match(app, /moreMenuDialog.*getBoundingClientRect[\s\S]*clickedInside[\s\S]*dialog\.close/s, 'Backdrop click must close the App Menu');
+assert.match(appShell, /getBoundingClientRect[\s\S]*inside[\s\S]*dialog\.close/s, 'Backdrop click must close the App Menu');
 assert.match(primaryNavigation, /href: '\.\/expenses\.html'/, 'Shared navigation must link to Expenses');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
 assert.doesNotMatch(expenses, /aria-disabled="true"[^>]*Expenses/, 'Expenses navigation must remain enabled');
 assert.equal((primaryNavigation.match(/badge: 'Beta'/g) || []).length, 1, 'Shared navigation must show Beta only for Forecast');
-assert.match(app, /moreNavBtn.*addEventListener/s, 'More menu event handler missing');
+assert.match(app, /setupAppShell\(\{ home: true \}\)/, 'Home must initialise the shared App Menu');
 assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu must not duplicate header or account actions');
-assert.match(index, /id="archiveBtn"/, 'Archived Properties must remain available under More');
+assert.match(appShell, /id="archiveBtn"/, 'Archived Properties must remain available under More');
 assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav[\s\S]*position: fixed/, 'Mobile fixed navigation styling missing');
 assert.match(styles, /safe-bottom/, 'Navigation must respect device safe-area spacing');
 assert.match(styles, /\.field input, \.field textarea, \.field select, \.expense-row input/, 'Dropdowns must share base input styling');
