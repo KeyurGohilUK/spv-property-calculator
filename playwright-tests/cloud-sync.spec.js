@@ -160,7 +160,7 @@ test('secondary-page automatic and manual sync share one expense operation', asy
 
   await page.locator('#secondaryAccountBtn').click();
   await page.locator('#secondarySyncBtn').click();
-  await expect(page.locator('#secondaryAccountMessage')).toHaveText('Properties and expenses are up to date.');
+  await expect(page.locator('#secondaryAccountMessage')).toHaveText('Cloud is up to date.');
 
   const calls = await cloudCalls(page);
   expect(calls.filter((call) => call.name === 'upsert_expense_if_current')).toHaveLength(1);

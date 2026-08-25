@@ -7,6 +7,7 @@ const page = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
 const sharedSync = fs.readFileSync(new URL('./expense-cloud-sync.js', import.meta.url), 'utf8');
+const workspaceSync = fs.readFileSync(new URL('./workspace-sync.js', import.meta.url), 'utf8');
 
 assert.match(cloud, /async function listExpenses\(\)/, 'Cloud expense listing is missing');
 assert.match(cloud, /async function upsertExpense\(record\)/, 'Cloud expense upsert is missing');
@@ -22,12 +23,11 @@ assert.match(sharedSync, /activeExpenseSync/, 'Shared sync must serialize overla
 assert.match(page, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*expenses\.js/, 'Expense page must load cloud dependencies before its module');
 assert.match(page, /id="expenseSyncStatus"/, 'Expense sync status is missing');
 assert.match(page, /kept locally and securely synced when signed in/, 'Receipt guidance must explain offline and private cloud storage');
-assert.match(app, /syncExpenseWorkspace\(window\.SPVCloud\)/, 'Main Account sync must use the shared expense service');
 assert.match(expenses, /syncExpenseWorkspace\(cloud\)/, 'Expense page must use the shared expense service');
-assert.match(secondaryHeader, /syncExpenseWorkspace\(cloud\)/, 'Secondary-page Account sync must use the shared expense service');
+assert.match(workspaceSync, /syncExpenses: syncExpenseWorkspace/, 'Workspace sync must use the shared expense service');
+assert.match(app, /syncWorkspace\(window\.SPVCloud\)/, 'Main Account must use the shared workspace sync engine');
+assert.match(secondaryHeader, /syncWorkspaceData\(window\.SPVCloud\)/, 'Secondary-page Account must use the shared workspace sync engine');
 assert.doesNotMatch(page, /id="syncExpensesBtn"/, 'Expense page must not duplicate the account Sync now action');
-assert.match(app, /async function syncExpenseRecords\(\)/, 'Account sync must include expense records');
-assert.match(app, /const expenseResult = await syncExpenseRecords\(\)/, 'Main cloud sync must await expense sync');
 assert.match(app, /dialogSyncBtn.*syncCloud/s, 'Account popup Sync now must trigger the combined cloud sync');
 
 console.log('Expense cloud sync checks passed.');

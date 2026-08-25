@@ -17,11 +17,9 @@ import {
   restoreProperty,
   permanentlyDeleteProperty as permanentlyDeleteLocalProperty,
   duplicateProperty,
-  replaceProperties as replaceLocalProperties,
-  getPendingDeletes as readPendingDeletes,
-  clearPendingDeletes
+  replaceProperties as replaceLocalProperties
 } from './storage.js';
-import { syncExpenseWorkspace } from './expense-cloud-sync.js';
+import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 
 /*
@@ -737,10 +735,6 @@ function storeCloudSyncedProperty(synced) {
 }
 
 
-async function syncExpenseRecords() {
-  return syncExpenseWorkspace(window.SPVCloud);
-}
-
 function setCloudMessage(message, isWarning = false) {
   cloudLastMessage = message || '';
   renderCloudState(isWarning);
@@ -854,31 +848,20 @@ async function syncCloud({ showFeedback = true } = {}) {
   if (showFeedback) $('signedInMessage').textContent = 'Syncing…';
 
   try {
-    const result = await window.SPVCloud.syncAll(getProperties(), readPendingDeletes());
-    if (!replaceLocalProperties(result.merged)) throw new Error('Could not update the local offline cache.');
-    clearPendingDeletes(result.clearedDeleteIds || []);
+    const result = await syncWorkspace(window.SPVCloud);
     renderPropertyList();
     renderArchiveList();
-    const expenseResult = await syncExpenseRecords();
-
-    const conflictCount = (result.conflicts?.length || 0) + expenseResult.conflicts.length;
-    if (conflictCount) {
-      const message = `${conflictCount} sync conflict${conflictCount === 1 ? '' : 's'} detected. Your local changes are safe and were not overwritten.`;
-      cloudLastMessage = message;
-      if (showFeedback) $('signedInMessage').textContent = message;
+    if (result.conflictCount) {
+      cloudLastMessage = result.message;
+      if (showFeedback) $('signedInMessage').textContent = result.message;
       return false;
     }
-
-    const changes = result.uploadedCount + result.downloadedCount + (result.archivedLegacyIds?.length || 0) + (result.permanentlyDeletedIds?.length || 0) + expenseResult.changes;
-    const message = changes
-      ? `Synced ${changes} change${changes === 1 ? '' : 's'} with Supabase.`
-      : 'Cloud is up to date.';
-    cloudLastMessage = message;
-    if (showFeedback) $('signedInMessage').textContent = message;
+    cloudLastMessage = result.message;
+    if (showFeedback) $('signedInMessage').textContent = result.message;
     return true;
   } catch (error) {
     console.warn('Cloud sync failed:', error);
-    cloudLastMessage = `Sync pending: ${error.message || 'Supabase could not be reached.'}`;
+    cloudLastMessage = formatWorkspaceSyncError(error);
     if (showFeedback) $('signedInMessage').textContent = cloudLastMessage;
     return false;
   } finally {

@@ -142,7 +142,7 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
 
   await page.locator('#secondaryAccountBtn').click();
   await page.locator('#secondarySyncBtn').click();
-  await expect(page.locator('#secondaryAccountMessage')).toHaveText('Properties and expenses are up to date.');
+  await expect(page.locator('#secondaryAccountMessage')).toHaveText('Cloud is up to date.');
   expect(worker.callsFor('PUT')).toHaveLength(uploadsAfterReconnect);
 });
 
