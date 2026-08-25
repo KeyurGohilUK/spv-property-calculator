@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.32-install-components';
+const CACHE_NAME = 'spv-property-calculator-v1.21.33-theme-component';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -22,6 +22,7 @@ const ASSETS = [
   './styles/features/archive.css',
   './styles/features/editor.css',
   './styles/features/statuses.css',
+  './src/components/theme.js',
   './theme.js',
   './src/components/help-guide.js',
   './help-guide.js',

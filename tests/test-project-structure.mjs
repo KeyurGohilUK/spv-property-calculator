@@ -51,4 +51,11 @@ for (const component of ['help-guide.js', 'admin-menu.js']) {
   );
 }
 
+assert.equal(fs.existsSync(new URL('src/components/theme.js', projectRoot)), true, 'theme.js must remain under src/components');
+assert.match(
+  fs.readFileSync(new URL('theme.js', projectRoot), 'utf8'),
+  /import\('\.\/src\/components\/theme\.js'\);/,
+  'theme.js must retain its previous URL as a classic-script compatibility entry point'
+);
+
 console.log('Project folder structure checks passed.');

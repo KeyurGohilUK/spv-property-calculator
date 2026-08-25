@@ -138,12 +138,13 @@ test('keeps previous component URLs available during the cache migration', async
     import('/update-notifier.js').then((module) => typeof module.setupUpdateNotifier),
     fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing'),
     fetch('/help-guide.js').then((response) => response.ok ? 'available' : 'missing'),
-    fetch('/admin-menu.js').then((response) => response.ok ? 'available' : 'missing')
+    fetch('/admin-menu.js').then((response) => response.ok ? 'available' : 'missing'),
+    fetch('/theme.js').then((response) => response.ok ? 'available' : 'missing')
   ]));
 
   expect(legacyModules).toEqual([
     'function', 'function', 'function', 'function', 'function', 'function',
-    'available', 'available', 'available'
+    'available', 'available', 'available', 'available'
   ]);
 });
 
