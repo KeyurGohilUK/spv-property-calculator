@@ -1,9 +1,11 @@
 import { setupInstallComponent } from './install-component.js';
+import { setupAccountController } from './account-controller.js';
 import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from './workspace-sync.js';
 const $ = (id) => document.getElementById(id);
 const header = document.querySelector('.header-inner');
 let cloudUser = null;
 let syncing = false;
+let accountController = null;
 
 function closeOnBackdrop(dialog) {
   dialog.addEventListener('click', (event) => {
@@ -17,7 +19,7 @@ function closeOnBackdrop(dialog) {
 async function syncWorkspace() {
   if (syncing || !cloudUser || !navigator.onLine) return;
   syncing = true;
-  renderAccount();
+  accountController?.render();
   $('secondaryAccountMessage').textContent = 'Syncing properties and expenses…';
   try {
     const result = await syncWorkspaceData(window.SPVCloud);
@@ -28,40 +30,12 @@ async function syncWorkspace() {
     $('secondaryAccountMessage').textContent = formatWorkspaceSyncError(error);
   } finally {
     syncing = false;
-    renderAccount();
+    accountController?.render();
   }
 }
 
 function renderAccount() {
-  const configured = window.SPVCloud?.getConfigState?.().configured;
-  $('secondaryAuthSetup').classList.toggle('hidden', configured !== false);
-  $('secondarySignedOut').classList.toggle('hidden', !configured || Boolean(cloudUser));
-  $('secondarySignedIn').classList.toggle('hidden', !configured || !cloudUser);
-  $('secondaryAccountBtn').classList.toggle('is-signed-in', Boolean(cloudUser));
-  $('secondaryAccountBtn').dataset.tooltip = cloudUser ? 'Account' : 'Sign in';
-  $('secondaryAccountBtn').title = cloudUser ? 'Account' : 'Sign in';
-  $('secondaryAccountBtn').setAttribute('aria-label', cloudUser ? 'Account' : 'Sign in');
-  if (cloudUser) {
-    $('secondarySignedInEmail').textContent = cloudUser.email || 'Signed-in user';
-    $('secondarySyncBtn').disabled = syncing || !navigator.onLine;
-    $('secondarySyncBtn').textContent = syncing ? 'Syncing…' : 'Sync now';
-  }
-}
-
-async function setupCloudAccount() {
-  const cloud = window.SPVCloud;
-  if (!cloud) { renderAccount(); return; }
-  cloud.onAuthChange((user) => {
-    cloudUser = user || null;
-    renderAccount();
-  });
-  try {
-    const state = await cloud.init();
-    cloudUser = state.user || null;
-  } catch (error) {
-    console.warn('Account setup failed:', error);
-  }
-  renderAccount();
+  accountController?.render();
 }
 
 if (header && !header.querySelector('.header-actions')) {
@@ -103,29 +77,32 @@ if (header && !header.querySelector('.header-actions')) {
     status.classList.toggle('offline', !navigator.onLine);
     const label = navigator.onLine ? 'Online' : 'Offline';
     status.setAttribute('aria-label', label); status.title = label; status.dataset.tooltip = label;
-    renderAccount();
+    accountController?.render();
   };
   window.addEventListener('online', updateConnection);
   window.addEventListener('offline', updateConnection);
   updateConnection();
 
-  $('secondaryAccountBtn').addEventListener('click', () => { renderAccount(); $('secondaryAccountDialog').showModal(); });
-  $('closeSecondaryAccount').addEventListener('click', () => $('secondaryAccountDialog').close());
   closeOnBackdrop($('secondaryAccountDialog'));
-
-  $('secondarySignInBtn').addEventListener('click', async () => {
-    $('secondaryAuthMessage').textContent = 'Signing in…';
-    try { const data = await window.SPVCloud.signIn($('secondaryAuthEmail').value.trim(), $('secondaryAuthPassword').value); cloudUser = data.user || data.session?.user; $('secondaryAuthMessage').textContent = ''; renderAccount(); await syncWorkspace(); }
-    catch (error) { $('secondaryAuthMessage').textContent = error.message || 'Could not sign in.'; }
+  accountController = setupAccountController({
+    cloud: window.SPVCloud,
+    elements: {
+      button: $('secondaryAccountBtn'), dialog: $('secondaryAccountDialog'), closeButton: $('closeSecondaryAccount'),
+      signedOut: $('secondarySignedOut'), signedIn: $('secondarySignedIn'), notConfigured: $('secondaryAuthSetup'),
+      setupMessage: $('secondaryAuthSetup').querySelector('p:not(.eyebrow)'),
+      name: $('secondaryAuthName'), email: $('secondaryAuthEmail'), password: $('secondaryAuthPassword'),
+      authMessage: $('secondaryAuthMessage'), signedInEmail: $('secondarySignedInEmail'),
+      signInButton: $('secondarySignInBtn'), signUpButton: $('secondarySignUpBtn'), signOutButton: $('secondarySignOutBtn'),
+      syncButton: $('secondarySyncBtn'), accountMessage: $('secondaryAccountMessage')
+    },
+    sync: syncWorkspace,
+    isSyncing: () => syncing,
+    onUserChange: async (user, { reason }) => {
+      cloudUser = user;
+      if (cloudUser && navigator.onLine && (reason === 'sign-in' || reason === 'sign-up')) await syncWorkspace();
+    }
   });
-  $('secondarySignUpBtn').addEventListener('click', async () => {
-    $('secondaryAuthMessage').textContent = 'Creating account…';
-    try { const data = await window.SPVCloud.signUp($('secondaryAuthEmail').value.trim(), $('secondaryAuthPassword').value, $('secondaryAuthName').value.trim()); cloudUser = data.session?.user || null; $('secondaryAuthMessage').textContent = cloudUser ? '' : 'Account created. Confirm your email, then sign in.'; renderAccount(); }
-    catch (error) { $('secondaryAuthMessage').textContent = error.message || 'Could not create account.'; }
-  });
-  $('secondarySignOutBtn').addEventListener('click', async () => { await window.SPVCloud.signOut(); cloudUser = null; $('secondaryAccountDialog').close(); renderAccount(); });
-  $('secondarySyncBtn').addEventListener('click', syncWorkspace);
-  setupCloudAccount();
+  accountController.initialise();
 }
 
 const moreControl = document.querySelector('[data-more-menu]');
