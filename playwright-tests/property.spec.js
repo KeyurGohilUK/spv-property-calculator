@@ -222,7 +222,7 @@ for (const route of ['/expenses.html', '/forecast.html']) {
 
     await page.locator('[data-more-menu]').click();
     await expect(page.getByRole('heading', { name: 'App Menu' })).toBeVisible();
-    await page.locator('#closeSecondaryMoreMenu').click();
+    await page.locator('#closeMoreMenuDialog').click();
 
     await expect(page).toHaveURL(originalUrl);
   });
