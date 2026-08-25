@@ -1,0 +1,17 @@
+.disclaimer-card { padding: 16px 18px; font-size: 12px; color: var(--muted); line-height: 1.55; box-shadow: none; }
+.summary-column { position: sticky; top: calc(78px + var(--safe-top)); }
+.summary-card { padding: 20px; }
+.summary-card h3 { margin: 5px 0 17px; font-size: 22px; }
+.summary-rows { display: grid; gap: 11px; }
+.summary-rows > div, .totals-block > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.summary-rows span, .totals-block span { color: var(--muted); font-size: 12px; }
+.summary-rows span small { color: var(--brand); margin-left: 5px; font-weight: 800; }
+.summary-rows strong { font-size: 14px; }
+.summary-rows .separator { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 2px; }
+.totals-block { display: grid; gap: 10px; padding: 14px 0; margin-top: 14px; border-top: 1px solid var(--border); }
+.totals-block strong { font-size: 13px; }
+.grand-total { background: var(--brand-soft); color: var(--text); border-radius: 16px; padding: 16px; margin: 2px 0 14px; }
+.grand-total span { display: block; color: var(--brand); font-size: 12px; font-weight: 800; }
+.grand-total strong { display: block; font-size: clamp(27px, 7vw, 36px); line-height: 1.05; margin: 5px 0 4px; letter-spacing: -.04em; }
+.grand-total small { color: var(--muted); }
+.save-message { min-height: 18px; margin: 9px 0 0; text-align: center; font-size: 12px; color: var(--brand); font-weight: 700; }

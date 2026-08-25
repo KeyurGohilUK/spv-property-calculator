@@ -1,0 +1,108 @@
+/* Forecast home entry */
+.home-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action-forecast{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}@media(max-width:560px){.home-secondary-actions{grid-template-columns:1fr}}
+
+
+/* v1.10.1 property viewing date */
+.viewing-date-field { max-width: 520px; }
+.viewing-date-field > label { font-weight: 750; font-size: 13px; }
+.viewing-date-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.viewing-date-input > svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+ .viewing-date-input input[type="date"] {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text);
+}
+.viewing-date-input select {
+  flex: 0 0 132px;
+  min-height: 38px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background-color: transparent;
+}
+.viewing-date-input select:disabled { opacity: .55; }
+ .viewing-calendar-btn {
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, var(--border));
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  color: var(--brand);
+  cursor: pointer;
+}
+.viewing-calendar-btn:hover,
+.viewing-calendar-btn:focus-visible {
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  outline: 2px solid color-mix(in srgb, var(--brand) 28%, transparent);
+  outline-offset: 2px;
+}
+.viewing-calendar-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.property-viewing-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warning) 15%, var(--surface-2));
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.property-viewing-date.viewed {
+  background: color-mix(in srgb, var(--positive) 15%, var(--surface-2));
+  color: var(--positive);
+}
+.property-viewing-date svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 620px) {
+  .viewing-date-field { max-width: none; }
+  .viewing-date-input { gap: 7px; padding-inline: 10px; }
+  .viewing-date-input select { flex-basis: 118px; padding-left: 9px; }
+}

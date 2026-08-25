@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readStyles } from './test-style-source.mjs';
 
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 assert.doesNotMatch(index, /Works offline, with a shared Supabase workspace for your small team\./, 'Home introduction must not include the removed workspace sentence');
@@ -9,7 +10,7 @@ assert.match(index, /class="property-hero-actions"[\s\S]*id="propertySyncStatus"
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
-const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
+const styles = readStyles();
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
 const installComponent = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');

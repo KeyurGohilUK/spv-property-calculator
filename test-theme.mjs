@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { readStyles } from './test-style-source.mjs';
 
 const theme = fs.readFileSync(new URL('./theme.js', import.meta.url), 'utf8');
-const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
+const styles = readStyles();
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');

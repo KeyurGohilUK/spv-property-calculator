@@ -1,7 +1,7 @@
 {
-  "version": "1.21.18",
+  "version": "1.21.19",
   "notes": [
-    "Currency, dates and percentages now use consistent formatting throughout the app.",
-    "Numeric parsing and safe text rendering now share one tested implementation."
+    "App styling is now organised into focused, maintainable files.",
+    "The visual design remains unchanged while future UI updates become safer."
   ]
 }
