@@ -1,7 +1,7 @@
 {
-  "version": "1.21.17",
+  "version": "1.21.18",
   "notes": [
-    "Forecast now reads properties through the same storage used by the calculator.",
-    "Purchase, deposit, mortgage and cash figures now use the same calculation engine everywhere."
+    "Currency, dates and percentages now use consistent formatting throughout the app.",
+    "Numeric parsing and safe text rendering now share one tested implementation."
   ]
 }

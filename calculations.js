@@ -1,11 +1,8 @@
 import { TAX_CONFIG } from './tax-config.js';
+import { parseNumber } from './format-utils.js';
 
 export function safeNumber(value) {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-  if (value === null || value === undefined || value === '') return 0;
-  const cleaned = String(value).replace(/[^0-9.-]/g, '');
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return parseNumber(value);
 }
 
 export function clamp(value, min, max) {
