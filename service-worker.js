@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.10-shared-workspace-sync';
+const CACHE_NAME = 'spv-property-calculator-v1.21.11-shared-account';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -32,6 +32,7 @@ const ASSETS = [
   './expense-cloud-sync.js',
   './sync-status.js',
   './workspace-sync.js',
+  './account-controller.js',
   './update-notifier.js',
   './receipt-cloud.js',
   './forecast.html',
