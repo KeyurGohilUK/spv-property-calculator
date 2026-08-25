@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const installSource = fs.readFileSync(new URL('../install-component.js', import.meta.url), 'utf8');
+const installSource = fs.readFileSync(new URL('../src/components/install-component.js', import.meta.url), 'utf8');
 const workerSource = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
 const release = JSON.parse(fs.readFileSync(new URL('../release.json', import.meta.url), 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'));
@@ -9,7 +9,7 @@ const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.m
 const appVersion = installSource.match(/APP_VERSION = '([^']+)'/)?.[1];
 const cacheVersion = workerSource.match(/CACHE_NAME = 'spv-property-calculator-v([0-9]+\.[0-9]+\.[0-9]+)-/)?.[1];
 
-assert.ok(appVersion, 'APP_VERSION was not found in install-component.js');
+assert.ok(appVersion, 'APP_VERSION was not found in src/components/install-component.js');
 assert.ok(cacheVersion, 'Semantic cache version was not found in service-worker.js');
 assert.equal(release.version, appVersion, 'release.json and APP_VERSION must match');
 assert.equal(cacheVersion, appVersion, 'Service-worker cache version and APP_VERSION must match');

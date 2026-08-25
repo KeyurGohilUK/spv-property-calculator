@@ -1,4 +1,4 @@
-import { setupInstallComponent } from '../../install-component.js';
+import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from '../../account-controller.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';
 import { setupAppShell } from './app-shell.js';

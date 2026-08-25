@@ -1,7 +1,7 @@
 {
-  "version": "1.21.31",
+  "version": "1.21.32",
   "notes": [
-    "Help Guide and administrator-menu behaviour are now organised with the shared UI components.",
+    "Install and update-notification behaviour is now organised with the shared UI components.",
     "Previous script addresses remain available so installed versions continue updating safely."
   ]
 }
