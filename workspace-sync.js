@@ -14,9 +14,9 @@ function syncError(error, stage) {
 }
 
 export function formatWorkspaceSyncError(error) {
-  const stage = error?.syncStage ? ` while ${error.syncStage}` : '';
-  const detail = String(error?.message || 'The cloud workspace could not be reached.').trim();
-  return `Sync pending${stage}: ${detail} Local changes remain safe. Try again.`;
+  const stage = error?.syncStage ? ` (while ${error.syncStage})` : '';
+  const detail = String(error?.message || 'The cloud workspace could not be reached.').trim().replace(/[.\s]+$/, '');
+  return `Sync pending: ${detail}${stage}. Local changes remain safe. Try again.`;
 }
 
 async function performWorkspaceSync(cloud, adapters) {
@@ -48,7 +48,7 @@ async function performWorkspaceSync(cloud, adapters) {
     ? `${conflictCount} sync conflict${conflictCount === 1 ? '' : 's'} detected. Local changes are safe and were not overwritten.`
     : changes
       ? `Synced ${changes} change${changes === 1 ? '' : 's'} with the shared workspace.`
-      : 'Properties and expenses are up to date.';
+      : 'Cloud is up to date.';
 
   return { propertyResult, expenseResult, conflictCount, changes, message };
 }
