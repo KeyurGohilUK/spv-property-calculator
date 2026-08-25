@@ -37,7 +37,7 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
 
   await expect(page.locator('.expense-card')).not.toHaveAttribute('role', 'button');
   await expect(page.getByRole('button', { name: 'Edit expense Companies House filing fee' })).toBeVisible();
-  await page.locator('.expense-card-main').click();
+  await page.getByRole('button', { name: 'Edit expense Companies House filing fee' }).click();
   await expect(page.getByRole('heading', { name: 'Edit Expense' })).toBeVisible();
   await page.locator('#expenseAmount').fill('150');
   await page.getByRole('button', { name: 'Save Changes' }).click();
