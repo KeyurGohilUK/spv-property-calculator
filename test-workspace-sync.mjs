@@ -58,7 +58,7 @@ await assert.rejects(
 const stagedError = Object.assign(new Error('receipt upload failed.'), { syncStage: 'syncing a receipt' });
 assert.equal(
   formatWorkspaceSyncError(stagedError),
-  'Sync pending while syncing a receipt: receipt upload failed. Local changes remain safe. Try again.'
+  'Sync pending: receipt upload failed (while syncing a receipt). Local changes remain safe. Try again.'
 );
 
 let calls = 0;
