@@ -198,15 +198,19 @@ test('home Account, Install and More controls open dialogs without navigation', 
 
   await page.locator('#accountBtn').click();
   await expect(page.locator('#authDialog')).toHaveAttribute('open', '');
+  await expect.poll(() => page.evaluate(() => document.querySelector('#authDialog')?.contains(document.activeElement))).toBe(true);
   await page.locator('#closeAuthDialog').click();
+  await expect(page.locator('#accountBtn')).toBeFocused();
 
   await page.locator('#installBtn').click();
   await expect(page.locator('#installDialog')).toHaveAttribute('open', '');
   await page.locator('#closeInstallDialog').click();
+  await expect(page.locator('#installBtn')).toBeFocused();
 
   await page.locator('#moreNavBtn').click();
   await expect(page.getByRole('heading', { name: 'App Menu' })).toBeVisible();
   await page.locator('#closeMoreMenuDialog').click();
+  await expect(page.locator('#moreNavBtn')).toBeFocused();
 
   await expect(page).toHaveURL(originalUrl);
 });
