@@ -1,132 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-GB">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#966540">
-  <meta name="description" content="Track company and property expenses for your UK SPV.">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="SPV Expenses">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
-  <script src="./theme.js"></script>
-  <script type="module" src="./help-guide.js"></script>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./expenses.css">
-  <title>Expenses · SPV Property Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=./expenses/">
+  <title>Opening Expenses…</title>
 </head>
 <body>
-  <div id="app">
-    <header class="app-header">
-      <div class="header-inner">
-        <a class="brand-home" href="./" aria-label="Back to property calculator">
-          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
-          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
-        </a>
-      </div>
-    </header>
-
-    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="expenses"></nav>
-
-    <main class="main-shell expense-shell">
-      <section class="hero-card expense-hero">
-        <div>
-          <p class="eyebrow">Actual spending</p>
-          <h1>Expense Tracker</h1>
-          <p class="muted">Record company-wide or property-specific expenses.</p>
-        </div>
-        <div class="expense-hero-actions">
-          <span id="expenseSyncStatus" class="sync-status" role="status">Saved on this device</span>
-          <button id="openExpenseFormBtn" class="primary-btn" type="button">＋ Add Expense</button>
-        </div>
-      </section>
-
-      <div class="expense-list-heading">
-        <div><h3>Recorded expenses</h3><span id="expenseCount" class="count-badge">0</span></div>
-        <button id="toggleExpenseFiltersBtn" class="secondary-btn compact-expense-btn" type="button" aria-expanded="false" aria-controls="expenseFilters">Filter &amp; Export</button>
-      </div>
-      <section id="expenseFilters" class="expense-filters hidden" aria-label="Expense filters">
-        <label class="field"><span>Allocation</span><select id="expenseFilter"><option value="all">All expenses</option><option value="company">General company</option></select></label>
-        <label class="field"><span>Category</span><select id="expenseCategoryFilter"><option value="all">All categories</option></select></label>
-        <label class="field"><span>From date</span><input id="expenseDateFrom" type="date"></label>
-        <label class="field"><span>To date</span><input id="expenseDateTo" type="date"></label>
-        <div class="expense-filter-actions">
-          <button id="clearExpenseFiltersBtn" class="text-btn" type="button">Clear filters</button>
-          <button id="exportExpensesBtn" class="primary-btn compact-expense-btn" type="button">Export CSV</button>
-        </div>
-        <section class="expense-report-card expense-report-inline" aria-labelledby="expenseReportTitle">
-          <div class="expense-report-heading">
-            <div><p class="eyebrow">Reporting</p><h3 id="expenseReportTitle">Expense summary</h3><small class="muted">Reflects the active filters</small></div>
-          </div>
-          <div class="expense-report-columns">
-            <div><h4>By month</h4><div id="expenseMonthlyReport" class="expense-breakdown"></div></div>
-            <div><h4>By category</h4><div id="expenseCategoryReport" class="expense-breakdown"></div></div>
-            <div><h4>By allocation</h4><div id="expenseAllocationReport" class="expense-breakdown"></div></div>
-          </div>
-        </section>
-      </section>
-
-      <div id="expenseList" class="expense-list"></div>
-      <div id="expenseEmpty" class="empty-state">
-        <div class="empty-icon" aria-hidden="true">£</div>
-        <h3>No expenses recorded</h3>
-        <p>Add your first actual SPV expense and keep your company records organised.</p>
-      </div>
-    </main>
-  </div>
-
-  <dialog id="expenseDialog" class="install-dialog expense-dialog">
-    <form id="expenseForm" novalidate>
-      <div class="expense-dialog-header">
-        <div><p class="eyebrow">Actual spending</p><h3 id="expenseDialogTitle">Add Expense</h3></div>
-        <button id="closeExpenseDialogBtn" class="dialog-close expense-dialog-close" type="button" aria-label="Close expense form">×</button>
-      </div>
-
-      <label class="field currency-field">
-        <span>Amount <strong aria-hidden="true">*</strong></span>
-        <span class="input-prefix"><span>£</span><input id="expenseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required aria-describedby="expenseAmountError"></span>
-        <small id="expenseAmountError" class="error-text hidden">Enter an amount greater than £0.</small>
-      </label>
-
-      <div class="expense-form-grid">
-        <label class="field"><span>Date</span><input id="expenseDate" type="date" required></label>
-        <label class="field"><span>Category</span>
-          <select id="expenseCategory">
-            <option>Legal &amp; professional</option><option>Mortgage &amp; finance</option><option>Repairs &amp; maintenance</option>
-            <option>Refurbishment</option><option>Insurance</option><option>Utilities</option><option>Travel</option>
-            <option>Office &amp; administration</option><option>Accountancy &amp; tax</option><option>Other</option>
-          </select>
-        </label>
-      </div>
-
-      <label class="field"><span>Expense relates to</span>
-        <select id="expenseScope"><option value="company">General company expense</option><option value="property">Specific property</option></select>
-      </label>
-      <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty" aria-describedby="expensePropertyError"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
-      <label class="field"><span>Supplier / description <em>optional</em></span><input id="expenseDescription" type="text" maxlength="160" placeholder="e.g. Companies House filing fee"></label>
-      <label class="field"><span>Notes <em>optional</em></span><textarea id="expenseNotes" rows="3" maxlength="1000" placeholder="Payment details or reason for expense"></textarea></label>
-
-      <label class="field receipt-field"><span>Receipt <em>optional</em></span>
-        <input id="expenseReceipt" type="file" accept="image/*,application/pdf" aria-describedby="expenseReceiptSize expenseReceiptHelp expenseReceiptError">
-        <span id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected</span>
-        <small id="expenseReceiptHelp">Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in.</small>
-        <small id="expenseReceiptError" class="error-text hidden"></small>
-      </label>
-      <label id="removeReceiptField" class="switch-row compact-switch hidden">
-        <span><span class="switch-title">Remove current receipt</span><small>The locally stored receipt will be deleted when you save.</small></span>
-        <input id="removeExpenseReceipt" type="checkbox" role="switch">
-      </label>
-
-      <p id="expenseSaveMessage" class="save-message" aria-live="polite"></p>
-      <div class="expense-form-actions"><button id="cancelExpenseBtn" class="secondary-btn" type="button">Cancel</button><button id="saveExpenseBtn" class="primary-btn" type="submit">Save Expense</button></div>
-    </form>
-  </dialog>
-
-  <script defer src="./supabase-config.js"></script>
-  <script defer src="./cloud.js"></script>
-  <script type="module" src="./secondary-page-header.js"></script>
-  <script type="module" src="./admin-menu.js"></script>
-  <script type="module" src="./expenses.js"></script>
+  <p>Opening <a href="./expenses/">Expenses</a>…</p>
+  <script>
+    window.location.replace(new URL('./expenses/', window.location.href).href + window.location.search + window.location.hash);
+  </script>
 </body>
 </html>

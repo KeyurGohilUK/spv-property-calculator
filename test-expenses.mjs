@@ -9,7 +9,7 @@ globalThis.localStorage = {
 const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('./expense-storage.js');
 
 const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8'));
-const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8'));
+const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('./expenses/index.html', import.meta.url), 'utf8'));
 assert.match(expensePage, /MAX_RECEIPT_SIZE = 2 \* 1024 \* 1024/, 'Receipt limit must remain 2 MB');
 assert.match(expensePage, /TARGET_RECEIPT_SIZE = Math\.floor\(1\.5 \* 1024 \* 1024\)/, 'Receipt images should target approximately 1.5 MB');
 assert.match(expensePage, /MAX_RECEIPT_IMAGE_DIMENSION = 2000/, 'Large receipt images must be resized');

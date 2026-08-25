@@ -5,8 +5,8 @@ import { readStyles } from './test-style-source.mjs';
 const theme = fs.readFileSync(new URL('./theme.js', import.meta.url), 'utf8');
 const styles = readStyles();
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
-const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
-const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
+const forecast = fs.readFileSync(new URL('./forecast/index.html', import.meta.url), 'utf8');
+const expenses = fs.readFileSync(new URL('./expenses/index.html', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8');
 

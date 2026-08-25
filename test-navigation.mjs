@@ -7,8 +7,8 @@ assert.doesNotMatch(index, /Works offline, with a shared Supabase workspace for 
 assert.match(index, /Archived properties are hidden from the main list and can be restored at any time\./, 'Archive guidance must remain clear and user-focused');
 assert.doesNotMatch(index, /remain stored locally and in Supabase|Any signed-in user can restore them/, 'Archive guidance must not expose backend details');
 assert.match(index, /class="property-hero-actions"[\s\S]*id="propertySyncStatus" class="sync-status"[\s\S]*id="newPropertyBtn" class="primary-btn"/, 'Properties hero must use the shared sync-status component');
-const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
-const expenses = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
+const forecast = fs.readFileSync(new URL('./forecast/index.html', import.meta.url), 'utf8');
+const expenses = fs.readFileSync(new URL('./expenses/index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const styles = readStyles();
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
@@ -72,7 +72,10 @@ assert.match(appShell, /id="closeMoreMenuDialog" class="icon-btn more-menu-close
 assert.match(styles, /\.more-menu-header[\s\S]*display: flex[\s\S]*justify-content: space-between/, 'App Menu title and close button must share an aligned header row');
 assert.match(dialogHelper, /getBoundingClientRect[\s\S]*outside[\s\S]*close\(\)/s, 'Shared helper must close dialogs from backdrop clicks');
 assert.match(dialogHelper, /aria-labelledby[\s\S]*focusFirst[\s\S]*returnFocus/s, 'Shared helper must label dialogs and manage focus');
-assert.match(primaryNavigation, /href: '\.\/expenses\.html'/, 'Shared navigation must link to Expenses');
+assert.match(primaryNavigation, /href: '\.\/expenses\/'/, 'Shared navigation must link to the clean Expenses route');
+assert.match(primaryNavigation, /href: '\.\/forecast\/'/, 'Shared navigation must link to the clean Forecast route');
+assert.doesNotMatch(primaryNavigation, /\.html/, 'Primary navigation must not expose implementation filenames');
+assert.match(appShell, /href="\.\/admin\/users\/"/, 'App Menu must link to the clean user-management route');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
 assert.doesNotMatch(expenses, /aria-disabled="true"[^>]*Expenses/, 'Expenses navigation must remain enabled');

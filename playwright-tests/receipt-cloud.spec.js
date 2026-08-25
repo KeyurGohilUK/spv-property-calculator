@@ -31,7 +31,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
   const worker = await installReceiptWorkerMock(page, {
     objectPath: 'receipts/expense-playwright/current-receipt.pdf'
   });
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await openNewExpense(page);
@@ -91,7 +91,7 @@ test('downloads a cloud receipt when this device has no cached file', async ({ p
     }]
   });
   const worker = await installReceiptWorkerMock(page);
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.getByText('Remote receipt')).toBeVisible();
 
   const popupPromise = page.waitForEvent('popup');
@@ -123,7 +123,7 @@ test('downloads a cloud receipt when this device has no cached file', async ({ p
 test('pending offline receipt uploads after reconnecting and shared sync', async ({ page, context }) => {
   await installCloudMock(page);
   const worker = await installReceiptWorkerMock(page);
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await context.setOffline(true);
@@ -149,7 +149,7 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
 test('unauthorized Worker response keeps the receipt safely pending locally', async ({ page }) => {
   await installCloudMock(page);
   const worker = await installReceiptWorkerMock(page, { uploadStatus: 401 });
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
 
   await openNewExpense(page, '19');

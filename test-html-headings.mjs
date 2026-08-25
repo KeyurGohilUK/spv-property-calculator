@@ -3,9 +3,9 @@ import fs from 'node:fs';
 
 const pages = [
   ['Properties', 'index.html', 'Your properties'],
-  ['Expenses', 'expenses.html', 'Expense Tracker'],
-  ['Forecast', 'forecast.html', 'Property Forecast'],
-  ['Manage Users', 'manage-users.html', 'Manage Users']
+  ['Expenses', 'expenses/index.html', 'Expense Tracker'],
+  ['Forecast', 'forecast/index.html', 'Property Forecast'],
+  ['Manage Users', 'admin/users/index.html', 'Manage Users']
 ];
 
 for (const [name, path, title] of pages) {

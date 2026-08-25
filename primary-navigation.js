@@ -21,8 +21,8 @@ export function setupPrimaryNavigation(root = document) {
   const home = nav.dataset.home === 'true';
   const items = [
     { id: 'properties', label: 'Properties', href: './' },
-    { id: 'expenses', label: 'Expenses', href: './expenses.html' },
-    { id: 'forecast', label: 'Forecast', href: './forecast.html', badge: 'Beta' }
+    { id: 'expenses', label: 'Expenses', href: './expenses/' },
+    { id: 'forecast', label: 'Forecast', href: './forecast/', badge: 'Beta' }
   ];
   nav.innerHTML = `${items.map((item) => link(item, activePage, home)).join('')}
     <button${home ? ' id="moreNavBtn"' : ''} class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog">

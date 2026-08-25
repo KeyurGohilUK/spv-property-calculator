@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.24-valid-form-markup';
+const CACHE_NAME = 'spv-property-calculator-v1.21.25-clean-url-paths';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -36,9 +36,11 @@ const ASSETS = [
   './storage.js',
   './manifest.json',
   './release.json',
+  './expenses/',
   './expenses.html',
   './secondary-page-header.js',
   './admin-menu.js',
+  './admin/users/',
   './manage-users.html',
   './manage-users.css',
   './manage-users.js',
@@ -54,6 +56,7 @@ const ASSETS = [
   './dialog-helper.js',
   './update-notifier.js',
   './receipt-cloud.js',
+  './forecast/',
   './forecast.html',
   './forecast.css',
   './forecast.js',

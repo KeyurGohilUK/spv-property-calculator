@@ -181,12 +181,12 @@ test('@mobile mobile save control remains fixed while the editor scrolls', async
   expect(after.y + after.height).toBeLessThanOrEqual(844);
 });
 
-for (const route of ['/', '/expenses.html', '/forecast.html']) {
+for (const route of ['/', '/expenses/', '/forecast/']) {
   test(`only Forecast keeps the Beta badge on ${route}`, async ({ page }) => {
     await page.goto(route);
 
-    const expenseItem = page.locator('.primary-nav-item[href="./expenses.html"]');
-    const forecastItem = page.locator('.primary-nav-item[href="./forecast.html"]');
+    const expenseItem = page.locator('.primary-nav-item[href="./expenses/"]');
+    const forecastItem = page.locator('.primary-nav-item[href="./forecast/"]');
     await expect(expenseItem).toContainText('Expenses');
     await expect(expenseItem.locator('small')).toHaveCount(0);
     await expect(forecastItem.locator('small')).toHaveText('Beta');
@@ -216,7 +216,7 @@ test('home Account, Install and More controls open dialogs without navigation', 
   await expect(page).toHaveURL(originalUrl);
 });
 
-for (const route of ['/expenses.html', '/forecast.html']) {
+for (const route of ['/expenses/', '/forecast/']) {
   test(`secondary-page controls behave as dialogs on ${route}`, async ({ page }) => {
     await page.goto(route);
     const originalUrl = page.url();
@@ -234,5 +234,16 @@ for (const route of ['/expenses.html', '/forecast.html']) {
     await page.locator('#closeMoreMenuDialog').click();
 
     await expect(page).toHaveURL(originalUrl);
+  });
+}
+
+for (const [legacyRoute, cleanRoute] of [
+  ['/expenses.html?property=property-123#report', '/expenses/?property=property-123#report'],
+  ['/forecast.html?property=property-123#projection', '/forecast/?property=property-123#projection'],
+  ['/manage-users.html?filter=pending#users', '/admin/users/?filter=pending#users']
+]) {
+  test(`legacy route ${legacyRoute} redirects without losing URL state`, async ({ page }) => {
+    await page.goto(legacyRoute);
+    await expect(page).toHaveURL(new RegExp(`${cleanRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   });
 }

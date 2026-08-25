@@ -149,7 +149,7 @@ test('secondary-page automatic and manual sync share one expense operation', asy
   await installCloudMock(page);
   await seedLocalWorkspace(page, { expenses: [pendingExpense()] });
 
-  await page.goto('/expenses.html');
+  await page.goto('/expenses/');
   await expect(page.locator('#accountBtn')).toHaveClass(/is-signed-in/);
   await expect(page.locator('#expenseSyncStatus')).toContainText('Synced');
 

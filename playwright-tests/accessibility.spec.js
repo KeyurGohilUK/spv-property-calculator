@@ -4,9 +4,9 @@ import { blockExternalServices } from './support/app-helpers.js';
 
 const pages = [
   ['Properties', '/'],
-  ['Expenses', '/expenses.html'],
-  ['Forecast', '/forecast.html'],
-  ['Manage users', '/manage-users.html']
+  ['Expenses', '/expenses/'],
+  ['Forecast', '/forecast/'],
+  ['Manage users', '/admin/users/']
 ];
 
 test.describe('automated accessibility checks', () => {

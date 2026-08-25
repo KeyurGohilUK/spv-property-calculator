@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const cloud = fs.readFileSync(new URL('./cloud.js', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('./expenses.js', import.meta.url), 'utf8');
-const page = fs.readFileSync(new URL('./expenses.html', import.meta.url), 'utf8');
+const page = fs.readFileSync(new URL('./expenses/index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const secondaryHeader = fs.readFileSync(new URL('./secondary-page-header.js', import.meta.url), 'utf8');
 const sharedSync = fs.readFileSync(new URL('./expense-cloud-sync.js', import.meta.url), 'utf8');

@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const index = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
-const forecast = fs.readFileSync(new URL('./forecast.html', import.meta.url), 'utf8');
-const users = fs.readFileSync(new URL('./manage-users.html', import.meta.url), 'utf8');
+const forecast = fs.readFileSync(new URL('./forecast/index.html', import.meta.url), 'utf8');
+const users = fs.readFileSync(new URL('./admin/users/index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const shell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
 

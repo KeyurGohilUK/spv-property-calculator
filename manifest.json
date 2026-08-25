@@ -40,7 +40,7 @@
       "name": "Property Forecast",
       "short_name": "Forecast",
       "description": "Forecast rent, cash flow, equity and investment returns",
-      "url": "./forecast.html",
+      "url": "./forecast/",
       "icons": [
         {
           "src": "./icons/icon-192.png",
