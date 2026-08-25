@@ -8,10 +8,9 @@ import {
 } from './receipt-cloud.js';
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
+import { formatCurrency, formatDate } from './format-utils.js';
 
 const $ = (id) => document.getElementById(id);
-const currency = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 });
-const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 const MAX_RECEIPT_SIZE = 2 * 1024 * 1024;
 const TARGET_RECEIPT_SIZE = Math.floor(1.5 * 1024 * 1024);
@@ -195,7 +194,7 @@ async function setupExpenseCloud() {
   }
 }
 
-function money(value) { return currency.format(Number(value) || 0); }
+function money(value) { return formatCurrency(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function propertyName(id) { return properties.find((item) => item.id === id)?.title || 'Unknown property'; }
 function today() {
   const now = new Date();
@@ -313,8 +312,7 @@ function renderReports(items) {
   renderBreakdown('expenseMonthlyReport', items, (item) => {
     const match = /^(\d{4})-(\d{2})/.exec(String(item.date || ''));
     if (!match) return 'Unknown month';
-    return new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' })
-      .format(new Date(Number(match[1]), Number(match[2]) - 1, 1));
+    return formatDate(new Date(Number(match[1]), Number(match[2]) - 1, 1), { month: 'short', year: 'numeric' });
   });
   renderBreakdown('expenseCategoryReport', items, (item) => item.category || 'Other');
   renderBreakdown('expenseAllocationReport', items, (item) =>
@@ -379,7 +377,7 @@ function render() {
     amount.textContent = money(expense.amount);
     const date = document.createElement('span');
     const parsedDate = new Date(`${expense.date}T12:00:00`);
-    date.textContent = Number.isNaN(parsedDate.getTime()) ? expense.date : dateFormat.format(parsedDate);
+    date.textContent = Number.isNaN(parsedDate.getTime()) ? expense.date : formatDate(parsedDate);
     heading.append(amount, date);
     main.appendChild(heading);
 

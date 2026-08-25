@@ -1,19 +1,14 @@
 import { renderSyncStatus } from './sync-status.js';
+import { escapeHtml, formatDate as formatSharedDate } from './format-utils.js';
 
 const $ = (id) => document.getElementById(id);
 let currentUserId = '';
 let users = [];
 let loading = false;
 
-function escapeHtml(value) {
-  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
-}
-
 function formatDate(value) {
   if (!value) return 'Never';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? 'Never' : new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(date);
+  return formatSharedDate(value, { dateStyle: 'medium' }, 'Never');
 }
 
 function setMessage(message = '', isError = false) {

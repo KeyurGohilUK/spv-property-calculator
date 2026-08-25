@@ -25,6 +25,7 @@ import {
 import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
 import { createPropertyCard } from './property-card.js';
+import { escapeHtml, formatCurrency, formatDate, formatNumber } from './format-utils.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });
@@ -37,15 +38,6 @@ const appShell = setupAppShell({ home: true });
 (() => {
 'use strict';
 
-const currency = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-  maximumFractionDigits: 0
-});
-
-const numberFormat = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 });
-const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const dateTimeFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const NOTES_CACHE_KEY = 'spv-property-calculator.notes.v1';
 
 const FEE_FIELDS = [
@@ -75,12 +67,12 @@ function makeId() {
 const $ = (id) => document.getElementById(id);
 
 function money(value) {
-  return currency.format(Number.isFinite(Number(value)) ? Number(value) : 0);
+  return formatCurrency(value);
 }
 
 function formatInputValue(value) {
   const numeric = safeNumber(value);
-  return numeric === 0 ? '0' : numberFormat.format(numeric);
+  return numeric === 0 ? '0' : formatNumber(numeric, { maximumFractionDigits: 2 });
 }
 
 function normalizeDepositPercent(value) {
@@ -94,9 +86,9 @@ function formatViewingDate(value) {
   if (!match) return '';
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 0), Number(match[5] || 0));
   if (Number.isNaN(date.getTime())) return '';
-  const dateLabel = dateFormat.format(date);
+  const dateLabel = formatDate(date);
   if (!match[4] || !match[5]) return dateLabel;
-  const timeLabel = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+  const timeLabel = formatDate(date, { hour: '2-digit', minute: '2-digit', hour12: false });
   return dateLabel + ' · ' + timeLabel;
 }
 
@@ -249,7 +241,7 @@ function renderCalculation() {
 
   $('depositAmountInline').textContent = money(calc.depositAmount);
   $('mortgageInline').textContent = money(calc.mortgageRequired);
-  $('depositPercentValue').textContent = `${numberFormat.format(calc.depositPercent)}%`;
+  $('depositPercentValue').textContent = `${formatNumber(calc.depositPercent, { maximumFractionDigits: 2 })}%`;
   $('purchaseDetailsInline').textContent = money(calc.purchasePrice);
   $('sdltInline').textContent = money(calc.sdlt.total);
   $('legalInline').textContent = money(calc.legalProfessional);
@@ -260,7 +252,7 @@ function renderCalculation() {
   $('summaryInline').textContent = money(calc.totalCashRequired);
 
   $('summaryPurchasePrice').textContent = money(calc.purchasePrice);
-  $('summaryDepositPercent').textContent = `${numberFormat.format(calc.depositPercent)}%`;
+  $('summaryDepositPercent').textContent = `${formatNumber(calc.depositPercent, { maximumFractionDigits: 2 })}%`;
   $('summaryDeposit').textContent = money(calc.depositAmount);
   $('summaryMortgage').textContent = money(calc.mortgageRequired);
   $('summarySDLT').textContent = money(calc.sdlt.total);
@@ -310,15 +302,6 @@ function addExpenseRow(expense = {}) {
     event.target.value = value ? formatInputValue(value) : '';
   });
   $('customExpenses').appendChild(row);
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
 }
 
 function readNotesCache() {
@@ -391,7 +374,7 @@ function renderNotes() {
   list.innerHTML = notesForDisplay.map((item) => {
     const rawAuthor = item.author_name || 'Signed-in user';
     const author = escapeHtml(rawAuthor);
-    const created = item.created_at ? dateTimeFormat.format(new Date(item.created_at)) : 'Recently';
+    const created = item.created_at ? formatDate(item.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
     const isMine = Boolean(cloudUser?.id && item.author_user_id === cloudUser.id);
     const initials = escapeHtml(rawAuthor.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?');
     return `<article class="note-message ${isMine ? 'mine' : 'theirs'}">
@@ -639,9 +622,9 @@ function renderPropertyList() {
       </div>`;
     const card=createPropertyCard({
       property, calc,
-      headerHtml:`<h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?dateFormat.format(new Date(property.updatedAt)):'recently'}</p>${viewingDateRow}`,
+      headerHtml:`<h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?formatDate(property.updatedAt):'recently'}</p>${viewingDateRow}`,
       toolsHtml,
-      formatters:{ money, number:(value)=>numberFormat.format(value), escape:escapeHtml }
+      formatters:{ money, number:(value)=>formatNumber(value, { maximumFractionDigits: 2 }), escape:escapeHtml }
     });
     card.querySelector('.property-card-open').addEventListener('click',()=> showEditor(property.id));
     if (calendarAction) card.querySelector('[data-action="calendar"]').addEventListener('click',()=> downloadViewingCalendarInvite(property));
@@ -657,9 +640,9 @@ function renderArchiveList() {
     const calc=calculateProperty(property);
     const card=createPropertyCard({
       property, calc, archived:true,
-      headerHtml:`<div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?dateFormat.format(new Date(property.deletedAt)):'recently'}</p>`,
+      headerHtml:`<div class="archive-label">Archived</div><h3>${escapeHtml(property.title||'Untitled Property')}</h3><p class="property-meta">Archived ${property.deletedAt?formatDate(property.deletedAt):'recently'}</p>`,
       actionsHtml:'<div class="archive-card-actions"><button class="primary-btn" type="button" data-action="restore">Restore Property</button><button class="danger-btn" type="button" data-action="permanent-delete">Permanently Delete</button></div>',
-      formatters:{ money, number:(value)=>numberFormat.format(value), escape:escapeHtml }
+      formatters:{ money, number:(value)=>formatNumber(value, { maximumFractionDigits: 2 }), escape:escapeHtml }
     });
     card.querySelector('[data-action="restore"]').addEventListener('click',async()=>{ const restored=restoreProperty(property.id); if(!restored)return; renderArchiveList();renderPropertyList(); if(cloudUser&&navigator.onLine){try{const synced=await window.SPVCloud.upsertProperty(restored);storeCloudSyncedProperty(synced);setCloudMessage('Property restored and synced to Supabase.');}catch(error){console.warn('Cloud restore sync failed:',error);setCloudMessage('Property restored locally; cloud sync will retry later.',true);}}else if(cloudUser){setCloudMessage('Property restored locally; it will sync when online.',true);} });
     card.querySelector('[data-action="permanent-delete"]').addEventListener('click',async(event)=>{
