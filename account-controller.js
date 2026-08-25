@@ -30,7 +30,8 @@ export function setupAccountController({
   onInitialised = () => {},
   onInitialisationError = () => {},
   getDisplayName = (user) => user?.user_metadata?.display_name || user?.email || '',
-  onDisplayNameSaved = () => {}
+  onDisplayNameSaved = () => {},
+  onRender = () => {}
 } = {}) {
   let user = null;
   let busy = false;
@@ -65,6 +66,7 @@ export function setupAccountController({
       elements.syncButton.disabled = busy || isSyncing() || !navigator.onLine;
       elements.syncButton.textContent = isSyncing() ? 'Syncing…' : 'Sync now';
     }
+    onRender({ user, state, busy });
   };
 
   const applyUser = async (nextUser, reason) => {
