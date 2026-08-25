@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { readStyles } from './test-style-source.mjs';
 
-const theme = fs.readFileSync(new URL('../theme.js', import.meta.url), 'utf8');
+const theme = fs.readFileSync(new URL('../src/components/theme.js', import.meta.url), 'utf8');
 const styles = readStyles();
 const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
@@ -20,9 +20,9 @@ assert.match(styles, /\.property-cost-breakdown \.investment-total strong \{[^}]
 assert.match(styles, /\.editor-save-icon\.is-saved \{[^}]*var\(--brand\)/, 'Saved property action must use the selected theme colour');
 
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
-  assert.match(page, /<script src="\.\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the theme before loading styles`);
+  assert.match(page, /<script src="\.\/src\/components\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the canonical theme component before loading styles`);
 }
 assert.match(appShell, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Shared App Menu must include and bind the theme switch');
-assert.match(serviceWorker, /'\.\/theme\.js'/, 'Theme support must work offline');
+assert.match(serviceWorker, /'\.\/src\/components\/theme\.js'[\s\S]*'\.\/theme\.js'/, 'Current and compatibility Theme scripts must work offline');
 
 console.log('Theme preference checks passed.');
