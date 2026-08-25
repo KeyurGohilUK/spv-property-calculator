@@ -1,7 +1,7 @@
 {
-  "version": "1.21.20",
+  "version": "1.21.21",
   "notes": [
-    "Every page now has a clear main heading for assistive technology.",
-    "Heading improvements preserve the existing visual design and layout."
+    "Screen-reader structure is now clearer across cards, controls and status messages.",
+    "Redundant accessibility attributes were removed without changing behaviour or design."
   ]
 }

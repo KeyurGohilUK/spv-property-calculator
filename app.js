@@ -608,15 +608,15 @@ function renderPropertyList() {
         : '';
     const calendarAction = !viewingPassed && viewingDateLabel ? `<button class="property-card-icon-action calendar" type="button" data-action="calendar" aria-label="Add viewing for ${escapeHtml(propertyTitle)} to calendar" title="Add viewing to calendar" data-tooltip="Calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg></button>` : '';
     const listingAction = listingUrl ? `<button class="property-card-icon-action listing" type="button" data-action="listing" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></button>` : '';
-    const toolsHtml=`<div class="property-card-tools" aria-label="Property actions">
+    const toolsHtml=`<div class="property-card-tools" role="group" aria-label="Property actions">
         ${calendarAction}${listingAction}
         <details class="property-card-more">
-          <summary class="property-card-icon-action" role="button" aria-haspopup="menu" aria-label="More actions for ${escapeHtml(propertyTitle)}" title="More actions" data-tooltip="More">
+          <summary class="property-card-icon-action" aria-label="More actions for ${escapeHtml(propertyTitle)}" title="More actions" data-tooltip="More">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2"></circle><circle cx="12" cy="12" r="1.2"></circle><circle cx="19" cy="12" r="1.2"></circle></svg>
           </summary>
-          <div class="property-card-action-menu" role="menu">
-            <button type="button" data-action="duplicate" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Duplicate</span></button>
-            <button class="archive" type="button" data-action="archive" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg><span>Archive</span></button>
+          <div class="property-card-action-menu">
+            <button type="button" data-action="duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Duplicate</span></button>
+            <button class="archive" type="button" data-action="archive"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M5 7l1 12h12l1-12"></path><path d="M9 11h6"></path><path d="M7 4h10l1 3H6l1-3Z"></path></svg><span>Archive</span></button>
           </div>
         </details>
       </div>`;

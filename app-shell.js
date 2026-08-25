@@ -10,7 +10,7 @@ function renderHeaderControls(root) {
   const header = root.querySelector('.header-inner');
   if (!header || header.querySelector('.header-actions')) return;
   header.insertAdjacentHTML('beforeend', `
-    <div class="header-actions" aria-label="App controls">
+    <div class="header-actions" role="group" aria-label="App controls">
       <span id="connectionStatus" class="header-icon-control connection-icon" role="status" tabindex="0" aria-label="Online" title="Online" data-tooltip="Online">${connectionIcons}</span>
       <button id="accountBtn" class="header-icon-control" type="button" aria-label="Sign in" title="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25"></circle><path d="M5.5 19c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3"></path></svg></button>
       <button id="installBtn" class="header-icon-control" type="button" aria-label="Install app" title="Install app" data-tooltip="Install app"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v10"></path><path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path></svg></button>
