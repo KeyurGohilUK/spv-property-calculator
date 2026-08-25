@@ -1,5 +1,5 @@
 .field { display: grid; gap: 7px; margin-top: 14px; }
-.field > span { font-weight: 750; font-size: 13px; }
+.field > span, .field > label { font-weight: 750; font-size: 13px; }
 .field em { font-style: normal; color: var(--muted); font-weight: 500; font-size: 11px; }
 .field small { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .field input, .field textarea, .field select, .expense-row input {

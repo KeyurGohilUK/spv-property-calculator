@@ -34,6 +34,17 @@ test('deposit slider updates deposit, mortgage and total cash immediately', asyn
   await expect(page.locator('#summaryTotalCash')).toHaveText('£115,000');
 });
 
+test('property form supports native keyboard submission', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#newPropertyBtn').click();
+  await page.locator('#title').fill('Keyboard Submission');
+  await page.locator('#purchasePrice').fill('250000');
+  await page.locator('#title').press('Enter');
+
+  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await expect(page.locator('#propertyCount')).toHaveText('1');
+});
+
 test('non-resident SDLT surcharge changes a known £250,000 calculation', async ({ page }) => {
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();

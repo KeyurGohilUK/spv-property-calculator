@@ -26,3 +26,7 @@ This list records the August 2026 HTML5, accessibility and duplication audit. Wo
 - [x] Remove ineffective ARIA attributes and redundant roles.
 - [x] Apply `aria-invalid` and connected error descriptions consistently during custom validation.
 - [x] Add automated HTML validation and axe accessibility checks to CI.
+
+## Standards hardening
+
+- [x] Remove HTML-validator exemptions by using valid phrasing content, unambiguous labels and native form submission.

@@ -1,7 +1,7 @@
 {
-  "version": "1.21.23",
+  "version": "1.21.24",
   "notes": [
-    "Navigation labels now have clearer contrast against the beige app background.",
-    "HTML and browser checks now detect common accessibility regressions before release."
+    "Form controls now use fully standards-compliant HTML without validator exemptions.",
+    "Property details can now be saved naturally from the keyboard using Enter."
   ]
 }
