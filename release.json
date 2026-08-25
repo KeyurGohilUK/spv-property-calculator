@@ -1,7 +1,7 @@
 {
-  "version": "1.21.22",
+  "version": "1.21.23",
   "notes": [
-    "Validation errors are now announced against the correct property and expense fields.",
-    "Invalid fields clear their accessibility error state as soon as you edit them."
+    "Every page is now automatically checked for HTML quality during development.",
+    "Browser tests now detect common WCAG accessibility regressions before release."
   ]
 }

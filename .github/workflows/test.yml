@@ -46,7 +46,10 @@ jobs:
           node-version: 22
 
       - name: Install test dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Validate HTML
+        run: npm run test:html
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit

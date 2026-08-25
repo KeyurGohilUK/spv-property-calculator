@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.22';
+export const APP_VERSION = '1.21.23';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
