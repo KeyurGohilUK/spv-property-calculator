@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
+import { syncWorkspace, formatWorkspaceSyncError } from '../workspace-sync.js';
 
 function adapters(overrides = {}) {
   return {

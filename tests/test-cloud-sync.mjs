@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const source = fs.readFileSync(new URL('./cloud.js', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const window = {
   SPV_SUPABASE_CONFIG: {
     url: 'https://YOUR_PROJECT_REF.supabase.co',

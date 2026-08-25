@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const installSource = fs.readFileSync(new URL('./install-component.js', import.meta.url), 'utf8');
-const workerSource = fs.readFileSync(new URL('./service-worker.js', import.meta.url), 'utf8');
-const release = JSON.parse(fs.readFileSync(new URL('./release.json', import.meta.url), 'utf8'));
-const manifest = JSON.parse(fs.readFileSync(new URL('./manifest.json', import.meta.url), 'utf8'));
+const installSource = fs.readFileSync(new URL('../install-component.js', import.meta.url), 'utf8');
+const workerSource = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
+const release = JSON.parse(fs.readFileSync(new URL('../release.json', import.meta.url), 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'));
 
 const appVersion = installSource.match(/APP_VERSION = '([^']+)'/)?.[1];
 const cacheVersion = workerSource.match(/CACHE_NAME = 'spv-property-calculator-v([0-9]+\.[0-9]+\.[0-9]+)-/)?.[1];
@@ -30,7 +30,7 @@ for (const [src, size, purpose] of expectedIcons) {
   assert.equal(icon.sizes, `${size}x${size}`, `Manifest size for ${src} is incorrect`);
   assert.equal(icon.purpose, purpose, `Manifest purpose for ${src} is incorrect`);
 
-  const iconBytes = fs.readFileSync(new URL(src, import.meta.url));
+  const iconBytes = fs.readFileSync(new URL(`../${src}`, import.meta.url));
   assert.equal(iconBytes.readUInt32BE(16), size, `${src} width is incorrect`);
   assert.equal(iconBytes.readUInt32BE(20), size, `${src} height is incorrect`);
   assert.match(workerSource, new RegExp(src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${src} is not cached for offline use`);

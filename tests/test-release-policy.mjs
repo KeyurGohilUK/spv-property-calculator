@@ -4,7 +4,7 @@ import {
   cachedAppChanges,
   compareVersions,
   extractCachedAssetPaths
-} from './release-policy.js';
+} from '../release-policy.js';
 
 const baseWorker = "const ASSETS = ['./styles.css', './old.js'].map((path) => path);";
 const currentWorker = "const ASSETS = ['./styles.css', './new.js'].map((path) => path);";

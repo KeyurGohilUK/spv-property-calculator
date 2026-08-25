@@ -5,7 +5,7 @@ class FakeElement {
 }
 globalThis.document = { createElement: () => new FakeElement() };
 
-const { createPropertyCard } = await import('./property-card.js');
+const { createPropertyCard } = await import('../property-card.js');
 const calc = {
   purchasePrice: 200000, depositPercent: 25, depositAmount: 50000,
   mortgageRequired: 150000, totalPurchaseCostsExcludingDeposit: 12000,

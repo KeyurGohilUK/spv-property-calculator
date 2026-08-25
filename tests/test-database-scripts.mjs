@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const bootstrap = fs.readFileSync(new URL('./database-scripts/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
-const expenseMigration = fs.readFileSync(new URL('./database-scripts/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
-const receiptMigration = fs.readFileSync(new URL('./database-scripts/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
-const revisionRepair = fs.readFileSync(new URL('./database-scripts/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
-const receiptWorker = fs.readFileSync(new URL('./cloudflare/receipt-worker/src/index.js', import.meta.url), 'utf8');
-const workerConfig = fs.readFileSync(new URL('./cloudflare/receipt-worker/wrangler.jsonc', import.meta.url), 'utf8');
-const migrationGuide = fs.readFileSync(new URL('./database-scripts/README.md', import.meta.url), 'utf8');
+const bootstrap = fs.readFileSync(new URL('../database-scripts/00 - Bootstrap Complete Schema.sql', import.meta.url), 'utf8');
+const expenseMigration = fs.readFileSync(new URL('../database-scripts/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
+const receiptMigration = fs.readFileSync(new URL('../database-scripts/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
+const revisionRepair = fs.readFileSync(new URL('../database-scripts/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
+const receiptWorker = fs.readFileSync(new URL('../cloudflare/receipt-worker/src/index.js', import.meta.url), 'utf8');
+const workerConfig = fs.readFileSync(new URL('../cloudflare/receipt-worker/wrangler.jsonc', import.meta.url), 'utf8');
+const migrationGuide = fs.readFileSync(new URL('../database-scripts/README.md', import.meta.url), 'utf8');
 
 for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);

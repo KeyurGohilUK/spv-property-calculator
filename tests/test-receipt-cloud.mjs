@@ -30,7 +30,7 @@ try {
     downloadCloudReceipt,
     deleteCloudReceipt,
     prepareExpenseReceiptForSync
-  } = await import('./receipt-cloud.js');
+  } = await import('../receipt-cloud.js');
 
   assert.equal(isCloudReceiptConfigured(), true);
   const file = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/jpeg' });

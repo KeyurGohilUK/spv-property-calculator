@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import worker from './cloudflare/receipt-worker/src/index.js';
+import worker from '../cloudflare/receipt-worker/src/index.js';
 
 const objects = new Map();
 const bucket = {
