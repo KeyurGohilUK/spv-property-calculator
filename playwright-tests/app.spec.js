@@ -24,6 +24,7 @@ test('More opens a modal without navigating and closes from the backdrop', async
 
   await page.mouse.click(5, 5);
   await expect(page.getByRole('heading', { name: 'App Menu' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'More' })).toBeFocused();
   await expect(page).toHaveURL(originalUrl);
 });
 
