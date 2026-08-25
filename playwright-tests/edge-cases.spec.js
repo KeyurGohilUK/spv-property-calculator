@@ -13,6 +13,10 @@ test('property validation blocks incomplete records and identifies both required
 
   await expect(page.locator('#titleError')).toBeVisible();
   await expect(page.locator('#priceError')).toBeVisible();
+  await expect(page.locator('#title')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#title')).toHaveAttribute('aria-describedby', /\btitleError\b/);
+  await expect(page.locator('#purchasePrice')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#purchasePrice')).toHaveAttribute('aria-describedby', /\bpriceError\b/);
   await expect(page.locator('#editorView')).not.toHaveClass(/hidden/);
   await expect(page.locator('#propertyCount')).toHaveText('0');
 });
@@ -94,6 +98,10 @@ test('expense validation requires an amount and a selected property', async ({ p
 
   await expect(page.locator('#expenseAmountError')).toBeVisible();
   await expect(page.locator('#expensePropertyError')).toBeVisible();
+  await expect(page.locator('#expenseAmount')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#expenseAmount')).toHaveAttribute('aria-describedby', /\bexpenseAmountError\b/);
+  await expect(page.locator('#expenseProperty')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#expenseProperty')).toHaveAttribute('aria-describedby', /\bexpensePropertyError\b/);
   await expect(page.locator('#expenseDialog')).toHaveAttribute('open', '');
 });
 
@@ -211,6 +219,8 @@ test('receipt PDFs larger than 2 MB are rejected before local save', async ({ pa
   await expect(page.locator('#expenseReceiptSize')).toContainText('oversized-receipt.pdf');
   await page.getByRole('button', { name: 'Save Expense' }).click();
   await expect(page.locator('#expenseReceiptError')).toContainText('2 MB');
+  await expect(page.locator('#expenseReceipt')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#expenseReceipt')).toHaveAttribute('aria-describedby', /\bexpenseReceiptError\b/);
   await expect(page.locator('#expenseDialog')).toHaveAttribute('open', '');
   await expect(page.locator('#expenseCount')).toHaveText('0');
 });

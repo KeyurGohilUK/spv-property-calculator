@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.21.21';
+export const APP_VERSION = '1.21.22';
 
 const APP_CACHE_PREFIX = 'spv-property-calculator-';
 const APP_UPDATE_ASSETS = Object.freeze([
@@ -13,7 +13,7 @@ const APP_UPDATE_ASSETS = Object.freeze([
   './styles/features/archive.css', './styles/features/editor.css', './styles/features/statuses.css',
   './theme.js', './help-guide.js',
   './app.js', './install-component.js', './update-notifier.js',
-  './format-utils.js',
+  './format-utils.js', './validation.js',
   './property-card.js',
   './calendar-invite.js', './cloud.js', './calculations.js', './tax-config.js',
   './storage.js', './manifest.json', './supabase-config.js', './release.json',

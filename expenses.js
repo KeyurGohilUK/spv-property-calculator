@@ -9,6 +9,7 @@ import {
 import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, permanentlyRemoveLocalExpense, saveReceipt, getReceipt, deleteReceipt } from './expense-storage.js';
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 import { formatCurrency, formatDate } from './format-utils.js';
+import { clearFieldValidation, setFieldValidation } from './validation.js';
 
 const $ = (id) => document.getElementById(id);
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
@@ -225,7 +226,7 @@ function updateScope() {
   $('expenseProperty').required = propertyScope;
   if (!propertyScope) {
     $('expenseProperty').value = '';
-    $('expensePropertyError').classList.add('hidden');
+    clearFieldValidation($('expenseProperty'), $('expensePropertyError'));
   }
 }
 
@@ -250,9 +251,9 @@ function openForm(expense = null) {
   $('removeExpenseReceipt').checked = false;
   $('removeReceiptField').classList.toggle('hidden', !expense?.receipt);
   $('expenseSaveMessage').textContent = '';
-  $('expenseAmountError').classList.add('hidden');
-  $('expensePropertyError').classList.add('hidden');
-  $('expenseReceiptError').classList.add('hidden');
+  clearFieldValidation($('expenseAmount'), $('expenseAmountError'));
+  clearFieldValidation($('expenseProperty'), $('expensePropertyError'));
+  clearFieldValidation($('expenseReceipt'), $('expenseReceiptError'));
   $('expenseReceiptSize').textContent = expense?.receipt
     ? `Current receipt: ${expense.receipt.name || 'Receipt'} · ${formatFileSize(expense.receipt.size)}`
     : 'No receipt selected';
@@ -483,15 +484,15 @@ async function submitExpense(event) {
   let receiptFile = $('expenseReceipt').files[0] || null;
   const amountInvalid = !Number.isFinite(amount) || amount <= 0;
   const propertyInvalid = scope === 'property' && !propertyId;
-  $('expenseAmountError').classList.toggle('hidden', !amountInvalid);
-  $('expensePropertyError').classList.toggle('hidden', !propertyInvalid);
-  $('expenseReceiptError').classList.add('hidden');
+  setFieldValidation($('expenseAmount'), $('expenseAmountError'), { invalid: amountInvalid });
+  setFieldValidation($('expenseProperty'), $('expensePropertyError'), { invalid: propertyInvalid });
+  clearFieldValidation($('expenseReceipt'), $('expenseReceiptError'));
 
   if (receiptFile && (!allowedReceiptTypes.has(receiptFile.type) || (receiptFile.type === 'application/pdf' && receiptFile.size > MAX_RECEIPT_SIZE))) {
-    $('expenseReceiptError').textContent = receiptFile.type === 'application/pdf' && receiptFile.size > MAX_RECEIPT_SIZE
+    const receiptMessage = receiptFile.type === 'application/pdf' && receiptFile.size > MAX_RECEIPT_SIZE
       ? 'PDF receipt must be 2 MB or smaller.'
       : 'Choose a PDF, JPEG, PNG, WebP or supported iPhone photo.';
-    $('expenseReceiptError').classList.remove('hidden');
+    setFieldValidation($('expenseReceipt'), $('expenseReceiptError'), { invalid: true, message: receiptMessage });
     return;
   }
   if (amountInvalid || propertyInvalid) return;
@@ -585,10 +586,12 @@ async function submitExpense(event) {
 
 $('openExpenseFormBtn').addEventListener('click', () => openForm());
 $('expenseScope').addEventListener('change', updateScope);
+$('expenseAmount').addEventListener('input', () => clearFieldValidation($('expenseAmount'), $('expenseAmountError')));
+$('expenseProperty').addEventListener('change', () => clearFieldValidation($('expenseProperty'), $('expensePropertyError')));
 function updateReceiptSelectionDetails() {
   const file = $('expenseReceipt').files[0] || null;
   const size = $('expenseReceiptSize');
-  $('expenseReceiptError').classList.add('hidden');
+  clearFieldValidation($('expenseReceipt'), $('expenseReceiptError'));
   if (!file) {
     const current = editingExpenseId ? getAllExpenses().find((item) => item.id === editingExpenseId)?.receipt : null;
     size.textContent = current

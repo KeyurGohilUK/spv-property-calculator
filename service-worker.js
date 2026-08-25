@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.21-aria-cleanup';
+const CACHE_NAME = 'spv-property-calculator-v1.21.22-validation-accessibility';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -26,6 +26,7 @@ const ASSETS = [
   './help-guide.js',
   './app.js',
   './format-utils.js',
+  './validation.js',
   './property-card.js',
   './install-component.js',
   './calendar-invite.js',

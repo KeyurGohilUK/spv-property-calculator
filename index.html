@@ -110,7 +110,7 @@
 
               <label class="field">
                 <span>Property Title <strong aria-hidden="true">*</strong></span>
-                <input id="title" name="title" type="text" maxlength="120" autocomplete="off" placeholder="e.g. 2 Bedroom Flat – Bristol" required>
+                <input id="title" name="title" type="text" maxlength="120" autocomplete="off" placeholder="e.g. 2 Bedroom Flat – Bristol" required aria-describedby="titleError">
                 <small id="titleError" class="error-text hidden">Please enter a property title.</small>
               </label>
 
@@ -154,8 +154,9 @@
                     <span>Deposit Percentage</span>
                     <output id="depositPercentValue" class="deposit-range-value" for="depositPercent">25%</output>
                   </span>
-                  <input id="depositPercent" name="depositPercent" class="deposit-range" type="range" min="0" max="100" step="5" value="25" aria-label="Deposit percentage in 5 percent steps">
+                  <input id="depositPercent" name="depositPercent" class="deposit-range" type="range" min="0" max="100" step="5" value="25" aria-label="Deposit percentage in 5 percent steps" aria-describedby="depositPercentError">
                   <span class="deposit-range-scale" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></span>
+                  <small id="depositPercentError" class="error-text hidden">Deposit must be between 0% and 100%.</small>
                 </label>
               </div>
 
