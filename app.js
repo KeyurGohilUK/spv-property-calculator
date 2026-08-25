@@ -23,10 +23,10 @@ import {
   replaceProperties as replaceLocalProperties
 } from './storage.js';
 import { syncWorkspace, formatWorkspaceSyncError } from './workspace-sync.js';
-import { buildViewingCalendarInvite, isFutureViewing } from './calendar-invite.js';
+import { buildViewingCalendarInvite, isFutureViewing } from './src/utils/calendar-invite.js';
 import { createPropertyCard } from './property-card.js';
-import { escapeHtml, formatCurrency, formatDate, formatNumber } from './format-utils.js';
-import { clearFieldValidation, setFieldValidation } from './validation.js';
+import { escapeHtml, formatCurrency, formatDate, formatNumber } from './src/utils/format-utils.js';
+import { clearFieldValidation, setFieldValidation } from './src/utils/validation.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });

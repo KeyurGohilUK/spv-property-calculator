@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { clearFieldValidation, setFieldValidation } from '../validation.js';
+import { clearFieldValidation, setFieldValidation } from '../src/utils/validation.js';
 
 const attributes = new Map([['aria-describedby', 'fieldHelp']]);
 const input = {
