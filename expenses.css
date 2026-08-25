@@ -36,9 +36,10 @@
 .expense-filter-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .expense-filter-actions button { min-height: 42px; white-space: nowrap; }
 .expense-list { display: grid; gap: 11px; }
-.expense-card { cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.expense-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
 .expense-card:hover { border-color: color-mix(in srgb, var(--brand) 30%, var(--border)); }
-.expense-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: 2px; }
+.expense-card-open { position: absolute; inset: 0; z-index: 1; width: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+.expense-card-open:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: 2px; }
 .expense-card-main { min-width: 0; }
 .expense-card-heading { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
 .expense-card-heading strong { font-size: 17px; }
@@ -47,7 +48,7 @@
 .expense-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .expense-chip { padding: 4px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 10px; font-weight: 800; }
 .expense-chip.property { color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, var(--surface)); }
-.expense-card-actions { display: flex; gap: 7px; }
+.expense-card-actions { position: relative; z-index: 2; display: flex; gap: 7px; }
 .expense-card-actions button { min-width: 40px; min-height: 40px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 800; }
 .expense-card-actions .view-receipt, .expense-card-actions .delete-expense { display: grid; place-items: center; }
 .expense-card-actions .view-receipt { color: var(--brand); }
