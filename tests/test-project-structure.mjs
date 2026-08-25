@@ -23,7 +23,8 @@ assert.equal(fs.existsSync(new URL('playwright-tests/', projectRoot)), false, 'L
 
 for (const utility of ['format-utils.js', 'validation.js', 'calendar-invite.js']) {
   assert.equal(fs.existsSync(new URL(`src/utils/${utility}`, projectRoot)), true, `${utility} must remain under src/utils`);
-  assert.equal(fs.existsSync(new URL(utility, projectRoot)), false, `${utility} must not return to the repository root`);
+  const compatibilitySource = fs.readFileSync(new URL(utility, projectRoot), 'utf8');
+  assert.match(compatibilitySource, new RegExp(`export \\* from '\\.\\/src\\/utils\\/${utility.replace('.', '\\.')}';`), `${utility} must retain its previous URL as a compatibility export`);
 }
 
 console.log('Project folder structure checks passed.');
