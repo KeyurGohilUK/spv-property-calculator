@@ -1,7 +1,7 @@
 {
-  "version": "1.21.37",
+  "version": "1.21.38",
   "notes": [
-    "App updates now use a versioned asset manifest, making folder migrations safer and easier to verify.",
-    "This bridge release keeps previous file addresses for one final update before obsolete root compatibility files are removed."
+    "Obsolete compatibility files have been removed from the repository root now that updates use the asset manifest.",
+    "Application code and feature styles now load only from their organised canonical folders."
   ]
 }

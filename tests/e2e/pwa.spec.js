@@ -98,7 +98,6 @@ test('installs the app shell and controls the page', async ({ page }) => {
     '/index.html',
     '/expenses/',
     '/src/app/app.js',
-    '/app.js',
     '/styles.css'
   ]));
 });
@@ -115,41 +114,20 @@ test('opens the cached expense tracker while offline', async ({ page, context })
   await expect(page.getByRole('button', { name: /Add Expense/i })).toBeVisible();
 });
 
-test('keeps previous utility URLs available during the cache migration', async ({ page }) => {
+test('loads canonical modules from the organised folders', async ({ page }) => {
   await page.goto('/');
 
-  const legacyModules = await page.evaluate(async () => Promise.all([
-    import('/format-utils.js').then((module) => typeof module.formatCurrency),
-    import('/validation.js').then((module) => typeof module.setFieldValidation),
-    import('/calendar-invite.js').then((module) => typeof module.buildViewingCalendarInvite),
-    import('/src/utils/calendar-invite.js').then((module) => typeof module.buildViewingCalendarInvite)
+  const canonicalModules = await page.evaluate(async () => Promise.all([
+    import('/src/utils/format-utils.js').then((module) => typeof module.formatCurrency),
+    import('/src/utils/validation.js').then((module) => typeof module.setFieldValidation),
+    import('/src/features/properties/calendar-invite.js').then((module) => typeof module.buildViewingCalendarInvite),
+    import('/src/app/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
+    import('/src/app/app-shell.js').then((module) => typeof module.setupAppShell),
+    import('/src/components/install-component.js').then((module) => typeof module.setupInstallComponent),
+    import('/src/components/update-notifier.js').then((module) => typeof module.setupUpdateNotifier)
   ]));
 
-  expect(legacyModules).toEqual(['function', 'function', 'function', 'function']);
-});
-
-test('keeps previous component URLs available during the cache migration', async ({ page }) => {
-  await page.goto('/');
-
-  const legacyModules = await page.evaluate(async () => Promise.all([
-    import('/dialog-helper.js').then((module) => typeof module.setupDialog),
-    import('/sync-status.js').then((module) => typeof module.renderSyncStatus),
-    import('/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
-    import('/app-shell.js').then((module) => typeof module.setupAppShell),
-    import('/src/components/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
-    import('/src/components/app-shell.js').then((module) => typeof module.setupAppShell),
-    import('/install-component.js').then((module) => typeof module.setupInstallComponent),
-    import('/update-notifier.js').then((module) => typeof module.setupUpdateNotifier),
-    fetch('/secondary-page-header.js').then((response) => response.ok ? 'available' : 'missing'),
-    fetch('/help-guide.js').then((response) => response.ok ? 'available' : 'missing'),
-    fetch('/admin-menu.js').then((response) => response.ok ? 'available' : 'missing'),
-    fetch('/theme.js').then((response) => response.ok ? 'available' : 'missing')
-  ]));
-
-  expect(legacyModules).toEqual([
-    'function', 'function', 'function', 'function', 'function', 'function', 'function', 'function',
-    'available', 'available', 'available', 'available'
-  ]);
+  expect(canonicalModules).toEqual(['function', 'function', 'function', 'function', 'function', 'function', 'function']);
 });
 
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {

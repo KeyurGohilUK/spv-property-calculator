@@ -23,6 +23,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /<script src="\.\/src\/components\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the canonical theme component before loading styles`);
 }
 assert.match(appShell, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Shared App Menu must include and bind the theme switch');
-assert.ok(appAssets.includes('./src/components/theme.js') && appAssets.includes('./theme.js'), 'Current and compatibility Theme scripts must work offline');
+assert.ok(appAssets.includes('./src/components/theme.js'), 'Canonical Theme script must work offline');
+assert.ok(!appAssets.includes('./theme.js'), 'Removed Theme compatibility path must not return to the cache manifest');
 
 console.log('Theme preference checks passed.');

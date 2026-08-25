@@ -82,7 +82,7 @@ User-facing navigation uses directory-based paths so GitHub Pages can serve clea
 - Forecast: `./forecast/`
 - Manage Users: `./admin/users/`
 
-The former `.html` URLs remain as compatibility redirects for existing bookmarks. Keep the trailing slash on clean routes so shared assets resolve consistently on both custom domains and repository-subdirectory deployments.
+The application now uses only these clean routes. Keep the trailing slash so shared assets resolve consistently on both custom domains and repository-subdirectory deployments.
 
 ## Local testing
 

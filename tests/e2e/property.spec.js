@@ -236,14 +236,3 @@ for (const route of ['/expenses/', '/forecast/']) {
     await expect(page).toHaveURL(originalUrl);
   });
 }
-
-for (const [legacyRoute, cleanRoute] of [
-  ['/expenses.html?property=property-123#report', '/expenses/?property=property-123#report'],
-  ['/forecast.html?property=property-123#projection', '/forecast/?property=property-123#projection'],
-  ['/manage-users.html?filter=pending#users', '/admin/users/?filter=pending#users']
-]) {
-  test(`legacy route ${legacyRoute} redirects without losing URL state`, async ({ page }) => {
-    await page.goto(legacyRoute);
-    await expect(page).toHaveURL(new RegExp(`${cleanRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
-  });
-}
