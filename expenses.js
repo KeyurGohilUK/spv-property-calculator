@@ -1,5 +1,6 @@
 import { getActiveProperties } from './storage.js';
 import { renderSyncStatus } from './sync-status.js';
+import { setupDialog } from './dialog-helper.js';
 import {
   uploadCloudReceipt,
   downloadCloudReceipt,
@@ -229,6 +230,12 @@ function updateScope() {
   }
 }
 
+const expenseDialogController = setupDialog($('expenseDialog'), {
+  closeButtons: [$('closeExpenseDialogBtn'), $('cancelExpenseBtn')],
+  initialFocus: () => $('expenseAmount')
+});
+$('expenseDialog').addEventListener('close', () => { editingExpenseId = null; });
+
 function openForm(expense = null) {
   editingExpenseId = expense?.id || null;
   $('expenseForm').reset();
@@ -251,13 +258,12 @@ function openForm(expense = null) {
     ? `Current receipt: ${expense.receipt.name || 'Receipt'} · ${formatFileSize(expense.receipt.size)}`
     : 'No receipt selected';
   updateScope();
-  $('expenseDialog').showModal();
-  window.setTimeout(() => $('expenseAmount').focus(), 0);
+  expenseDialogController.open();
 }
 
 function closeForm() {
   editingExpenseId = null;
-  $('expenseDialog').close();
+  expenseDialogController.close();
 }
 
 function expenseMatchesFilter(expense) {
@@ -580,8 +586,6 @@ async function submitExpense(event) {
 }
 
 $('openExpenseFormBtn').addEventListener('click', () => openForm());
-$('closeExpenseDialogBtn').addEventListener('click', closeForm);
-$('cancelExpenseBtn').addEventListener('click', closeForm);
 $('expenseScope').addEventListener('change', updateScope);
 function updateReceiptSelectionDetails() {
   const file = $('expenseReceipt').files[0] || null;
@@ -622,11 +626,6 @@ window.addEventListener('offline', () => setSyncStatus('Offline · changes will 
 window.addEventListener('spv-workspace-synced', () => {
   populateProperties();
   render();
-});
-$('expenseDialog').addEventListener('click', (event) => {
-  const dialog = event.currentTarget;
-  const bounds = dialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeForm();
 });
 
 populateProperties();

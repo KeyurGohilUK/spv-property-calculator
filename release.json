@@ -1,7 +1,7 @@
 {
-  "version": "1.21.14",
+  "version": "1.21.15",
   "notes": [
-    "Property and expense card actions now respond independently and more reliably.",
-    "Keyboard and screen-reader navigation has been improved without changing the card design."
+    "Popups now use consistent close and backdrop behaviour throughout the app.",
+    "Keyboard focus now moves into each popup and returns to the control that opened it."
   ]
 }

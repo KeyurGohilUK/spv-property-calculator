@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.14-accessible-cards';
+const CACHE_NAME = 'spv-property-calculator-v1.21.15-accessible-dialogs';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -35,6 +35,7 @@ const ASSETS = [
   './account-controller.js',
   './primary-navigation.js',
   './app-shell.js',
+  './dialog-helper.js',
   './update-notifier.js',
   './receipt-cloud.js',
   './forecast.html',

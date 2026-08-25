@@ -1,3 +1,5 @@
+import { setupDialog } from './dialog-helper.js';
+
 (function initialiseHelpGuide() {
   'use strict';
   const STORAGE_KEY = 'spv-help-guide-seen';
@@ -9,6 +11,7 @@
   ];
   let currentStep = 0;
   let dialog;
+  let dialogController;
 
   function hasSeenGuide() { try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch { return false; } }
   function markGuideSeen() { try { localStorage.setItem(STORAGE_KEY, 'true'); } catch { /* Storage may be unavailable. */ } }
@@ -31,13 +34,13 @@
     dialog.querySelector('[data-help-next]').textContent = currentStep === steps.length - 1 ? 'Finish' : 'Next';
     dialog.querySelectorAll('[data-help-dot]').forEach((dot, index) => dot.classList.toggle('active', index === currentStep));
   }
-  function openGuide() { currentStep = 0; renderStep(); if (!dialog.open) dialog.showModal(); }
-  function closeGuide() { markGuideSeen(); dialog.close(); }
+  function openGuide(trigger) { currentStep = 0; renderStep(); dialogController.open(trigger); }
+  function closeGuide() { markGuideSeen(); dialogController.close(); }
   function bindTriggers(root = document) {
     root.querySelectorAll('[data-help-guide]').forEach((trigger) => {
       if (trigger.dataset.helpBound === 'true') return;
       trigger.dataset.helpBound = 'true';
-      trigger.addEventListener('click', () => { trigger.closest('dialog')?.close(); openGuide(); });
+      trigger.addEventListener('click', () => { trigger.closest('dialog')?.close(); openGuide(document.activeElement); });
     });
   }
   function init() {
@@ -50,8 +53,12 @@
         <div class="help-guide-actions"><button class="secondary-btn hidden" type="button" data-help-back>Back</button><button class="primary-btn" type="button" data-help-next>Next</button></div>
       </dialog>`);
     dialog = document.getElementById('helpGuideDialog');
+    dialogController = setupDialog(dialog, {
+      closeButtons: [dialog.querySelector('[data-help-close]')],
+      initialFocus: () => dialog.querySelector('[data-help-next]')
+    });
+    dialog.addEventListener('close', markGuideSeen);
     bindTriggers();
-    dialog.querySelector('[data-help-close]').addEventListener('click', closeGuide);
     dialog.querySelector('[data-help-back]').addEventListener('click', () => { currentStep -= 1; renderStep(); });
     dialog.querySelector('[data-help-next]').addEventListener('click', () => { if (currentStep === steps.length - 1) closeGuide(); else { currentStep += 1; renderStep(); } });
     dialog.addEventListener('cancel', markGuideSeen);

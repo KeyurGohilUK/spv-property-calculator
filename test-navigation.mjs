@@ -15,6 +15,7 @@ const installComponent = fs.readFileSync(new URL('./install-component.js', impor
 const syncStatus = fs.readFileSync(new URL('./sync-status.js', import.meta.url), 'utf8');
 const primaryNavigation = fs.readFileSync(new URL('./primary-navigation.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('./app-shell.js', import.meta.url), 'utf8');
+const dialogHelper = fs.readFileSync(new URL('./dialog-helper.js', import.meta.url), 'utf8');
 assert.doesNotMatch(expenses, /Total recorded|Company expenses|Property expenses|expense-summary-grid/, 'Expense overview counters must remain removed');
 assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecasting/, 'Forecast must not duplicate the main navigation with an upper back bar');
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
@@ -54,7 +55,7 @@ assert.match(forecast, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*secondary-page
 assert.match(primaryNavigation, /class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog"/, 'Shared More must be a local dialog button');
 assert.doesNotMatch(forecast, /href="\.\/\?menu=more"/, 'Forecast More must not navigate away');
 assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not navigate away');
-assert.match(appShell, /data-more-menu[\s\S]*dialog\.showModal\(\)/, 'Shared More must open a local popup');
+assert.match(appShell, /data-more-menu[\s\S]*dialogController\.open\(control\)/, 'Shared More must open through the accessible dialog helper');
 assert.match(appShell, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Shared App Menu items must be ordered by priority');
 assert.match(appShell, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Shared App Menu must use Install dialog styling');
 assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
@@ -64,7 +65,8 @@ assert.doesNotMatch(appShell, /<h3[^>]*>More<\/h3>/, 'More popup must not repeat
 assert.match(appShell, /<h3 id="appMenuTitle">App Menu<\/h3>/, 'App Menu title must remain in the popup header');
 assert.match(appShell, /id="closeMoreMenuDialog" class="icon-btn more-menu-close"/, 'More popup close button class missing');
 assert.match(styles, /\.more-menu-header[\s\S]*display: flex[\s\S]*justify-content: space-between/, 'App Menu title and close button must share an aligned header row');
-assert.match(appShell, /getBoundingClientRect[\s\S]*inside[\s\S]*dialog\.close/s, 'Backdrop click must close the App Menu');
+assert.match(dialogHelper, /getBoundingClientRect[\s\S]*outside[\s\S]*close\(\)/s, 'Shared helper must close dialogs from backdrop clicks');
+assert.match(dialogHelper, /aria-labelledby[\s\S]*focusFirst[\s\S]*returnFocus/s, 'Shared helper must label dialogs and manage focus');
 assert.match(primaryNavigation, /href: '\.\/expenses\.html'/, 'Shared navigation must link to Expenses');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
