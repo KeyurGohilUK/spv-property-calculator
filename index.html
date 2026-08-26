@@ -17,7 +17,18 @@
   <link rel="stylesheet" href="./styles.css">
   <title>SPV Property Calculator</title>
 </head>
-<body>
+<body class="auth-pending">
+  <main id="publicLanding" class="public-landing" aria-labelledby="publicLandingTitle">
+    <section class="public-landing-card">
+      <img class="public-landing-logo" src="./icons/icon-192.png" alt="" width="96" height="96">
+      <p class="eyebrow">Private workspace</p>
+      <h1 id="publicLandingTitle">SPV Property Calculator</h1>
+      <p class="public-landing-intro">A private property-planning workspace for authorised users.</p>
+      <button id="publicLoginBtn" class="primary-btn public-login-btn" type="button" disabled>Preparing login…</button>
+      <p id="publicLoginStatus" class="public-login-status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
   <div id="app">
     <header class="app-header">
       <div class="header-inner">
@@ -38,7 +49,7 @@
         <div class="hero-card">
           <div>
             <p class="eyebrow">Purchase-cost planning</p>
-            <h1 id="homeTitle">Your properties</h1>
+            <h2 id="homeTitle">Your properties</h2>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed.</p>
           </div>
           <div class="property-hero-actions" role="group" aria-label="Property actions">
@@ -335,12 +346,7 @@
     <div id="authSignedOut">
       <p class="eyebrow">Cloud sync</p>
       <h3>Supabase account</h3>
-      <p class="muted small">Sign in to the shared workspace. Every authenticated user can see, edit and archive the same shared property list. The local copy remains available offline.</p>
-
-      <label class="field">
-        <span>Your name <em>(used when creating an account and on notes)</em></span>
-        <input id="authDisplayName" type="text" autocomplete="name" maxlength="80" placeholder="e.g. Keyur">
-      </label>
+      <p class="muted small">Sign in with an approved account to open the private workspace.</p>
       <label class="field">
         <span>Email</span>
         <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
@@ -351,7 +357,6 @@
       </label>
       <div class="auth-actions">
         <button id="signInBtn" class="primary-btn" type="button">Sign in</button>
-        <button id="signUpBtn" class="secondary-btn" type="button">Create account</button>
       </div>
       <p id="authMessage" class="auth-message" aria-live="polite"></p>
     </div>

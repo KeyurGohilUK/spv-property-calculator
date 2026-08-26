@@ -1,8 +1,8 @@
 {
-  "version": "1.21.40",
+  "version": "1.21.41",
   "notes": [
-    "Note Notifications are ready to enable with the configured public VAPID key.",
-    "Push-notification setup, operations, testing and troubleshooting are now documented in one runbook.",
-    "The Update 14 Row Level Security verification query now uses the correct PostgreSQL catalogue column."
+    "Anonymous visitors now see a private welcome and login screen instead of workspace features.",
+    "Install, connection status and app navigation remain hidden until authentication succeeds.",
+    "Direct feature URLs return signed-out visitors to the private landing page."
   ]
 }

@@ -3,6 +3,7 @@ import { setupAccountController } from '../services/account-controller.js';
 import { setupPrimaryNavigation } from '../app/primary-navigation.js';
 import { setupAppShell } from '../app/app-shell.js';
 import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from '../services/workspace-sync.js';
+import { renderAccessState, redirectAnonymousToLanding } from '../services/access-gate.js';
 
 const $ = (id) => document.getElementById(id);
 setupPrimaryNavigation();
@@ -33,10 +34,9 @@ document.body.insertAdjacentHTML('beforeend', `
   <dialog id="secondaryAccountDialog" class="install-dialog auth-dialog">
     <button id="closeSecondaryAccount" class="dialog-close" type="button" aria-label="Close">×</button>
     <div id="secondarySignedOut"><p class="eyebrow">Cloud sync</p><h3>Supabase account</h3>
-      <label class="field"><span>Your name</span><input id="secondaryAuthName" type="text" autocomplete="name" maxlength="80"></label>
       <label class="field"><span>Email</span><input id="secondaryAuthEmail" type="email" autocomplete="email"></label>
       <label class="field"><span>Password</span><input id="secondaryAuthPassword" type="password" autocomplete="current-password" minlength="6"></label>
-      <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button><button id="secondarySignUpBtn" class="secondary-btn" type="button">Create account</button></div>
+      <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button></div>
       <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondarySignedIn" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Signed in</h3><p id="secondarySignedInEmail" class="muted"></p>
@@ -67,15 +67,17 @@ accountController = setupAccountController({
     button: shell.accountButton, dialog: $('secondaryAccountDialog'), closeButton: $('closeSecondaryAccount'),
     signedOut: $('secondarySignedOut'), signedIn: $('secondarySignedIn'), notConfigured: $('secondaryAuthSetup'),
     setupMessage: $('secondaryAuthSetup').querySelector('p:not(.eyebrow)'),
-    name: $('secondaryAuthName'), email: $('secondaryAuthEmail'), password: $('secondaryAuthPassword'),
+    email: $('secondaryAuthEmail'), password: $('secondaryAuthPassword'),
     authMessage: $('secondaryAuthMessage'), signedInEmail: $('secondarySignedInEmail'),
-    signInButton: $('secondarySignInBtn'), signUpButton: $('secondarySignUpBtn'), signOutButton: $('secondarySignOutBtn'),
+    signInButton: $('secondarySignInBtn'), signOutButton: $('secondarySignOutBtn'),
     syncButton: $('secondarySyncBtn'), accountMessage: $('secondaryAccountMessage')
   },
   sync: syncWorkspace,
   isSyncing: () => syncing,
   onUserChange: async (user, { reason }) => {
     cloudUser = user;
+    renderAccessState(user);
+    if (!user && redirectAnonymousToLanding(user)) return;
     if (cloudUser && navigator.onLine && (reason === 'sign-in' || reason === 'sign-up')) await syncWorkspace();
   }
 });

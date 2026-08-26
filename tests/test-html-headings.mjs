@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const pages = [
-  ['Properties', 'index.html', 'Your properties'],
+  ['Properties', 'index.html', 'SPV Property Calculator'],
   ['Expenses', 'expenses/index.html', 'Expense Tracker'],
   ['Forecast', 'forecast/index.html', 'Property Forecast'],
   ['Manage Users', 'admin/users/index.html', 'Manage Users']

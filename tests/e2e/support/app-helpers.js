@@ -1,8 +1,10 @@
 import { expect } from '@playwright/test';
+import { installCloudMock } from './cloud-mock.js';
 
-export async function blockExternalServices(page) {
+export async function blockExternalServices(page, { authenticated = true } = {}) {
   await page.addInitScript(() => localStorage.setItem('spv-help-guide-seen', 'true'));
   await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
+  await installCloudMock(page, { signedOut: !authenticated });
 }
 
 export async function openContainingSection(page, fieldSelector) {
