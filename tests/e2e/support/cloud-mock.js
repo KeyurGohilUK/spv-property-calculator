@@ -145,9 +145,8 @@ const MOCK_SUPABASE_SDK = `
 `;
 
 export async function installCloudMock(page, options = {}) {
-  await page.addInitScript((mockOptions) => {
-    window.__PW_CLOUD_OPTIONS__ = mockOptions;
-  }, options);
+  const bootstrap = `window.__PW_CLOUD_OPTIONS__ = ${JSON.stringify(options)};\n${MOCK_SUPABASE_SDK}`;
+  await page.addInitScript({ content: bootstrap });
 
   await page.route(SUPABASE_SDK_PATTERN, (route) => route.fulfill({
     status: 200,
