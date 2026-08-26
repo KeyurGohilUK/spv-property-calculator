@@ -29,7 +29,8 @@ assert.match(index, /<body class="auth-pending">[\s\S]*id="publicLanding"[\s\S]*
 assert.match(app, /setPublicLoginState[\s\S]*button\.textContent = ready \? 'Login'/, 'Landing action must become Login only after authentication is ready');
 assert.doesNotMatch(index, /id="signUpBtn"|>Create account</, 'Public account creation must not be offered');
 assert.match(accessGate, /auth-pending[\s\S]*auth-anonymous[\s\S]*auth-authenticated[\s\S]*window\.location\.replace/, 'Shared access gate must hide pending content and redirect anonymous feature routes');
-assert.match(styles, /\.auth-pending #app,[\s\S]*\.auth-anonymous #app \{ display: none; \}/, 'Workspace must remain hidden until authentication succeeds');
+assert.match(styles, /\.auth-pending #publicLanding,[\s\S]*\.auth-pending #app,[\s\S]*\.auth-anonymous #app \{ display: none; \}/, 'Public and workspace content must remain hidden until authentication is resolved');
+assert.match(styles, /\.auth-pending::before[\s\S]*\.auth-pending::after[\s\S]*auth-loading-spin/, 'Pending authentication must show a neutral loading state instead of the public landing page');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
 assert.match(app, /import \{ renderSyncStatus \} from '\.\.\/components\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');
