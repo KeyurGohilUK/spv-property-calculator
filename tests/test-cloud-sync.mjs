@@ -55,5 +55,7 @@ if (!source.includes('archivedLegacyIds')) throw new Error('legacy conversion mi
 if (!source.includes("rpc('permanently_delete_property'")) throw new Error('permanent-delete RPC missing');
 if (!source.includes("from('property_deletions')")) throw new Error('permanent deletion tombstones missing');
 if (!source.includes('permanentlyDeletedIds')) throw new Error('permanent deletion sync filtering missing');
+if (!source.includes("from('push_subscriptions')")) throw new Error('push subscription persistence missing');
+if (!source.includes('onBeforeSignOut')) throw new Error('push cleanup lifecycle missing');
 
 console.log('Conflict-safe archive and cloud merge tests passed.');

@@ -31,6 +31,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 11 — private Cloudflare R2 receipt references and Worker access grants
 - Update 12 — revision-column repair for conflict-safe property and expense sync
 - Update 13 — administrator user approval and workspace role management
+- Update 14 — per-device Web Push subscriptions for new property notes
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -41,6 +42,8 @@ The table and function definitions use PostgreSQL SQL. Authentication references
 Receipt binaries live in a private Cloudflare R2 bucket. The database stores only receipt metadata and a private object key in `receipt_object_path`; never store public or expiring presigned URLs. The Worker validates Supabase users and workspace permissions before accessing R2.
 
 ## Rules for future changes
+
+The current schema is complete through **Update 14 - Note Push Notifications**.
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.

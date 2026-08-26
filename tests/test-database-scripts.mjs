@@ -5,13 +5,14 @@ const bootstrap = fs.readFileSync(new URL('../database/bootstrap/00 - Bootstrap 
 const expenseMigration = fs.readFileSync(new URL('../database/migrations/Update 10 - Expense Tracker.sql', import.meta.url), 'utf8');
 const receiptMigration = fs.readFileSync(new URL('../database/migrations/Update 11 - Private R2 Receipts.sql', import.meta.url), 'utf8');
 const revisionRepair = fs.readFileSync(new URL('../database/migrations/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
+const pushMigration = fs.readFileSync(new URL('../database/migrations/Update 14 - Note Push Notifications.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
 const projectRoot = new URL('../', import.meta.url);
 const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 
-for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses']) {
+for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'push_subscriptions']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
 }
 assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS');
@@ -24,6 +25,9 @@ assert.match(receiptMigration, /expenses_receipt_object_path_check/, 'Update 11 
 assert.match(revisionRepair, /alter table public\.properties[\s\S]*add column if not exists revision bigint/, 'Update 12 must safely repair the property revision column');
 assert.match(revisionRepair, /alter table public\.expenses[\s\S]*add column if not exists revision bigint/, 'Update 12 must safely repair the expense revision column');
 assert.match(revisionRepair, /create or replace function public\.upsert_property_if_current/, 'Update 12 must restore conflict-safe property writes');
+assert.match(pushMigration, /user_id uuid not null references public\.workspace_members\(user_id\) on delete cascade/, 'Push subscriptions must belong to workspace members');
+assert.match(pushMigration, /alter table public\.push_subscriptions enable row level security/, 'Push subscriptions must enable RLS');
+assert.match(pushMigration, /auth\.uid\(\) = user_id[\s\S]*public\.is_workspace_member\(\)/, 'Members may manage only their own push subscriptions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');

@@ -1,0 +1,3 @@
+[functions.note-push]
+# Database Webhooks authenticate with NOTE_PUSH_WEBHOOK_SECRET instead of a user JWT.
+verify_jwt = false

@@ -18,7 +18,7 @@ This app keeps a local offline copy in `localStorage` and syncs a shared propert
 4. Copy the whole SQL file into the SQL Editor.
 5. Click **Run**.
 
-The bootstrap creates the complete current schema: workspace membership, properties, notes, deletion tombstones and expenses, together with indexes, Row Level Security and conflict-safe write functions. Run numbered migrations only when upgrading an existing database.
+The bootstrap creates the complete current schema: workspace membership, properties, notes, push subscriptions, deletion tombstones and expenses, together with indexes, Row Level Security and conflict-safe write functions. Run numbered migrations only when upgrading an existing database.
 
 ## 3. Configure email/password authentication
 
@@ -67,7 +67,8 @@ Replace the two placeholders:
 ```javascript
 window.SPV_SUPABASE_CONFIG = Object.freeze({
   url: 'https://YOUR_PROJECT_REF.supabase.co',
-  publishableKey: 'sb_publishable_REPLACE_ME'
+  publishableKey: 'sb_publishable_REPLACE_ME',
+  pushPublicKey: ''
 });
 ```
 
@@ -76,13 +77,53 @@ Example shape only:
 ```javascript
 window.SPV_SUPABASE_CONFIG = Object.freeze({
   url: 'https://abcdefghijklmnop.supabase.co',
-  publishableKey: 'sb_publishable_xxxxxxxxxxxxxxxxx'
+  publishableKey: 'sb_publishable_xxxxxxxxxxxxxxxxx',
+  pushPublicKey: ''
 });
 ```
 
 It is normal for this file to be visible in a public GitHub Pages repository. A Publishable key is a client-side key; protection of the property data comes from authenticated sessions plus the supplied RLS policies.
 
-## 6. Deploy to GitHub Pages
+## 6. Configure note push notifications
+
+Push is optional: the calculator and shared notes continue to work if it is not configured. The **More → Note Notifications** control remains disabled until the public VAPID key is present.
+
+1. For an existing database, run `database/migrations/Update 14 - Note Push Notifications.sql`. Fresh projects already receive this schema from the bootstrap.
+2. Generate one VAPID key pair using the maintained `web-push` package:
+
+   ```bash
+   npx web-push generate-vapid-keys --json
+   ```
+
+3. Put only the generated **public** key in `supabase-config.js` as `pushPublicKey`. Never commit the private key.
+4. Link the repository to the Supabase project, then set these Edge Function secrets:
+
+   ```bash
+   supabase secrets set \
+     VAPID_SUBJECT=mailto:YOUR_EMAIL \
+     VAPID_PUBLIC_KEY=YOUR_PUBLIC_KEY \
+     VAPID_PRIVATE_KEY=YOUR_PRIVATE_KEY \
+     NOTE_PUSH_WEBHOOK_SECRET=YOUR_LONG_RANDOM_SECRET
+   ```
+
+5. Deploy the function:
+
+   ```bash
+   supabase functions deploy note-push
+   ```
+
+6. In **Supabase Dashboard → Database → Webhooks**, create a webhook named `property-note-push`:
+   - Table: `public.property_notes`
+   - Event: `INSERT` only
+   - Method: `POST`
+   - URL: `https://YOUR_PROJECT_REF.supabase.co/functions/v1/note-push`
+   - Header: `x-note-push-secret: YOUR_LONG_RANDOM_SECRET`
+
+The Edge Function rejects unsigned webhook calls, excludes the note author, sends only the author and property title (not the private note text), and removes expired device subscriptions. `SUPABASE_SERVICE_ROLE_KEY` is supplied automatically to deployed Supabase Edge Functions and must never be copied into browser code.
+
+Each signed-in user must install the PWA and enable **More → Note Notifications** on every device where they want alerts. On iPhone and iPad, Web Push requires a Home Screen installation.
+
+## 7. Deploy to GitHub Pages
 
 Upload all files in this folder to the root of your GitHub repository, including:
 
@@ -98,7 +139,7 @@ Upload all files in this folder to the root of your GitHub repository, including
 
 Then open **GitHub → repository → Settings → Pages**, choose **Deploy from a branch**, select `main` and `/(root)`, then save.
 
-## 7. First use
+## 8. First use
 
 1. Open the GitHub Pages URL.
 2. Tap/click **Sign in** in the app header.
@@ -106,7 +147,7 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 4. Existing local properties will be merged into the shared Supabase property list on sync.
 5. Save a property. The app first saves locally, then syncs the record to the shared Supabase workspace when online. Other signed-in users receive it on their next sync/app load.
 
-## 8. Offline behaviour
+## 9. Offline behaviour
 
 - The calculator works without Supabase or an internet connection.
 - Property changes are saved locally first.
@@ -114,7 +155,7 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 - Archive and restore actions are saved locally first and then synced like any other property update. Archived rows remain in Supabase.
 - Signing out does **not** erase the local copy on that device.
 
-## 9. Checking your data in Supabase
+## 10. Checking your data in Supabase
 
 In Supabase open **Table Editor → properties**. Each row contains:
 
@@ -126,7 +167,7 @@ In Supabase open **Table Editor → properties**. Each row contains:
 
 The JSON approach means future calculator fields can be added without needing a new database column for every new input.
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 ### App says “Cloud not configured”
 Check `supabase-config.js` and make sure both placeholders were replaced, then reload the page.

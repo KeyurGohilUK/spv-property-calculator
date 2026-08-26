@@ -124,10 +124,27 @@ test('loads canonical modules from the organised folders', async ({ page }) => {
     import('/src/app/primary-navigation.js').then((module) => typeof module.setupPrimaryNavigation),
     import('/src/app/app-shell.js').then((module) => typeof module.setupAppShell),
     import('/src/components/install-component.js').then((module) => typeof module.setupInstallComponent),
-    import('/src/components/update-notifier.js').then((module) => typeof module.setupUpdateNotifier)
+    import('/src/components/update-notifier.js').then((module) => typeof module.setupUpdateNotifier),
+    import('/src/services/push-subscription.js').then((module) => typeof module.createPushSubscriptionService),
+    import('/src/components/notification-settings.js').then((module) => typeof module.setupNotificationSettings)
   ]));
 
-  expect(canonicalModules).toEqual(['function', 'function', 'function', 'function', 'function', 'function', 'function']);
+  expect(canonicalModules).toEqual([
+    'function', 'function', 'function', 'function', 'function',
+    'function', 'function', 'function', 'function'
+  ]);
+});
+
+test('shows the shared per-device note notification setting', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#moreNavBtn').click();
+
+  const toggle = page.locator('[data-notification-toggle]');
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toBeDisabled();
+  await expect(toggle.locator('[data-notification-description]')).toHaveText(
+    'Notification server setup is required.'
+  );
 });
 
 test('shows a newer release and its notes in the install dialog', async ({ page }) => {

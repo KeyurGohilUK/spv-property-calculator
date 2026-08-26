@@ -1,6 +1,8 @@
 # Project structure
 
-Runtime implementations live under `src/`, feature styles under `styles/features/`, and deployable Worker code under `workers/`.
+Runtime implementations live under `src/`, feature styles under `styles/features/`, Cloudflare Worker code under `workers/`, and Supabase Edge Functions under `supabase/functions/`.
+
+Cross-page browser integrations are split between `src/services/` for platform/data behaviour and `src/components/` for shared controls. Database changes remain immutable numbered scripts under `database/migrations/`, with the same final schema folded into `database/bootstrap/`.
 
 The small JavaScript and stylesheet files retained at the repository root are compatibility entry points, not duplicate implementations. Older installed PWA releases have cached asset manifests that still request those exact URLs. Removing a compatibility entry would make their all-or-nothing update download fail with “Could not download updates.”
 

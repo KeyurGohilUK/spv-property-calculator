@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.38-organised-paths';
+const CACHE_NAME = 'spv-property-calculator-v1.21.39-note-push';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -35,6 +35,47 @@ self.addEventListener('activate', (event) => {
         .map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
+});
+
+function getNotificationUrl(value) {
+  const fallback = new URL('./', self.registration.scope);
+  try {
+    const target = new URL(String(value || './'), self.registration.scope);
+    return target.origin === fallback.origin && target.href.startsWith(fallback.href)
+      ? target.href
+      : fallback.href;
+  } catch {
+    return fallback.href;
+  }
+}
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try { payload = event.data?.json?.() || {}; } catch { payload = {}; }
+  const title = String(payload.title || 'New property note');
+  const options = {
+    body: String(payload.body || 'A new note was added to a shared property.'),
+    icon: new URL('./icons/icon-192.png', self.registration.scope).href,
+    badge: new URL('./icons/favicon-32.png', self.registration.scope).href,
+    tag: String(payload.tag || 'property-note'),
+    renotify: true,
+    data: { url: getNotificationUrl(payload.url) }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = getNotificationUrl(event.notification.data?.url);
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const appWindow = windows.find((client) => client.url.startsWith(self.registration.scope));
+    if (appWindow) {
+      await appWindow.navigate(targetUrl);
+      return appWindow.focus();
+    }
+    return self.clients.openWindow(targetUrl);
+  })());
 });
 
 self.addEventListener('fetch', (event) => {
