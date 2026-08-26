@@ -2,6 +2,29 @@
 
 A mobile-first Progressive Web App for estimating the cash required to buy a residential investment property through a UK Limited Company / SPV.
 
+## Copyright and permitted use
+
+**Copyright © 2026 Keyur Gohil. All rights reserved.**
+
+This repository contains publicly viewable **proprietary source code**. It is
+not open-source software. No licence is granted beyond the limited platform
+rights in GitHub's Terms of Service. In particular, public access, cloning,
+downloading, or use of GitHub's Fork feature does not grant permission to
+deploy, host, redistribute, commercialise, or create derivative works from the
+project outside the scope of those platform rights.
+
+See [LICENSE](LICENSE) for the complete proprietary notice and disclaimer,
+[third-party notices](docs/legal/THIRD_PARTY_NOTICES.md) for separately
+licensed dependencies, and the [contribution policy](.github/CONTRIBUTING.md)
+before proposing any contribution.
+
+Forks, copies, modified versions, and third-party deployments are independent.
+They are not operated, reviewed, secured, supported, sponsored, or endorsed by
+the repository owner. Policies published for the official hosted application
+apply only to that application and not to any third-party deployment. Publicly
+visible endpoints or client configuration do not authorise access to the
+official backend, data, service accounts, or other infrastructure.
+
 ## Main features
 
 - Purchase price, deposit and mortgage required
