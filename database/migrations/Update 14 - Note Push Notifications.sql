@@ -40,8 +40,13 @@ with check (
 
 commit;
 
--- Verification:
-select table_name, row_security
-from information_schema.tables
-where table_schema = 'public'
-  and table_name = 'push_subscriptions';
+-- Verification (pg_catalog exposes the RLS flag as `rowsecurity`):
+select schemaname, tablename, rowsecurity
+from pg_catalog.pg_tables
+where schemaname = 'public'
+  and tablename = 'push_subscriptions';
+
+select policyname, cmd
+from pg_catalog.pg_policies
+where schemaname = 'public'
+  and tablename = 'push_subscriptions';

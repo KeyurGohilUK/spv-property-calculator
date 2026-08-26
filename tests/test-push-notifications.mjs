@@ -9,6 +9,10 @@ import {
 const encoded = base64UrlToUint8Array('AQIDBA');
 assert.deepEqual([...encoded], [1, 2, 3, 4], 'VAPID public keys must decode from base64url');
 
+const browserConfig = fs.readFileSync(new URL('../supabase-config.js', import.meta.url), 'utf8');
+const configuredPublicKey = browserConfig.match(/pushPublicKey:\s*'([^']+)'/)?.[1] || '';
+assert.equal(base64UrlToUint8Array(configuredPublicKey).byteLength, 65, 'Configured VAPID public key must decode to an uncompressed P-256 key');
+
 assert.equal(getPushCapability({
   navigatorRef: { serviceWorker: {}, userAgent: 'iPhone' },
   notificationRef: {},

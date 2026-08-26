@@ -135,7 +135,7 @@ test('loads canonical modules from the organised folders', async ({ page }) => {
   ]);
 });
 
-test('shows the shared per-device note notification setting', async ({ page }) => {
+test('shows the configured per-device note notification setting', async ({ page }) => {
   await page.goto('/');
   await page.locator('#moreNavBtn').click();
 
@@ -143,7 +143,7 @@ test('shows the shared per-device note notification setting', async ({ page }) =
   await expect(toggle).toBeVisible();
   await expect(toggle).toBeDisabled();
   await expect(toggle.locator('[data-notification-description]')).toHaveText(
-    'Notification server setup is required.'
+    'Sign in to enable note notifications.'
   );
 });
 
