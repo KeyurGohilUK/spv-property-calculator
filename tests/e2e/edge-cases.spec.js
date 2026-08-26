@@ -41,7 +41,7 @@ test('property form supports native keyboard submission', async ({ page }) => {
   await page.locator('#purchasePrice').fill('250000');
   await page.locator('#title').press('Enter');
 
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
   await page.locator('#backBtn').click();
   await expect(page.locator('#propertyCount')).toHaveText('1');
 });
