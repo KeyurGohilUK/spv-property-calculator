@@ -29,7 +29,7 @@ const organisedModules = {
   'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
   'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js'],
   'src/features/users/': ['manage-users.js'],
-  'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js', 'push-subscription.js'],
+  'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js', 'access-gate.js', 'push-subscription.js'],
   'src/config/': ['tax-config.js'],
   'src/utils/': ['format-utils.js', 'validation.js'],
   'src/components/': [

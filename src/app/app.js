@@ -2,6 +2,7 @@ import { TAX_CONFIG } from '../config/tax-config.js';
 import { renderSyncStatus } from '../components/sync-status.js';
 import { setupInstallComponent } from '../components/install-component.js';
 import { setupAccountController } from '../services/account-controller.js';
+import { renderAccessState } from '../services/access-gate.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';
 import { setupAppShell } from './app-shell.js';
 import {
@@ -852,9 +853,18 @@ async function syncCloud({ showFeedback = true } = {}) {
   }
 }
 
+function setPublicLoginState({ ready = false, message = '' } = {}) {
+  const button = $('publicLoginBtn');
+  button.disabled = !ready;
+  button.textContent = ready ? 'Login' : 'Login unavailable';
+  $('publicLoginStatus').textContent = message;
+}
+
 async function setupCloud() {
   const cloud = window.SPVCloud;
   if (!cloud) {
+    renderAccessState(null);
+    setPublicLoginState({ message: 'Login is temporarily unavailable. Please try again later.' });
     renderCloudState(true);
     return;
   }
@@ -865,9 +875,9 @@ async function setupCloud() {
       button: $('accountBtn'), dialog: $('authDialog'), closeButton: $('closeAuthDialog'),
       signedOut: $('authSignedOut'), signedIn: $('authSignedIn'), notConfigured: $('authNotConfigured'),
       setupMessage: $('authNotConfigured').querySelector('p:not(.eyebrow):not(.muted)'),
-      name: $('authDisplayName'), email: $('authEmail'), password: $('authPassword'),
+      email: $('authEmail'), password: $('authPassword'),
       authMessage: $('authMessage'), signedInEmail: $('signedInEmail'),
-      signInButton: $('signInBtn'), signUpButton: $('signUpBtn'), signOutButton: $('signOutBtn'),
+      signInButton: $('signInBtn'), signOutButton: $('signOutBtn'),
       syncButton: $('dialogSyncBtn'), accountMessage: $('signedInMessage'),
       displayNameInput: $('accountDisplayName'), saveDisplayNameButton: $('saveDisplayNameBtn')
     },
@@ -876,16 +886,25 @@ async function setupCloud() {
     getDisplayName: getCloudDisplayName,
     onUserChange: async (user, { reason }) => {
       cloudUser = user;
+      renderAccessState(user);
       renderCloudState();
       renderNotes();
       if (editingId && cloudUser) loadNotes();
       if (cloudUser && navigator.onLine && reason !== 'profile') await syncCloud({ showFeedback: false });
       if (!cloudUser && reason === 'sign-out') cloudLastMessage = 'Signed out. Your local offline copy is still on this device.';
     },
-    onInitialised: (state) => { cloudInitialized = !state.configured || Boolean(state.available); },
+    onInitialised: (state) => {
+      cloudInitialized = !state.configured || Boolean(state.available);
+      setPublicLoginState({
+        ready: Boolean(state.configured && state.available),
+        message: state.configured && state.available ? '' : 'Login is temporarily unavailable.'
+      });
+    },
     onInitialisationError: (error) => {
       cloudInitialized = false;
       cloudLastMessage = error.message || 'Supabase initialization failed.';
+      renderAccessState(null);
+      setPublicLoginState({ message: 'Login is temporarily unavailable. Please try again later.' });
       renderCloudState(true);
     },
     onDisplayNameSaved: () => renderNotes(),
@@ -908,6 +927,7 @@ function updateConnectionStatus() {
 }
 
 function init() {
+  $('publicLoginBtn').addEventListener('click', () => accountController?.open());
   populateViewingTimeOptions();
   $('homeBrandLink').addEventListener('click', (event) => {
     event.preventDefault();

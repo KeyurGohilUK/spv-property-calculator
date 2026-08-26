@@ -1,8 +1,10 @@
 import { expect } from '@playwright/test';
+import { installCloudMock } from './cloud-mock.js';
 
-export async function blockExternalServices(page) {
+export async function blockExternalServices(page, { authenticated = true } = {}) {
   await page.addInitScript(() => localStorage.setItem('spv-help-guide-seen', 'true'));
   await page.route(/^https:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
+  await installCloudMock(page, { signedOut: !authenticated });
 }
 
 export async function openContainingSection(page, fieldSelector) {
@@ -28,7 +30,7 @@ export async function createProperty(page, {
   }
 
   await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
   await page.locator('#backBtn').click();
   await expect(page.locator('#homeView')).not.toHaveClass(/hidden/);
   await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();

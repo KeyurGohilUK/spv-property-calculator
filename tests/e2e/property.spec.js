@@ -49,7 +49,7 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   await page.locator('#purchasePrice').press('ControlOrMeta+A');
   await page.locator('#purchasePrice').pressSequentially('300000');
   await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
   await page.locator('#backBtn').click();
 
   const card = page.locator('.property-card').filter({ hasText: 'Updated Playwright Property' });
