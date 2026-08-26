@@ -9,7 +9,7 @@ const MOCK_SUPABASE_SDK = `
     expenses: [...(options.expenses || [])]
   };
   const now = '2026-08-23T23:59:59.000Z';
-  const session = {
+  let session = options.signedOut ? null : {
     access_token: 'playwright-access-token',
     user: {
       id: '00000000-0000-4000-8000-000000000001',
@@ -104,16 +104,32 @@ const MOCK_SUPABASE_SDK = `
 
   window.supabase = {
     createClient() {
+      let authChangeHandler = () => {};
       return {
         auth: {
-          onAuthStateChange() {
+          onAuthStateChange(handler) {
+            authChangeHandler = (_event, nextSession) => handler(_event, nextSession);
             return { data: { subscription: { unsubscribe() {} } } };
           },
           getSession() {
             return Promise.resolve({ data: { session }, error: null });
           },
           signOut() {
+            session = null;
+            authChangeHandler('SIGNED_OUT', null);
             return Promise.resolve({ error: null });
+          },
+          signInWithPassword() {
+            session = {
+              access_token: 'playwright-access-token',
+              user: {
+                id: '00000000-0000-4000-8000-000000000001',
+                email: 'playwright@example.test',
+                user_metadata: { display_name: 'Playwright User' }
+              }
+            };
+            authChangeHandler('SIGNED_IN', session);
+            return Promise.resolve({ data: { session, user: session.user }, error: null });
           },
           updateUser({ data }) {
             session.user.user_metadata = { ...session.user.user_metadata, ...data };

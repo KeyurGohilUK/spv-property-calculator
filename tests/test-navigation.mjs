@@ -16,6 +16,7 @@ const installComponent = fs.readFileSync(new URL('../src/components/install-comp
 const syncStatus = fs.readFileSync(new URL('../src/components/sync-status.js', import.meta.url), 'utf8');
 const primaryNavigation = fs.readFileSync(new URL('../src/app/primary-navigation.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
+const accessGate = fs.readFileSync(new URL('../src/services/access-gate.js', import.meta.url), 'utf8');
 const dialogHelper = fs.readFileSync(new URL('../src/components/dialog-helper.js', import.meta.url), 'utf8');
 const propertyCard = fs.readFileSync(new URL('../src/features/properties/property-card.js', import.meta.url), 'utf8');
 const forecastProperty = fs.readFileSync(new URL('../src/features/forecast/forecast-property.js', import.meta.url), 'utf8');
@@ -24,6 +25,11 @@ assert.doesNotMatch(forecast, /forecast-topbar|forecast-back|Investment forecast
 assert.match(forecast, /type="module" src="\.\/src\/features\/forecast\/forecast\.js"/, 'Forecast must load its canonical feature module');
 assert.match(forecastProperty, /getActiveProperties[\s\S]*calculateProperty/, 'Forecast must use shared property storage and calculations');
 assert.doesNotMatch(index, /id="archiveBackBtn"|Shared archive/, 'Archived Properties must not duplicate the main navigation with an upper back bar');
+assert.match(index, /<body class="auth-pending">[\s\S]*id="publicLanding"[\s\S]*id="publicLoginBtn"/, 'Home must provide an anonymous landing page with a single login action');
+assert.match(app, /setPublicLoginState[\s\S]*button\.textContent = ready \? 'Login'/, 'Landing action must become Login only after authentication is ready');
+assert.doesNotMatch(index, /id="signUpBtn"|>Create account</, 'Public account creation must not be offered');
+assert.match(accessGate, /auth-pending[\s\S]*auth-anonymous[\s\S]*auth-authenticated[\s\S]*window\.location\.replace/, 'Shared access gate must hide pending content and redirect anonymous feature routes');
+assert.match(styles, /\.auth-pending #app,[\s\S]*\.auth-anonymous #app \{ display: none; \}/, 'Workspace must remain hidden until authentication succeeds');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
 assert.match(app, /import \{ renderSyncStatus \} from '\.\.\/components\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');

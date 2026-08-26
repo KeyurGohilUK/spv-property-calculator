@@ -160,7 +160,7 @@ export function setupAccountController({
   });
   elements.button.addEventListener('click', () => { render(); dialogController.open(elements.button); });
   elements.signInButton.addEventListener('click', signIn);
-  elements.signUpButton.addEventListener('click', signUp);
+  elements.signUpButton?.addEventListener('click', signUp);
   elements.signOutButton.addEventListener('click', signOut);
   elements.syncButton.addEventListener('click', () => sync?.());
   elements.saveDisplayNameButton?.addEventListener('click', saveDisplayName);
