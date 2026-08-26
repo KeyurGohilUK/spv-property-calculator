@@ -3,6 +3,7 @@
 Documentation is grouped by its role and expected lifetime:
 
 - `setup/` — current instructions required to configure external services.
+- `push-notifications/` — setup, architecture, operations, testing and troubleshooting for note alerts.
 - `planning/` — active technical-debt and architecture backlogs.
 - `history/` — completed implementation and upgrade notes retained as project history.
 

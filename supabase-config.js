@@ -11,6 +11,6 @@
 window.SPV_SUPABASE_CONFIG = Object.freeze({
   url: 'https://abegxabdlecgznapukzq.supabase.co',
   publishableKey: 'sb_publishable_yzMePSBunGSzYB3UCzWs5g_5cjAJbcC',
-  pushPublicKey: '',
+  pushPublicKey: 'BP5cepqoNlR53JoHiMthlYbHoRqGP5s3JNJe7Y-km5dbeOxPvyFK6gxBQmIDR0aqYxTCC_N0liwYnJe-9yWgj-A',
   receiptWorkerUrl: 'https://spv-receipt-service.keyurgohil-uk.workers.dev'
 });

@@ -88,6 +88,8 @@ It is normal for this file to be visible in a public GitHub Pages repository. A 
 
 Push is optional: the calculator and shared notes continue to work if it is not configured. The **More → Note Notifications** control remains disabled until the public VAPID key is present.
 
+Follow the maintained runbook in [`docs/push-notifications/README.md`](../push-notifications/README.md). It contains the current dashboard route, verification queries, acceptance tests and recovery procedures. The summary below is retained for initial setup.
+
 1. For an existing database, run `database/migrations/Update 14 - Note Push Notifications.sql`. Fresh projects already receive this schema from the bootstrap.
 2. Generate one VAPID key pair using the maintained `web-push` package:
 
@@ -112,7 +114,7 @@ Push is optional: the calculator and shared notes continue to work if it is not 
    supabase functions deploy note-push
    ```
 
-6. In **Supabase Dashboard → Database → Webhooks**, create a webhook named `property-note-push`:
+6. In **Supabase Dashboard → Integrations → Webhooks**, create a webhook named `property-note-push`:
    - Table: `public.property_notes`
    - Event: `INSERT` only
    - Method: `POST`

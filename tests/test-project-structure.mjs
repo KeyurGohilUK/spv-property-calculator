@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const projectRoot = new URL('../', import.meta.url);
 const requiredDirectories = [
-  'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/planning/',
+  'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
   'src/features/forecast/', 'src/features/users/', 'src/services/', 'src/config/',
   'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/', 'tests/e2e/'
@@ -11,6 +11,10 @@ const requiredDirectories = [
 
 for (const path of requiredDirectories) {
   assert.equal(fs.statSync(new URL(path, projectRoot)).isDirectory(), true, `${path} must remain a directory`);
+}
+
+for (const document of ['README.md', 'SETUP.md', 'ARCHITECTURE.md', 'TESTING.md', 'TROUBLESHOOTING.md']) {
+  assert.equal(fs.existsSync(new URL(`docs/push-notifications/${document}`, projectRoot)), true, `${document} must remain in the push-notification runbook`);
 }
 
 const rootMarkdown = fs.readdirSync(projectRoot).filter((name) => name.endsWith('.md')).sort();

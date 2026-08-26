@@ -28,6 +28,9 @@ assert.match(revisionRepair, /create or replace function public\.upsert_property
 assert.match(pushMigration, /user_id uuid not null references public\.workspace_members\(user_id\) on delete cascade/, 'Push subscriptions must belong to workspace members');
 assert.match(pushMigration, /alter table public\.push_subscriptions enable row level security/, 'Push subscriptions must enable RLS');
 assert.match(pushMigration, /auth\.uid\(\) = user_id[\s\S]*public\.is_workspace_member\(\)/, 'Members may manage only their own push subscriptions');
+assert.match(pushMigration, /select schemaname, tablename, rowsecurity[\s\S]*from pg_catalog\.pg_tables/, 'Push migration must verify RLS through pg_catalog.pg_tables.rowsecurity');
+assert.doesNotMatch(pushMigration, /information_schema\.tables[\s\S]*row_security/, 'Push migration must not query the nonexistent information_schema row_security column');
+assert.match(pushMigration, /from pg_catalog\.pg_policies/, 'Push migration must verify its RLS policies');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');
