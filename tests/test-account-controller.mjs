@@ -6,6 +6,7 @@ const app = fs.readFileSync(new URL('../src/app/app.js', import.meta.url), 'utf8
 const secondary = fs.readFileSync(new URL('../src/components/secondary-page-header.js', import.meta.url), 'utf8');
 const controller = fs.readFileSync(new URL('../src/services/account-controller.js', import.meta.url), 'utf8');
 const policyAcceptance = fs.readFileSync(new URL('../src/services/policy-acceptance.js', import.meta.url), 'utf8');
+const accessGate = fs.readFileSync(new URL('../src/services/access-gate.js', import.meta.url), 'utf8');
 
 assert.equal(validateAccountCredentials('', ''), 'Enter your email and password.');
 assert.equal(validateAccountCredentials('user@example.com', 'secret'), '');
@@ -26,5 +27,6 @@ assert.match(secondary, /requireCurrentPolicyAcceptance/, 'Secondary pages must 
 assert.match(policyAcceptance, /POLICY_VERSION = '2026-08-26'/, 'Policy gate must define the current policy version');
 assert.match(policyAcceptance, /getPolicyAcceptance/, 'Policy gate must check the saved policy version');
 assert.match(policyAcceptance, /acceptPolicies\(POLICY_VERSION\)/, 'Policy gate must store the current policy version');
+assert.match(accessGate, /classList\.remove\([^)]*auth-policy-required/, 'Successful acceptance must clear the blocking policy state');
 
 console.log('Shared account controller checks passed.');
