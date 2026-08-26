@@ -30,7 +30,7 @@ export async function createProperty(page, {
   }
 
   await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText('Saved on this device');
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
   await page.locator('#backBtn').click();
   await expect(page.locator('#homeView')).not.toHaveClass(/hidden/);
   await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
