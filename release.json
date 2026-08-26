@@ -1,8 +1,8 @@
 {
-  "version": "1.21.41",
+  "version": "1.21.42",
   "notes": [
-    "Anonymous visitors now see a private welcome and login screen instead of workspace features.",
-    "Install, connection status and app navigation remain hidden until authentication succeeds.",
-    "Direct feature URLs return signed-out visitors to the private landing page."
+    "Page changes now show a neutral loading indicator while your session is restored.",
+    "The public landing page no longer flashes briefly for signed-in users.",
+    "Anonymous visitors still see the private welcome and login screen after authentication is checked."
   ]
 }
