@@ -3,6 +3,8 @@
 .auth-pending #app,
 .auth-anonymous #app { display: none; }
 .auth-authenticated #publicLanding { display: none; }
+.auth-policy-required #publicLanding,
+.auth-policy-required #app { display: none; }
 
 .auth-pending { overflow: hidden; }
 .auth-pending::before {

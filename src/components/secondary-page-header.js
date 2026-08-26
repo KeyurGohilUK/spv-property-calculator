@@ -4,6 +4,7 @@ import { setupPrimaryNavigation } from '../app/primary-navigation.js';
 import { setupAppShell } from '../app/app-shell.js';
 import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from '../services/workspace-sync.js';
 import { renderAccessState, redirectAnonymousToLanding } from '../services/access-gate.js';
+import { requireCurrentPolicyAcceptance } from '../services/policy-acceptance.js';
 
 const $ = (id) => document.getElementById(id);
 setupPrimaryNavigation();
@@ -76,6 +77,7 @@ accountController = setupAccountController({
   isSyncing: () => syncing,
   onUserChange: async (user, { reason }) => {
     cloudUser = user;
+    if (user && !await requireCurrentPolicyAcceptance(user, { cloud: window.SPVCloud })) return;
     renderAccessState(user);
     if (!user && redirectAnonymousToLanding(user)) return;
     if (cloudUser && navigator.onLine && (reason === 'sign-in' || reason === 'sign-up')) await syncWorkspace();

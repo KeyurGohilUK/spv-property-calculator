@@ -3,6 +3,7 @@ import { renderSyncStatus } from '../components/sync-status.js';
 import { setupInstallComponent } from '../components/install-component.js';
 import { setupAccountController } from '../services/account-controller.js';
 import { renderAccessState } from '../services/access-gate.js';
+import { requireCurrentPolicyAcceptance } from '../services/policy-acceptance.js';
 import { setupPrimaryNavigation } from './primary-navigation.js';
 import { setupAppShell } from './app-shell.js';
 import {
@@ -886,6 +887,7 @@ async function setupCloud() {
     getDisplayName: getCloudDisplayName,
     onUserChange: async (user, { reason }) => {
       cloudUser = user;
+      if (user && !await requireCurrentPolicyAcceptance(user, { cloud })) return;
       renderAccessState(user);
       renderCloudState();
       renderNotes();

@@ -592,6 +592,35 @@
     if (error) throw error;
   }
 
+  async function getPolicyAcceptance() {
+    if (!currentUser) return null;
+    const supabaseClient = ensureClient();
+    const { data, error } = await supabaseClient
+      .from('policy_acceptances')
+      .select('terms_version,privacy_version,disclaimer_version,accepted_at')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    return data || null;
+  }
+
+  async function acceptPolicies(version) {
+    if (!currentUser) throw new Error('Sign in before accepting the policies.');
+    const acceptedVersion = String(version || '').trim();
+    if (!acceptedVersion) throw new Error('Policy version is required.');
+    const supabaseClient = ensureClient();
+    const { error } = await supabaseClient
+      .from('policy_acceptances')
+      .upsert({
+        user_id: currentUser.id,
+        terms_version: acceptedVersion,
+        privacy_version: acceptedVersion,
+        disclaimer_version: acceptedVersion,
+        accepted_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+    if (error) throw error;
+  }
+
   function destroy() {
     authSubscription?.unsubscribe?.();
     authSubscription = null;
@@ -609,6 +638,8 @@
     getWorkspaceAccess,
     listWorkspaceUsers,
     setWorkspaceUserAccess,
+    getPolicyAcceptance,
+    acceptPolicies,
     getCurrentUser: () => currentUser,
     getUserDisplayName,
     updateDisplayName,

@@ -32,6 +32,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 12 — revision-column repair for conflict-safe property and expense sync
 - Update 13 — administrator user approval and workspace role management
 - Update 14 — per-device Web Push subscriptions for new property notes
+- Update 15 — versioned Terms, Privacy Policy and Disclaimer acceptance
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -43,7 +44,7 @@ Receipt binaries live in a private Cloudflare R2 bucket. The database stores onl
 
 ## Rules for future changes
 
-The current schema is complete through **Update 14 - Note Push Notifications**.
+The current schema is complete through **Update 15 - Policy Acceptance**.
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.

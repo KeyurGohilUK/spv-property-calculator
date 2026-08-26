@@ -3,12 +3,18 @@ const SUPABASE_SDK_PATTERN = /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js/;
 const MOCK_SUPABASE_SDK = `
 (() => {
   const options = window.__PW_CLOUD_OPTIONS__ || {};
+  const now = '2026-08-23T23:59:59.000Z';
   const state = window.__PW_CLOUD_STATE__ = {
     calls: [],
     properties: [...(options.properties || [])],
-    expenses: [...(options.expenses || [])]
+    expenses: [...(options.expenses || [])],
+    policy_acceptances: options.policyAccepted === false ? [] : [{
+      terms_version: '2026-08-26',
+      privacy_version: '2026-08-26',
+      disclaimer_version: '2026-08-26',
+      accepted_at: now
+    }]
   };
-  const now = '2026-08-23T23:59:59.000Z';
   let session = options.signedOut ? null : {
     access_token: 'playwright-access-token',
     user: {
@@ -39,7 +45,16 @@ const MOCK_SUPABASE_SDK = `
         state.calls.push({ type: 'insert', table, value });
         return builder;
       },
+      upsert(value) {
+        state.calls.push({ type: 'upsert', table, value });
+        state[table] = [value];
+        return builder;
+      },
       single() { return Promise.resolve(listResult(table)); },
+      maybeSingle() {
+        const result = listResult(table);
+        return Promise.resolve({ data: result.data?.[0] || null, error: result.error });
+      },
       then(resolve, reject) { return Promise.resolve(listResult(table)).then(resolve, reject); }
     };
     return builder;

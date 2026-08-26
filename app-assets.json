@@ -1,5 +1,5 @@
 {
-  "version": "1.21.43",
+  "version": "1.21.44",
   "assets": [
     "./",
     "./index.html",
@@ -52,6 +52,7 @@
     "./src/services/workspace-sync.js",
     "./src/services/account-controller.js",
     "./src/services/access-gate.js",
+    "./src/services/policy-acceptance.js",
     "./src/services/push-subscription.js",
     "./src/app/primary-navigation.js",
     "./src/app/app-shell.js",

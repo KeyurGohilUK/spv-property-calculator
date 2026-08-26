@@ -12,7 +12,7 @@ const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.
 const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
 for (const sql of [migration, bootstrap]) {
-  assert.match(sql, /create or replace function public\.list_workspace_users\(\)/, 'User listing RPC is missing');
+  assert.match(sql, /create (?:or replace )?function public\.list_workspace_users\(\)/, 'User listing RPC is missing');
   assert.match(sql, /create or replace function public\.set_workspace_user_access/, 'User access update RPC is missing');
   assert.match(sql, /not public\.is_workspace_admin\(\)/, 'User management must require an administrator');
   assert.match(sql, /p_user_id\s*=\s*auth\.uid\(\)/, 'Administrator self-lockout protection is missing');

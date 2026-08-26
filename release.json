@@ -1,8 +1,8 @@
 {
-  "version": "1.21.43",
+  "version": "1.21.44",
   "notes": [
-    "Privacy Policy, Terms of Use, Disclaimer and Copyright pages are now available.",
-    "Legal links are available from the public landing page and authenticated App Menu.",
-    "The sign-in screen now links directly to the applicable Privacy Policy and Terms of Use."
+    "Authorised users now acknowledge the current legal policies once before entering the workspace.",
+    "Policy versions and acceptance time are stored securely against each Supabase account.",
+    "Administrators can see whether each account has accepted the current policy version."
   ]
 }
