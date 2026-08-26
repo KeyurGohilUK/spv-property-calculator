@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node tests/test-format-utils.mjs && node tests/test-validation.mjs && node tests/test-calculations.mjs && node tests/test-storage.mjs && node tests/test-cloud-sync.mjs && node tests/test-workspace-sync.mjs && node tests/test-account-controller.mjs && node tests/test-push-notifications.mjs && node tests/test-release.mjs && node tests/test-release-policy.mjs && node tests/test-project-structure.mjs && node tests/test-style-architecture.mjs && node tests/test-html-headings.mjs && node tests/test-aria-semantics.mjs && node tests/test-navigation.mjs && node tests/test-url-routing.mjs && node tests/test-property-card.mjs && node tests/test-forecast-property.mjs && node tests/test-theme.mjs && node tests/test-help-guide.mjs && node tests/test-expenses.mjs && node tests/test-database-scripts.mjs && node tests/test-expense-cloud-sync.mjs && node tests/test-receipt-worker.mjs && node tests/test-receipt-cloud.mjs && node tests/test-calendar-invite.mjs && node tests/test-user-management.mjs && node tests/test-update-notifier.mjs",
-    "test:html": "html-validate index.html expenses/index.html forecast/index.html admin/users/index.html",
+    "test:html": "html-validate index.html expenses/index.html forecast/index.html admin/users/index.html legal/privacy.html legal/terms.html legal/disclaimer.html legal/copyright.html",
     "test:e2e": "playwright test"
   },
   "devDependencies": {

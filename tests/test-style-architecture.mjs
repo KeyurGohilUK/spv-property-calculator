@@ -8,7 +8,7 @@ const expected = [
   'styles/features/properties.css', 'styles/forms.css', 'styles/features/summary.css',
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
   'styles/features/editor.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
-  'styles/app-shell-navigation.css'
+  'styles/app-shell-navigation.css', 'styles/legal.css'
 ];
 
 assert.deepEqual(imports, expected, 'Stylesheet manifest order must preserve the established cascade');

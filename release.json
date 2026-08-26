@@ -1,8 +1,8 @@
 {
-  "version": "1.21.42",
+  "version": "1.21.43",
   "notes": [
-    "Page changes now show a neutral loading indicator while your session is restored.",
-    "The public landing page no longer flashes briefly for signed-in users.",
-    "Anonymous visitors still see the private welcome and login screen after authentication is checked."
+    "Privacy Policy, Terms of Use, Disclaimer and Copyright pages are now available.",
+    "Legal links are available from the public landing page and authenticated App Menu.",
+    "The sign-in screen now links directly to the applicable Privacy Policy and Terms of Use."
   ]
 }
