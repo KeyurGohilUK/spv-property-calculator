@@ -28,6 +28,8 @@ function renderAppMenu(root, { home }) {
         <a class="more-menu-item hidden" href="./admin/users/" data-admin-users-link aria-hidden="true" tabindex="-1"><span class="more-menu-icon" aria-hidden="true">♙</span><span><strong>Manage Users</strong><small>Approve accounts and assign workspace roles</small></span><span aria-hidden="true">›</span></a>
         <button class="more-menu-item" type="button" data-help-guide><span class="more-menu-icon" aria-hidden="true">?</span><span><strong>Help Guide</strong><small>Installation, account and app menu overview</small></span><span aria-hidden="true">›</span></button>
         <button class="more-menu-item" type="button" data-theme-toggle aria-pressed="false"><span class="more-menu-icon" data-theme-icon aria-hidden="true">☀</span><span><strong>Theme</strong><small data-theme-description>Light appearance</small></span><span class="theme-switch" aria-hidden="true"></span></button>
+        <p class="legal-menu-heading">Legal</p>
+        <a class="more-menu-item" href="${new URL('../../legal/privacy.html', import.meta.url).href}"><span class="more-menu-icon" aria-hidden="true">◈</span><span><strong>Privacy &amp; Terms</strong><small>Privacy, terms, disclaimer and copyright</small></span><span aria-hidden="true">›</span></a>
       </div>
     </dialog>`);
   return $('moreMenuDialog', root);

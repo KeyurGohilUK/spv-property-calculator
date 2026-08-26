@@ -17,6 +17,8 @@ const syncStatus = fs.readFileSync(new URL('../src/components/sync-status.js', i
 const primaryNavigation = fs.readFileSync(new URL('../src/app/primary-navigation.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const accessGate = fs.readFileSync(new URL('../src/services/access-gate.js', import.meta.url), 'utf8');
+const privacy = fs.readFileSync(new URL('../legal/privacy.html', import.meta.url), 'utf8');
+const terms = fs.readFileSync(new URL('../legal/terms.html', import.meta.url), 'utf8');
 const dialogHelper = fs.readFileSync(new URL('../src/components/dialog-helper.js', import.meta.url), 'utf8');
 const propertyCard = fs.readFileSync(new URL('../src/features/properties/property-card.js', import.meta.url), 'utf8');
 const forecastProperty = fs.readFileSync(new URL('../src/features/forecast/forecast-property.js', import.meta.url), 'utf8');
@@ -31,6 +33,10 @@ assert.doesNotMatch(index, /id="signUpBtn"|>Create account</, 'Public account cr
 assert.match(accessGate, /auth-pending[\s\S]*auth-anonymous[\s\S]*auth-authenticated[\s\S]*window\.location\.replace/, 'Shared access gate must hide pending content and redirect anonymous feature routes');
 assert.match(styles, /\.auth-pending #publicLanding,[\s\S]*\.auth-pending #app,[\s\S]*\.auth-anonymous #app \{ display: none; \}/, 'Public and workspace content must remain hidden until authentication is resolved');
 assert.match(styles, /\.auth-pending::before[\s\S]*\.auth-pending::after[\s\S]*auth-loading-spin/, 'Pending authentication must show a neutral loading state instead of the public landing page');
+assert.match(index, /legal\/privacy\.html[\s\S]*legal\/terms\.html[\s\S]*legal\/disclaimer\.html[\s\S]*legal\/copyright\.html/, 'Anonymous landing page must expose all legal notices');
+assert.match(appShell, /legal\/privacy\.html[\s\S]*Privacy &amp; Terms/, 'Authenticated App Menu must link to legal information');
+assert.match(privacy, /Keyur Gohil[\s\S]*spvcalculator\.support@oopahone\.com[\s\S]*not monitored daily[\s\S]*Information Commissioner's Office/, 'Privacy Policy must identify the controller, contact route, response caveat and ICO rights');
+assert.match(terms, /planning aids[\s\S]*Nothing in these terms excludes or limits liability where doing so would be unlawful/, 'Terms must explain estimate limitations without excluding mandatory liability');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
 assert.match(app, /import \{ renderSyncStatus \} from '\.\.\/components\/sync-status\.js';[\s\S]*function renderPropertySyncStatus\(isWarning = false\)[\s\S]*Offline · changes will sync later[\s\S]*renderSyncStatus\(status, message, tone\)/, 'Properties must use the shared neutral offline sync status');

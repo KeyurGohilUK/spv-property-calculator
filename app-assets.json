@@ -1,5 +1,5 @@
 {
-  "version": "1.21.42",
+  "version": "1.21.43",
   "assets": [
     "./",
     "./index.html",
@@ -12,6 +12,7 @@
     "./styles/dialogs-updates.css",
     "./styles/app-shell-home.css",
     "./styles/app-shell-navigation.css",
+    "./styles/legal.css",
     "./styles/features/properties.css",
     "./styles/features/summary.css",
     "./styles/features/archive.css",
@@ -32,6 +33,10 @@
     "./manifest.json",
     "./supabase-config.js",
     "./release.json",
+    "./legal/privacy.html",
+    "./legal/terms.html",
+    "./legal/disclaimer.html",
+    "./legal/copyright.html",
     "./expenses/",
     "./src/components/secondary-page-header.js",
     "./src/components/admin-menu.js",
