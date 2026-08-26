@@ -24,6 +24,8 @@
 .user-save-btn { min-width: 84px; }
 .user-status-badge { display: inline-flex; width: fit-content; margin-top: 8px; padding: 4px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 700; }
 .user-status-badge.active { background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--brand); }
+.user-policy-badge { display: inline-flex; width: fit-content; margin: 6px 0 0 6px; padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, #b45309 12%, var(--surface)); color: #92400e; font-size: 11px; font-weight: 700; }
+.user-policy-badge.accepted { background: color-mix(in srgb, #15803d 12%, var(--surface)); color: #166534; }
 .user-access-state { display: grid; justify-items: center; gap: 8px; padding: 34px 18px; text-align: center; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); }
 .user-access-state h3, .user-access-state p { margin: 0; }
 .user-access-state .primary-btn { margin-top: 8px; text-decoration: none; }

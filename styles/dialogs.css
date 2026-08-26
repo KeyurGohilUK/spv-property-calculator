@@ -59,6 +59,13 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .auth-account-card strong, .auth-account-card small { display: block; }
 .auth-account-card small { margin-top: 4px; color: var(--muted); line-height: 1.4; }
 .tiny { font-size: 11px; line-height: 1.45; }
+.policy-acceptance-dialog { max-width: 540px; }
+.policy-acceptance-dialog h2 { margin: 0 0 10px; }
+.policy-acceptance-dialog ul { display: grid; gap: 7px; padding-left: 22px; }
+.policy-acceptance-dialog a { color: var(--brand); font-weight: 700; }
+.policy-confirmation { display: flex; align-items: flex-start; gap: 11px; margin-top: 20px; padding: 15px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); line-height: 1.5; cursor: pointer; }
+.policy-confirmation input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand); }
+.policy-acceptance-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
 
 @media (max-width: 620px) {
   .header-actions { gap: 5px; }
@@ -69,4 +76,3 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   #installBtn { display: none; }
   .auth-actions { grid-template-columns: 1fr; }
 }
-

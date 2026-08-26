@@ -41,11 +41,18 @@ function renderUsers() {
     const isCurrentUser = user.user_id === currentUserId;
     const role = ['viewer', 'editor', 'admin'].includes(user.role) ? user.role : 'viewer';
     const displayName = user.display_name || 'Unnamed user';
+    const policyCurrent = user.terms_version === '2026-08-26'
+      && user.privacy_version === '2026-08-26'
+      && user.disclaimer_version === '2026-08-26';
+    const policyStatus = policyCurrent
+      ? `Policies accepted ${formatDate(user.policy_accepted_at)}`
+      : 'Policy acceptance pending';
     return `<article class="user-card" data-user-id="${escapeHtml(user.user_id)}">
       <div class="user-identity">
         <strong>${escapeHtml(displayName)}${isCurrentUser ? ' (You)' : ''}</strong>
         <small>${escapeHtml(user.email || 'No email address')}</small>
         <span class="user-status-badge ${user.active ? 'active' : ''}">${user.active ? 'Active member' : 'Access not approved'} · Last sign-in ${escapeHtml(formatDate(user.last_sign_in_at))}</span>
+        <span class="user-policy-badge ${policyCurrent ? 'accepted' : ''}">${escapeHtml(policyStatus)}</span>
       </div>
       <label class="field user-role-field"><span>Role</span>
         <select data-user-role ${isCurrentUser ? 'disabled' : ''}>

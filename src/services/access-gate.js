@@ -1,6 +1,6 @@
 export function renderAccessState(user, { root = document } = {}) {
   const authenticated = Boolean(user);
-  root.body.classList.remove('auth-pending', 'auth-anonymous', 'auth-authenticated');
+  root.body.classList.remove('auth-pending', 'auth-anonymous', 'auth-authenticated', 'auth-policy-required');
   root.body.classList.add(authenticated ? 'auth-authenticated' : 'auth-anonymous');
 
   const landing = root.getElementById('publicLanding');
