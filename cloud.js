@@ -15,6 +15,7 @@
   let sdkLoadPromise = null;
   let sdkLoadError = '';
   const listeners = new Set();
+  const beforeSignOutListeners = new Set();
 
   function isConfigured() {
     const url = String(config.url || '').trim();
@@ -123,6 +124,11 @@
     return () => listeners.delete(listener);
   }
 
+  function onBeforeSignOut(listener) {
+    beforeSignOutListeners.add(listener);
+    return () => beforeSignOutListeners.delete(listener);
+  }
+
   async function getSession() {
     const supabaseClient = ensureClient();
     const { data, error } = await supabaseClient.auth.getSession();
@@ -153,6 +159,12 @@
 
   async function signOut() {
     const supabaseClient = ensureClient();
+    const cleanupResults = await Promise.allSettled(
+      [...beforeSignOutListeners].map((listener) => listener())
+    );
+    for (const result of cleanupResults) {
+      if (result.status === 'rejected') console.warn('Account sign-out cleanup failed:', result.reason);
+    }
     const { error } = await supabaseClient.auth.signOut();
     if (error) throw error;
     emitAuth(null, 'SIGNED_OUT');
@@ -300,6 +312,41 @@
       .select('id');
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('You can only delete your own notes.');
+    return true;
+  }
+
+  async function savePushSubscription(subscription) {
+    const supabaseClient = ensureClient();
+    const user = await requireUser();
+    const endpoint = String(subscription?.endpoint || '').trim();
+    const p256dh = String(subscription?.keys?.p256dh || '').trim();
+    const auth = String(subscription?.keys?.auth || '').trim();
+    if (!endpoint || !p256dh || !auth) throw new Error('The browser returned an invalid push subscription.');
+    const { error } = await supabaseClient
+      .from('push_subscriptions')
+      .upsert({
+        user_id: user.id,
+        endpoint,
+        p256dh,
+        auth,
+        user_agent: String(navigator.userAgent || '').slice(0, 500),
+        last_seen_at: new Date().toISOString()
+      }, { onConflict: 'endpoint' });
+    if (error) throw error;
+    return true;
+  }
+
+  async function removePushSubscription(endpointValue) {
+    const supabaseClient = ensureClient();
+    const user = await requireUser();
+    const endpoint = String(endpointValue || '').trim();
+    if (!endpoint) return false;
+    const { error } = await supabaseClient
+      .from('push_subscriptions')
+      .delete()
+      .eq('endpoint', endpoint)
+      .eq('user_id', user.id);
+    if (error) throw error;
     return true;
   }
 
@@ -549,6 +596,7 @@
     authSubscription?.unsubscribe?.();
     authSubscription = null;
     listeners.clear();
+    beforeSignOutListeners.clear();
   }
 
   window.SPVCloud = Object.freeze({
@@ -556,6 +604,7 @@
     getConfigState,
     init,
     onAuthChange,
+    onBeforeSignOut,
     getSession,
     getWorkspaceAccess,
     listWorkspaceUsers,
@@ -573,6 +622,8 @@
     listNotes,
     addNote,
     deleteNote,
+    savePushSubscription,
+    removePushSubscription,
     upsertProperty,
     listPermanentDeletions,
     permanentlyDeleteProperty,

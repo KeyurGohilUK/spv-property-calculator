@@ -1,7 +1,8 @@
 {
-  "version": "1.21.38",
+  "version": "1.21.39",
   "notes": [
-    "Obsolete compatibility files have been removed from the repository root now that updates use the asset manifest.",
-    "Application code and feature styles now load only from their organised canonical folders."
+    "Signed-in workspace members can enable Note Notifications per device from the More menu.",
+    "New property notes can securely notify other subscribed members without showing the private note text.",
+    "Notification taps safely reopen the relevant property in the installed app."
   ]
 }

@@ -115,8 +115,10 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
   transition: transform .2s ease;
 }
-[data-theme-toggle][aria-pressed="true"] .theme-switch { background: var(--brand); }
-[data-theme-toggle][aria-pressed="true"] .theme-switch::before { transform: translateX(20px); }
+[data-theme-toggle][aria-pressed="true"] .theme-switch,
+[data-notification-toggle][aria-pressed="true"] .theme-switch { background: var(--brand); }
+[data-theme-toggle][aria-pressed="true"] .theme-switch::before,
+[data-notification-toggle][aria-pressed="true"] .theme-switch::before { transform: translateX(20px); }
 .help-guide-dialog { width: min(460px, calc(100% - 28px)); overflow: visible; }
 .help-guide-progress-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 2px 34px 22px 0; color: var(--muted); font-size: 12px; font-weight: 750; }
 .help-guide-dots { display: flex; gap: 6px; }

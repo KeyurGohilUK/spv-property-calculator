@@ -57,6 +57,7 @@ let currentNotes = [];
 let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
+let pendingPropertyId = '';
 
 let installComponent = null;
 let accountController = null;
@@ -596,6 +597,16 @@ function showEditor(id = null) {
   if (editingId) loadNotes();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function openPendingProperty() {
+  if (!pendingPropertyId) return false;
+  const property = getProperty(pendingPropertyId);
+  if (!property || property.deletedAt) return false;
+  const propertyId = pendingPropertyId;
+  pendingPropertyId = '';
+  showEditor(propertyId);
+  return true;
+}
 function updatePropertyCounts() {
   const activeCount=getActiveProperties().length, archivedCount=getArchivedProperties().length;
   $('propertyCount').textContent=activeCount; $('archivedPropertyCount').textContent=archivedCount; $('archiveCountBadge').textContent=archivedCount;
@@ -820,6 +831,7 @@ async function syncCloud({ showFeedback = true } = {}) {
     const result = await syncWorkspace(window.SPVCloud);
     renderPropertyList();
     renderArchiveList();
+    openPendingProperty();
     if (result.conflictCount) {
       cloudLastMessage = result.message;
       if (showFeedback) $('signedInMessage').textContent = result.message;
@@ -986,6 +998,12 @@ function init() {
   setupCloud();
 
   const initialMenuUrl = new URL(window.location.href);
+  pendingPropertyId = String(initialMenuUrl.searchParams.get('property') || '').trim();
+  if (pendingPropertyId) {
+    initialMenuUrl.searchParams.delete('property');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(openPendingProperty, 0);
+  }
   const requestedDialog = initialMenuUrl.searchParams.get('dialog');
   if (requestedDialog === 'account' || requestedDialog === 'install') {
     initialMenuUrl.searchParams.delete('dialog');

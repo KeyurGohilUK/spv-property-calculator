@@ -6,7 +6,7 @@ const requiredDirectories = [
   'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/planning/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
   'src/features/forecast/', 'src/features/users/', 'src/services/', 'src/config/',
-  'src/utils/', 'src/components/', 'workers/receipt/', 'tests/e2e/'
+  'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/', 'tests/e2e/'
 ];
 
 for (const path of requiredDirectories) {
@@ -25,12 +25,12 @@ const organisedModules = {
   'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
   'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js'],
   'src/features/users/': ['manage-users.js'],
-  'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js'],
+  'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js', 'push-subscription.js'],
   'src/config/': ['tax-config.js'],
   'src/utils/': ['format-utils.js', 'validation.js'],
   'src/components/': [
     'admin-menu.js', 'dialog-helper.js', 'help-guide.js', 'install-component.js',
-    'secondary-page-header.js', 'sync-status.js', 'theme.js', 'update-notifier.js'
+    'notification-settings.js', 'secondary-page-header.js', 'sync-status.js', 'theme.js', 'update-notifier.js'
   ]
 };
 

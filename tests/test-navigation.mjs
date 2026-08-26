@@ -63,6 +63,7 @@ assert.doesNotMatch(expenses, /href="\.\/\?menu=more"/, 'Expenses More must not 
 assert.match(appShell, /data-more-menu[\s\S]*dialogController\.open\(control\)/, 'Shared More must open through the accessible dialog helper');
 assert.match(appShell, /more-menu-list[\s\S]*Archived Properties[\s\S]*Manage Users[\s\S]*Help Guide[\s\S]*Theme/, 'Shared App Menu items must be ordered by priority');
 assert.match(appShell, /id="moreMenuDialog" class="install-dialog more-menu-dialog"/, 'Shared App Menu must use Install dialog styling');
+assert.match(appShell, /setupNotificationSettings/, 'Shared App Menu must initialise notification settings');
 assert.match(app, /searchParams\.get\('view'\) === 'archive'[\s\S]*showArchive/, 'Archived Properties route must open the archive view');
 
 assert.equal((appShell.match(/id="archiveBtn"/g) || []).length, 1, 'Archive action ID must be unique');

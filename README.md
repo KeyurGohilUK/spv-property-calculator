@@ -19,6 +19,7 @@ A mobile-first Progressive Web App for estimating the cash required to buy a res
 - Viewer, editor and administrator workspace roles
 - Administrator-only permanent property deletion
 - Administrator user-management page for account approval and role assignment
+- Shared property notes with optional per-device alerts for other members' new notes
 - Soft-delete Archived Properties page with restore support
 - Offline-first cloud sync; archived records remain stored locally and in Supabase
 - GitHub Pages and iPhone PWA support

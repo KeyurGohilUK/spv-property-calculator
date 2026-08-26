@@ -1,4 +1,5 @@
 import { setupDialog } from '../components/dialog-helper.js';
+import { setupNotificationSettings } from '../components/notification-settings.js';
 
 const $ = (id, root = document) => root.getElementById(id);
 
@@ -35,17 +36,22 @@ function renderAppMenu(root, { home }) {
 export function setupAppShell({ root = document, home = false } = {}) {
   renderHeaderControls(root);
   const dialog = renderAppMenu(root, { home });
+  const notificationSettings = setupNotificationSettings({ root });
   const dialogController = setupDialog(dialog, { closeButtons: [$('closeMoreMenuDialog', root)] });
   root.querySelectorAll('[data-more-menu]').forEach((control) => {
     if (control.dataset.appMenuBound) return;
     control.dataset.appMenuBound = 'true';
-    control.addEventListener('click', () => dialogController.open(control));
+    control.addEventListener('click', () => {
+      notificationSettings?.render();
+      dialogController.open(control);
+    });
   });
   window.SPVTheme?.bindThemeControls(dialog);
   window.SPVHelpGuide?.bindTriggers(dialog);
   window.dispatchEvent(new CustomEvent('spv-admin-menu-rendered'));
   return {
     connectionStatus: $('connectionStatus', root), accountButton: $('accountBtn', root),
-    installButton: $('installBtn', root), menuDialog: dialog, menuDialogController: dialogController
+    installButton: $('installBtn', root), menuDialog: dialog, menuDialogController: dialogController,
+    notificationSettings
   };
 }

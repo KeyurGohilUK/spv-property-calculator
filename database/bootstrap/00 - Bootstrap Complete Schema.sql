@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SPV Property Calculator - complete database bootstrap
--- Current through Update 13 (Admin User Management)
+-- Current through Update 14 (Note Push Notifications)
 --
 -- Use for a fresh or replacement Supabase project. Create at least one Auth user
 -- first; the oldest account is made the initial administrator. Safe to re-run.
@@ -16,6 +16,18 @@ create table if not exists public.workspace_members (
   added_at timestamptz not null default now(),
   added_by uuid null references auth.users(id) on delete set null
 );
+
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.workspace_members(user_id) on delete cascade,
+  endpoint text not null unique check (length(endpoint) between 20 and 2048 and endpoint ~ '^https://'),
+  p256dh text not null check (length(p256dh) between 20 and 255),
+  auth text not null check (length(auth) between 8 and 255),
+  user_agent text not null default '' check (length(user_agent) <= 500),
+  created_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()
+);
+create index if not exists push_subscriptions_user_idx on public.push_subscriptions(user_id);
 
 create table if not exists public.properties (
   id text primary key,
@@ -77,6 +89,7 @@ create unique index if not exists expenses_receipt_object_path_idx
   on public.expenses(receipt_object_path) where receipt_object_path is not null;
 
 alter table public.workspace_members enable row level security;
+alter table public.push_subscriptions enable row level security;
 alter table public.properties enable row level security;
 alter table public.property_notes enable row level security;
 alter table public.property_deletions enable row level security;
@@ -105,14 +118,19 @@ create or replace function public.is_workspace_admin() returns boolean
 language sql stable security definer set search_path=public,pg_temp
 as $$ select exists(select 1 from public.workspace_members where user_id=auth.uid() and active and role='admin') $$;
 
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses from anon;
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses from authenticated;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions from anon;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions from authenticated;
 grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses to authenticated;
+grant select, insert, update, delete on table public.push_subscriptions to authenticated;
 revoke all on function public.is_workspace_member(), public.is_workspace_editor(), public.is_workspace_admin() from public, anon;
 grant execute on function public.is_workspace_member(), public.is_workspace_editor(), public.is_workspace_admin() to authenticated;
 
 drop policy if exists "Members read own membership" on public.workspace_members;
 create policy "Members read own membership" on public.workspace_members for select to authenticated using (auth.uid()=user_id);
+drop policy if exists "Members manage own push subscriptions" on public.push_subscriptions;
+create policy "Members manage own push subscriptions" on public.push_subscriptions for all to authenticated
+using (auth.uid()=user_id and public.is_workspace_member())
+with check (auth.uid()=user_id and public.is_workspace_member());
 drop policy if exists "Members read properties" on public.properties;
 create policy "Members read properties" on public.properties for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read notes" on public.property_notes;
