@@ -1,8 +1,7 @@
 {
-  "version": "1.21.44",
+  "version": "1.21.45",
   "notes": [
-    "Authorised users now acknowledge the current legal policies once before entering the workspace.",
-    "Policy versions and acceptance time are stored securely against each Supabase account.",
-    "Administrators can see whether each account has accepted the current policy version."
+    "Property cards now show Today or Tomorrow for upcoming viewings on those days.",
+    "Other viewing dates continue to use the full date and time."
   ]
 }

@@ -5,7 +5,7 @@ class FakeElement {
 }
 globalThis.document = { createElement: () => new FakeElement() };
 
-const { createPropertyCard } = await import('../src/features/properties/property-card.js');
+const { createPropertyCard, formatViewingDate } = await import('../src/features/properties/property-card.js');
 const calc = {
   purchasePrice: 200000, depositPercent: 25, depositAmount: 50000,
   mortgageRequired: 150000, totalPurchaseCostsExcludingDeposit: 12000,
@@ -29,5 +29,10 @@ assert.match(active.className, /^property-card$/);
 assert.match(active.innerHTML, /aria-label="Open &lt;Home> for editing"/);
 assert.doesNotMatch(archived.innerHTML, /property-card-open/);
 assert.equal(archived.className, 'property-card archived-card');
+
+const now = new Date(2026, 7, 27, 9, 0);
+assert.equal(formatViewingDate('2026-08-27T14:30', now), 'Today at 14:30');
+assert.equal(formatViewingDate('2026-08-28T10:15', now), 'Tomorrow at 10:15');
+assert.equal(formatViewingDate('2026-08-29T16:45', now), '29 Aug 2026 · 16:45');
 
 console.log('Shared property-card rendering tests passed.');

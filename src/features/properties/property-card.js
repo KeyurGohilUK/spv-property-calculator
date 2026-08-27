@@ -1,3 +1,37 @@
+import { formatDate } from '../../utils/format-utils.js';
+
+function isSameLocalDay(left, right) {
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate();
+}
+
+export function formatViewingDate(value, now = new Date()) {
+  const raw = String(value || '').trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(raw);
+  if (!match) return '';
+
+  const date = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4] || 0),
+    Number(match[5] || 0)
+  );
+  if (Number.isNaN(date.getTime())) return '';
+
+  const dateLabel = formatDate(date);
+  if (!match[4] || !match[5]) return dateLabel;
+
+  const timeLabel = formatDate(date, { hour: '2-digit', minute: '2-digit', hour12: false });
+  if (isSameLocalDay(date, now)) return `Today at ${timeLabel}`;
+
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  if (isSameLocalDay(date, tomorrow)) return `Tomorrow at ${timeLabel}`;
+
+  return `${dateLabel} · ${timeLabel}`;
+}
+
 function renderPropertyStats(calc, { money, number }) {
   return `<div class="property-stats">
     <div><span>Purchase Price</span><strong>${money(calc.purchasePrice)}</strong></div>

@@ -26,7 +26,7 @@ import {
 } from '../features/properties/storage.js';
 import { syncWorkspace, formatWorkspaceSyncError } from '../services/workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from '../features/properties/calendar-invite.js';
-import { createPropertyCard } from '../features/properties/property-card.js';
+import { createPropertyCard, formatViewingDate } from '../features/properties/property-card.js';
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from '../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../utils/validation.js';
 
@@ -82,18 +82,6 @@ function formatInputValue(value) {
 function normalizeDepositPercent(value) {
   const clamped = clamp(safeNumber(value), 0, 100);
   return Math.round(clamped / 5) * 5;
-}
-
-function formatViewingDate(value) {
-  const raw = String(value || '').trim();
-  const match = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(raw);
-  if (!match) return '';
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 0), Number(match[5] || 0));
-  if (Number.isNaN(date.getTime())) return '';
-  const dateLabel = formatDate(date);
-  if (!match[4] || !match[5]) return dateLabel;
-  const timeLabel = formatDate(date, { hour: '2-digit', minute: '2-digit', hour12: false });
-  return dateLabel + ' · ' + timeLabel;
 }
 
 function normalizeViewingDateTime(value) {
