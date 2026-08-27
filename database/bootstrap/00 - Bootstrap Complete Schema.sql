@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SPV Property Calculator - complete database bootstrap
--- Current through Update 15 (Policy Acceptance)
+-- Current through Update 16 (Viewing Push Reminders)
 --
 -- Use for a fresh or replacement Supabase project. Create at least one Auth user
 -- first; the oldest account is made the initial administrator. Safe to re-run.
@@ -48,6 +48,19 @@ create table if not exists public.properties (
 );
 create index if not exists properties_updated_idx on public.properties(updated_at desc);
 create index if not exists properties_deleted_idx on public.properties(deleted_at) where deleted_at is not null;
+
+create table if not exists public.viewing_reminder_deliveries (
+  id uuid primary key default gen_random_uuid(),
+  property_id text not null references public.properties(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  viewing_at_local timestamp without time zone not null,
+  reminder_type text not null check (reminder_type in ('morning','one_hour')),
+  status text not null default 'processing' check (status in ('processing','delivered','skipped')),
+  created_at timestamptz not null default now(),
+  delivered_at timestamptz null,
+  unique (property_id, user_id, viewing_at_local, reminder_type)
+);
+create index if not exists viewing_reminder_cleanup_idx on public.viewing_reminder_deliveries(viewing_at_local);
 
 create table if not exists public.property_notes (
   id uuid primary key default gen_random_uuid(),
@@ -103,6 +116,7 @@ alter table public.properties enable row level security;
 alter table public.property_notes enable row level security;
 alter table public.property_deletions enable row level security;
 alter table public.expenses enable row level security;
+alter table public.viewing_reminder_deliveries enable row level security;
 
 insert into public.workspace_members(user_id, role, active)
 select id, 'admin', true from auth.users
@@ -127,8 +141,8 @@ create or replace function public.is_workspace_admin() returns boolean
 language sql stable security definer set search_path=public,pg_temp
 as $$ select exists(select 1 from public.workspace_members where user_id=auth.uid() and active and role='admin') $$;
 
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions, public.policy_acceptances from anon;
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions, public.policy_acceptances from authenticated;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries from anon;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries from authenticated;
 grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses to authenticated;
 grant select, insert, update, delete on table public.push_subscriptions to authenticated;
 grant select, insert, update on table public.policy_acceptances to authenticated;
@@ -258,3 +272,10 @@ grant execute on function public.list_workspace_users() to authenticated;
 grant execute on function public.set_workspace_user_access(uuid,text,boolean) to authenticated;
 
 commit;
+
+create extension if not exists pg_cron with schema pg_catalog;
+select cron.schedule(
+  'cleanup-viewing-reminder-deliveries', '0 3 * * 0',
+  $$delete from public.viewing_reminder_deliveries
+    where viewing_at_local < timezone('Europe/London', now()) - interval '30 days'$$
+);

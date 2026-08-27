@@ -1,7 +1,8 @@
 {
-  "version": "1.21.45",
+  "version": "1.21.46",
   "notes": [
-    "Property cards now show Today or Tomorrow for upcoming viewings on those days.",
-    "Other viewing dates continue to use the full date and time."
+    "Enabled devices can receive property-viewing reminders around 9:00 AM and one hour before the appointment.",
+    "Reminder delivery is duplicate-safe and old delivery records are removed automatically after 30 days.",
+    "The App Menu now uses one Notifications setting for property notes and viewing reminders."
   ]
 }

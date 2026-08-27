@@ -58,7 +58,7 @@ export function createPushSubscriptionService({
     if (!String(publicKey || '').trim()) {
       return { enabled: false, available: false, reason: 'Notification server setup is required.' };
     }
-    if (!currentUser()) return { enabled: false, available: false, reason: 'Sign in to enable note notifications.' };
+    if (!currentUser()) return { enabled: false, available: false, reason: 'Sign in to enable notifications.' };
     if (notificationRef.permission === 'denied') {
       return { enabled: false, available: false, reason: 'Notifications are blocked in device settings.' };
     }
@@ -71,7 +71,7 @@ export function createPushSubscriptionService({
   }
 
   async function enable() {
-    if (!currentUser()) throw new Error('Sign in to enable note notifications.');
+    if (!currentUser()) throw new Error('Sign in to enable notifications.');
     if (!cloud?.savePushSubscription) throw new Error('Notification sync is unavailable.');
     const applicationServerKey = base64UrlToUint8Array(publicKey);
     const permissionRequest = notificationRef.permission === 'granted'

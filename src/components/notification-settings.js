@@ -3,7 +3,7 @@ import { createPushSubscriptionService } from '../services/push-subscription.js'
 const BUTTON_HTML = `
   <button class="more-menu-item" type="button" data-notification-toggle aria-pressed="false">
     <span class="more-menu-icon" aria-hidden="true">🔔</span>
-    <span><strong>Note Notifications</strong><small data-notification-description>Checking this device…</small></span>
+    <span><strong>Notifications</strong><small data-notification-description>Checking this device…</small></span>
     <span class="theme-switch" aria-hidden="true"></span>
   </button>`;
 

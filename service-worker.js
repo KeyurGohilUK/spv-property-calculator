@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.21.45-relative-viewing-dates';
+const CACHE_NAME = 'spv-property-calculator-v1.21.46-viewing-reminders';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -52,9 +52,9 @@ function getNotificationUrl(value) {
 self.addEventListener('push', (event) => {
   let payload = {};
   try { payload = event.data?.json?.() || {}; } catch { payload = {}; }
-  const title = String(payload.title || 'New property note');
+  const title = String(payload.title || 'SPV Property Calculator');
   const options = {
-    body: String(payload.body || 'A new note was added to a shared property.'),
+    body: String(payload.body || 'You have a new property notification.'),
     icon: new URL('./icons/icon-192.png', self.registration.scope).href,
     badge: new URL('./icons/favicon-32.png', self.registration.scope).href,
     tag: String(payload.tag || 'property-note'),

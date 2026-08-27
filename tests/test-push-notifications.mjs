@@ -79,9 +79,11 @@ assert.match(worker, /addEventListener\('notificationclick'[\s\S]*clients\.openW
 assert.match(worker, /target\.origin === fallback\.origin/, 'Notification URLs must be restricted to the app origin');
 
 const edgeFunction = fs.readFileSync(new URL('../supabase/functions/note-push/index.ts', import.meta.url), 'utf8');
+const notificationSettings = fs.readFileSync(new URL('../src/components/notification-settings.js', import.meta.url), 'utf8');
 assert.match(edgeFunction, /constantTimeEqual\(request\.headers\.get\('x-note-push-secret'\)/, 'Webhook authentication is missing');
 assert.match(edgeFunction, /\.neq\('user_id', payload\.record\.author_user_id\)/, 'Note authors must be excluded');
 assert.doesNotMatch(edgeFunction, /payload\.record\.note/, 'Notification payloads must not expose note text');
 assert.match(edgeFunction, /statusCode === 404 \|\| statusCode === 410/, 'Expired subscriptions must be removed');
+assert.match(notificationSettings, /<strong>Notifications<\/strong>/, 'One device setting must cover notes and viewing reminders');
 
 console.log('Push notification service and security checks passed.');
