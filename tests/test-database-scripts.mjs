@@ -7,13 +7,14 @@ const receiptMigration = fs.readFileSync(new URL('../database/migrations/Update 
 const revisionRepair = fs.readFileSync(new URL('../database/migrations/Update 12 - Repair Revision Sync Schema.sql', import.meta.url), 'utf8');
 const pushMigration = fs.readFileSync(new URL('../database/migrations/Update 14 - Note Push Notifications.sql', import.meta.url), 'utf8');
 const policyMigration = fs.readFileSync(new URL('../database/migrations/Update 15 - Policy Acceptance.sql', import.meta.url), 'utf8');
+const viewingReminderMigration = fs.readFileSync(new URL('../database/migrations/Update 16 - Viewing Push Reminders.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
 const projectRoot = new URL('../', import.meta.url);
 const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 
-for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'push_subscriptions', 'policy_acceptances']) {
+for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'push_subscriptions', 'policy_acceptances', 'viewing_reminder_deliveries']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
 }
 assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS');
@@ -35,6 +36,10 @@ assert.match(pushMigration, /from pg_catalog\.pg_policies/, 'Push migration must
 assert.match(policyMigration, /create table if not exists public\.policy_acceptances/, 'Update 15 must create policy acceptance records');
 assert.match(policyMigration, /auth\.uid\(\) = user_id/g, 'Users must manage only their own policy acceptance');
 assert.match(policyMigration, /policy_accepted_at[\s\S]*terms_version[\s\S]*privacy_version[\s\S]*disclaimer_version/, 'Admin user listing must expose versioned policy status');
+assert.match(viewingReminderMigration, /unique \(property_id, user_id, viewing_at_local, reminder_type\)/, 'Viewing reminders must prevent duplicate delivery claims');
+assert.match(viewingReminderMigration, /on delete cascade/, 'Deleting a property must clean its reminder deliveries');
+assert.match(viewingReminderMigration, /cleanup-viewing-reminder-deliveries[\s\S]*interval '30 days'/, 'Viewing reminder delivery history must be cleaned weekly after 30 days');
+assert.match(viewingReminderMigration, /alter table public\.viewing_reminder_deliveries enable row level security/, 'Viewing reminder delivery history must enable RLS');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');

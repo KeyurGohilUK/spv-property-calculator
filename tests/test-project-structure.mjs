@@ -6,7 +6,8 @@ const requiredDirectories = [
   'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
   'src/features/forecast/', 'src/features/users/', 'src/services/', 'src/config/',
-  'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/', 'tests/e2e/'
+  'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/',
+  'supabase/functions/viewing-reminders/', 'tests/e2e/'
 ];
 
 for (const path of requiredDirectories) {

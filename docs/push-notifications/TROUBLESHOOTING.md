@@ -46,3 +46,12 @@ The endpoint is unique. A fresh enable updates the existing endpoint, while push
 To rotate credentials, update Supabase secrets and the webhook header as one maintenance change. Rotating the VAPID key also requires a web release with the new public key and users must resubscribe.
 
 To stop sends without affecting notes, disable the database webhook. To retire the feature, disable the webhook first, ask users to turn off notifications, and only then consider removing subscriptions or secrets through a reviewed migration/operations change.
+
+## Viewing reminder did not arrive
+
+1. Confirm `send-viewing-reminders` is active in `cron.job` and has run within five minutes.
+2. Confirm the property has a valid `viewingDate` and is not archived.
+3. Confirm the property owner's device has an active row in `push_subscriptions`.
+4. Check `viewing_reminder_deliveries`: `delivered` means a push provider accepted it; `skipped` means no active owner subscription existed.
+5. Confirm the Vault value matches `VIEWING_REMINDER_CRON_SECRET` without exposing either value.
+6. Remember that delivery is best effort and device Focus modes can suppress an accepted push.

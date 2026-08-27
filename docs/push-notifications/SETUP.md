@@ -82,12 +82,63 @@ Create this webhook:
 
 The header value must exactly match `NOTE_PUSH_WEBHOOK_SECRET`.
 
-## 5. Enable each device
+## 5. Configure viewing reminders
+
+Run `database/migrations/Update 16 - Viewing Push Reminders.sql` in the SQL Editor. This creates the duplicate-prevention table and the weekly 30-day cleanup job.
+
+Create one new high-entropy secret and store the same value in the Edge Function and Supabase Vault:
+
+```bash
+supabase secrets set VIEWING_REMINDER_CRON_SECRET=YOUR_NEW_RANDOM_SECRET
+supabase functions deploy viewing-reminders
+```
+
+Then run the following in the SQL Editor, replacing only `YOUR_NEW_RANDOM_SECRET`:
+
+```sql
+create extension if not exists pg_net with schema extensions;
+
+select vault.create_secret(
+  'YOUR_NEW_RANDOM_SECRET',
+  'viewing_reminder_cron_secret',
+  'Authenticates the five-minute viewing reminder job'
+);
+
+select cron.schedule(
+  'send-viewing-reminders',
+  '*/5 * * * *',
+  $job$
+  select net.http_post(
+    url := 'https://abegxabdlecgznapukzq.supabase.co/functions/v1/viewing-reminders',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-viewing-reminder-secret', (
+        select decrypted_secret from vault.decrypted_secrets
+        where name = 'viewing_reminder_cron_secret'
+      )
+    ),
+    body := '{}'::jsonb
+  );
+  $job$
+);
+```
+
+Verify both jobs:
+
+```sql
+select jobname, schedule, active
+from cron.job
+where jobname in ('send-viewing-reminders', 'cleanup-viewing-reminder-deliveries');
+```
+
+Expected schedules are every five minutes for sending and Sunday at 03:00 for cleanup. Never paste the secret into repository files, screenshots or support logs.
+
+## 6. Enable each device
 
 1. Deploy the web app and open the latest release.
 2. Sign in as a workspace member.
 3. Install the PWA. On iPhone/iPad, use **Share → Add to Home Screen**, then open that installed app.
-4. Open **More → Note Notifications** and enable notifications.
+4. Open **More → Notifications** and enable notifications.
 5. Accept the browser permission prompt.
 
 Subscriptions are per browser profile and per device. Repeat these steps on every device that should receive alerts, then complete the [acceptance test](TESTING.md).

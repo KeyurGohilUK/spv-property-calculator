@@ -1,6 +1,6 @@
-# Note push notifications
+# Push notifications
 
-This folder is the operational reference for Web Push alerts created when a workspace member adds a property note. The feature is optional and does not affect note saving or synchronisation if push delivery is unavailable.
+This folder is the operational reference for Web Push alerts created for shared property notes and scheduled property viewings. The feature is optional and does not affect saved data if push delivery is unavailable.
 
 ## Current status
 
@@ -8,6 +8,9 @@ This folder is the operational reference for Web Push alerts created when a work
 - Database: `push_subscriptions` is defined by the bootstrap and Update 14.
 - Sender: Supabase Edge Function `note-push`.
 - Trigger: an `INSERT` webhook on `public.property_notes`.
+- Viewing sender: Supabase Edge Function `viewing-reminders`, invoked by Supabase Cron every five minutes.
+- Viewing schedule: around 09:00 Europe/London and once when the viewing is within one hour.
+- Duplicate prevention: `viewing_reminder_deliveries`, cleaned weekly after a 30-day retention period.
 - Recipient rule: subscribed workspace members except the note author.
 - Privacy rule: notification content contains the author and property title, never the note text.
 
