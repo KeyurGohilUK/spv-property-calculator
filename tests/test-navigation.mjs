@@ -35,7 +35,7 @@ assert.match(styles, /\.auth-pending #publicLanding,[\s\S]*\.auth-pending #app,[
 assert.match(styles, /\.auth-pending::before[\s\S]*\.auth-pending::after[\s\S]*auth-loading-spin/, 'Pending authentication must show a neutral loading state instead of the public landing page');
 assert.match(index, /legal\/privacy\.html[\s\S]*legal\/terms\.html[\s\S]*legal\/disclaimer\.html[\s\S]*legal\/copyright\.html/, 'Anonymous landing page must expose all legal notices');
 assert.match(appShell, /legal\/privacy\.html[\s\S]*Privacy &amp; Terms/, 'Authenticated App Menu must link to legal information');
-assert.match(privacy, /Keyur Gohil[\s\S]*spvcalculator\.support@oopahone\.com[\s\S]*not monitored daily[\s\S]*Information Commissioner's Office/, 'Privacy Policy must identify the controller, contact route, response caveat and ICO rights');
+assert.match(privacy, /Keyur Gohil[\s\S]*spvappuser@oopahone\.co\.uk[\s\S]*not monitored daily[\s\S]*Information Commissioner's Office/, 'Privacy Policy must identify the controller, contact route, response caveat and ICO rights');
 assert.match(terms, /planning aids[\s\S]*Nothing in these terms excludes or limits liability where doing so would be unlawful/, 'Terms must explain estimate limitations without excluding mandatory liability');
 assert.match(syncStatus, /export function renderSyncStatus\(element, message, state = ''\)[\s\S]*state === 'error'[\s\S]*state === 'synced'/, 'Shared sync-status component must apply consistent states');
 
