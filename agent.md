@@ -118,8 +118,16 @@ Do not add duplicate root-level implementations or compatibility copies for reti
 - Local saves must remain immediate; cloud sync may follow when authenticated and online.
 - Preserve Row Level Security and least-privilege workspace roles: viewer, editor, and administrator.
 - Permanent deletion remains administrator-only and online-only unless explicitly redesigned.
-- Schema changes require both the correct ordered migration and an updated bootstrap schema for new installations.
-- Database changes must be idempotent where the established migration pattern requires it and must include verification guidance/tests.
+### Mandatory Supabase schema-change rule
+
+Every change to the Supabase/database structure is incomplete unless the same pull request includes both of the following:
+
+1. A new, correctly ordered migration file in `database/migrations/` that safely upgrades every existing Supabase deployment.
+2. The equivalent update to the appropriate bootstrap schema in `database/bootstrap/` so a newly created Supabase project starts with the complete current structure.
+
+This requirement is mandatory for tables, columns, constraints, indexes, functions, triggers, policies, Row Level Security, grants, storage configuration, and any other database object or structural behaviour. Never update only the migration or only the bootstrap. Never defer either half to a later pull request.
+
+The migration must preserve existing data, follow the established naming/order convention, be idempotent where the project pattern requires it, and include relevant tests plus clear verification and deployment instructions. If both upgrade paths cannot be supplied and verified, do not open the pull request as ready for review.
 - Never expose authenticated features or workspace data on the anonymous landing state.
 - Do not assume network availability, notification permission, PWA installation, or cloud configuration.
 
@@ -218,7 +226,7 @@ Before opening a pull request, confirm all of the following:
 - [ ] `npm run test:e2e` passes.
 - [ ] Cached assets, PWA update behaviour, and clean routes remain correct.
 - [ ] `release.json` was bumped with accurate release-specific notes when cached app files changed.
-- [ ] Database bootstrap, migration, documentation, and tests were updated when the schema changed.
+- [ ] Every Supabase structure change includes both an ordered migration for existing deployments and the equivalent bootstrap update for new deployments; documentation and tests are updated too.
 - [ ] Documentation was updated when behaviour, setup, architecture, or operational steps changed.
 - [ ] The final diff was reviewed for accidental files, debug output, and formatting issues.
 - [ ] The PR description explains the problem, solution, test evidence, UI impact, release version (or why no bump is needed), and any deployment/database steps.
