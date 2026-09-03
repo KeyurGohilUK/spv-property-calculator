@@ -19,7 +19,7 @@ for (const document of ['README.md', 'SETUP.md', 'ARCHITECTURE.md', 'TESTING.md'
 }
 
 const rootMarkdown = fs.readdirSync(projectRoot).filter((name) => name.endsWith('.md')).sort();
-assert.deepEqual(rootMarkdown, ['README.md'], 'Only the main README should remain at the repository root');
+assert.deepEqual(rootMarkdown, ['README.md', 'agent.md'], 'Only the approved README and AI agent instructions should remain at the repository root');
 assert.equal(fs.existsSync(new URL('database-scripts/', projectRoot)), false, 'Legacy database-scripts directory must not return');
 assert.equal(fs.existsSync(new URL('playwright-tests/', projectRoot)), false, 'Legacy playwright-tests directory must not return');
 assert.equal(fs.existsSync(new URL('cloudflare/receipt-worker/', projectRoot)), false, 'Legacy receipt-worker directory must not return');
