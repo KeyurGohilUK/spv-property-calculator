@@ -1,6 +1,9 @@
 {
-  "version": "1.22.0",
+  "version": "1.23.0",
   "notes": [
-    "Added Task Manager (Beta) — create and track workspace tasks, update status, and sync across devices."
+    "Added Task Manager (Beta) — create and track workspace tasks, update status, and sync across devices.",
+    "Added BRRR Scenario Calculator — work backwards from GDV comparables to model offer price, capital recycling, and ICR/LTV constraints.",
+    "Added Year 1 cash flow waterfall — expandable line-by-line breakdown of rent, deductions, and mortgage on the Forecast page.",
+    "Added metric help buttons (?) on all forecast cards, mortgage-rate stress test, rent stress test, ICR, DSCR, break-even occupancy, and LTV — each explains the formula, UK benchmarks, and what above/below-average means."
   ]
 }

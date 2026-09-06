@@ -1,0 +1,19 @@
+# Local Supabase CLI working directories — these contain secrets and runtime state
+supabase/.temp/
+supabase/.branches/
+
+# Local environment / secrets
+.env
+.env.local
+.env.*.local
+supabase-config.local.js
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
