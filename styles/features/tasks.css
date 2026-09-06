@@ -133,7 +133,7 @@
 .suggestion-dialog h3 { margin: 4px 0 6px; }
 .suggestion-source { font-size: 13px; color: var(--muted); margin: 0 0 2px; overflow-wrap: anywhere; }
 .suggestion-prompt { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
-.suggestion-list { display: grid; gap: 8px; }
+.suggestion-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .suggestion-btn {
   display: grid;
   gap: 3px;
