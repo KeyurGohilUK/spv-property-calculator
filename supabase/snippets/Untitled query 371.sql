@@ -116,7 +116,6 @@ create table if not exists public.tasks (
   description text not null default '',
   status text not null default 'todo' check (status in ('todo', 'in-progress', 'done')),
   created_by uuid null references auth.users(id) on delete set null,
-  assigned_to uuid null references auth.users(id) on delete set null,
   due_date date null,
   scope text not null default 'company' check (scope in ('company', 'property')),
   property_id text null references public.properties(id) on delete set null,
@@ -133,31 +132,6 @@ create index if not exists tasks_status_idx on public.tasks(status);
 create index if not exists tasks_updated_idx on public.tasks(updated_at desc);
 create index if not exists tasks_due_date_idx on public.tasks(due_date) where due_date is not null;
 create index if not exists tasks_property_idx on public.tasks(property_id) where property_id is not null;
-create index if not exists tasks_assigned_idx on public.tasks(assigned_to) where assigned_to is not null;
-
-create table if not exists public.task_events (
-  id text primary key,
-  task_id text not null references public.tasks(id) on delete cascade,
-  user_id uuid null references auth.users(id) on delete set null,
-  display_name text not null default '',
-  from_status text null check (from_status in ('todo', 'in-progress', 'done')),
-  to_status text null check (to_status in ('todo', 'in-progress', 'done')),
-  created_at timestamptz not null default now()
-);
-create index if not exists task_events_task_idx on public.task_events(task_id);
-create index if not exists task_events_created_idx on public.task_events(created_at);
-
-create table if not exists public.task_reminder_deliveries (
-  id uuid primary key default gen_random_uuid(),
-  task_id text not null references public.tasks(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  reminder_type text not null check (reminder_type in ('due_today', 'overdue')),
-  sent_on date not null default current_date,
-  status text not null default 'processing' check (status in ('processing', 'delivered', 'skipped')),
-  created_at timestamptz not null default now(),
-  unique (task_id, user_id, sent_on)
-);
-create index if not exists task_reminder_cleanup_idx on public.task_reminder_deliveries(sent_on);
 
 alter table public.workspace_members enable row level security;
 alter table public.push_subscriptions enable row level security;
@@ -167,8 +141,6 @@ alter table public.property_notes enable row level security;
 alter table public.property_deletions enable row level security;
 alter table public.expenses enable row level security;
 alter table public.tasks enable row level security;
-alter table public.task_events enable row level security;
-alter table public.task_reminder_deliveries enable row level security;
 alter table public.viewing_reminder_deliveries enable row level security;
 
 insert into public.workspace_members(user_id, role, active)
@@ -176,6 +148,8 @@ select id, 'admin', true from auth.users
 where not exists (select 1 from public.workspace_members)
 order by created_at asc limit 1
 on conflict (user_id) do nothing;
+
+select * from public.workspace_members where role='admin' and active
 
 do $$
 begin
@@ -194,9 +168,9 @@ create or replace function public.is_workspace_admin() returns boolean
 language sql stable security definer set search_path=public,pg_temp
 as $$ select exists(select 1 from public.workspace_members where user_id=auth.uid() and active and role='admin') $$;
 
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from anon;
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from authenticated;
-grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events to authenticated;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries from anon;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries from authenticated;
+grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks to authenticated;
 grant select, insert, update, delete on table public.push_subscriptions to authenticated;
 grant select, insert, update on table public.policy_acceptances to authenticated;
 revoke all on function public.is_workspace_member(), public.is_workspace_editor(), public.is_workspace_admin() from public, anon;
@@ -230,25 +204,9 @@ drop policy if exists "Members read expenses" on public.expenses;
 create policy "Members read expenses" on public.expenses for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read tasks" on public.tasks;
 create policy "Members read tasks" on public.tasks for select to authenticated using (public.is_workspace_member());
-drop policy if exists "Members read task events" on public.task_events;
-create policy "Members read task events" on public.task_events for select to authenticated using (public.is_workspace_member());
-
-create or replace function public.insert_task_event(
- p_id text,p_task_id text,p_display_name text,p_from_status text,p_to_status text,p_created_at timestamptz)
-returns void language plpgsql security definer set search_path=public,pg_temp as $$
-begin
- if auth.uid() is null or not public.is_workspace_editor() then raise exception 'Approved editor access is required'; end if;
- if nullif(btrim(p_id),'') is null then raise exception 'Event ID is required'; end if;
- if nullif(btrim(p_task_id),'') is null then raise exception 'Task ID is required'; end if;
- insert into public.task_events(id,task_id,user_id,display_name,from_status,to_status,created_at)
- values(p_id,p_task_id,auth.uid(),coalesce(p_display_name,''),p_from_status,p_to_status,coalesce(p_created_at,now()))
- on conflict(id) do nothing;
-end $$;
-revoke all on function public.insert_task_event(text,text,text,text,text,timestamptz) from public,anon;
-grant execute on function public.insert_task_event(text,text,text,text,text,timestamptz) to authenticated;
 
 create or replace function public.upsert_task_if_current(
- p_id text,p_title text,p_description text,p_status text,p_created_by uuid,p_assigned_to uuid,
+ p_id text,p_title text,p_description text,p_status text,p_created_by uuid,
  p_due_date date,p_scope text,p_property_id text,p_deleted_at timestamptz,p_expected_revision bigint)
 returns table(new_revision bigint,server_created_at timestamptz,server_updated_at timestamptz)
 language plpgsql security definer set search_path=public,pg_temp as $$
@@ -264,18 +222,15 @@ begin
   raise exception 'Task property does not match its scope';
  end if;
  if p_expected_revision is null or p_expected_revision<0 then raise exception 'Expected revision must be zero or greater'; end if;
- if p_assigned_to is not null and not exists(
-   select 1 from public.workspace_members where user_id=p_assigned_to and active
- ) then raise exception 'Assignee must be an active workspace member'; end if;
  if p_expected_revision=0 then
-  insert into public.tasks(id,user_id,title,description,status,created_by,assigned_to,due_date,scope,property_id,created_at,updated_at,deleted_at,revision)
+  insert into public.tasks(id,user_id,title,description,status,created_by,due_date,scope,property_id,created_at,updated_at,deleted_at,revision)
   values(p_id,auth.uid(),coalesce(p_title,''),coalesce(p_description,''),coalesce(p_status,'todo'),
-   p_created_by,p_assigned_to,p_due_date,coalesce(p_scope,'company'),nullif(p_property_id,''),v_now,v_now,p_deleted_at,1)
+   p_created_by,p_due_date,coalesce(p_scope,'company'),nullif(p_property_id,''),v_now,v_now,p_deleted_at,1)
   on conflict(id) do nothing
   returning tasks.revision,tasks.created_at,tasks.updated_at into new_revision,server_created_at,server_updated_at;
  else
   update public.tasks set title=coalesce(p_title,''),description=coalesce(p_description,''),
-   status=coalesce(p_status,'todo'),assigned_to=p_assigned_to,due_date=p_due_date,scope=coalesce(p_scope,'company'),
+   status=coalesce(p_status,'todo'),due_date=p_due_date,scope=coalesce(p_scope,'company'),
    property_id=nullif(p_property_id,''),deleted_at=p_deleted_at,updated_at=v_now,revision=revision+1
   where id=p_id and revision=p_expected_revision
   returning tasks.revision,tasks.created_at,tasks.updated_at into new_revision,server_created_at,server_updated_at;
@@ -283,25 +238,8 @@ begin
  if new_revision is null then raise exception using errcode='40001',message='TASK_CONFLICT: this task changed on another device'; end if;
  return next;
 end $$;
-revoke all on function public.upsert_task_if_current(text,text,text,text,uuid,uuid,date,text,text,timestamptz,bigint) from public,anon;
-grant execute on function public.upsert_task_if_current(text,text,text,text,uuid,uuid,date,text,text,timestamptz,bigint) to authenticated;
-
-create or replace function public.list_active_members()
-returns table(user_id uuid,display_name text)
-language plpgsql security definer set search_path=public,auth,pg_temp as $$
-begin
- if auth.uid() is null or not public.is_workspace_member() then raise exception 'Workspace member access is required'; end if;
- return query
- select account.id,
-  coalesce(nullif(account.raw_user_meta_data->>'display_name',''),nullif(account.raw_user_meta_data->>'full_name',''),
-   split_part(coalesce(account.email,''),'@',1))::text
- from auth.users account
- join public.workspace_members member on member.user_id=account.id
- where member.active=true
- order by lower(coalesce(nullif(account.raw_user_meta_data->>'display_name',''),account.email,''));
-end $$;
-revoke all on function public.list_active_members() from public,anon;
-grant execute on function public.list_active_members() to authenticated;
+revoke all on function public.upsert_task_if_current(text,text,text,text,uuid,date,text,text,timestamptz,bigint) from public,anon;
+grant execute on function public.upsert_task_if_current(text,text,text,text,uuid,date,text,text,timestamptz,bigint) to authenticated;
 
 create or replace function public.upsert_property_if_current(
  p_id text,p_data jsonb,p_created_at timestamptz,p_deleted_at timestamptz,p_expected_revision bigint)
@@ -405,9 +343,4 @@ select cron.schedule(
   'cleanup-viewing-reminder-deliveries', '0 3 * * 0',
   $$delete from public.viewing_reminder_deliveries
     where viewing_at_local < timezone('Europe/London', now()) - interval '30 days'$$
-);
-select cron.schedule(
-  'cleanup-task-reminder-deliveries', '0 4 * * 0',
-  $$delete from public.task_reminder_deliveries
-    where sent_on < current_date - interval '30 days'$$
 );

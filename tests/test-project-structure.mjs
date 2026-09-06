@@ -5,9 +5,9 @@ const projectRoot = new URL('../', import.meta.url);
 const requiredDirectories = [
   'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
-  'src/features/forecast/', 'src/features/users/', 'src/services/', 'src/config/',
+  'src/features/forecast/', 'src/features/tasks/', 'src/features/users/', 'src/services/', 'src/config/',
   'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/',
-  'supabase/functions/viewing-reminders/', 'tests/e2e/'
+  'supabase/functions/viewing-reminders/', 'tests/e2e/', 'brrr/',
 ];
 
 for (const path of requiredDirectories) {
@@ -28,7 +28,8 @@ const organisedModules = {
   'src/app/': ['app.js', 'app-shell.js', 'primary-navigation.js'],
   'src/features/properties/': ['calculations.js', 'property-card.js', 'storage.js', 'calendar-invite.js'],
   'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
-  'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js'],
+  'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js', 'forecast-brrr.js'],
+  'src/features/tasks/': ['tasks.js', 'task-storage.js', 'task-cloud-sync.js'],
   'src/features/users/': ['manage-users.js'],
   'src/services/': ['workspace-sync.js', 'receipt-cloud.js', 'account-controller.js', 'access-gate.js', 'policy-acceptance.js', 'push-subscription.js'],
   'src/config/': ['tax-config.js'],
