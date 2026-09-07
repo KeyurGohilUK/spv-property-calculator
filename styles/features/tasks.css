@@ -57,7 +57,7 @@
 }
 .task-status-btn:hover { border-color: var(--brand); color: var(--brand); background: color-mix(in srgb, var(--brand) 9%, transparent); }
 .task-status-btn[data-status="in-progress"] { border-color: var(--brand); color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, transparent); }
-.task-status-btn[data-status="done"] { border-color: var(--success, #3d9a5c); color: var(--success, #3d9a5c); background: color-mix(in srgb, var(--success, #3d9a5c) 11%, transparent); }
+.task-status-btn[data-status="done"] { border-color: var(--positive); color: var(--positive); background: color-mix(in srgb, var(--positive) 11%, transparent); }
 .task-status-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .task-card-main { min-width: 0; }
 .task-card-title { margin: 0 0 5px; font-size: 15px; font-weight: 750; overflow-wrap: anywhere; }
@@ -79,7 +79,7 @@
 }
 .task-chip.todo { background: var(--surface-2); color: var(--muted); }
 .task-chip.in-progress { color: var(--brand-strong); background: color-mix(in srgb, var(--brand) 14%, var(--surface)); }
-.task-chip.done { color: var(--success, #3d9a5c); background: color-mix(in srgb, var(--success, #3d9a5c) 14%, var(--surface)); }
+.task-chip.done { color: var(--positive); background: color-mix(in srgb, var(--positive) 14%, var(--surface)); }
 .task-chip.overdue { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
 .task-chip.task-role-viewer { color: var(--muted); background: var(--surface-2); }
 .task-chip.task-role-editor, .task-chip.task-role-admin { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--surface)); }
@@ -97,7 +97,7 @@
   color: var(--muted);
   cursor: pointer;
 }
-.task-delete-btn { color: var(--danger) !important; }
+.task-card-actions .task-delete-btn { color: var(--danger); }
 .task-card-actions button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Dialog */
