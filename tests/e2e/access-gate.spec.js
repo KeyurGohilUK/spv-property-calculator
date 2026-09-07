@@ -21,7 +21,7 @@ test('anonymous visitors see only the private landing page and login', async ({ 
   await expect(page.getByRole('button', { name: 'Create account' })).toHaveCount(0);
 });
 
-for (const route of ['/expenses/', '/forecast/', '/admin/users/']) {
+for (const route of ['/expenses/', '/forecast/', '/brrr/', '/tasks/', '/admin/users/']) {
   test(`anonymous visitors cannot open ${route}`, async ({ page }) => {
     await page.goto(route);
     await expect(page).toHaveURL(/\/$/);
