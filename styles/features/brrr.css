@@ -96,3 +96,5 @@ html[data-theme="dark"] {
   .brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive) 14%, var(--surface)); }
   .brrr-companion-card { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
 }
+
+.brrr-table-help { margin-top: 10px; }
