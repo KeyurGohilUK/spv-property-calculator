@@ -72,6 +72,7 @@
     "./styles/features/forecast-advanced.css",
     "./brrr/",
     "./src/features/forecast/forecast-brrr.js",
+    "./src/features/forecast/brrr-calculations.js",
     "./styles/features/brrr.css",
     "./icons/icon-192.png",
     "./icons/icon-512.png",
