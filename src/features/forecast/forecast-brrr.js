@@ -1,25 +1,9 @@
-(() => {
-'use strict';
+import { BRRR_DEFAULTS, calcBrrr, calcBreakeven } from './brrr-calculations.js';
 
 const BRRR_KEY = 'spv-property-calculator.brrr.v1';
 const $ = (id) => document.getElementById(id);
 
-const DEFAULTS = Object.freeze({
-  gdv: 200000,
-  refurbCost: 25000,
-  monthlyRent: 1100,
-  purchaseLtv: 70,
-  refinanceLtv: 75,
-  mortgageRate: 5.5,
-  stressRate: 5.5,
-  icrRatio: 1.25,
-  purchaseCostsPct: 5,
-  managementPct: 10,
-  refurbWeeks: 12,
-  minOffer: 130000,
-  maxOffer: 180000,
-  offerStep: 5000,
-});
+const DEFAULTS = BRRR_DEFAULTS;
 
 const FIELD_KEYS = [
   'gdv', 'refurbCost', 'monthlyRent', 'purchaseLtv', 'refinanceLtv',
@@ -46,58 +30,6 @@ function gbp(v) {
 
 function readInputs() {
   return Object.fromEntries(FIELD_KEYS.map((key, i) => [key, num(FIELD_IDS[i], DEFAULTS[key])]));
-}
-
-function calcBrrr(offerPrice, inputs) {
-  const {
-    gdv, refurbCost, monthlyRent, purchaseLtv, refinanceLtv,
-    mortgageRate, stressRate, icrRatio, purchaseCostsPct, managementPct, refurbWeeks,
-  } = inputs;
-
-  const ltvFrac = purchaseLtv / 100;
-  const purchaseDeposit = offerPrice * (1 - ltvFrac);
-  const purchaseMortgage = offerPrice * ltvFrac;
-  const purchaseCosts = offerPrice * (purchaseCostsPct / 100);
-  const carryingCost = purchaseMortgage * (mortgageRate / 100) * (refurbWeeks / 52);
-  const totalCashIn = purchaseDeposit + purchaseCosts + refurbCost + carryingCost;
-
-  const annualRent = monthlyRent * 12;
-  const icrLimit = annualRent / ((stressRate / 100) * icrRatio);
-  const ltvLimit = gdv * (refinanceLtv / 100);
-  const icrIsBinding = icrLimit < ltvLimit;
-  const refinanceMortgage = Math.min(ltvLimit, icrLimit);
-  const cashReleased = Math.max(0, refinanceMortgage - purchaseMortgage);
-  const capitalLeft = totalCashIn - cashReleased;
-
-  const annualMortgageInterest = refinanceMortgage * (mortgageRate / 100);
-  const annualManagement = annualRent * (managementPct / 100);
-  const netAnnualCashFlow = annualRent - annualMortgageInterest - annualManagement;
-  const monthlyCashFlow = netAnnualCashFlow / 12;
-  const grossYield = (annualRent / gdv) * 100;
-
-  return {
-    offerPrice, purchaseDeposit, purchaseMortgage, purchaseCosts, carryingCost,
-    totalCashIn, icrLimit, ltvLimit, icrIsBinding, refinanceMortgage, cashReleased,
-    capitalLeft, annualRent, annualMortgageInterest, annualManagement,
-    netAnnualCashFlow, monthlyCashFlow, grossYield,
-  };
-}
-
-// Analytical solution: find offer price where totalCashIn === cashReleased (capitalLeft === 0)
-function calcBreakeven(inputs) {
-  const {
-    gdv, refurbCost, monthlyRent, purchaseLtv, refinanceLtv,
-    mortgageRate, stressRate, icrRatio, purchaseCostsPct, refurbWeeks,
-  } = inputs;
-  const L = purchaseLtv / 100;
-  const carryFactor = L * (mortgageRate / 100) * (refurbWeeks / 52);
-  const K = 1 - L + (purchaseCostsPct / 100) + carryFactor;
-  const annualRent = monthlyRent * 12;
-  const icrLimit = annualRent / ((stressRate / 100) * icrRatio);
-  const ltvLimit = gdv * (refinanceLtv / 100);
-  const R = Math.min(ltvLimit, icrLimit);
-  // P × K + refurb = R − P × L  →  P = (R − refurb) / (K + L)
-  return Math.max(0, (R - refurbCost) / (K + L));
 }
 
 let selectedOffer = null;
@@ -277,4 +209,3 @@ function init() {
 }
 
 init();
-})();
