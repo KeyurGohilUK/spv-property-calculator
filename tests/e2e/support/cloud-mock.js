@@ -8,6 +8,9 @@ const MOCK_SUPABASE_SDK = `
     calls: [],
     properties: [...(options.properties || [])],
     expenses: [...(options.expenses || [])],
+    tasks: [...(options.tasks || [])],
+    task_events: [...(options.taskEvents || [])],
+    workspace_members: options.signedOut ? [] : [{ user_id: '00000000-0000-4000-8000-000000000001', role: options.workspaceRole || 'editor', active: true }],
     policy_acceptances: options.policyAccepted === false ? [] : [{
       terms_version: '2026-08-26',
       privacy_version: '2026-08-26',
@@ -62,9 +65,19 @@ const MOCK_SUPABASE_SDK = `
 
   function rpc(name, args) {
     state.calls.push({ type: 'rpc', name, args });
+    if (name === 'list_active_members') {
+      const result = { data: [{ user_id: '00000000-0000-4000-8000-000000000001', display_name: 'Playwright User' }], error: null };
+      return { single() { return Promise.resolve(result); }, then(resolve, reject) { return Promise.resolve(result).then(resolve, reject); } };
+    }
+    if (name === 'insert_task_event') {
+      const result = { data: null, error: null };
+      return { single() { return Promise.resolve(result); }, then(resolve, reject) { return Promise.resolve(result).then(resolve, reject); } };
+    }
     const conflict = name === 'upsert_property_if_current'
       ? options.propertyConflict
-      : name === 'upsert_expense_if_current' && options.expenseConflict;
+      : name === 'upsert_expense_if_current'
+        ? options.expenseConflict
+        : name === 'upsert_task_if_current' && options.taskConflict;
     const newRevision = Math.max(1, Number(args?.p_expected_revision || 0) + 1);
     const result = conflict
       ? { data: null, error: { code: '40001', message: name.startsWith('upsert_property') ? 'PROPERTY_CONFLICT' : 'EXPENSE_CONFLICT' } }
@@ -88,6 +101,26 @@ const MOCK_SUPABASE_SDK = `
       };
       state.properties = state.properties.filter((item) => item.id !== row.id);
       state.properties.push(row);
+    }
+
+    if (!conflict && name === 'upsert_task_if_current') {
+      const row = {
+        id: args.p_id,
+        title: args.p_title,
+        description: args.p_description,
+        status: args.p_status,
+        created_by: args.p_created_by,
+        assigned_to: args.p_assigned_to,
+        due_date: args.p_due_date,
+        scope: args.p_scope,
+        property_id: args.p_property_id,
+        created_at: now,
+        updated_at: now,
+        deleted_at: args.p_deleted_at || null,
+        revision: newRevision
+      };
+      state.tasks = state.tasks.filter((item) => item.id !== row.id);
+      state.tasks.push(row);
     }
 
     if (!conflict && name === 'upsert_expense_if_current') {
