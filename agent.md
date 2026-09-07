@@ -1,21 +1,10 @@
 # AI Agent Instructions
 
-This file defines the mandatory working rules for any AI agent making changes to the SPV Property Calculator repository. Read it in full before analysing, editing, committing, or opening a pull request.
+This file defines the mandatory working rules for any AI agent making changes to the SPV Property Calculator repository. Read it before analysing, editing, committing, or opening a pull request.
 
 ## Product purpose
 
-SPV Property Calculator is a mobile-first Progressive Web App (PWA) for UK limited company / SPV property investors. It covers:
-
-- **Property calculator** — estimate cash required to buy through a UK SPV (SDLT, deposit, stamp duty, refurbishment, etc.).
-- **Expenses tracker** — log and categorise SPV costs; attach receipt photos uploaded to Cloudflare R2.
-- **Property forecast** — project rent, cash flow, mortgage balance, equity, and scenarios over 5–25 years.
-- **BRRR calculator** — pre-purchase offer analysis using the Buy / Refurbish / Rent / Refinance method; works backwards from GDV comparables to find the maximum offer price that fully recycles capital.
-- **Task manager** — workspace task tracking with statuses, due dates, assignees, status history, templates, cloud sync, push reminders, and role-based permissions.
-- **Admin / user management** — approve workspace accounts and assign roles.
-- **Push notifications** — note-save reminders, viewing-date reminders, and daily task-due reminders delivered through Supabase Edge Functions.
-- **Shared workspace** — authenticated users share data through Supabase cloud sync with offline-first localStorage as the source of truth.
-
-The calculator is a planning tool, not tax, legal, mortgage, or investment advice. Do not weaken or remove applicable disclaimers.
+SPV Property Calculator is a mobile-first Progressive Web App (PWA) for estimating the cash required to buy residential investment property through a UK Limited Company/SPV. It also supports property tracking, expenses, forecasts, shared workspace data, viewing reminders, and administrative user management.
 
 Preserve the app's core behaviour:
 
@@ -26,7 +15,7 @@ Preserve the app's core behaviour:
 - Clear UK property terminology and transparent calculations.
 - A safe anonymous landing experience that exposes only login and public/legal information, not authenticated features.
 
-This app is designed to be used as planning tool, not tax, legal, mortgage, or investment advice. Do not weaken or remove applicable disclaimers.
+The calculator is a planning tool, not tax, legal, mortgage, or investment advice. Do not weaken or remove applicable disclaimers.
 
 ## Technology stack
 
@@ -39,187 +28,35 @@ This is intentionally a lightweight, framework-free web application.
 | App model | Multi-page PWA with shared app-shell modules and feature modules |
 | Hosting | Static GitHub Pages |
 | Offline support | Service worker, Cache API, web app manifest, localStorage |
-| Cloud / auth | Supabase JavaScript client, email/password auth, PostgreSQL/RLS-backed workspace data |
-| Edge functions | Deno / Supabase Edge Functions (`supabase/functions/`) |
-| Receipt storage | Cloudflare Worker and R2 integration (`workers/receipt/`) |
-| Push notifications | Web Push API, VAPID keys, Supabase delivery tables |
-| Unit / integration tests | Node.js 22 scripts using built-in `node:assert` |
+| Cloud/auth | Supabase JavaScript client, email/password authentication, PostgreSQL/RLS-backed workspace data |
+| Receipt storage | Cloudflare Worker and R2 integration |
+| Notifications | Web Push using VAPID and Supabase delivery data |
+| Unit/integration tests | Node.js 22 scripts using built-in assertions |
 | Browser tests | Playwright on desktop Chromium and mobile WebKit/iPhone |
-| Accessibility checks | HTML Validate and axe-core via Playwright |
+| Accessibility checks | HTML Validate and axe-core through Playwright |
 | CI | GitHub Actions |
 
 Do not introduce a framework, bundler, CSS library, state-management library, or runtime dependency without explicit approval and a documented reason.
-
-## Route entry points
-
-Each page is a standalone HTML file using `<base href="../">` so all asset paths resolve from the repository root regardless of nesting depth.
-
-| Route | File | Purpose |
-| --- | --- | --- |
-| `/` | `index.html` | Property calculator (home) |
-| `/expenses/` | `expenses/index.html` | Expense tracker |
-| `/forecast/` | `forecast/index.html` | Long-term property forecast |
-| `/brrr/` | `brrr/index.html` | BRRR scenario calculator (pre-purchase) |
-| `/tasks/` | `tasks/index.html` | Task manager |
-| `/admin/users/` | `admin/users/index.html` | User and role management |
-
-`brrr/` uses `data-active-page="forecast"` so the Forecast nav item stays highlighted — BRRR is part of the forecast feature set.
 
 ## Repository architecture
 
 Keep code in the existing responsibility-based structure:
 
-- `src/app/` — application bootstrap (`app.js`), app shell (`app-shell.js`), and primary navigation (`primary-navigation.js`).
-- `src/features/<feature>/` — feature-specific behaviour. Current features: `properties`, `expenses`, `forecast`, `tasks`, `users`.
-- `src/components/` — reusable UI components: `admin-menu.js`, `dialog-helper.js`, `help-guide.js`, `install-component.js`, `notification-settings.js`, `secondary-page-header.js`, `sync-status.js`, `theme.js`, `update-notifier.js`.
-- `src/services/` — auth, cloud, sync, access, receipts: `access-gate.js`, `account-controller.js`, `policy-acceptance.js`, `push-subscription.js`, `receipt-cloud.js`, `workspace-sync.js`.
-- `src/utils/` — small stateless utilities: `format-utils.js`, `scope-filter.js`, `validation.js`.
-- `src/config/` — configuration modules: `tax-config.js`.
-- `styles/tokens.css` — all design tokens. Feature files consume tokens; they never define raw colour values.
-- `styles/features/` — feature-level CSS files that are individually linked from each page that needs them.
-- `tests/test-*.mjs` — Node regression, architecture, and integration tests. Run with `npm test`.
-- `tests/e2e/` — Playwright end-to-end journeys.
-- `database/bootstrap/00 - Bootstrap Complete Schema.sql` — complete schema for a fresh Supabase installation.
-- `database/migrations/` — ordered migration files for existing installations (currently through Update 20).
-- `supabase/functions/` — Deno edge functions: `note-push`, `viewing-reminders`, `task-reminders`.
-- `docs/setup/`, `docs/planning/`, `docs/history/` — current setup docs, active planning, and completed historical material.
-- `app-assets.json` — cache manifest for the service worker. Every new page, script, or stylesheet must be registered here.
+- `index.html`, `expenses/index.html`, `forecast/index.html`, and `admin/users/index.html` are route entry points.
+- `src/app/` contains application bootstrap, app shell, and primary navigation.
+- `src/features/<feature>/` contains feature-specific behaviour.
+- `src/components/` contains reusable UI components and rendering behaviour.
+- `src/services/` contains auth, cloud, sync, access, and other external/service orchestration.
+- `src/utils/` contains small stateless shared utilities.
+- `src/config/` contains configuration modules such as tax configuration.
+- `styles/tokens.css` owns design tokens. Other CSS files consume those tokens.
+- `styles/features/` contains feature-level styles.
+- `tests/test-*.mjs` contains unit, integration, architecture, accessibility, and regression tests.
+- `tests/e2e/` contains user-facing Playwright journeys.
+- `database/bootstrap/` represents a fresh database install; `database/migrations/` contains ordered changes for existing installations.
+- `docs/setup/`, `docs/planning/`, and `docs/history/` contain current setup, active planning, and completed historical material.
 
 Do not add duplicate root-level implementations or compatibility copies for retired URLs. Keep clean directory routes with trailing slashes and relative asset paths.
-
-## Feature inventory
-
-### Properties (home page)
-
-Core calculator. Saves property objects to `localStorage` with `_cloudDirty` / `_cloudRevision` for optimistic-lock cloud sync. Supports archiving, restoration, permanent deletion (admin only), and property notes. Each property can trigger a viewing-reminder push notification.
-
-### Expenses
-
-Log SPV costs with amount, date, category, property association, and receipt attachment. Receipts are compressed client-side and uploaded to Cloudflare R2 via a signed worker endpoint. Expense records sync via `upsert_expense_if_current` RPC.
-
-### Forecast
-
-Long-term projection tied to a saved property. Reads purchase numbers from `getPurchaseNumbers(property)` and projects value, rent, mortgage balance, cash flow, equity, and cumulative return. Includes:
-
-- **Scenario grid** — conservative / expected / optimistic variants.
-- **Stress test** — cash flow at 7 mortgage-rate points (3–9 %).
-- **Refinance / exit split card** — potential cash release and net sale proceeds.
-- **Advanced metrics** — injected by `forecast-advanced.js`: return breakdown, rent stress grid, refurbishment analysis.
-- **BRRR companion card** — visible link to `brrr/` so users can run pre-purchase analysis.
-
-### BRRR calculator
-
-Standalone pre-purchase tool (`brrr/index.html` + `src/features/forecast/forecast-brrr.js`). No cloud dependency — all calculations run locally. Key logic:
-
-- `calcBrrr(offerPrice, inputs)` — pure function returning the full waterfall: deposit, purchase costs, refurbishment budget, carrying cost during void, ICR stress-test cap, LTV cap, effective refinance, cash released, capital left in deal, ongoing monthly cash flow, gross yield.
-- `calcBreakeven(inputs)` — analytical closed-form solution: `P = (R − refurb) / (K + L)` where `R = min(GDV × refinanceLtv, ICR limit)`.
-- Sensitivity table — up to 30 offer price rows; click a row to see the full waterfall. Rows where `capitalLeft ≤ 0` are marked ✓ (fully recycled).
-- ICR advisory — when ICR is the binding constraint (not LTV), a note explains the lever to pull.
-- Assumptions persist to `localStorage` under key `spv-property-calculator.brrr.v1`.
-
-### Task manager
-
-Full workspace task system. Key properties per task: `id`, `title`, `description`, `status` (`todo` / `in-progress` / `done`), `scope` (`company` / `property`), `propertyId`, `dueDate`, `assignedTo` (uuid), `deletedAt`, `_cloudDirty`, `_cloudRevision`.
-
-**Role-based permissions:**
-- `viewer` — read-only; cannot create tasks or change status.
-- `editor` — can create tasks and update status on tasks they created; cannot edit tasks created by others.
-- `admin` — full edit access to all tasks.
-
-**Status history** — every status change is appended to `task_events` (INSERT + SELECT only; no UPDATE/DELETE). Displayed in the task form as a timestamped history list.
-
-**Templates** — predefined checklists in `task-templates.js`: UK Property Purchase, SPV Company Setup, Viewing Checklist, Remortgage Checklist, Property Management. Applied in bulk from the template picker dialog.
-
-**Assignee picker** — populated from `list_active_members()` RPC. Assignee filter available in the filter panel.
-
-**Viewing suggestion dialog** — when a task whose title matches `/\b(viewing|property[\s-]visit|site[\s-]visit|inspect)/i` is marked done, a suggestion dialog prompts the user to create a follow-up: "Make offer", "Arrange second viewing", or "Request lease pack".
-
-**Filtering / grouping** — filter by property, status, due date (overdue / this week / upcoming / no date), and assignee; group by status.
-
-**Push reminders** — `supabase/functions/task-reminders/` edge function runs daily at 08:00 (scheduled via Supabase dashboard, POST with `x-task-reminder-secret` header). Delivers to `assigned_to` user if set, otherwise all active members. Deduplication via `task_reminder_deliveries` table (`unique(task_id, user_id, sent_on)`). A pg_cron job purges records older than 30 days every Sunday.
-
-### Admin / user management
-
-Accessible only to admins. Lists workspace members, their roles, activity, and policy acceptance status. Allows role changes (`viewer` / `editor` / `admin`) and activation / deactivation.
-
-## Data model and Supabase conventions
-
-### Tables
-
-| Table | Purpose |
-| --- | --- |
-| `workspace_members` | Role and active state per user |
-| `push_subscriptions` | Web Push endpoint + key pairs per user |
-| `policy_acceptances` | Per-user policy version acceptance |
-| `properties` | Property records with JSONB data blob |
-| `viewing_reminder_deliveries` | Dedup log for viewing-date push notifications |
-| `property_notes` | Append-only notes per property |
-| `property_deletions` | Permanent deletion log |
-| `expenses` | Expense records |
-| `tasks` | Task records with `assigned_to uuid` |
-| `task_events` | Append-only status change history |
-| `task_reminder_deliveries` | Dedup log for daily task due-date push notifications |
-
-### Security model
-
-All writes go through `SECURITY DEFINER` PL/pgSQL functions — they bypass RLS so the function body can enforce role logic, then return control to the caller. Direct client `INSERT` / `UPDATE` on most tables is blocked. Helper functions `public.is_workspace_editor()` and `public.is_workspace_admin()` gate role checks.
-
-### Key RPCs
-
-| Function | Purpose |
-| --- | --- |
-| `upsert_property_if_current` | Optimistic-lock property upsert |
-| `upsert_expense_if_current` | Optimistic-lock expense upsert |
-| `upsert_task_if_current` | 11-param optimistic-lock task upsert (includes `p_assigned_to`) |
-| `insert_task_event` | Append-only status history insert |
-| `list_active_members` | Returns id + display_name for active workspace members |
-| `list_workspace_users` | Admin-only full member list |
-| `set_workspace_user_access` | Admin-only role and active flag setter |
-
-### Optimistic-lock conflict pattern
-
-Every synced record carries `_cloudRevision` (integer). On upsert, the RPC checks that the current DB revision matches; if not, it returns a conflict signal (no error thrown). The client detects the mismatch and marks the local record as conflicted rather than silently overwriting. Do not bypass this pattern.
-
-### Mandatory Supabase schema-change rule
-
-Every change to the Supabase/database structure is incomplete unless the same pull request includes **both**:
-
-1. A new, correctly ordered migration file in `database/migrations/` that safely upgrades every existing Supabase deployment.
-2. The equivalent update to `database/bootstrap/00 - Bootstrap Complete Schema.sql` so a newly created project starts with the complete current structure.
-
-This is mandatory for tables, columns, constraints, indexes, functions, triggers, policies, RLS, grants, storage configuration, and any other database object. Never update only the migration or only the bootstrap. Never defer either half to a later pull request.
-
-## Edge functions
-
-All three edge functions live in `supabase/functions/` and are configured in `supabase/config.toml` with `verify_jwt = false` (they use their own secrets instead).
-
-| Function | Trigger | Purpose |
-| --- | --- | --- |
-| `note-push` | Property save event from client | Push notification when a colleague saves a property note |
-| `viewing-reminders` | pg_cron daily | Notify assigned/all-members about upcoming property viewings |
-| `task-reminders` | Supabase dashboard cron daily 08:00 | Notify about tasks due today or overdue within 7 days |
-
-`viewing-reminders` and `task-reminders` each have a companion `schedule.js` file with pure helper functions (`todayInLondon`, `addDays`, `findDueTasks`/`findViewingTasks`) that are unit-tested in `tests/test-tasks.mjs` / `tests/test-navigation.mjs`.
-
-Push deduplication follows the same pattern in both reminder functions: INSERT a claim row with a unique constraint on `(task_id, user_id, sent_on)`, catch error code `23505` (duplicate = already sent today), update to `delivered` on success, delete the claim row on failure so tomorrow can retry.
-
-## Shared utilities and patterns
-
-### `src/utils/scope-filter.js`
-
-`populateScopeFilterOptions(formSelect, filterSelect, properties, staticFilterCount)` — synchronises a task/expense form's property `<select>` and its filter `<select>` from the live properties list. Always call this when the property list changes.
-
-### `src/components/sync-status.js`
-
-`renderSyncStatus(element, state)` — updates a `<span role="status">` with the current cloud sync state. Tasks, expenses, and properties each have their own sync status element.
-
-### `src/components/dialog-helper.js`
-
-`setupDialog(dialogElement, options)` — standardised keyboard, backdrop, and focus management for `<dialog>` elements. Always use this for new dialogs rather than writing bespoke open/close logic.
-
-### `src/services/access-gate.js`
-
-`getWorkspaceAccess()` / `renderAccessState(user)` — check and render the user's role. Gate all writes behind `canEdit` (editor or admin). Gate admin actions behind `canAdmin`.
 
 ## Coding standards
 
@@ -244,7 +81,7 @@ Push deduplication follows the same pattern in both reminder functions: INSERT a
 - Every form control must have an associated label.
 - Every icon-only interactive control must have an accessible name and tooltip/title where the current component convention requires it.
 - Buttons perform actions; links navigate.
-- Dialogs must have an accessible title, keyboard operation, focus management, backdrop/escape handling, and a reachable close action. Use `dialog-helper.js`.
+- Dialogs must have an accessible title, keyboard operation, focus management, backdrop/escape handling, and a reachable close action.
 - Dynamic status messages must remain understandable to assistive technology.
 - Do not convey meaning using colour alone.
 - Preserve visible keyboard focus and logical tab order.
@@ -256,7 +93,7 @@ Push deduplication follows the same pattern in both reminder functions: INSERT a
 - Use native ES modules and explicit imports/exports.
 - Keep calculation and transformation logic pure wherever practical so production code and Node tests exercise the same implementation.
 - Use `const` by default and `let` only when reassignment is necessary.
-- Avoid new global variables. Existing global integration points (`window.SPVCloud`, `window.SPVTheme`, `window.SPVHelpGuide`) should be extended only when the architecture requires it.
+- Avoid new global variables. Existing global integration points should be extended only when the architecture requires them.
 - Handle malformed, missing, offline, stale, and unauthorised data safely.
 - Do not silently discard local unsynced work.
 - Preserve conflict-resolution, archive/restore, permissions, and offline sync semantics.
@@ -269,7 +106,6 @@ Push deduplication follows the same pattern in both reminder functions: INSERT a
 
 - Use design tokens from `styles/tokens.css`; do not scatter hard-coded theme colours through feature files.
 - Extend the existing CSS layers and import order in `styles.css`.
-- When a page needs new feature-level styles, create a separate `styles/features/<name>.css` file and link it only from that page's HTML. Do not add page-specific rules to `styles.css`.
 - Reuse shared components and patterns before creating feature-specific variants.
 - Keep selectors scoped and maintainable; avoid `!important` unless an existing, documented cascade constraint makes it unavoidable.
 - Prevent horizontal page overflow.
@@ -282,7 +118,16 @@ Push deduplication follows the same pattern in both reminder functions: INSERT a
 - Local saves must remain immediate; cloud sync may follow when authenticated and online.
 - Preserve Row Level Security and least-privilege workspace roles: viewer, editor, and administrator.
 - Permanent deletion remains administrator-only and online-only unless explicitly redesigned.
+### Mandatory Supabase schema-change rule
 
+Every change to the Supabase/database structure is incomplete unless the same pull request includes both of the following:
+
+1. A new, correctly ordered migration file in `database/migrations/` that safely upgrades every existing Supabase deployment.
+2. The equivalent update to the appropriate bootstrap schema in `database/bootstrap/` so a newly created Supabase project starts with the complete current structure.
+
+This requirement is mandatory for tables, columns, constraints, indexes, functions, triggers, policies, Row Level Security, grants, storage configuration, and any other database object or structural behaviour. Never update only the migration or only the bootstrap. Never defer either half to a later pull request.
+
+The migration must preserve existing data, follow the established naming/order convention, be idempotent where the project pattern requires it, and include relevant tests plus clear verification and deployment instructions. If both upgrade paths cannot be supplied and verified, do not open the pull request as ready for review.
 - Never expose authenticated features or workspace data on the anonymous landing state.
 - Do not assume network availability, notification permission, PWA installation, or cloud configuration.
 
@@ -334,7 +179,7 @@ The established brand is warm cream/beige with brown/copper accents and a polish
 Changes to cached application files must be visible to already-installed PWAs.
 
 - Keep `manifest.json`, `service-worker.js`, and `app-assets.json` consistent.
-- Add every new page HTML file, feature script, and stylesheet to `app-assets.json` so the service worker caches it.
+- Add new required offline assets to the cache manifest.
 - Do not break the install flow, Download Updates flow, Check for Update state, or unsaved-change protection.
 - Preserve relative URLs and trailing-slash application routes.
 - If a cached app file changes, increase the semantic version in `release.json`.
@@ -359,20 +204,7 @@ npm run test:html
 npm run test:e2e
 ```
 
-Also run the most focused relevant test(s) while developing:
-
-- **Logic, persistence, sync, structure** → `tests/test-*.mjs` (Node).
-- **UI regression, routing, accessibility** → relevant Playwright spec in `tests/e2e/`.
-- **New HTML** → `npm run test:html` (HTML Validate + axe).
-
-Current Node test files:
-
-| File | Coverage |
-| --- | --- |
-| `tests/test-tasks.mjs` | Task storage, cloud sync, event history, reminder schedule helpers, assignedTo, suggestion dialog |
-| `tests/test-navigation.mjs` | Primary navigation rendering and active-page marking |
-| `tests/test-project-structure.mjs` | Required directories and organised module files |
-| `tests/test-style-architecture.mjs` | CSS token usage and import conventions |
+Also run the most focused relevant test(s) while developing. For a UI or browser regression, add or update Playwright coverage when stable browser behaviour is involved. For logic, persistence, sync, routing, structure, theme, or accessibility changes, add or update the matching Node regression test.
 
 Do not hand over or open a ready-for-review PR with known failing checks. If a check cannot run locally, state exactly which check, why, and what evidence was used instead; do not claim it passed.
 
