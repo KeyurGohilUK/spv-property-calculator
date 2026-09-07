@@ -10,6 +10,7 @@ import { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpens
 import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 import { formatCurrency, formatDate } from '../../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
+import { populateScopeFilterOptions } from '../../utils/scope-filter.js';
 
 const $ = (id) => document.getElementById(id);
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
@@ -205,19 +206,7 @@ function today() {
 
 function populateProperties() {
   properties = getActiveProperties();
-  const propertySelect = $('expenseProperty');
-  propertySelect.innerHTML = '<option value="">Select property</option>';
-  const filter = $('expenseFilter');
-  Array.from(filter.options).slice(2).forEach((option) => option.remove());
-  properties.forEach((property) => {
-    const option = document.createElement('option');
-    option.value = property.id;
-    option.textContent = property.title || 'Untitled property';
-    propertySelect.appendChild(option);
-    const filterOption = option.cloneNode(true);
-    filterOption.value = `property:${property.id}`;
-    filter.appendChild(filterOption);
-  });
+  populateScopeFilterOptions($('expenseProperty'), $('expenseFilter'), properties);
 }
 
 function updateScope() {

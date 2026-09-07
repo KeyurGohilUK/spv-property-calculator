@@ -6,6 +6,8 @@ const pages = [
   ['Properties', '/'],
   ['Expenses', '/expenses/'],
   ['Forecast', '/forecast/'],
+  ['BRRR', '/brrr/'],
+  ['Tasks', '/tasks/'],
   ['Manage users', '/admin/users/']
 ];
 

@@ -4,7 +4,7 @@
   top: calc(var(--safe-top) + 71px);
   z-index: 18;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   max-width: 1120px;
   margin: 0 auto;
   padding: 8px 16px;
@@ -158,9 +158,9 @@
     min-height: 54px;
     flex-direction: column;
     gap: 3px;
-    padding: 5px 3px;
+    padding: 5px 2px;
     border-radius: 10px;
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.1;
   }
   .primary-nav-item svg { width: 22px; height: 22px; }

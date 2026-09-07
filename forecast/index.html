@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./styles/features/forecast.css">
   <link rel="stylesheet" href="./styles/features/forecast-advanced.css">
+  <link rel="stylesheet" href="./styles/features/brrr.css">
   <title>Property Forecast · SPV Property Calculator</title>
 </head>
 <body class="auth-pending">
@@ -43,6 +44,14 @@
           <select id="forecastProperty"></select>
         </label>
       </section>
+
+      <a class="brrr-companion-card" href="./brrr/">
+        <div class="brrr-companion-card-body">
+          <strong>BRRR Scenario Calculator</strong>
+          <span>Work backwards from GDV comparables to find your max offer price and model the full capital recycling cycle.</span>
+        </div>
+        <span class="brrr-companion-arrow" aria-hidden="true">›</span>
+      </a>
 
       <div id="forecastEmpty" class="empty-state hidden">
         <div class="empty-icon" aria-hidden="true">⌂</div>
@@ -88,15 +97,19 @@
         <section class="forecast-summary-section">
           <div class="forecast-section-heading"><div><p class="eyebrow">Projection</p><h3 id="forecastSummaryTitle">10-year outlook</h3></div></div>
           <div class="forecast-summary-grid">
-            <article><span>Year 1 pre-tax cash flow</span><strong id="year1CashFlow">£0</strong><small id="monthlyCashFlow">£0 / month</small></article>
-            <article><span>Gross yield</span><strong id="grossYield">0%</strong><small>Year 1</small></article>
-            <article><span>Net yield</span><strong id="netYield">0%</strong><small>Before corporation tax</small></article>
-            <article><span>Pre-tax cash-on-cash return</span><strong id="cashOnCash">0%</strong><small>Year 1</small></article>
-            <article><span>Projected value</span><strong id="projectedValue">£0</strong><small id="projectedValueYear">Year 10</small></article>
-            <article><span>Projected equity</span><strong id="projectedEquity">£0</strong><small id="projectedMortgage">Mortgage £0</small></article>
-            <article class="summary-highlight"><span>Total projected pre-tax return</span><strong id="totalReturn">£0</strong><small id="totalReturnPercent">0% on initial cash</small></article>
-            <article><span>Cash-flow payback</span><strong id="paybackPeriod">—</strong><small>Cumulative rental cash flow</small></article>
+            <article><span>Year 1 pre-tax cash flow <button class="metric-help-btn" type="button" data-metric="year1CashFlow" aria-label="Explain Year 1 pre-tax cash flow">?</button></span><strong id="year1CashFlow">£0</strong><small id="monthlyCashFlow">£0 / month</small></article>
+            <article><span>Gross yield <button class="metric-help-btn" type="button" data-metric="grossYield" aria-label="Explain gross yield">?</button></span><strong id="grossYield">0%</strong><small>Year 1</small></article>
+            <article><span>Net yield <button class="metric-help-btn" type="button" data-metric="netYield" aria-label="Explain net yield">?</button></span><strong id="netYield">0%</strong><small>Before corporation tax</small></article>
+            <article><span>Pre-tax cash-on-cash return <button class="metric-help-btn" type="button" data-metric="cashOnCash" aria-label="Explain cash-on-cash return">?</button></span><strong id="cashOnCash">0%</strong><small>Year 1</small></article>
+            <article><span>Projected value <button class="metric-help-btn" type="button" data-metric="projectedValue" aria-label="Explain projected value">?</button></span><strong id="projectedValue">£0</strong><small id="projectedValueYear">Year 10</small></article>
+            <article><span>Projected equity <button class="metric-help-btn" type="button" data-metric="projectedEquity" aria-label="Explain projected equity">?</button></span><strong id="projectedEquity">£0</strong><small id="projectedMortgage">Mortgage £0</small></article>
+            <article class="summary-highlight"><span>Total projected pre-tax return <button class="metric-help-btn" type="button" data-metric="totalReturn" aria-label="Explain total projected return">?</button></span><strong id="totalReturn">£0</strong><small id="totalReturnPercent">0% on initial cash</small></article>
+            <article><span>Cash-flow payback <button class="metric-help-btn" type="button" data-metric="paybackPeriod" aria-label="Explain cash-flow payback">?</button></span><strong id="paybackPeriod">—</strong><small>Cumulative rental cash flow</small></article>
           </div>
+          <details id="cashFlowWaterfallDetails" class="forecast-waterfall">
+            <summary class="forecast-waterfall-toggle">Show Year 1 cash flow breakdown</summary>
+            <div id="cashFlowWaterfall" class="forecast-waterfall-body"></div>
+          </details>
         </section>
 
         <section class="forecast-card">
@@ -146,6 +159,13 @@
       </div>
     </main>
   </div>
+
+  <dialog id="metricHelpDialog" class="install-dialog metric-help-dialog" aria-labelledby="metricHelpTitle">
+    <button id="closeMetricHelpBtn" class="dialog-close" type="button" aria-label="Close">×</button>
+    <p class="eyebrow" id="metricHelpEyebrow">Metric</p>
+    <h3 id="metricHelpTitle">About this metric</h3>
+    <div id="metricHelpBody"></div>
+  </dialog>
 
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>

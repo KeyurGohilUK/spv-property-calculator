@@ -8,7 +8,7 @@ const expected = [
   'styles/features/properties.css', 'styles/forms.css', 'styles/features/summary.css',
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
   'styles/features/editor.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
-  'styles/app-shell-navigation.css', 'styles/legal.css'
+  'styles/app-shell-navigation.css', 'styles/legal.css', 'styles/features/tasks.css'
 ];
 
 assert.deepEqual(imports, expected, 'Stylesheet manifest order must preserve the established cascade');
@@ -22,7 +22,7 @@ assert.match(fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 
 assert.match(fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8'), /\.primary-app-nav/);
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 
-for (const canonicalName of ['expenses.css', 'forecast.css', 'forecast-advanced.css', 'users.css']) {
+for (const canonicalName of ['expenses.css', 'forecast.css', 'forecast-advanced.css', 'users.css', 'tasks.css']) {
   const canonicalPath = `styles/features/${canonicalName}`;
   assert.ok(fs.readFileSync(new URL(`../${canonicalPath}`, import.meta.url), 'utf8').trim(), `${canonicalPath} must not be empty`);
 }

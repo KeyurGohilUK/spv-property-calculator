@@ -5,6 +5,8 @@ import {
   clearPendingDeletes
 } from '../features/properties/storage.js';
 import { syncExpenseWorkspace } from '../features/expenses/expense-cloud-sync.js';
+import { syncTaskWorkspace } from '../features/tasks/task-cloud-sync.js';
+import { syncTaskEvents } from '../features/tasks/task-event-sync.js';
 
 let activeSync = null;
 
@@ -37,12 +39,17 @@ async function performWorkspaceSync(cloud, adapters) {
   }
 
   const expenseResult = await adapters.syncExpenses(cloud);
-  const conflictCount = (propertyResult.conflicts?.length || 0) + (expenseResult.conflicts?.length || 0);
+  const [taskResult] = await Promise.all([
+    adapters.syncTasks(cloud),
+    adapters.syncTaskEvents(cloud)
+  ]);
+  const conflictCount = (propertyResult.conflicts?.length || 0) + (expenseResult.conflicts?.length || 0) + (taskResult.conflicts?.length || 0);
   const changes = Number(propertyResult.uploadedCount || 0)
     + Number(propertyResult.downloadedCount || 0)
     + (propertyResult.archivedLegacyIds?.length || 0)
     + (propertyResult.permanentlyDeletedIds?.length || 0)
-    + Number(expenseResult.changes || 0);
+    + Number(expenseResult.changes || 0)
+    + Number(taskResult.changes || 0);
 
   const message = conflictCount
     ? `${conflictCount} sync conflict${conflictCount === 1 ? '' : 's'} detected. Local changes are safe and were not overwritten.`
@@ -50,7 +57,7 @@ async function performWorkspaceSync(cloud, adapters) {
       ? `Synced ${changes} change${changes === 1 ? '' : 's'} with the shared workspace.`
       : 'Cloud is up to date.';
 
-  return { propertyResult, expenseResult, conflictCount, changes, message };
+  return { propertyResult, expenseResult, taskResult, conflictCount, changes, message };
 }
 
 export function syncWorkspace(cloud, overrides = {}) {
@@ -61,6 +68,8 @@ export function syncWorkspace(cloud, overrides = {}) {
     getPendingDeletes,
     clearPendingDeletes,
     syncExpenses: syncExpenseWorkspace,
+    syncTasks: syncTaskWorkspace,
+    syncTaskEvents,
     ...overrides
   };
   activeSync = performWorkspaceSync(cloud, adapters).finally(() => {

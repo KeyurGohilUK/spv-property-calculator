@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="../">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="Create and manage tasks for your UK SPV property portfolio.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV Tasks">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./src/components/theme.js"></script>
+  <script type="module" src="./src/components/help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles/features/tasks.css">
+  <title>Tasks · SPV Property Calculator</title>
+</head>
+<body class="auth-pending">
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="tasks"></nav>
+
+    <main class="main-shell task-shell">
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Workspace tasks</p>
+          <h1>Task Manager <small class="beta-badge">Beta</small></h1>
+          <p class="muted">Create and track tasks across your property portfolio.</p>
+        </div>
+        <div class="task-hero-actions">
+          <span id="taskSyncStatus" class="sync-status" role="status">Saved on this device</span>
+          <button id="openTemplateDialogBtn" class="secondary-btn compact-task-btn" type="button">From template</button>
+          <button id="openTaskFormBtn" class="primary-btn" type="button">＋ Add Task</button>
+        </div>
+      </section>
+
+      <div class="task-list-heading">
+        <div>
+          <h3>Tasks</h3>
+          <span id="taskCount" class="count-badge">0</span>
+          <span id="taskRoleBadge" class="task-chip hidden" aria-live="polite"></span>
+        </div>
+        <button id="toggleTaskFiltersBtn" class="secondary-btn compact-task-btn" type="button" aria-expanded="false" aria-controls="taskFilters">Filter</button>
+      </div>
+
+      <section id="taskFilters" class="task-filters hidden" aria-label="Task filters">
+        <label class="field"><span>Property</span>
+          <select id="taskFilter">
+            <option value="all">All tasks</option>
+            <option value="company">Company tasks</option>
+          </select>
+        </label>
+        <label class="field"><span>Status</span>
+          <select id="taskStatusFilter">
+            <option value="all">All statuses</option>
+            <option value="todo">To do</option>
+            <option value="in-progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </label>
+        <label class="field"><span>Due date</span>
+          <select id="taskDueFilter">
+            <option value="all">Any date</option>
+            <option value="overdue">Overdue</option>
+            <option value="due-soon">Due this week</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="no-date">No due date</option>
+          </select>
+        </label>
+        <label class="field"><span>Assignee</span>
+          <select id="taskAssignedFilter">
+            <option value="all">Anyone</option>
+            <option value="unassigned">Unassigned</option>
+          </select>
+        </label>
+        <label class="field"><span>Group by</span>
+          <select id="taskGroupBy">
+            <option value="none">No grouping</option>
+            <option value="status">Status</option>
+          </select>
+        </label>
+        <div class="task-filter-actions">
+          <button id="clearTaskFiltersBtn" class="text-btn" type="button">Clear</button>
+        </div>
+      </section>
+
+      <div id="taskList" class="task-list"></div>
+      <div id="taskEmpty" class="empty-state">
+        <div class="empty-icon" aria-hidden="true">✓</div>
+        <h3>No tasks yet</h3>
+        <p>Add your first task to keep your SPV work organised.</p>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="taskDialog" class="install-dialog task-dialog" aria-labelledby="taskDialogTitle">
+    <form id="taskForm" novalidate>
+      <div class="task-dialog-header">
+        <div><p class="eyebrow">Workspace task</p><h3 id="taskDialogTitle">New Task</h3></div>
+        <button id="closeTaskDialogBtn" class="dialog-close task-dialog-close" type="button" aria-label="Close task form">×</button>
+      </div>
+
+      <label class="field">
+        <span>Title <strong aria-hidden="true">*</strong></span>
+        <input id="taskTitle" type="text" maxlength="200" placeholder="e.g. Instruct conveyancing solicitor" required aria-describedby="taskTitleError">
+        <small id="taskTitleError" class="error-text hidden">Enter a task title.</small>
+      </label>
+
+      <label class="field">
+        <span>Description <em>optional</em></span>
+        <textarea id="taskDescription" rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
+      </label>
+
+      <div class="task-form-grid">
+        <label class="field">
+          <span>Status</span>
+          <select id="taskStatus">
+            <option value="todo">To do</option>
+            <option value="in-progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Due date <em>optional</em></span>
+          <input id="taskDueDate" type="date">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Assigned to <em>optional</em></span>
+        <select id="taskAssignedTo">
+          <option value="">Unassigned</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Task relates to</span>
+        <select id="taskScope">
+          <option value="company">General company task</option>
+          <option value="property">Specific property</option>
+        </select>
+      </label>
+      <label id="taskPropertyField" class="field hidden">
+        <span>Property <strong aria-hidden="true">*</strong></span>
+        <select id="taskProperty" aria-describedby="taskPropertyError"></select>
+        <small id="taskPropertyError" class="error-text hidden">Select a property.</small>
+      </label>
+
+      <section id="taskHistory" class="task-history hidden" aria-label="Status history">
+        <h4 class="task-history-heading">History</h4>
+        <ol id="taskHistoryList" class="task-history-list"></ol>
+      </section>
+
+      <p id="taskSaveMessage" class="save-message" aria-live="polite"></p>
+      <div class="task-form-actions">
+        <button id="cancelTaskBtn" class="secondary-btn" type="button">Cancel</button>
+        <button id="saveTaskBtn" class="primary-btn" type="submit">Save Task</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="templateDialog" class="install-dialog template-dialog" aria-labelledby="templateDialogTitle">
+    <button id="closeTemplateDialogBtn" class="dialog-close" type="button" aria-label="Close template picker">×</button>
+    <div class="template-dialog-header">
+      <p class="eyebrow">Quick start</p>
+      <h3 id="templateDialogTitle">Apply a checklist</h3>
+      <p>Choose a pre-built task list and apply it to your workspace in one tap.</p>
+    </div>
+    <div id="templateList" class="template-list"></div>
+    <div id="templatePropertyRow" class="hidden">
+      <label class="field">
+        <span>Apply to property <strong aria-hidden="true">*</strong></span>
+        <select id="templateProperty" aria-describedby="templatePropertyError">
+          <option value="">Select property</option>
+        </select>
+        <small id="templatePropertyError" class="error-text hidden">Select a property.</small>
+      </label>
+    </div>
+    <p id="templateApplyMessage" class="save-message" aria-live="polite"></p>
+    <div class="template-dialog-actions">
+      <button id="cancelTemplateBtn" class="secondary-btn" type="button">Cancel</button>
+      <button id="applyTemplateBtn" class="primary-btn" type="button" disabled>Apply tasks</button>
+    </div>
+  </dialog>
+
+  <dialog id="suggestionDialog" class="install-dialog suggestion-dialog" aria-labelledby="suggestionDialogTitle">
+    <button id="closeSuggestionDialogBtn" class="dialog-close" type="button" aria-label="Close suggestions">×</button>
+    <p class="eyebrow">Viewing complete</p>
+    <h3 id="suggestionDialogTitle">What's next?</h3>
+    <p id="suggestionTaskName" class="suggestion-source"></p>
+    <p class="suggestion-prompt">Would you like to create a follow-up task?</p>
+    <ul class="suggestion-list">
+      <li><button class="suggestion-btn" type="button" data-suggestion="Make offer">
+        <strong>Make offer</strong>
+        <small>Prepare and submit a formal offer</small>
+      </button></li>
+      <li><button class="suggestion-btn" type="button" data-suggestion="Arrange second viewing">
+        <strong>Arrange second viewing</strong>
+        <small>Book a follow-up visit to the property</small>
+      </button></li>
+      <li><button class="suggestion-btn" type="button" data-suggestion="Request lease pack">
+        <strong>Request lease pack</strong>
+        <small>Ask the agent for the full lease documents</small>
+      </button></li>
+    </ul>
+    <div class="suggestion-footer">
+      <button id="dismissSuggestionBtn" class="text-btn" type="button">Not now</button>
+    </div>
+  </dialog>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./src/components/secondary-page-header.js"></script>
+  <script type="module" src="./src/components/admin-menu.js"></script>
+  <script type="module" src="./src/features/tasks/tasks.js"></script>
+</body>
+</html>

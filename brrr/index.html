@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="../">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="Work backwards from comparables to find your maximum BRRR offer price for a UK SPV buy-to-let property.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV BRRR">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./src/components/theme.js"></script>
+  <script type="module" src="./src/components/help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles/features/forecast.css">
+  <link rel="stylesheet" href="./styles/features/brrr.css">
+  <title>BRRR Calculator · SPV Property Calculator</title>
+</head>
+<body class="auth-pending">
+  <div id="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand-home" href="./" aria-label="Back to property calculator">
+          <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+          <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="forecast"></nav>
+
+    <main class="main-shell forecast-shell">
+      <section class="hero-card forecast-hero brrr-hero">
+        <div>
+          <p class="eyebrow">Pre-purchase analysis</p>
+          <h1>BRRR Calculator <small class="beta-badge">Beta</small></h1>
+          <p class="muted">Work backwards from your comparables to find the maximum offer price that fully recycles your capital. Buy · Refurbish · Rent · Refinance.</p>
+        </div>
+        <a class="secondary-btn brrr-back-link" href="./forecast/">← Property Forecast</a>
+      </section>
+
+      <div id="brrrWorkspace" class="forecast-workspace">
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading">
+            <div><p class="eyebrow">Strategy assumptions</p><h3>BRRR inputs</h3></div>
+            <button id="resetBrrrBtn" class="secondary-btn compact-btn" type="button">Reset</button>
+          </div>
+          <div class="forecast-field-grid">
+            <label class="field currency-field"><span>Post-refurb GDV <em>from comparables</em></span><span class="input-prefix"><span>£</span><input id="brrrGdv" type="number" min="0" step="1000" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Refurbishment budget</span><span class="input-prefix"><span>£</span><input id="brrrRefurbCost" type="number" min="0" step="500" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Monthly rent (post-refurb)</span><span class="input-prefix"><span>£</span><input id="brrrMonthlyRent" type="number" min="0" step="25" inputmode="decimal"></span></label>
+            <label class="field"><span>Purchase LTV</span><span class="forecast-suffix-input"><input id="brrrPurchaseLtv" type="number" min="0" max="95" step="1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>Refinance LTV</span><span class="forecast-suffix-input"><input id="brrrRefinanceLtv" type="number" min="0" max="95" step="1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>Mortgage rate</span><span class="forecast-suffix-input"><input id="brrrMortgageRate" type="number" min="0" max="25" step="0.1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>ICR stress rate</span><span class="forecast-suffix-input"><input id="brrrStressRate" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span>%</span></span></label>
+            <label class="field"><span>ICR ratio <em>1.25 for Ltd Co</em></span><span class="forecast-suffix-input"><input id="brrrIcrRatio" type="number" min="1" max="2" step="0.05" inputmode="decimal"><span>×</span></span></label>
+            <label class="field"><span>Purchase costs (SDLT + legal)</span><span class="forecast-suffix-input"><input id="brrrPurchaseCostsPct" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span>% of offer</span></span></label>
+            <label class="field"><span>Management fee</span><span class="forecast-suffix-input"><input id="brrrManagementPct" type="number" min="0" max="30" step="0.5" inputmode="decimal"><span>% rent</span></span></label>
+            <label class="field"><span>Void during refurb</span><span class="forecast-suffix-input"><input id="brrrRefurbWeeks" type="number" min="0" max="52" step="1" inputmode="numeric"><span>weeks</span></span></label>
+          </div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading">
+            <div><p class="eyebrow">Sensitivity</p><h3>Offer price range to test</h3></div>
+            <span id="brrrBreakevenPrice" class="forecast-pill hidden">Max to fully recycle: —</span>
+          </div>
+          <div class="forecast-field-grid">
+            <label class="field currency-field"><span>Minimum offer</span><span class="input-prefix"><span>£</span><input id="brrrMinOffer" type="number" min="0" step="1000" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Maximum offer</span><span class="input-prefix"><span>£</span><input id="brrrMaxOffer" type="number" min="0" step="1000" inputmode="decimal"></span></label>
+            <label class="field currency-field"><span>Step size</span><span class="input-prefix"><span>£</span><input id="brrrOfferStep" type="number" min="1000" step="1000" inputmode="decimal"></span></label>
+          </div>
+        </section>
+
+        <section class="forecast-card">
+          <div class="forecast-section-heading">
+            <div><p class="eyebrow">Scenarios</p><h3>Offer price sensitivity</h3></div>
+          </div>
+          <div class="forecast-table-wrap">
+            <table class="forecast-table brrr-table" aria-label="BRRR sensitivity table">
+              <thead>
+                <tr>
+                  <th>Offer price</th>
+                  <th>Total cash in</th>
+                  <th>Refinance</th>
+                  <th>Cash released</th>
+                  <th>Capital left</th>
+                  <th>Monthly CF</th>
+                  <th>Gross yield</th>
+                </tr>
+              </thead>
+              <tbody id="brrrRows"></tbody>
+            </table>
+          </div>
+          <p class="muted tiny brrr-table-help">Click any row to see the full waterfall breakdown. ✓ = capital fully recycled.</p>
+        </section>
+
+        <section class="forecast-card" id="brrrDetailCard">
+          <div class="forecast-section-heading">
+            <div><p class="eyebrow">Breakdown</p><h3 id="brrrDetailTitle">Selected scenario</h3></div>
+          </div>
+          <div id="brrrDetail"></div>
+        </section>
+
+        <details class="disclaimer-card forecast-disclaimer">
+          <summary>BRRR calculator disclaimer</summary>
+          <p>This calculator is for illustrative purposes only and does not constitute financial, tax or investment advice. Figures exclude corporation tax, capital gains tax, bridging finance fees, survey costs, insurance, contingency allowances and transaction-specific tax treatment unless explicitly entered. ICR calculations use a simplified stress test; your lender may apply different criteria, products and rates. Confirm all figures with your accountant, mortgage broker and qualified professional advisers before making any investment decision.</p>
+        </details>
+      </div>
+    </main>
+  </div>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./src/components/secondary-page-header.js"></script>
+  <script type="module" src="./src/components/admin-menu.js"></script>
+  <script type="module" src="./src/features/forecast/forecast-brrr.js"></script>
+</body>
+</html>

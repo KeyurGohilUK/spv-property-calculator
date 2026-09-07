@@ -20,7 +20,9 @@
   function isConfigured() {
     const url = String(config.url || '').trim();
     const key = String(config.publishableKey || config.anonKey || '').trim();
-    return /^https:\/\/.+\.supabase\.co\/?$/i.test(url)
+    const validUrl = /^https:\/\/.+\.supabase\.co\/?$/i.test(url)
+      || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(url);
+    return validUrl
       && !url.includes('YOUR_PROJECT_REF')
       && key.length > 20
       && !key.includes('REPLACE_ME');
@@ -372,6 +374,127 @@
   }
 
 
+  function fromCloudTask(row) {
+    return {
+      id: String(row.id),
+      title: row.title || '',
+      description: row.description || '',
+      status: ['todo', 'in-progress', 'done'].includes(row.status) ? row.status : 'todo',
+      createdBy: row.created_by || null,
+      assignedTo: row.assigned_to || null,
+      dueDate: row.due_date || null,
+      scope: row.scope === 'property' ? 'property' : 'company',
+      propertyId: row.property_id || '',
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || new Date().toISOString(),
+      deletedAt: row.deleted_at || null,
+      _cloudRevision: Math.max(0, Number(row.revision) || 0),
+      _cloudDirty: false
+    };
+  }
+
+  async function listTasks() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient
+      .from('tasks')
+      .select('id,title,description,status,created_by,assigned_to,due_date,scope,property_id,created_at,updated_at,deleted_at,revision')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return (data || []).map(fromCloudTask);
+  }
+
+  async function listActiveMembers() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient.rpc('list_active_members');
+    if (error) throw error;
+    return (data || []).map((row) => ({
+      userId: String(row.user_id),
+      displayName: String(row.display_name || '')
+    }));
+  }
+
+  function isTaskConflict(error) {
+    return error?.code === '40001'
+      || String(error?.message || '').includes('TASK_CONFLICT');
+  }
+
+  async function upsertTask(record) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const expectedRevision = Math.max(0, Number(record?._cloudRevision) || 0);
+    const { data, error } = await supabaseClient
+      .rpc('upsert_task_if_current', {
+        p_id: String(record.id),
+        p_title: record.title || '',
+        p_description: record.description || '',
+        p_status: record.status || 'todo',
+        p_created_by: record.createdBy || null,
+        p_assigned_to: record.assignedTo || null,
+        p_due_date: record.dueDate || null,
+        p_scope: record.scope === 'property' ? 'property' : 'company',
+        p_property_id: record.scope === 'property' ? String(record.propertyId || '') : null,
+        p_deleted_at: record.deletedAt || null,
+        p_expected_revision: expectedRevision
+      })
+      .single();
+    if (error) {
+      if (isTaskConflict(error)) {
+        const conflict = new Error('This task changed on another device. Your local change has been kept.');
+        conflict.code = 'TASK_CONFLICT';
+        conflict.taskId = String(record.id);
+        throw conflict;
+      }
+      throw error;
+    }
+    return {
+      ...record,
+      createdAt: data?.server_created_at || record.createdAt,
+      updatedAt: data?.server_updated_at || record.updatedAt,
+      _cloudRevision: Math.max(1, Number(data?.new_revision) || expectedRevision + 1),
+      _cloudDirty: false
+    };
+  }
+
+  function fromCloudTaskEvent(row) {
+    return {
+      id: String(row.id),
+      taskId: String(row.task_id),
+      userId: row.user_id || null,
+      displayName: row.display_name || '',
+      fromStatus: row.from_status || null,
+      toStatus: row.to_status || null,
+      createdAt: row.created_at || new Date().toISOString(),
+      _cloudDirty: false
+    };
+  }
+
+  async function listTaskEvents() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient
+      .from('task_events')
+      .select('id,task_id,user_id,display_name,from_status,to_status,created_at')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data || []).map(fromCloudTaskEvent);
+  }
+
+  async function insertTaskEvent(event) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { error } = await supabaseClient.rpc('insert_task_event', {
+      p_id: String(event.id),
+      p_task_id: String(event.taskId),
+      p_display_name: event.displayName || '',
+      p_from_status: event.fromStatus || null,
+      p_to_status: event.toStatus || null,
+      p_created_at: event.createdAt || null
+    });
+    if (error) throw error;
+  }
+
   function fromCloudExpense(row) {
     return {
       id: String(row.id),
@@ -647,6 +770,12 @@
     signIn,
     signOut,
     listProperties,
+    listTasks,
+    upsertTask,
+    isTaskConflict,
+    listTaskEvents,
+    insertTaskEvent,
+    listActiveMembers,
     listExpenses,
     upsertExpense,
     isExpenseConflict,

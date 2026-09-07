@@ -2,6 +2,7 @@ const icons = Object.freeze({
   properties: '<path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path>',
   expenses: '<rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h4"></path>',
   forecast: '<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path>',
+  tasks: '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect><path d="m9 12 2 2 4-4"></path>',
   more: '<circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle>'
 });
 
@@ -22,6 +23,7 @@ export function setupPrimaryNavigation(root = document) {
   const items = [
     { id: 'properties', label: 'Properties', href: './' },
     { id: 'expenses', label: 'Expenses', href: './expenses/' },
+    { id: 'tasks', label: 'Tasks', href: './tasks/', badge: 'Beta' },
     { id: 'forecast', label: 'Forecast', href: './forecast/', badge: 'Beta' }
   ];
   nav.innerHTML = `${items.map((item) => link(item, activePage, home)).join('')}

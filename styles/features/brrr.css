@@ -1,0 +1,100 @@
+/* BRRR Calculator */
+.brrr-hero { align-items: flex-end; }
+.brrr-back-link { white-space: nowrap; align-self: flex-end; }
+
+/* Sensitivity table rows */
+.brrr-table tbody tr { cursor: pointer; transition: background .12s ease; }
+.brrr-table tbody tr:hover { background: color-mix(in srgb, var(--brand) 5%, var(--surface)); }
+.brrr-table tbody tr.brrr-row-selected { background: var(--brand-soft); }
+.brrr-table tbody tr.brrr-row-recycled td:nth-child(5) { font-weight: 750; }
+.brrr-table tbody tr:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: -2px; }
+
+.brrr-positive { color: var(--positive); }
+
+/* ICR / LTV constraint tags */
+.brrr-constraint-tag {
+  display: inline-flex;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.brrr-constraint-tag.brrr-icr { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--danger); }
+.brrr-constraint-tag.brrr-ltv { background: color-mix(in srgb, var(--brand) 12%, var(--surface)); color: var(--brand-strong); }
+
+/* Waterfall breakdown */
+.brrr-waterfall { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.brrr-waterfall-section { display: grid; gap: 8px; }
+.brrr-section-label {
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+.brrr-section-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: .9rem;
+}
+.brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive) 12%, var(--surface)); }
+.brrr-section-total.brrr-total-negative { background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+.brrr-binding-row span { color: var(--danger); font-size: .85rem; }
+.brrr-binding-row strong { color: var(--danger); }
+.brrr-yield-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 12px;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.brrr-yield-row strong { color: var(--text); }
+.brrr-icr-note {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  font-size: .78rem;
+  color: var(--danger);
+  line-height: 1.45;
+}
+
+/* Companion card on forecast page */
+.brrr-companion-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--border));
+  border-radius: 16px;
+  background: var(--brand-soft);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color .15s ease, background .15s ease;
+}
+.brrr-companion-card:hover { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, var(--surface)); }
+.brrr-companion-card-body strong { display: block; font-size: 15px; font-weight: 800; margin-bottom: 3px; }
+.brrr-companion-card-body span { font-size: 13px; color: var(--text); }
+.brrr-companion-arrow { font-size: 18px; color: var(--brand); flex: 0 0 auto; }
+
+@media (max-width: 680px) {
+  .brrr-waterfall { grid-template-columns: 1fr; }
+}
+
+html[data-theme="dark"] {
+  .brrr-section-total { background: var(--surface-2); }
+  .brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive) 14%, var(--surface)); }
+  .brrr-companion-card { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
+}
+
+.brrr-table-help { margin-top: 10px; }
