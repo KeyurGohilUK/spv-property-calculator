@@ -9,7 +9,7 @@
 .brrr-table tbody tr.brrr-row-recycled td:nth-child(5) { font-weight: 750; }
 .brrr-table tbody tr:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: -2px; }
 
-.brrr-positive { color: var(--positive, #3d9a5c) !important; }
+.brrr-positive { color: var(--positive); }
 
 /* ICR / LTV constraint tags */
 .brrr-constraint-tag {
@@ -46,9 +46,9 @@
   background: var(--surface-2);
   font-size: .9rem;
 }
-.brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive, #3d9a5c) 12%, var(--surface)); }
+.brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive) 12%, var(--surface)); }
 .brrr-section-total.brrr-total-negative { background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
-.brrr-binding-row span { color: var(--danger) !important; font-size: .85rem; }
+.brrr-binding-row span { color: var(--danger); font-size: .85rem; }
 .brrr-binding-row strong { color: var(--danger); }
 .brrr-yield-row {
   display: flex;
@@ -93,6 +93,6 @@
 
 html[data-theme="dark"] {
   .brrr-section-total { background: var(--surface-2); }
-  .brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive, #3d9a5c) 14%, var(--surface)); }
+  .brrr-section-total.brrr-total-recycled { background: color-mix(in srgb, var(--positive) 14%, var(--surface)); }
   .brrr-companion-card { background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
 }
