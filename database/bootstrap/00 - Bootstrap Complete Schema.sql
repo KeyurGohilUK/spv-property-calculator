@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SPV Property Calculator - complete database bootstrap
--- Current through Update 16 (Viewing Push Reminders)
+-- Current through Update 20 (Task Reminders)
 --
 -- Use for a fresh or replacement Supabase project. Create at least one Auth user
 -- first; the oldest account is made the initial administrator. Safe to re-run.
