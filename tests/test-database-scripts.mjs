@@ -44,7 +44,9 @@ assert.match(viewingReminderMigration, /alter table public\.viewing_reminder_del
 assert.match(taskDiscussionMigration, /create table if not exists public\.task_comments/, 'Update 21 must create task comments');
 assert.match(taskDiscussionMigration, /public\.is_workspace_editor\(\)/, 'Only workspace editors may add task comments');
 assert.match(taskDiscussionMigration, /char_length\(btrim\(p_message\)\)>2000/, 'Task comments must enforce the UI length limit in the database');
-assert.match(bootstrap, /create or replace function public\.insert_task_comment/, 'Bootstrap must include task discussions');
+assert.match(taskDiscussionMigration, /where task_comments\.user_id=auth\.uid\(\)/, 'Users must only be able to edit their own task comments');
+assert.match(taskDiscussionMigration, /add column if not exists updated_at/, 'Update 21 must remain rerunnable when adding comment editing');
+assert.match(bootstrap, /create or replace function public\.save_task_comment/, 'Bootstrap must include editable task discussions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');

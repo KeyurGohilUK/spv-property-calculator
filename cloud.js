@@ -499,7 +499,8 @@
     return {
       id: String(row.id), taskId: String(row.task_id), userId: row.user_id || null,
       displayName: row.display_name || '', message: row.message || '',
-      createdAt: row.created_at || new Date().toISOString(), _cloudDirty: false
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || null, _cloudDirty: false
     };
   }
 
@@ -507,19 +508,20 @@
     const supabaseClient = ensureClient();
     await requireUser();
     const { data, error } = await supabaseClient.from('task_comments')
-      .select('id,task_id,user_id,display_name,message,created_at')
+      .select('id,task_id,user_id,display_name,message,created_at,updated_at')
       .order('created_at', { ascending: true });
     if (error) throw error;
     return (data || []).map(fromCloudTaskComment);
   }
 
-  async function insertTaskComment(comment) {
+  async function upsertTaskComment(comment) {
     const supabaseClient = ensureClient();
     await requireUser();
-    const { error } = await supabaseClient.rpc('insert_task_comment', {
+    const { error } = await supabaseClient.rpc('save_task_comment', {
       p_id: String(comment.id), p_task_id: String(comment.taskId),
       p_display_name: comment.displayName || '', p_message: comment.message || '',
-      p_created_at: comment.createdAt || null
+      p_created_at: comment.createdAt || null,
+      p_updated_at: comment.updatedAt || null
     });
     if (error) throw error;
   }
@@ -805,7 +807,7 @@
     listTaskEvents,
     insertTaskEvent,
     listTaskComments,
-    insertTaskComment,
+    upsertTaskComment,
     listActiveMembers,
     listExpenses,
     upsertExpense,

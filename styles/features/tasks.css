@@ -134,6 +134,9 @@
 .task-comment { padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
 .task-comment-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; color: var(--muted); font-size: 11px; }
 .task-comment-author { color: var(--text); font-weight: 750; }
+.task-comment-meta-end { display: flex; align-items: center; justify-content: flex-end; gap: 7px; }
+.task-comment-edit { min-height: 28px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--brand); font: inherit; font-weight: 750; cursor: pointer; }
+.task-comment-edit:hover { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 8%, transparent); }
 .task-comment-body { margin: 0; color: var(--text); font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
 .task-comment-empty { padding: 6px 0; color: var(--muted); font-size: 12px; font-style: italic; }
 .task-comment-composer { margin-top: 12px; }
@@ -141,6 +144,9 @@
 .task-comment-composer textarea { width: 100%; resize: vertical; }
 .task-comment-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
 .task-comment-actions .save-message { margin: 0; }
+.task-comment-editor textarea { width: 100%; resize: vertical; }
+.task-comment-editor .save-message { min-height: 18px; margin: 4px 0; }
+.task-comment-editor-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 /* Suggestion dialog */
 .suggestion-dialog { width: min(420px, calc(100% - 24px)); }

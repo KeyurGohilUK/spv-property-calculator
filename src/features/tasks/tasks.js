@@ -8,7 +8,7 @@ import {
   getTasks, getAllTasks, saveTask, updateTaskStatus, deleteTask, replaceTasks, nextStatus
 } from './task-storage.js';
 import { addTaskEvent, getTaskEvents } from './task-event-storage.js';
-import { addTaskComment, getTaskComments } from './task-comment-storage.js';
+import { addTaskComment, getTaskComments, updateTaskComment } from './task-comment-storage.js';
 import { syncTaskWorkspace } from './task-cloud-sync.js';
 import { syncTaskEvents } from './task-event-sync.js';
 import { syncTaskComments } from './task-comment-sync.js';
@@ -293,17 +293,88 @@ function renderTaskDiscussion(taskId) {
     const author = document.createElement('span');
     author.className = 'task-comment-author';
     author.textContent = comment.userId === cloudUser?.id ? 'You' : (comment.displayName || 'Workspace member');
+    const metaEnd = document.createElement('span');
+    metaEnd.className = 'task-comment-meta-end';
     const time = document.createElement('time');
     time.dateTime = comment.createdAt || '';
     time.textContent = formatRelativeTime(comment.createdAt);
+    if (comment.updatedAt) {
+      const edited = document.createElement('span');
+      edited.textContent = 'Edited';
+      metaEnd.append(edited);
+    }
+    metaEnd.append(time);
+    if (canEdit && comment.userId && comment.userId === cloudUser?.id) {
+      const editButton = document.createElement('button');
+      editButton.type = 'button';
+      editButton.className = 'task-comment-edit';
+      editButton.textContent = 'Edit';
+      editButton.setAttribute('aria-label', `Edit comment from ${formatRelativeTime(comment.createdAt)}`);
+      editButton.addEventListener('click', () => startEditingComment(item, comment));
+      metaEnd.append(editButton);
+    }
     const body = document.createElement('p');
     body.className = 'task-comment-body';
     body.textContent = comment.message;
-    meta.append(author, time);
+    meta.append(author, metaEnd);
     item.append(meta, body);
     list.appendChild(item);
   });
   list.scrollTop = list.scrollHeight;
+}
+
+function startEditingComment(item, comment) {
+  if (!canEdit || !cloudUser?.id || comment.userId !== cloudUser.id) return;
+  const body = item.querySelector('.task-comment-body');
+  const editButton = item.querySelector('.task-comment-edit');
+  if (!body || !editButton) return;
+  editButton.disabled = true;
+
+  const editor = document.createElement('div');
+  editor.className = 'task-comment-editor';
+  const textarea = document.createElement('textarea');
+  textarea.rows = 3;
+  textarea.maxLength = 2000;
+  textarea.value = comment.message;
+  textarea.setAttribute('aria-label', 'Edit comment');
+  const message = document.createElement('p');
+  message.className = 'save-message';
+  message.setAttribute('aria-live', 'polite');
+  const actions = document.createElement('div');
+  actions.className = 'task-comment-editor-actions';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.className = 'text-btn';
+  cancel.textContent = 'Cancel';
+  const save = document.createElement('button');
+  save.type = 'button';
+  save.className = 'secondary-btn compact-task-btn';
+  save.textContent = 'Save edit';
+  actions.append(cancel, save);
+  editor.append(textarea, message, actions);
+  body.replaceWith(editor);
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+  cancel.addEventListener('click', () => renderTaskDiscussion(comment.taskId));
+  textarea.addEventListener('input', () => { message.textContent = ''; });
+  save.addEventListener('click', () => {
+    const newMessage = textarea.value.trim();
+    if (!newMessage) {
+      message.textContent = 'Enter a comment.';
+      textarea.focus();
+      return;
+    }
+    save.disabled = true;
+    try {
+      updateTaskComment(comment.id, newMessage, cloudUser.id);
+      renderTaskDiscussion(comment.taskId);
+      syncTasks({ showFeedback: false });
+    } catch (error) {
+      message.textContent = error.message || 'Could not update this comment.';
+      save.disabled = false;
+    }
+  });
 }
 
 function populateProperties() {
