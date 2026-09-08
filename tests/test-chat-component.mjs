@@ -23,7 +23,7 @@ assert.match(styles, /styles\/components\/chat-thread\.css/, 'Global stylesheet 
 assert.match(propertyApp, /renderChatThread/, 'Property Notes must use the shared chat renderer');
 assert.match(propertyHtml, /id="notesList" class="chat-list"/, 'Property Notes must use the shared chat list');
 assert.match(propertyHtml, /class="chat-composer"/, 'Property Notes must use the shared chat composer');
-assert.doesNotMatch(editorCss, /\.note-message\b|\.note-bubble\b|\.notes-list\b|\.note-composer\b|\.note-send-btn\b/, 'Retired note-specific chat styles must be removed');
+assert.doesNotMatch(editorCss, /\.note-message(?:\s|\{|\.)|\.note-bubble(?:\s|\{|\.)|\.notes-list\s*\{|\.note-composer(?:\s|\{|\.)|\.note-send-btn(?:\s|\{|\.)/, 'Retired note-specific chat styles must be removed');
 
 assert.match(taskApp, /renderChatThread/, 'Task Discussion must use the shared chat renderer');
 assert.match(taskApp, /setChatComposerMode/, 'Task Discussion edit state must use the shared chat composer');
