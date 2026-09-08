@@ -17,3 +17,12 @@
 - Expense receipt uploads using private Supabase Storage.
 - Estimated-versus-actual reporting without modifying estimated calculations.
 - Accountant-friendly CSV export and backup.
+
+## Database deployment automation
+
+- Establish the existing production Supabase schema as the migration baseline.
+- Store future migrations under `supabase/migrations/` using Supabase's timestamped naming convention.
+- Validate database migrations in CI for pull requests without connecting to production.
+- After changes merge to `main`, deploy pending migrations with `supabase db push` through a protected `production` GitHub environment.
+- Require manual approval before production deployment, keep Supabase credentials in environment secrets and prevent concurrent migration runs.
+- Run a dry-run check before each production migration deployment and keep Update 21 as a manual migration until the baseline workflow is established.
