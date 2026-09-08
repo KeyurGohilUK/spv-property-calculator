@@ -1,5 +1,5 @@
 {
-  "version": "1.24.1",
+  "version": "1.24.2",
   "assets": [
     "./",
     "./index.html",
@@ -7,6 +7,7 @@
     "./styles/tokens.css",
     "./styles/base.css",
     "./styles/app-shell-core.css",
+    "./styles/components/chat-thread.css",
     "./styles/forms.css",
     "./styles/dialogs.css",
     "./styles/dialogs-updates.css",
@@ -18,6 +19,7 @@
     "./styles/features/archive.css",
     "./styles/features/editor.css",
     "./styles/features/statuses.css",
+    "./src/components/chat-thread.js",
     "./src/components/theme.js",
     "./src/components/help-guide.js",
     "./src/app/app.js",

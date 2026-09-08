@@ -59,8 +59,8 @@ Templates populate tasks rather than being locked sequences, so users can remove
 ### 3. Push notification reminders for due dates
 The app already has VAPID push infrastructure and a Supabase Edge Function pattern (viewing reminders). A scheduled edge function can query tasks due soon and fire notifications — this is the second use of existing infrastructure with no new platform concepts.
 
-### 4. Task comments and status history
-An append-only log per task recording who changed the status and when. Useful for shared workspaces where a director, accountant, and letting agent may all be members and need to know who acted last.
+### 4. Task discussion and status history
+Each saved task includes a shared **Discussion** chat for workspace members, plus the separate status-history log. Discussion reuses the same shared chat component as Property Notes so message bubbles, composer behaviour, mobile sizing, author treatment, and accessibility stay consistent across the app. Task discussion persistence remains offline-first and continues to sync through the task-comment storage/service layer.
 
 ### 5. Expense prompt on task completion
 When a task is marked done, offer a lightweight prompt: "Was there a cost? Log an expense." Bridges the task list and expense tracker at the natural moment — common for solicitor fees, survey costs, and filing fees.

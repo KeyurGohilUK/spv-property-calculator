@@ -1,4 +1,5 @@
 import { renderSyncStatus } from '../../components/sync-status.js';
+import { renderChatThread, setChatComposerMode } from '../../components/chat-thread.js';
 import { setupDialog } from '../../components/dialog-helper.js';
 import { getActiveProperties } from '../properties/storage.js';
 import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
@@ -274,54 +275,23 @@ function renderTaskHistory(taskId) {
 
 function renderTaskDiscussion(taskId) {
   const comments = getTaskComments(taskId);
-  const list = $('taskCommentList');
-  list.innerHTML = '';
   $('taskCommentCount').textContent = String(comments.length);
-
-  if (!comments.length) {
-    const empty = document.createElement('li');
-    empty.className = 'task-comment-empty';
-    empty.textContent = 'No comments yet. Start the discussion.';
-    list.appendChild(empty);
-    return;
-  }
-
-  comments.forEach((comment) => {
-    const item = document.createElement('li');
-    item.className = 'task-comment';
-    const meta = document.createElement('div');
-    meta.className = 'task-comment-meta';
-    const author = document.createElement('span');
-    author.className = 'task-comment-author';
-    author.textContent = comment.userId === cloudUser?.id ? 'You' : (comment.displayName || 'Workspace member');
-
-    const metaEnd = document.createElement('span');
-    metaEnd.className = 'task-comment-meta-end';
-    const time = document.createElement('time');
-    time.dateTime = comment.updatedAt || comment.createdAt || '';
-    const wasEdited = comment.updatedAt && comment.createdAt && comment.updatedAt !== comment.createdAt;
-    time.textContent = `${formatRelativeTime(comment.updatedAt || comment.createdAt)}${wasEdited ? ' · edited' : ''}`;
-    metaEnd.appendChild(time);
-
-    if (canEdit && comment.userId && comment.userId === cloudUser?.id) {
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'task-comment-edit-btn';
-      editBtn.textContent = 'Edit';
-      editBtn.setAttribute('aria-label', 'Edit your comment');
-      editBtn.addEventListener('click', () => beginEditTaskComment(comment));
-      metaEnd.appendChild(editBtn);
-    }
-
-    const body = document.createElement('p');
-    body.className = 'task-comment-body';
-    body.textContent = comment.message;
-    meta.append(author, metaEnd);
-    item.append(meta, body);
-    list.appendChild(item);
+  renderChatThread({
+    container: $('taskCommentList'),
+    messages: comments,
+    currentUserId: cloudUser?.id || null,
+    getId: (comment) => comment.id,
+    getAuthorId: (comment) => comment.userId,
+    getAuthorName: (comment) => comment.displayName || 'Workspace member',
+    getMessage: (comment) => comment.message,
+    getCreatedAt: (comment) => comment.createdAt || '',
+    getUpdatedAt: (comment) => comment.updatedAt || '',
+    formatTimestamp: formatRelativeTime,
+    onEdit: canEdit ? beginEditTaskComment : null,
+    emptyDescription: 'Start the discussion about this task.'
   });
-  list.scrollTop = list.scrollHeight;
 }
+
 function populateProperties() {
   properties = getActiveProperties();
   populateScopeFilterOptions($('taskProperty'), $('taskFilter'), properties);
@@ -763,19 +733,25 @@ function openForm(task = null, { preset = null } = {}) {
 
 function resetCommentComposer() {
   editingCommentId = null;
-  $('taskComment').value = '';
-  $('taskCommentLabel').textContent = 'Add a comment';
-  $('addTaskCommentBtn').textContent = 'Post comment';
-  $('cancelTaskCommentEditBtn').classList.add('hidden');
+  setChatComposerMode({
+    label: $('taskCommentLabel'),
+    textarea: $('taskComment'),
+    sendButton: $('addTaskCommentBtn'),
+    cancelButton: $('cancelTaskCommentEditBtn')
+  });
 }
 
 function beginEditTaskComment(comment) {
   if (!canEdit || !cloudUser || comment.userId !== cloudUser.id) return;
   editingCommentId = comment.id;
-  $('taskComment').value = comment.message;
-  $('taskCommentLabel').textContent = 'Edit comment';
-  $('addTaskCommentBtn').textContent = 'Save changes';
-  $('cancelTaskCommentEditBtn').classList.remove('hidden');
+  setChatComposerMode({
+    label: $('taskCommentLabel'),
+    textarea: $('taskComment'),
+    sendButton: $('addTaskCommentBtn'),
+    cancelButton: $('cancelTaskCommentEditBtn'),
+    editing: true,
+    value: comment.message
+  });
   $('taskCommentMessage').textContent = '';
   $('taskComment').focus();
   $('taskComment').setSelectionRange($('taskComment').value.length, $('taskComment').value.length);
@@ -785,7 +761,7 @@ function postTaskComment() {
   if (!editingTaskId || !canEdit) return;
   const message = $('taskComment').value.trim();
   if (!message) {
-    $('taskCommentMessage').textContent = 'Enter a comment.';
+    $('taskCommentMessage').textContent = 'Enter a message.';
     $('taskComment').focus();
     return;
   }
@@ -796,7 +772,7 @@ function postTaskComment() {
   try {
     if (editingCommentId) {
       updateTaskComment(editingCommentId, message, cloudUser?.id || null);
-      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Comment updated' : 'Update saved on this device';
+      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Message updated' : 'Update saved on this device';
     } else {
       addTaskComment({
         taskId: editingTaskId,
@@ -804,13 +780,13 @@ function postTaskComment() {
         displayName: getActorName(),
         message
       });
-      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Comment posted' : 'Saved on this device';
+      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Message sent' : 'Saved on this device';
     }
     resetCommentComposer();
     renderTaskDiscussion(editingTaskId);
     syncTasks({ showFeedback: false });
   } catch (error) {
-    $('taskCommentMessage').textContent = error.message || 'Could not save this comment.';
+    $('taskCommentMessage').textContent = error.message || 'Could not save this message.';
   } finally {
     button.disabled = false;
   }

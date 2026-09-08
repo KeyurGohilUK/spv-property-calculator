@@ -163,19 +163,24 @@
 
       <section id="taskDiscussion" class="task-discussion hidden" aria-labelledby="taskDiscussionHeading">
         <div class="task-discussion-header">
-          <h4 id="taskDiscussionHeading" class="task-history-heading">Discussion</h4>
+          <div>
+            <h4 id="taskDiscussionHeading" class="task-history-heading">Discussion</h4>
+            <small>Shared with workspace members</small>
+          </div>
           <span id="taskCommentCount" class="count-badge">0</span>
         </div>
-        <ol id="taskCommentList" class="task-comment-list" aria-live="polite"></ol>
-        <div id="taskCommentComposer" class="task-comment-composer">
-          <label id="taskCommentLabel" for="taskComment">Add a comment</label>
-          <textarea id="taskComment" rows="2" maxlength="2000" placeholder="Write an update or question…"></textarea>
-          <div class="task-comment-actions">
+        <div id="taskCommentList" class="chat-list task-discussion-list" role="log" aria-label="Task discussion"></div>
+        <div id="taskCommentComposer" class="chat-composer-wrap">
+          <label id="taskCommentLabel" class="chat-label" for="taskComment">Add a message</label>
+          <div class="chat-composer">
+            <textarea id="taskComment" rows="1" maxlength="2000" placeholder="Write a message…"></textarea>
+            <button id="addTaskCommentBtn" class="chat-send-btn" type="button" aria-label="Send message" title="Send message">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+            </button>
+          </div>
+          <div class="chat-composer-footer">
             <p id="taskCommentMessage" class="save-message" aria-live="polite"></p>
-            <div class="task-comment-action-buttons">
-              <button id="cancelTaskCommentEditBtn" class="text-btn hidden" type="button">Cancel edit</button>
-              <button id="addTaskCommentBtn" class="secondary-btn compact-task-btn" type="button">Post comment</button>
-            </div>
+            <button id="cancelTaskCommentEditBtn" class="text-btn chat-cancel-edit hidden" type="button">Cancel edit</button>
           </div>
         </div>
       </section>

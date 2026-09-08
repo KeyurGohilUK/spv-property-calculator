@@ -6,7 +6,7 @@ const requiredDirectories = [
   'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
   'src/features/forecast/', 'src/features/tasks/', 'src/features/users/', 'src/services/', 'src/config/',
-  'src/utils/', 'src/components/', 'workers/receipt/', 'supabase/functions/note-push/',
+  'src/utils/', 'src/components/', 'styles/components/', 'workers/receipt/', 'supabase/functions/note-push/',
   'supabase/functions/viewing-reminders/', 'tests/e2e/', 'brrr/',
 ];
 
@@ -35,7 +35,7 @@ const organisedModules = {
   'src/config/': ['tax-config.js'],
   'src/utils/': ['format-utils.js', 'validation.js'],
   'src/components/': [
-    'admin-menu.js', 'dialog-helper.js', 'help-guide.js', 'install-component.js',
+    'admin-menu.js', 'chat-thread.js', 'dialog-helper.js', 'help-guide.js', 'install-component.js',
     'notification-settings.js', 'secondary-page-header.js', 'sync-status.js', 'theme.js', 'update-notifier.js'
   ]
 };

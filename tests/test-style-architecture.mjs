@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const manifest = fs.readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 const imports = [...manifest.matchAll(/@import url\('\.\/(styles\/[^']+)'\);/g)].map((match) => match[1]);
 const expected = [
-  'styles/tokens.css', 'styles/base.css', 'styles/app-shell-core.css',
+  'styles/tokens.css', 'styles/base.css', 'styles/app-shell-core.css', 'styles/components/chat-thread.css',
   'styles/features/properties.css', 'styles/forms.css', 'styles/features/summary.css',
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
   'styles/features/editor.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
