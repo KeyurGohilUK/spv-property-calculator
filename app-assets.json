@@ -1,5 +1,5 @@
 {
-  "version": "1.23.0",
+  "version": "1.24.0",
   "assets": [
     "./",
     "./index.html",
@@ -64,6 +64,10 @@
     "./src/features/tasks/tasks.js",
     "./src/features/tasks/task-storage.js",
     "./src/features/tasks/task-cloud-sync.js",
+    "./src/features/tasks/task-event-storage.js",
+    "./src/features/tasks/task-event-sync.js",
+    "./src/features/tasks/task-comment-storage.js",
+    "./src/features/tasks/task-comment-sync.js",
     "./forecast/",
     "./styles/features/forecast.css",
     "./src/features/forecast/forecast.js",

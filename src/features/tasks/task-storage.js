@@ -25,9 +25,14 @@ function writeRaw(tasks) {
 }
 
 const STATUS_ORDER = ['todo', 'in-progress', 'done'];
+// Active work is intentionally surfaced before queued and completed work.
+const SORT_STATUS_ORDER = ['in-progress', 'todo', 'done'];
 
 function sortTasks(items) {
-  const statusRank = (s) => STATUS_ORDER.indexOf(s === 'done' ? 'done' : s) ?? 0;
+  const statusRank = (status) => {
+    const rank = SORT_STATUS_ORDER.indexOf(status);
+    return rank < 0 ? SORT_STATUS_ORDER.length : rank;
+  };
   return [...items].sort((a, b) => {
     const statusOrder = statusRank(a.status) - statusRank(b.status);
     if (statusOrder !== 0) return statusOrder;

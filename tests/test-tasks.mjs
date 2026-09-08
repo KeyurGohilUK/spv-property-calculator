@@ -17,6 +17,7 @@ const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const workspaceSync = fs.readFileSync(new URL('../src/services/workspace-sync.js', import.meta.url), 'utf8');
 
 const { addTaskEvent, getTaskEvents, getAllTaskEvents } = await import('../src/features/tasks/task-event-storage.js');
+const { addTaskComment, getTaskComments, getAllTaskComments } = await import('../src/features/tasks/task-comment-storage.js');
 
 // Storage: create and retrieve
 const task = saveTask({ title: 'Instruct solicitor', status: 'todo', scope: 'company' });
@@ -52,6 +53,14 @@ assert.equal(companyTask.propertyId, '', 'Company tasks must have empty property
 replaceTasks([companyTask]);
 assert.equal(getTasks().length, 1);
 assert.equal(getTasks()[0].title, 'Annual accounts');
+
+// Storage: active work is surfaced first without changing the status cycle
+replaceTasks([
+  { id: 'todo-first', title: 'Queued', status: 'todo', updatedAt: '2025-01-01T00:00:00Z' },
+  { id: 'done-last', title: 'Finished', status: 'done', updatedAt: '2025-01-03T00:00:00Z' },
+  { id: 'active-top', title: 'Active', status: 'in-progress', updatedAt: '2025-01-02T00:00:00Z' }
+]);
+assert.deepEqual(getTasks().map((item) => item.id), ['active-top', 'todo-first', 'done-last']);
 
 // Merge: cloud-only record is added locally
 const local1 = { id: 'a', title: 'Local', status: 'todo', updatedAt: '2024-01-01T00:00:00Z', _cloudDirty: false, _cloudRevision: 1 };
@@ -96,6 +105,16 @@ for (let i = 1; i < all.length; i++) {
   assert.ok(all[i].createdAt >= all[i - 1].createdAt, 'Events must be sorted by createdAt ascending');
 }
 
+// Discussion: comments are task-specific, trimmed, ordered, and queued for cloud sync
+const comment1 = addTaskComment({ taskId: histTask.id, userId: 'user-1', displayName: 'Alice', message: '  Please check the quote.  ' });
+assert.equal(comment1.message, 'Please check the quote.');
+assert.equal(comment1._cloudDirty, true);
+addTaskComment({ taskId: 'other-task', userId: 'user-2', displayName: 'Bob', message: 'Different task' });
+assert.equal(getTaskComments(histTask.id).length, 1);
+assert.equal(getTaskComments(histTask.id)[0].displayName, 'Alice');
+assert.equal(getAllTaskComments().length, 2);
+assert.throws(() => addTaskComment({ taskId: histTask.id, message: '   ' }), /Enter a comment/);
+
 // Reminder schedule: todayInLondon returns a valid ISO date
 const todayStr = todayInLondon();
 assert.match(todayStr, /^\d{4}-\d{2}-\d{2}$/, 'todayInLondon must return YYYY-MM-DD');
@@ -137,6 +156,9 @@ assert.match(taskHtml, /id="taskEmpty"/, 'Task page must include empty state');
 assert.match(taskHtml, /id="taskDialog"/, 'Task page must include task dialog');
 assert.match(taskHtml, /id="taskHistory"/, 'Task dialog must include history section');
 assert.match(taskHtml, /id="taskHistoryList"/, 'Task dialog must include history list');
+assert.match(taskHtml, /id="taskDiscussion"/, 'Task dialog must include a discussion area');
+assert.match(taskHtml, /id="taskCommentList"/, 'Task discussion must include a comment list');
+assert.match(taskHtml, /id="addTaskCommentBtn"/, 'Task discussion must include a post action');
 assert.match(taskHtml, /id="taskAssignedTo"/, 'Task dialog must include assignee select');
 assert.match(taskHtml, /id="taskAssignedFilter"/, 'Task filter panel must include assignee filter select');
 assert.match(taskHtml, /id="suggestionDialog"/, 'Task page must include the suggestion dialog');
@@ -150,6 +172,8 @@ assert.match(taskHtml, /supabase-config\.js[\s\S]*cloud\.js[\s\S]*tasks\.js/, 'T
 assert.match(taskPage, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/components\/sync-status\.js'/, 'Tasks must use shared sync-status component');
 assert.match(taskPage, /syncTaskWorkspace\(cloud\)/, 'Tasks must use the shared task sync service');
 assert.match(taskPage, /syncTaskEvents\(cloud\)/, 'Tasks must sync status history events');
+assert.match(taskPage, /syncTaskComments\(cloud\)/, 'Tasks must sync discussion comments');
+assert.match(taskPage, /STATUS_GROUP_ORDER = \['in-progress', 'todo', 'done'\]/, 'In-progress groups must render first');
 assert.match(taskPage, /addTaskEvent\(/, 'Tasks must record status change events');
 assert.match(taskPage, /canEdit/, 'Tasks must gate writes behind edit permission');
 assert.match(taskPage, /getWorkspaceAccess/, 'Tasks must check workspace access for edit permission');
@@ -170,11 +194,15 @@ assert.match(cloud, /isTaskConflict/, 'Task conflict detection is missing');
 assert.match(cloud, /async function listTaskEvents\(\)/, 'Cloud task event listing is missing');
 assert.match(cloud, /async function insertTaskEvent\(/, 'Cloud task event insert is missing');
 assert.match(cloud, /insert_task_event/, 'Task events must use the insert_task_event RPC');
+assert.match(cloud, /async function listTaskComments\(\)/, 'Cloud task comment listing is missing');
+assert.match(cloud, /async function insertTaskComment\(comment\)/, 'Cloud task comment insertion is missing');
+assert.match(cloud, /insert_task_comment/, 'Task comments must use the protected insert RPC');
 assert.match(cloud, /async function listActiveMembers\(\)/, 'Cloud must expose listActiveMembers for the assignee picker');
 assert.match(cloud, /list_active_members/, 'listActiveMembers must call the list_active_members RPC');
 
 // Workspace sync includes tasks and events
 assert.match(workspaceSync, /syncTasks: syncTaskWorkspace/, 'Workspace sync must include the task sync service');
 assert.match(workspaceSync, /syncTaskEvents/, 'Workspace sync must include task event sync');
+assert.match(workspaceSync, /syncTaskComments/, 'Workspace sync must include task comment sync');
 
 console.log('Task checks passed.');

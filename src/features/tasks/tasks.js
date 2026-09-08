@@ -8,8 +8,10 @@ import {
   getTasks, getAllTasks, saveTask, updateTaskStatus, deleteTask, replaceTasks, nextStatus
 } from './task-storage.js';
 import { addTaskEvent, getTaskEvents } from './task-event-storage.js';
+import { addTaskComment, getTaskComments } from './task-comment-storage.js';
 import { syncTaskWorkspace } from './task-cloud-sync.js';
 import { syncTaskEvents } from './task-event-sync.js';
+import { syncTaskComments } from './task-comment-sync.js';
 import { TEMPLATES, buildTasksFromTemplate } from './task-templates.js';
 
 const $ = (id) => document.getElementById(id);
@@ -59,9 +61,10 @@ async function syncTasks({ showFeedback = true } = {}) {
   taskSyncing = true;
   setSyncStatus('Syncing tasks…');
   try {
-    const [result] = await Promise.all([
-      syncTaskWorkspace(cloud),
-      syncTaskEvents(cloud)
+    const result = await syncTaskWorkspace(cloud);
+    await Promise.all([
+      syncTaskEvents(cloud),
+      syncTaskComments(cloud)
     ]);
     render();
     if (result.conflicts.length) {
@@ -268,6 +271,41 @@ function renderTaskHistory(taskId) {
   });
 }
 
+function renderTaskDiscussion(taskId) {
+  const comments = getTaskComments(taskId);
+  const list = $('taskCommentList');
+  list.innerHTML = '';
+  $('taskCommentCount').textContent = String(comments.length);
+
+  if (!comments.length) {
+    const empty = document.createElement('li');
+    empty.className = 'task-comment-empty';
+    empty.textContent = 'No comments yet. Start the discussion.';
+    list.appendChild(empty);
+    return;
+  }
+
+  comments.forEach((comment) => {
+    const item = document.createElement('li');
+    item.className = 'task-comment';
+    const meta = document.createElement('div');
+    meta.className = 'task-comment-meta';
+    const author = document.createElement('span');
+    author.className = 'task-comment-author';
+    author.textContent = comment.userId === cloudUser?.id ? 'You' : (comment.displayName || 'Workspace member');
+    const time = document.createElement('time');
+    time.dateTime = comment.createdAt || '';
+    time.textContent = formatRelativeTime(comment.createdAt);
+    const body = document.createElement('p');
+    body.className = 'task-comment-body';
+    body.textContent = comment.message;
+    meta.append(author, time);
+    item.append(meta, body);
+    list.appendChild(item);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
 function populateProperties() {
   properties = getActiveProperties();
   populateScopeFilterOptions($('taskProperty'), $('taskFilter'), properties);
@@ -424,7 +462,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   return card;
 }
 
-const STATUS_GROUP_ORDER = ['todo', 'in-progress', 'done'];
+const STATUS_GROUP_ORDER = ['in-progress', 'todo', 'done'];
 
 function render() {
   const tasks = getTasks().filter(taskMatchesFilter);
@@ -660,6 +698,8 @@ $('taskDialog').addEventListener('close', () => {
   });
   $('saveTaskBtn').classList.remove('hidden');
   $('cancelTaskBtn').textContent = 'Cancel';
+  $('taskComment').value = '';
+  $('taskCommentMessage').textContent = '';
 });
 
 const templateDialogController = setupDialog($('templateDialog'), {
@@ -692,13 +732,47 @@ function openForm(task = null, { preset = null } = {}) {
   if (task) {
     renderTaskHistory(task.id);
     $('taskHistory').classList.remove('hidden');
+    renderTaskDiscussion(task.id);
+    $('taskDiscussion').classList.remove('hidden');
+    $('taskCommentComposer').classList.toggle('hidden', !canEdit);
   } else {
     $('taskHistory').classList.add('hidden');
+    $('taskDiscussion').classList.add('hidden');
   }
   clearFieldValidation($('taskTitle'), $('taskTitleError'));
   clearFieldValidation($('taskProperty'), $('taskPropertyError'));
   updateScope();
   taskDialogController.open();
+}
+
+function postTaskComment() {
+  if (!editingTaskId || !canEdit) return;
+  const message = $('taskComment').value.trim();
+  if (!message) {
+    $('taskCommentMessage').textContent = 'Enter a comment.';
+    $('taskComment').focus();
+    return;
+  }
+
+  const button = $('addTaskCommentBtn');
+  button.disabled = true;
+  $('taskCommentMessage').textContent = 'Posting…';
+  try {
+    addTaskComment({
+      taskId: editingTaskId,
+      userId: cloudUser?.id || null,
+      displayName: getActorName(),
+      message
+    });
+    $('taskComment').value = '';
+    $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Comment posted' : 'Saved on this device';
+    renderTaskDiscussion(editingTaskId);
+    syncTasks({ showFeedback: false });
+  } catch (error) {
+    $('taskCommentMessage').textContent = error.message || 'Could not add this comment.';
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function submitTask(event) {
@@ -754,6 +828,8 @@ function submitTask(event) {
 }
 
 $('openTaskFormBtn').addEventListener('click', () => openForm());
+$('addTaskCommentBtn').addEventListener('click', postTaskComment);
+$('taskComment').addEventListener('input', () => { $('taskCommentMessage').textContent = ''; });
 $('openTemplateDialogBtn').addEventListener('click', openTemplateDialog);
 $('applyTemplateBtn').addEventListener('click', applyTemplateHandler);
 $('taskScope').addEventListener('change', updateScope);
