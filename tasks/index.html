@@ -168,11 +168,14 @@
         </div>
         <ol id="taskCommentList" class="task-comment-list" aria-live="polite"></ol>
         <div id="taskCommentComposer" class="task-comment-composer">
-          <label for="taskComment">Add a comment</label>
+          <label id="taskCommentLabel" for="taskComment">Add a comment</label>
           <textarea id="taskComment" rows="2" maxlength="2000" placeholder="Write an update or question…"></textarea>
           <div class="task-comment-actions">
             <p id="taskCommentMessage" class="save-message" aria-live="polite"></p>
-            <button id="addTaskCommentBtn" class="secondary-btn compact-task-btn" type="button">Post comment</button>
+            <div class="task-comment-action-buttons">
+              <button id="cancelTaskCommentEditBtn" class="text-btn hidden" type="button">Cancel edit</button>
+              <button id="addTaskCommentBtn" class="secondary-btn compact-task-btn" type="button">Post comment</button>
+            </div>
           </div>
         </div>
       </section>

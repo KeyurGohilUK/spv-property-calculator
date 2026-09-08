@@ -1,6 +1,7 @@
 {
-  "version": "1.24.0",
+  "version": "1.24.1",
   "notes": [
+    "Task discussion comments can now be edited by their author, with edited comments clearly marked.",
     "Added a shared discussion thread to each task and moved In Progress work to the top of the task list.",
     "Added Task Manager (Beta) — create and track workspace tasks, update status, and sync across devices.",
     "Added BRRR Scenario Calculator — work backwards from GDV comparables to model offer price, capital recycling, and ICR/LTV constraints.",

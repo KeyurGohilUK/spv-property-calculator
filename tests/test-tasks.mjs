@@ -17,7 +17,7 @@ const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const workspaceSync = fs.readFileSync(new URL('../src/services/workspace-sync.js', import.meta.url), 'utf8');
 
 const { addTaskEvent, getTaskEvents, getAllTaskEvents } = await import('../src/features/tasks/task-event-storage.js');
-const { addTaskComment, getTaskComments, getAllTaskComments } = await import('../src/features/tasks/task-comment-storage.js');
+const { addTaskComment, getTaskComments, getAllTaskComments, updateTaskComment } = await import('../src/features/tasks/task-comment-storage.js');
 
 // Storage: create and retrieve
 const task = saveTask({ title: 'Instruct solicitor', status: 'todo', scope: 'company' });
@@ -113,6 +113,11 @@ addTaskComment({ taskId: 'other-task', userId: 'user-2', displayName: 'Bob', mes
 assert.equal(getTaskComments(histTask.id).length, 1);
 assert.equal(getTaskComments(histTask.id)[0].displayName, 'Alice');
 assert.equal(getAllTaskComments().length, 2);
+const editedComment = updateTaskComment(comment1.id, '  Quote checked and approved.  ', 'user-1');
+assert.equal(editedComment.message, 'Quote checked and approved.');
+assert.equal(editedComment._cloudDirty, true);
+assert.ok(editedComment.updatedAt, 'Edited comments must record updatedAt');
+assert.throws(() => updateTaskComment(comment1.id, 'Changed by Bob', 'user-2'), /only edit your own comments/);
 assert.throws(() => addTaskComment({ taskId: histTask.id, message: '   ' }), /Enter a comment/);
 
 // Reminder schedule: todayInLondon returns a valid ISO date
@@ -159,6 +164,7 @@ assert.match(taskHtml, /id="taskHistoryList"/, 'Task dialog must include history
 assert.match(taskHtml, /id="taskDiscussion"/, 'Task dialog must include a discussion area');
 assert.match(taskHtml, /id="taskCommentList"/, 'Task discussion must include a comment list');
 assert.match(taskHtml, /id="addTaskCommentBtn"/, 'Task discussion must include a post action');
+assert.match(taskHtml, /id="cancelTaskCommentEditBtn"/, 'Task discussion must allow comment editing to be cancelled');
 assert.match(taskHtml, /id="taskAssignedTo"/, 'Task dialog must include assignee select');
 assert.match(taskHtml, /id="taskAssignedFilter"/, 'Task filter panel must include assignee filter select');
 assert.match(taskHtml, /id="suggestionDialog"/, 'Task page must include the suggestion dialog');
@@ -173,6 +179,8 @@ assert.match(taskPage, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/componen
 assert.match(taskPage, /syncTaskWorkspace\(cloud\)/, 'Tasks must use the shared task sync service');
 assert.match(taskPage, /syncTaskEvents\(cloud\)/, 'Tasks must sync status history events');
 assert.match(taskPage, /syncTaskComments\(cloud\)/, 'Tasks must sync discussion comments');
+assert.match(taskPage, /updateTaskComment\(/, 'Tasks must support editing discussion comments');
+assert.match(taskPage, /beginEditTaskComment/, 'Task discussion must expose an edit flow for the current user');
 assert.match(taskPage, /STATUS_GROUP_ORDER = \['in-progress', 'todo', 'done'\]/, 'In-progress groups must render first');
 assert.match(taskPage, /addTaskEvent\(/, 'Tasks must record status change events');
 assert.match(taskPage, /canEdit/, 'Tasks must gate writes behind edit permission');
@@ -195,8 +203,8 @@ assert.match(cloud, /async function listTaskEvents\(\)/, 'Cloud task event listi
 assert.match(cloud, /async function insertTaskEvent\(/, 'Cloud task event insert is missing');
 assert.match(cloud, /insert_task_event/, 'Task events must use the insert_task_event RPC');
 assert.match(cloud, /async function listTaskComments\(\)/, 'Cloud task comment listing is missing');
-assert.match(cloud, /async function insertTaskComment\(comment\)/, 'Cloud task comment insertion is missing');
-assert.match(cloud, /insert_task_comment/, 'Task comments must use the protected insert RPC');
+assert.match(cloud, /async function upsertTaskComment\(comment\)/, 'Cloud task comment upsert is missing');
+assert.match(cloud, /upsert_task_comment/, 'Task comments must use the protected upsert RPC');
 assert.match(cloud, /async function listActiveMembers\(\)/, 'Cloud must expose listActiveMembers for the assignee picker');
 assert.match(cloud, /list_active_members/, 'listActiveMembers must call the list_active_members RPC');
 
