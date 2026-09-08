@@ -39,6 +39,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 19 — task assignment
 - Update 20 — task due-date reminders
 - Update 21 — task discussion comments
+- Update 22 — editable task discussion comments
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
