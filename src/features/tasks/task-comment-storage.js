@@ -35,14 +35,15 @@ export function addTaskComment({ taskId, userId, displayName, message }) {
   const cleanMessage = String(message || '').trim();
   if (!cleanMessage) throw new Error('Enter a comment.');
   const comments = readRaw();
+  const now = new Date().toISOString();
   const comment = {
     id: makeId(),
     taskId: String(taskId),
     userId: userId || null,
     displayName: String(displayName || ''),
     message: cleanMessage,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
     _cloudDirty: true
   };
   comments.push(comment);
