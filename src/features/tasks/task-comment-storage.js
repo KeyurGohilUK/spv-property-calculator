@@ -42,11 +42,31 @@ export function addTaskComment({ taskId, userId, displayName, message }) {
     displayName: String(displayName || ''),
     message: cleanMessage,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     _cloudDirty: true
   };
   comments.push(comment);
   if (!writeRaw(comments)) throw new Error('Unable to save this comment on this device.');
   return comment;
+}
+
+export function updateTaskComment(commentId, message, userId) {
+  const cleanMessage = String(message || '').trim();
+  if (!cleanMessage) throw new Error('Enter a comment.');
+  const comments = readRaw();
+  const index = comments.findIndex((comment) => comment.id === commentId);
+  if (index < 0) throw new Error('Comment could not be found.');
+  const existing = comments[index];
+  if (!userId || existing.userId !== userId) throw new Error('You can only edit your own comments.');
+  const updated = {
+    ...existing,
+    message: cleanMessage,
+    updatedAt: new Date().toISOString(),
+    _cloudDirty: true
+  };
+  comments[index] = updated;
+  if (!writeRaw(comments)) throw new Error('Unable to update this comment on this device.');
+  return updated;
 }
 
 export function replaceTaskComments(comments) {
