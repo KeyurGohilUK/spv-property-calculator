@@ -9,6 +9,7 @@ const pushMigration = fs.readFileSync(new URL('../database/migrations/Update 14 
 const policyMigration = fs.readFileSync(new URL('../database/migrations/Update 15 - Policy Acceptance.sql', import.meta.url), 'utf8');
 const viewingReminderMigration = fs.readFileSync(new URL('../database/migrations/Update 16 - Viewing Push Reminders.sql', import.meta.url), 'utf8');
 const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 21 - Task Discussions.sql', import.meta.url), 'utf8');
+const editableTaskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 22 - Editable Task Discussions.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
@@ -44,7 +45,10 @@ assert.match(viewingReminderMigration, /alter table public\.viewing_reminder_del
 assert.match(taskDiscussionMigration, /create table if not exists public\.task_comments/, 'Update 21 must create task comments');
 assert.match(taskDiscussionMigration, /public\.is_workspace_editor\(\)/, 'Only workspace editors may add task comments');
 assert.match(taskDiscussionMigration, /char_length\(btrim\(p_message\)\)>2000/, 'Task comments must enforce the UI length limit in the database');
-assert.match(bootstrap, /create or replace function public\.insert_task_comment/, 'Bootstrap must include task discussions');
+assert.match(editableTaskDiscussionMigration, /add column if not exists updated_at/, 'Update 22 must add task comment edit timestamps');
+assert.match(editableTaskDiscussionMigration, /create or replace function public\.upsert_task_comment/, 'Update 22 must add the protected comment upsert RPC');
+assert.match(editableTaskDiscussionMigration, /v_existing_user is distinct from auth\.uid\(\)/, 'Update 22 must only allow authors to edit their own comments');
+assert.match(bootstrap, /create or replace function public\.upsert_task_comment/, 'Bootstrap must include editable task discussions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');
