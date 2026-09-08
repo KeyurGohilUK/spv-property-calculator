@@ -1,5 +1,6 @@
 import { TAX_CONFIG } from '../config/tax-config.js';
 import { renderSyncStatus } from '../components/sync-status.js';
+import { renderChatThread } from '../components/chat-thread.js';
 import { setupInstallComponent } from '../components/install-component.js';
 import { setupAccountController } from '../services/account-controller.js';
 import { renderAccessState } from '../services/access-gate.js';
@@ -357,35 +358,28 @@ function renderNotes() {
   }
   if ($('refreshNotesBtn')) $('refreshNotesBtn').disabled = notesLoading || !navigator.onLine || !signedIn || !hasSavedProperty;
 
-  const list = $('notesList');
-  if (!list) return;
-  if (!currentNotes.length) {
-    list.innerHTML = '<div class="notes-empty"><div class="notes-empty-icon">💬</div><p>No messages yet</p><small>Start the conversation about this property.</small></div>';
-    return;
-  }
-
   const notesForDisplay = [...currentNotes].sort((a, b) => {
     const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
     const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
     return aTime - bTime;
   });
 
-  list.innerHTML = notesForDisplay.map((item) => {
-    const rawAuthor = item.author_name || 'Signed-in user';
-    const author = escapeHtml(rawAuthor);
-    const created = item.created_at ? formatDate(item.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
-    const isMine = Boolean(cloudUser?.id && item.author_user_id === cloudUser.id);
-    const initials = escapeHtml(rawAuthor.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?');
-    return `<article class="note-message ${isMine ? 'mine' : 'theirs'}">
-      <div class="note-avatar" aria-hidden="true">${initials}</div>
-      <div class="note-message-stack">
-        <div class="note-bubble"><p>${escapeHtml(item.note || '').replaceAll('\n', '<br>')}</p></div>
-        <div class="note-meta"><strong>${author}</strong><span aria-hidden="true">·</span><time>${escapeHtml(created)}</time>${isMine ? `<button class="note-delete-btn ${deletingNoteId === item.id ? 'is-loading' : ''}" type="button" data-note-id="${escapeHtml(item.id || '')}" aria-label="Delete note" title="Delete note" ${deletingNoteId ? 'disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>` : ''}</div>
-      </div>
-    </article>`;
-  }).join('');
-
-  requestAnimationFrame(() => { list.scrollTop = list.scrollHeight; });
+  renderChatThread({
+    container: $('notesList'),
+    messages: notesForDisplay,
+    currentUserId: cloudUser?.id || null,
+    getId: (item) => item.id,
+    getAuthorId: (item) => item.author_user_id,
+    getAuthorName: (item) => item.author_name || 'Signed-in user',
+    getMessage: (item) => item.note || '',
+    getCreatedAt: (item) => item.created_at || '',
+    formatTimestamp: (value) => value
+      ? formatDate(value, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : 'Recently',
+    onDelete: (item) => deleteOwnNote(item.id),
+    deletingId: deletingNoteId,
+    emptyDescription: 'Start the conversation about this property.'
+  });
 }
 
 async function loadNotes({ forceCloud = false } = {}) {
@@ -955,11 +949,6 @@ function init() {
     }
   });
   $('refreshNotesBtn').addEventListener('click', () => loadNotes({ forceCloud: true }));
-  $('notesList').addEventListener('click', (event) => {
-    const deleteBtn = event.target.closest('.note-delete-btn');
-    if (deleteBtn) deleteOwnNote(deleteBtn.dataset.noteId);
-  });
-
   $('viewingDateDay').addEventListener('change', syncViewingDateFromPicker);
   $('viewingTime').addEventListener('change', syncViewingDateFromPicker);
   $('propertyForm').addEventListener('input', handlePropertyFormMutation);
