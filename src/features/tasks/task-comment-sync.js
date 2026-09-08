@@ -3,13 +3,13 @@ import { getAllTaskComments, replaceTaskComments } from './task-comment-storage.
 let activeSync = null;
 
 async function performCommentSync(cloud) {
-  if (!cloud?.listTaskComments || !cloud?.insertTaskComment) return { uploaded: 0 };
+  if (!cloud?.listTaskComments || !cloud?.upsertTaskComment) return { uploaded: 0 };
 
   const local = getAllTaskComments();
   let uploaded = 0;
   for (const comment of local.filter((item) => item._cloudDirty)) {
     try {
-      await cloud.insertTaskComment(comment);
+      await cloud.upsertTaskComment(comment);
       uploaded += 1;
     } catch (error) {
       console.warn('Could not upload task comment:', error);
