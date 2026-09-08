@@ -8,13 +8,14 @@ const revisionRepair = fs.readFileSync(new URL('../database/migrations/Update 12
 const pushMigration = fs.readFileSync(new URL('../database/migrations/Update 14 - Note Push Notifications.sql', import.meta.url), 'utf8');
 const policyMigration = fs.readFileSync(new URL('../database/migrations/Update 15 - Policy Acceptance.sql', import.meta.url), 'utf8');
 const viewingReminderMigration = fs.readFileSync(new URL('../database/migrations/Update 16 - Viewing Push Reminders.sql', import.meta.url), 'utf8');
+const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 21 - Task Discussions.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
 const projectRoot = new URL('../', import.meta.url);
 const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 
-for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'push_subscriptions', 'policy_acceptances', 'viewing_reminder_deliveries']) {
+for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'tasks', 'task_events', 'task_comments', 'push_subscriptions', 'policy_acceptances', 'viewing_reminder_deliveries']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
 }
 assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS');
@@ -40,6 +41,10 @@ assert.match(viewingReminderMigration, /unique \(property_id, user_id, viewing_a
 assert.match(viewingReminderMigration, /on delete cascade/, 'Deleting a property must clean its reminder deliveries');
 assert.match(viewingReminderMigration, /cleanup-viewing-reminder-deliveries[\s\S]*interval '30 days'/, 'Viewing reminder delivery history must be cleaned weekly after 30 days');
 assert.match(viewingReminderMigration, /alter table public\.viewing_reminder_deliveries enable row level security/, 'Viewing reminder delivery history must enable RLS');
+assert.match(taskDiscussionMigration, /create table if not exists public\.task_comments/, 'Update 21 must create task comments');
+assert.match(taskDiscussionMigration, /public\.is_workspace_editor\(\)/, 'Only workspace editors may add task comments');
+assert.match(taskDiscussionMigration, /char_length\(btrim\(p_message\)\)>2000/, 'Task comments must enforce the UI length limit in the database');
+assert.match(bootstrap, /create or replace function public\.insert_task_comment/, 'Bootstrap must include task discussions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
 assert.match(receiptWorker, /requireWorkspaceAccess[\s\S]*is_workspace_editor[\s\S]*env\.RECEIPTS\.put[\s\S]*env\.RECEIPTS\.get[\s\S]*env\.RECEIPTS\.delete/, 'Private R2 Worker access controls are incomplete');

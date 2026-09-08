@@ -7,6 +7,7 @@ import {
 import { syncExpenseWorkspace } from '../features/expenses/expense-cloud-sync.js';
 import { syncTaskWorkspace } from '../features/tasks/task-cloud-sync.js';
 import { syncTaskEvents } from '../features/tasks/task-event-sync.js';
+import { syncTaskComments } from '../features/tasks/task-comment-sync.js';
 
 let activeSync = null;
 
@@ -39,9 +40,10 @@ async function performWorkspaceSync(cloud, adapters) {
   }
 
   const expenseResult = await adapters.syncExpenses(cloud);
-  const [taskResult] = await Promise.all([
-    adapters.syncTasks(cloud),
-    adapters.syncTaskEvents(cloud)
+  const taskResult = await adapters.syncTasks(cloud);
+  await Promise.all([
+    adapters.syncTaskEvents(cloud),
+    adapters.syncTaskComments(cloud)
   ]);
   const conflictCount = (propertyResult.conflicts?.length || 0) + (expenseResult.conflicts?.length || 0) + (taskResult.conflicts?.length || 0);
   const changes = Number(propertyResult.uploadedCount || 0)
@@ -70,6 +72,7 @@ export function syncWorkspace(cloud, overrides = {}) {
     syncExpenses: syncExpenseWorkspace,
     syncTasks: syncTaskWorkspace,
     syncTaskEvents,
+    syncTaskComments,
     ...overrides
   };
   activeSync = performWorkspaceSync(cloud, adapters).finally(() => {

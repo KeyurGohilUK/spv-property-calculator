@@ -147,6 +147,17 @@ create table if not exists public.task_events (
 create index if not exists task_events_task_idx on public.task_events(task_id);
 create index if not exists task_events_created_idx on public.task_events(created_at);
 
+create table if not exists public.task_comments (
+  id text primary key,
+  task_id text not null references public.tasks(id) on delete cascade,
+  user_id uuid null references auth.users(id) on delete set null,
+  display_name text not null default '',
+  message text not null check (char_length(btrim(message)) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists task_comments_task_idx on public.task_comments(task_id);
+create index if not exists task_comments_created_idx on public.task_comments(created_at);
+
 create table if not exists public.task_reminder_deliveries (
   id uuid primary key default gen_random_uuid(),
   task_id text not null references public.tasks(id) on delete cascade,
@@ -168,6 +179,7 @@ alter table public.property_deletions enable row level security;
 alter table public.expenses enable row level security;
 alter table public.tasks enable row level security;
 alter table public.task_events enable row level security;
+alter table public.task_comments enable row level security;
 alter table public.task_reminder_deliveries enable row level security;
 alter table public.viewing_reminder_deliveries enable row level security;
 
@@ -194,9 +206,9 @@ create or replace function public.is_workspace_admin() returns boolean
 language sql stable security definer set search_path=public,pg_temp
 as $$ select exists(select 1 from public.workspace_members where user_id=auth.uid() and active and role='admin') $$;
 
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from anon;
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from authenticated;
-grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events to authenticated;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from anon;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from authenticated;
+grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments to authenticated;
 grant select, insert, update, delete on table public.push_subscriptions to authenticated;
 grant select, insert, update on table public.policy_acceptances to authenticated;
 revoke all on function public.is_workspace_member(), public.is_workspace_editor(), public.is_workspace_admin() from public, anon;
@@ -232,6 +244,8 @@ drop policy if exists "Members read tasks" on public.tasks;
 create policy "Members read tasks" on public.tasks for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read task events" on public.task_events;
 create policy "Members read task events" on public.task_events for select to authenticated using (public.is_workspace_member());
+drop policy if exists "Members read task comments" on public.task_comments;
+create policy "Members read task comments" on public.task_comments for select to authenticated using (public.is_workspace_member());
 
 create or replace function public.insert_task_event(
  p_id text,p_task_id text,p_display_name text,p_from_status text,p_to_status text,p_created_at timestamptz)
@@ -246,6 +260,22 @@ begin
 end $$;
 revoke all on function public.insert_task_event(text,text,text,text,text,timestamptz) from public,anon;
 grant execute on function public.insert_task_event(text,text,text,text,text,timestamptz) to authenticated;
+
+create or replace function public.insert_task_comment(
+ p_id text,p_task_id text,p_display_name text,p_message text,p_created_at timestamptz)
+returns void language plpgsql security definer set search_path=public,pg_temp as $$
+begin
+ if auth.uid() is null or not public.is_workspace_editor() then raise exception 'Approved editor access is required'; end if;
+ if nullif(btrim(p_id),'') is null then raise exception 'Comment ID is required'; end if;
+ if nullif(btrim(p_task_id),'') is null then raise exception 'Task ID is required'; end if;
+ if nullif(btrim(p_message),'') is null then raise exception 'Comment is required'; end if;
+ if char_length(btrim(p_message))>2000 then raise exception 'Comment is too long'; end if;
+ insert into public.task_comments(id,task_id,user_id,display_name,message,created_at)
+ values(p_id,p_task_id,auth.uid(),coalesce(p_display_name,''),btrim(p_message),coalesce(p_created_at,now()))
+ on conflict(id) do nothing;
+end $$;
+revoke all on function public.insert_task_comment(text,text,text,text,timestamptz) from public,anon;
+grant execute on function public.insert_task_comment(text,text,text,text,timestamptz) to authenticated;
 
 create or replace function public.upsert_task_if_current(
  p_id text,p_title text,p_description text,p_status text,p_created_by uuid,p_assigned_to uuid,

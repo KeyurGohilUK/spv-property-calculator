@@ -161,6 +161,22 @@
         <ol id="taskHistoryList" class="task-history-list"></ol>
       </section>
 
+      <section id="taskDiscussion" class="task-discussion hidden" aria-labelledby="taskDiscussionHeading">
+        <div class="task-discussion-header">
+          <h4 id="taskDiscussionHeading" class="task-history-heading">Discussion</h4>
+          <span id="taskCommentCount" class="count-badge">0</span>
+        </div>
+        <ol id="taskCommentList" class="task-comment-list" aria-live="polite"></ol>
+        <div id="taskCommentComposer" class="task-comment-composer">
+          <label for="taskComment">Add a comment</label>
+          <textarea id="taskComment" rows="2" maxlength="2000" placeholder="Write an update or question…"></textarea>
+          <div class="task-comment-actions">
+            <p id="taskCommentMessage" class="save-message" aria-live="polite"></p>
+            <button id="addTaskCommentBtn" class="secondary-btn compact-task-btn" type="button">Post comment</button>
+          </div>
+        </div>
+      </section>
+
       <p id="taskSaveMessage" class="save-message" aria-live="polite"></p>
       <div class="task-form-actions">
         <button id="cancelTaskBtn" class="secondary-btn" type="button">Cancel</button>
