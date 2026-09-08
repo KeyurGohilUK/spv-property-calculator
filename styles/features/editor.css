@@ -105,7 +105,7 @@
 }
 
 
-/* Shared property notes — chat layout */
+/* Property Notes wrappers around the shared chat component. */
 .notes-section .notes-count { font-size: 15px; }
 .notes-state { padding: 4px 0 2px; }
 .notes-chat { margin: 2px -4px -4px; }
@@ -134,164 +134,13 @@
 .note-refresh-btn:hover { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
 .note-refresh-btn:disabled { opacity: .45; cursor: default; }
 .note-refresh-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.notes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  min-height: 150px;
-  max-height: 430px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 12px 6px 14px;
-  border: 1px solid var(--border);
-  border-radius: 18px 18px 8px 8px;
-  background: color-mix(in srgb, var(--surface-2) 72%, var(--surface));
-  scroll-behavior: smooth;
-}
-.note-message { display: flex; align-items: flex-end; gap: 8px; width: 100%; }
-.note-message.mine { flex-direction: row-reverse; }
-.note-avatar {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .02em;
-  box-shadow: 0 3px 10px color-mix(in srgb, #000 8%, transparent);
-}
-.note-message.mine .note-avatar { background: var(--brand-soft); color: var(--brand); border-color: color-mix(in srgb, var(--brand) 25%, var(--border)); }
-.note-message-stack { display: flex; flex-direction: column; align-items: flex-start; max-width: min(78%, 560px); min-width: 0; }
-.note-message.mine .note-message-stack { align-items: flex-end; }
-.note-bubble {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 17px 17px 17px 5px;
-  background: var(--surface);
-  box-shadow: 0 3px 12px color-mix(in srgb, #000 5%, transparent);
-}
-.note-message.mine .note-bubble {
-  border-color: color-mix(in srgb, var(--brand) 28%, var(--border));
-  border-radius: 17px 17px 5px 17px;
-  background: var(--brand-soft);
-}
-.note-bubble p { margin: 0; line-height: 1.45; font-size: 13px; overflow-wrap: anywhere; }
-.note-meta { display: flex; align-items: center; gap: 4px; margin: 4px 5px 0; color: var(--muted); font-size: 9px; line-height: 1.25; }
-.note-meta strong { color: var(--muted); font-size: inherit; font-weight: 750; }
-.note-meta time { white-space: nowrap; }
-.notes-empty { margin: auto; text-align: center; padding: 24px 14px; color: var(--muted); }
-.notes-empty-icon { width: 42px; height: 42px; margin: 0 auto 8px; display: grid; place-items: center; border-radius: 50%; background: var(--surface); font-size: 19px; }
-.notes-empty p { margin: 0 0 3px; color: var(--text); font-weight: 800; }
-.notes-empty small { font-size: 11px; }
-.note-composer-wrap { border: 1px solid var(--border); border-top: 0; border-radius: 0 0 18px 18px; padding: 10px; background: var(--surface); }
-.note-composer { display: flex; align-items: flex-end; gap: 8px; }
-.note-composer textarea {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  max-height: 126px;
-  resize: vertical;
-  padding: 11px 13px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface-2);
-  color: var(--text);
-  line-height: 1.4;
-}
-.note-composer textarea::placeholder { color: var(--muted); }
-.note-send-btn {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 25%, transparent);
-}
-.note-send-btn:hover { background: var(--brand-strong); }
-.note-send-btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
-.note-send-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transform: translateX(1px); }
-.note-send-btn.is-loading svg { visibility: hidden; }
-.note-send-btn.is-loading::after {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 2px solid color-mix(in srgb, #fff 35%, transparent);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: note-send-spin .75s linear infinite;
-}
-@keyframes note-send-spin { to { transform: rotate(360deg); } }
 .note-save-message { display: block; min-height: 15px; margin: 5px 50px 0 8px; color: var(--muted); font-size: 10px; line-height: 1.35; }
 .account-name-field { margin-bottom: 12px; }
 .account-name-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .account-name-row .compact-btn { min-height: 48px; }
 @media (max-width: 620px) {
-  .notes-list { max-height: 390px; padding-inline: 4px; }
-  .note-message-stack { max-width: 84%; }
-  .note-avatar { width: 27px; height: 27px; flex-basis: 27px; font-size: 8px; }
-  .note-bubble { padding: 9px 11px; }
-  .note-bubble p { font-size: 12.5px; }
-  .note-composer-wrap { padding: 8px; }
-  .note-composer textarea { min-height: 42px; padding: 10px 12px; }
-  .note-send-btn { width: 42px; height: 42px; flex-basis: 42px; }
   .account-name-row { grid-template-columns: 1fr; }
   .account-name-row .compact-btn { width: 100% !important; }
-}
-
-/* Note deletion */
-.note-delete-btn {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  margin: -7px -6px -7px 1px;
-  display: inline-grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-.note-delete-btn:hover,
-.note-delete-btn:focus-visible {
-  background: color-mix(in srgb, #dc2626 10%, transparent);
-  color: #dc2626;
-  outline: none;
-}
-.note-delete-btn:disabled { opacity: .45; cursor: default; }
-.note-delete-btn svg {
-  width: 13px;
-  height: 13px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.note-delete-btn.is-loading svg { visibility: hidden; }
-.note-delete-btn.is-loading::after {
-  content: '';
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  border: 1.5px solid color-mix(in srgb, currentColor 28%, transparent);
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: note-send-spin .75s linear infinite;
 }
 
 @media (hover: none) { .property-card-icon-action::after { display: none; } }
