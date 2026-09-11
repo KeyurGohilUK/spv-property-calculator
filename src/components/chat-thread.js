@@ -1,4 +1,4 @@
-import { appendLinkifiedText } from '../utils/linkified-text.js';
+import { appendSafeRichText } from '../utils/rich-text.js';
 
 export function renderChatThread({
   container,
@@ -59,8 +59,8 @@ export function renderChatThread({
 
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
-    const text = document.createElement('p');
-    appendLinkifiedText(text, getMessage(item));
+    const text = document.createElement('div');
+    appendSafeRichText(text, getMessage(item));
     bubble.appendChild(text);
 
     const meta = document.createElement('div');
