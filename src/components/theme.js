@@ -54,4 +54,10 @@
   applyTheme(readTheme());
   window.SPVTheme = { applyTheme, bindThemeControls, getTheme: readTheme };
   document.addEventListener('DOMContentLoaded', () => bindThemeControls());
+
+  const scriptUrl = document.currentScript?.src;
+  if (scriptUrl) {
+    const richTextareaUrl = new URL('./rich-textarea.js', scriptUrl).href;
+    import(richTextareaUrl).catch((error) => console.warn('Rich text editor could not load:', error));
+  }
 }());
