@@ -1,12 +1,8 @@
 {
-  "version": "1.24.2",
+  "version": "1.24.3",
   "notes": [
-    "Property Notes and Task Discussion now share one compact chat interface, including consistent message bubbles and editing controls.",
-    "Task discussion comments can now be edited by their author, with edited comments clearly marked.",
-    "Added a shared discussion thread to each task and moved In Progress work to the top of the task list.",
-    "Added Task Manager (Beta) — create and track workspace tasks, update status, and sync across devices.",
-    "Added BRRR Scenario Calculator — work backwards from GDV comparables to model offer price, capital recycling, and ICR/LTV constraints.",
-    "Added Year 1 cash flow waterfall — expandable line-by-line breakdown of rent, deductions, and mortgage on the Forecast page.",
-    "Added metric help buttons (?) on all forecast cards, mortgage-rate stress test, rent stress test, ICR, DSCR, break-even occupancy, and LTV — each explains the formula, UK benchmarks, and what above/below-average means."
+    "Task descriptions now turn pasted web addresses into clickable links.",
+    "Property card titles now open the property in Google Maps.",
+    "Property Notes and Task Discussion messages now turn pasted web addresses into clickable links."
   ]
 }

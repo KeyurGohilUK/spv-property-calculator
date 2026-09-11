@@ -3,6 +3,7 @@
 @import url('./styles/base.css');
 @import url('./styles/app-shell-core.css');
 @import url('./styles/components/chat-thread.css');
+@import url('./styles/components/linked-content.css');
 @import url('./styles/features/properties.css');
 @import url('./styles/forms.css');
 @import url('./styles/features/summary.css');

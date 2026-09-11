@@ -38,6 +38,10 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
 
   const savedCard = page.locator('.property-card').filter({ hasText: 'Playwright Test Property' });
   await expect(savedCard).not.toHaveAttribute('role', 'button');
+  await expect(savedCard.locator('.property-map-link')).toHaveAttribute(
+    'href',
+    'https://www.google.com/maps/search/?api=1&query=Playwright%20Test%20Property'
+  );
   const openCard = savedCard.getByRole('button', { name: 'Open Playwright Test Property for editing' });
   await openCard.focus();
   await openCard.press('Enter');

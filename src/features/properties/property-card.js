@@ -49,6 +49,16 @@ function renderPropertyCostBreakdown(calc, { money }) {
   </div>`;
 }
 
+function linkPropertyTitleToMap(headerHtml, property) {
+  const title = String(property?.title || '').trim();
+  if (!title) return headerHtml;
+  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}`;
+  return String(headerHtml || '').replace(
+    /<h3>([\s\S]*?)<\/h3>/,
+    `<h3><a class="property-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer" title="Open in Google Maps">$1</a></h3>`
+  );
+}
+
 export function createPropertyCard({
   property,
   calc,
@@ -63,9 +73,10 @@ export function createPropertyCard({
   const editControl = archived
     ? ''
     : `<button class="property-card-open" type="button" aria-label="Open ${formatters.escape(property.title || 'Untitled Property')} for editing"></button>`;
+  const linkedHeaderHtml = linkPropertyTitleToMap(headerHtml, property);
 
   card.innerHTML = `${editControl}${toolsHtml}
-    <div class="property-card-header"><div>${headerHtml}</div></div>
+    <div class="property-card-header"><div>${linkedHeaderHtml}</div></div>
     ${renderPropertyStats(calc, formatters)}
     ${renderPropertyCostBreakdown(calc, formatters)}
     ${actionsHtml}`;

@@ -1,5 +1,5 @@
 {
-  "version": "1.24.2",
+  "version": "1.24.3",
   "assets": [
     "./",
     "./index.html",
@@ -8,6 +8,7 @@
     "./styles/base.css",
     "./styles/app-shell-core.css",
     "./styles/components/chat-thread.css",
+    "./styles/components/linked-content.css",
     "./styles/forms.css",
     "./styles/dialogs.css",
     "./styles/dialogs-updates.css",
@@ -25,6 +26,7 @@
     "./src/app/app.js",
     "./src/utils/format-utils.js",
     "./src/utils/validation.js",
+    "./src/utils/linkified-text.js",
     "./src/features/properties/property-card.js",
     "./src/components/install-component.js",
     "./src/features/properties/calendar-invite.js",
@@ -64,6 +66,7 @@
     "./tasks/",
     "./styles/features/tasks.css",
     "./src/features/tasks/tasks.js",
+    "./src/features/tasks/task-description-links.js",
     "./src/features/tasks/task-storage.js",
     "./src/features/tasks/task-cloud-sync.js",
     "./src/features/tasks/task-event-storage.js",

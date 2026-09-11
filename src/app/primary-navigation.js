@@ -23,7 +23,7 @@ export function setupPrimaryNavigation(root = document) {
   const items = [
     { id: 'properties', label: 'Properties', href: './' },
     { id: 'expenses', label: 'Expenses', href: './expenses/' },
-    { id: 'tasks', label: 'Tasks', href: './tasks/', badge: 'Beta' },
+    { id: 'tasks', label: 'Tasks', href: './tasks/' },
     { id: 'forecast', label: 'Forecast', href: './forecast/', badge: 'Beta' }
   ];
   nav.innerHTML = `${items.map((item) => link(item, activePage, home)).join('')}
