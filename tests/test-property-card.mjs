@@ -24,10 +24,14 @@ for (const card of [active, archived]) {
   assert.match(card.innerHTML, /Purchase Price[\s\S]*Deposit[\s\S]*Mortgage[\s\S]*Purchase Costs/);
   assert.match(card.innerHTML, /Cash to Buy Property[\s\S]*\+ Refurbishment[\s\S]*Total Investment/);
   assert.match(card.innerHTML, /£62000[\s\S]*£8000[\s\S]*£70000/);
+  assert.match(card.innerHTML, /class="property-map-link"/);
+  assert.match(card.innerHTML, /target="_blank" rel="noopener noreferrer" title="Open in Google Maps"/);
 }
 assert.match(active.className, /^property-card$/);
 assert.match(active.innerHTML, /aria-label="Open &lt;Home> for editing"/);
+assert.match(active.innerHTML, /query=%3CHome%3E/);
 assert.doesNotMatch(archived.innerHTML, /property-card-open/);
+assert.match(archived.innerHTML, /query=Old%20Home/);
 assert.equal(archived.className, 'property-card archived-card');
 
 const now = new Date(2026, 7, 27, 9, 0);
