@@ -21,6 +21,7 @@ const property = {
 };
 const now = new Date('2099-11-01T10:00:00.000Z');
 const invite = buildViewingCalendarInvite(property, { now });
+const unfoldedInvite = invite.content.replace(/\r\n /g, '');
 const start = invite.content.match(/DTSTART:(\d{8}T\d{6}Z)/)?.[1];
 const end = invite.content.match(/DTEND:(\d{8}T\d{6}Z)/)?.[1];
 
@@ -38,8 +39,8 @@ assert.equal(isFutureViewing('2020-01-01T10:00', now), false);
 assert.equal(invite.filename, '2-bed-flat-bristol-viewing.ics');
 assert.match(invite.content, /^BEGIN:VCALENDAR\r\n/);
 assert.match(invite.content, /SUMMARY:Property Viewing - 2 Bed Flat\\, Bristol/);
-assert.match(invite.content, /DESCRIPTION:Meet agent\\; bring ID\\nUse side & rear entrance\\n\\nProperty listing:/);
-assert.doesNotMatch(invite.content, /<strong>|<p>/, 'Calendar descriptions must not expose stored rich-text markup');
+assert.match(unfoldedInvite, /DESCRIPTION:Meet agent\\; bring ID\\nUse side & rear entrance\\n\\nProperty listing:/);
+assert.doesNotMatch(unfoldedInvite, /<strong>|<p>/, 'Calendar descriptions must not expose stored rich-text markup');
 assert.match(invite.content, /URL:https:\/\/example\.com\/property\?id=123/);
 assert.match(invite.content, /TRIGGER:-PT1H/);
 assert.equal(parseIcsUtc(end) - parseIcsUtc(start), 60 * 60 * 1000, 'viewing must last one hour');
