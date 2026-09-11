@@ -15,7 +15,7 @@ assert.match(appSource, /minute < 60; minute \+= 15/, 'Viewing time selector mus
 const property = {
   id: 'property-123',
   title: '2 Bed Flat, Bristol',
-  details: 'Meet agent; bring ID\nUse side entrance',
+  details: '<p>Meet <strong>agent</strong>; bring ID</p><p>Use side &amp; rear entrance</p>',
   listingUrl: 'https://example.com/property?id=123',
   viewingDate: '2099-12-01T14:30'
 };
@@ -38,7 +38,8 @@ assert.equal(isFutureViewing('2020-01-01T10:00', now), false);
 assert.equal(invite.filename, '2-bed-flat-bristol-viewing.ics');
 assert.match(invite.content, /^BEGIN:VCALENDAR\r\n/);
 assert.match(invite.content, /SUMMARY:Property Viewing - 2 Bed Flat\\, Bristol/);
-assert.match(invite.content, /DESCRIPTION:Meet agent\\; bring ID\\nUse side entrance\\n\\nProperty listing:/);
+assert.match(invite.content, /DESCRIPTION:Meet agent\\; bring ID\\nUse side & rear entrance\\n\\nProperty listing:/);
+assert.doesNotMatch(invite.content, /<strong>|<p>/, 'Calendar descriptions must not expose stored rich-text markup');
 assert.match(invite.content, /URL:https:\/\/example\.com\/property\?id=123/);
 assert.match(invite.content, /TRIGGER:-PT1H/);
 assert.equal(parseIcsUtc(end) - parseIcsUtc(start), 60 * 60 * 1000, 'viewing must last one hour');
