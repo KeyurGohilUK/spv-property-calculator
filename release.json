@@ -1,5 +1,5 @@
 {
-  "version": "1.25.0",
+  "version": "1.24.3",
   "notes": [
     "All text areas now use a shared rich-text editor with bold, italic, underline, lists and safe web links.",
     "Task descriptions, Property Notes and Task Discussion now render saved rich-text formatting and clickable links safely.",
