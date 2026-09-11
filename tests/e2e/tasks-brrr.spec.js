@@ -13,9 +13,12 @@ test('task manager creates a company task and keeps it visible', async ({ page }
 
   await page.getByRole('button', { name: /Add Task/i }).click();
   await page.locator('#taskTitle').fill('Review mortgage offer');
+  await page.locator('#taskDescription').fill('Check https://example.com/mortgage-guide before the call.');
   await page.getByRole('button', { name: 'Save Task' }).click();
 
-  await expect(page.getByText('Review mortgage offer', { exact: true })).toBeVisible();
+  const card = page.locator('.task-card').filter({ hasText: 'Review mortgage offer' });
+  await expect(card).toBeVisible();
+  await expect(card.locator('.task-card-description .inline-text-link')).toHaveAttribute('href', 'https://example.com/mortgage-guide');
   await expect(page.locator('#taskCount')).toHaveText('1');
 });
 
@@ -29,12 +32,13 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
   await expect(page.getByRole('heading', { name: 'Discussion' })).toBeVisible();
   await expect(page.locator('#taskCommentList')).toHaveClass(/chat-list/);
 
-  await page.locator('#taskComment').fill('Need an Agreement in Principle first.');
+  await page.locator('#taskComment').fill('Need an Agreement in Principle first: https://example.com/aip');
   await page.getByRole('button', { name: 'Send message' }).click();
   await expect(page.locator('#taskCommentList .chat-bubble')).toContainText('Need an Agreement in Principle first.');
+  await expect(page.locator('#taskCommentList .chat-bubble .inline-text-link')).toHaveAttribute('href', 'https://example.com/aip');
 
   await page.getByRole('button', { name: 'Edit your message' }).click();
-  await expect(page.locator('#taskComment')).toHaveValue('Need an Agreement in Principle first.');
+  await expect(page.locator('#taskComment')).toHaveValue('Need an Agreement in Principle first: https://example.com/aip');
   await expect(page.getByRole('button', { name: 'Save edited message' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Save Changes' })).toHaveCount(1);
 });
