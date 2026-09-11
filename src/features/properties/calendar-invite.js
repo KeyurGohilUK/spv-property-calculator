@@ -32,6 +32,21 @@ function escapeIcsText(value) {
     .replace(/;/g, '\\;');
 }
 
+function richTextToPlainText(value) {
+  return String(value || '')
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\s*\/\s*(?:p|div|li|blockquote|h[1-6])\s*>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&#x27;/gi, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function safeWebUrl(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -74,7 +89,7 @@ export function buildViewingCalendarInvite(property, {
   const title = String(property?.title || '').trim() || 'Property';
   const end = new Date(start.getTime() + Math.max(1, Number(durationMinutes) || 60) * 60_000);
   const listingUrl = safeWebUrl(property?.listingUrl);
-  const descriptionParts = [String(property?.details || '').trim()];
+  const descriptionParts = [richTextToPlainText(property?.details)];
   if (listingUrl) descriptionParts.push(`Property listing: ${listingUrl}`);
   const description = descriptionParts.filter(Boolean).join('\n\n')
     || 'Property viewing created by SPV Property Calculator.';
