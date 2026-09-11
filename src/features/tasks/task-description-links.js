@@ -8,7 +8,12 @@ export function linkifyTaskDescriptions(root = document) {
   });
 }
 
+function removeTaskBetaBadge() {
+  document.querySelector('.task-shell .beta-badge')?.remove();
+}
+
 function setupTaskDescriptionLinks() {
+  removeTaskBetaBadge();
   const taskList = document.getElementById('taskList');
   if (!taskList) return;
 
