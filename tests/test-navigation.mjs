@@ -50,7 +50,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
 assert.match(primaryNavigation, /Properties[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
-assert.match(primaryNavigation, /id: 'tasks'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Tasks as Beta');
+assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
 assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Forecast as Beta');
 assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
 
@@ -94,7 +94,7 @@ assert.match(appShell, /href="\.\/admin\/users\/"/, 'App Menu must link to the c
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
 assert.doesNotMatch(index, /Expense tracking is coming next|<span>Soon<\/span>|<small>Soon<\/small>/, 'Expenses must no longer be marked as coming soon');
 assert.doesNotMatch(expenses, /aria-disabled="true"[^>]*Expenses/, 'Expenses navigation must remain enabled');
-assert.equal((primaryNavigation.match(/badge: 'Beta'/g) || []).length, 2, 'Shared navigation must show Beta for Tasks and Forecast');
+assert.equal((primaryNavigation.match(/badge: 'Beta'/g) || []).length, 1, 'Shared navigation must show Beta only for Forecast');
 assert.match(app, /setupAppShell\(\{ home: true \}\)/, 'Home must initialise the shared App Menu');
 assert.doesNotMatch(index, /id="more(?:Sync|Account|Install)Btn"/, 'More menu must not duplicate header or account actions');
 assert.match(appShell, /id="archiveBtn"/, 'Archived Properties must remain available under More');
