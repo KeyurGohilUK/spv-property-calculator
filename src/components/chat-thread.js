@@ -1,3 +1,5 @@
+import { appendLinkifiedText } from '../utils/linkified-text.js';
+
 export function renderChatThread({
   container,
   messages = [],
@@ -58,7 +60,7 @@ export function renderChatThread({
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
     const text = document.createElement('p');
-    text.textContent = String(getMessage(item) || '');
+    appendLinkifiedText(text, getMessage(item));
     bubble.appendChild(text);
 
     const meta = document.createElement('div');
