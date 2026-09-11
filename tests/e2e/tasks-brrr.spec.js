@@ -34,7 +34,7 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
 
   await page.locator('#taskComment').fill('Need an Agreement in Principle first: https://example.com/aip');
   await page.getByRole('button', { name: 'Send message' }).click();
-  await expect(page.locator('#taskCommentList .chat-bubble')).toContainText('Need an Agreement in Principle first.');
+  await expect(page.locator('#taskCommentList .chat-bubble')).toContainText('Need an Agreement in Principle first:');
   await expect(page.locator('#taskCommentList .chat-bubble .inline-text-link')).toHaveAttribute('href', 'https://example.com/aip');
 
   await page.getByRole('button', { name: 'Edit your message' }).click();
