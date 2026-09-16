@@ -1,8 +1,8 @@
 {
-  "version": "1.26.2",
+  "version": "1.26.3",
   "notes": [
-    "Forecast now shows Family BTL, 3-person HMO and 4-person HMO together in a true three-column mobile comparison.",
-    "The mobile cards are compact so all three strategies remain visible at once without horizontal swiping.",
-    "Mobile regression coverage now verifies the strategy cards stay on one row and fit within the comparison area."
+    "Dialogs now open without preselecting the close button or another interactive control.",
+    "The App Menu no longer duplicates the BRRR Calculator link because BRRR is already available inside Forecast.",
+    "Forecast keeps the true side-by-side BTL vs 3-person HMO vs 4-person HMO mobile comparison."
   ]
 }
