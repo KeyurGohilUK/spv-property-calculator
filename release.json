@@ -1,5 +1,5 @@
 {
-  "version": "1.26.3",
+  "version": "1.26.4",
   "notes": [
     "Dialogs now open without preselecting the close button or another interactive control.",
     "The App Menu no longer duplicates the BRRR Calculator link because BRRR is already available inside Forecast.",
