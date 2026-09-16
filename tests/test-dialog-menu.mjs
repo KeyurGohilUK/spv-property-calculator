@@ -8,8 +8,8 @@ const dialogStyles = fs.readFileSync(new URL('../styles/dialogs.css', import.met
 
 assert.match(dialogHelper, /dialog\.setAttribute\('tabindex', '-1'\)/, 'Shared dialogs must be programmatically focusable without selecting a control');
 assert.match(dialogHelper, /setAttribute\('autofocus', ''\)/, 'Shared dialogs must direct native modal focus to the dialog container');
-assert.match(dialogHelper, /focusDialog = \(\) => dialog\.focus\(\{ preventScroll: true \}\)/, 'Shared dialogs must focus the dialog container when opened');
-assert.match(dialogHelper, /focusDialog\(\)[\s\S]*requestAnimationFrame\(focusDialog\)/, 'Shared dialogs must re-apply neutral container focus after native dialog focus handling');
+assert.match(dialogHelper, /focusFirst = \(\) => dialog\.focus\(\{ preventScroll: true \}\)/, 'Shared dialogs must focus the dialog container when opened');
+assert.match(dialogHelper, /focusFirst\(\)[\s\S]*requestAnimationFrame\(focusFirst\)/, 'Shared dialogs must re-apply neutral container focus after native dialog focus handling');
 assert.doesNotMatch(dialogHelper, /initialFocus|querySelectorAll\('\[autofocus\]/, 'Shared dialog helper must not preselect an input, button or close control');
 assert.doesNotMatch(appShell, /BRRR Calculator|href="\.\/brrr\/"/, 'App Menu must not duplicate the BRRR calculator already available inside Forecast');
 assert.match(policyAcceptance, /tabindex="-1" autofocus[\s\S]*requestAnimationFrame\(focusDialog\)/, 'Policy acceptance dialog must use neutral container focus too');
