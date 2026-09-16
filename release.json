@@ -1,8 +1,8 @@
 {
   "version": "1.26.1",
   "notes": [
-    "Forecast strategy cards now stay side by side on mobile in a horizontal swipe layout for faster BTL vs HMO comparison.",
-    "The mobile comparison keeps each strategy card readable while preserving the same metrics and cash-flow differences.",
+    "Forecast now keeps Family BTL, 3-person HMO and 4-person HMO visible side by side on mobile for direct comparison.",
+    "Mobile strategy cards use a compact layout so rent, costs, cash flow, yield and cash-on-cash can be compared without horizontal swiping.",
     "Forecast still includes 4-person HMO screening and editable offer-price sensitivity scenarios."
   ]
 }
