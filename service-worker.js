@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.26.0-btl-hmo';
+const CACHE_NAME = 'spv-property-calculator-v1.26.1-mobile-strategy';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -82,8 +82,6 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const requestUrl = new URL(event.request.url);
 
-  // Always try to refresh Supabase config when online, but retain the last working
-  // copy for offline launches. This avoids an old cached config after GitHub updates.
   if (requestUrl.href === CONFIG_URL) {
     event.respondWith(
       fetch(event.request)
@@ -97,8 +95,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Release metadata is network-first so an installed older app can show the
-  // latest version notes before its main app-shell cache is refreshed.
   if (requestUrl.href === RELEASE_URL) {
     event.respondWith(
       fetch(event.request)
@@ -112,8 +108,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache the pinned Supabase browser SDK after the first successful online load.
-  // If unavailable later, the core calculator still works from local assets.
   if (requestUrl.href.startsWith(SUPABASE_CDN_PREFIX)) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
@@ -140,9 +134,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App assets are network-first so a newly deployed HTML page cannot run
-  // against stale JavaScript from an earlier release. Cached files remain the
-  // offline fallback when the network is unavailable.
   event.respondWith(
     fetch(event.request)
       .then((response) => {
