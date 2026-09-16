@@ -40,27 +40,34 @@ test('Forecast compares BTL, 3-person HMO and 4-person HMO clearly', async ({ pa
   await expect(page.locator('#strategyInsight')).toContainText('4 HMO vs BTL');
 });
 
-test('Forecast keeps all three strategy cards side by side on mobile', async ({ page }) => {
+test('Forecast keeps all three strategy cards visible side by side on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/forecast/');
 
   const cards = page.locator('.strategy-card');
   await expect(cards).toHaveCount(3);
 
-  const boxes = await Promise.all([0, 1, 2].map((index) => cards.nth(index).boundingBox()));
-  expect(boxes.every(Boolean)).toBeTruthy();
-  expect(Math.abs(boxes[0].y - boxes[1].y)).toBeLessThan(3);
-  expect(Math.abs(boxes[1].y - boxes[2].y)).toBeLessThan(3);
-  expect(boxes[1].x).toBeGreaterThan(boxes[0].x);
-  expect(boxes[2].x).toBeGreaterThan(boxes[1].x);
+  const layout = await page.locator('#strategyCards').evaluate((element) => {
+    const children = [...element.children];
+    const rects = children.map((child) => child.getBoundingClientRect());
+    const container = element.getBoundingClientRect();
+    return {
+      tops: rects.map((rect) => Math.round(rect.top)),
+      widths: rects.map((rect) => rect.width),
+      left: Math.min(...rects.map((rect) => rect.left)),
+      right: Math.max(...rects.map((rect) => rect.right)),
+      containerLeft: container.left,
+      containerRight: container.right,
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth
+    };
+  });
 
-  const scrollState = await page.locator('#strategyCards').evaluate((element) => ({
-    scrollWidth: element.scrollWidth,
-    clientWidth: element.clientWidth,
-    overflowX: getComputedStyle(element).overflowX
-  }));
-  expect(scrollState.scrollWidth).toBeGreaterThan(scrollState.clientWidth);
-  expect(scrollState.overflowX).toBe('auto');
+  expect(new Set(layout.tops).size).toBe(1);
+  expect(layout.widths.every((width) => width > 0)).toBeTruthy();
+  expect(layout.left).toBeGreaterThanOrEqual(layout.containerLeft - 1);
+  expect(layout.right).toBeLessThanOrEqual(layout.containerRight + 1);
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
 });
 
 test('Forecast HMO screening flags insufficient communal space', async ({ page }) => {
