@@ -18,13 +18,15 @@ export function setupDialog(dialog, { closeButtons = [], label } = {}) {
   if (label) dialog.setAttribute('aria-label', label);
   ensureLabel(dialog);
   if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
+  if (!dialog.hasAttribute('autofocus')) dialog.setAttribute('autofocus', '');
   let returnFocus = null;
 
-  const focusFirst = () => dialog.focus({ preventScroll: true });
+  const focusDialog = () => dialog.focus({ preventScroll: true });
   const open = (trigger = document.activeElement) => {
     returnFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
     if (!dialog.open) dialog.showModal();
-    focusFirst();
+    focusDialog();
+    window.requestAnimationFrame(focusDialog);
   };
   const close = () => { if (dialog.open) dialog.close(); };
   const controller = { open, close, dialog };
