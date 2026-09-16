@@ -12,23 +12,19 @@ function ensureLabel(dialog) {
   dialog.setAttribute('aria-labelledby', heading.id);
 }
 
-export function setupDialog(dialog, { closeButtons = [], initialFocus, label } = {}) {
+export function setupDialog(dialog, { closeButtons = [], label } = {}) {
   if (!dialog) return { open() {}, close() {} };
   if (controllers.has(dialog)) return controllers.get(dialog);
   if (label) dialog.setAttribute('aria-label', label);
   ensureLabel(dialog);
+  if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
   let returnFocus = null;
 
-  const focusFirst = () => {
-    const requested = typeof initialFocus === 'function' ? initialFocus() : initialFocus;
-    const target = typeof requested === 'string' ? dialog.querySelector(requested) : requested;
-    const fallback = [...dialog.querySelectorAll('[autofocus], input, select, textarea, button, a[href]')].find(visible);
-    (visible(target) ? target : fallback)?.focus();
-  };
+  const focusFirst = () => dialog.focus({ preventScroll: true });
   const open = (trigger = document.activeElement) => {
     returnFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
     if (!dialog.open) dialog.showModal();
-    window.setTimeout(focusFirst, 0);
+    focusFirst();
   };
   const close = () => { if (dialog.open) dialog.close(); };
   const controller = { open, close, dialog };
