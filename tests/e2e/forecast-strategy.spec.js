@@ -40,6 +40,29 @@ test('Forecast compares BTL, 3-person HMO and 4-person HMO clearly', async ({ pa
   await expect(page.locator('#strategyInsight')).toContainText('4 HMO vs BTL');
 });
 
+test('Forecast keeps all three strategy cards side by side on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/forecast/');
+
+  const cards = page.locator('.strategy-card');
+  await expect(cards).toHaveCount(3);
+
+  const boxes = await Promise.all([0, 1, 2].map((index) => cards.nth(index).boundingBox()));
+  expect(boxes.every(Boolean)).toBeTruthy();
+  expect(Math.abs(boxes[0].y - boxes[1].y)).toBeLessThan(3);
+  expect(Math.abs(boxes[1].y - boxes[2].y)).toBeLessThan(3);
+  expect(boxes[1].x).toBeGreaterThan(boxes[0].x);
+  expect(boxes[2].x).toBeGreaterThan(boxes[1].x);
+
+  const scrollState = await page.locator('#strategyCards').evaluate((element) => ({
+    scrollWidth: element.scrollWidth,
+    clientWidth: element.clientWidth,
+    overflowX: getComputedStyle(element).overflowX
+  }));
+  expect(scrollState.scrollWidth).toBeGreaterThan(scrollState.clientWidth);
+  expect(scrollState.overflowX).toBe('auto');
+});
+
 test('Forecast HMO screening flags insufficient communal space', async ({ page }) => {
   await page.goto('/forecast/');
   await page.getByText('HMO suitability screening').click();
