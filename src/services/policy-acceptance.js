@@ -20,7 +20,7 @@ function getDialog(root = document) {
   if (dialog) return dialog;
   const legalRoot = new URL('../../legal/', import.meta.url);
   root.body.insertAdjacentHTML('beforeend', `
-    <dialog id="policyAcceptanceDialog" class="install-dialog policy-acceptance-dialog" aria-labelledby="policyAcceptanceTitle">
+    <dialog id="policyAcceptanceDialog" class="install-dialog policy-acceptance-dialog" aria-labelledby="policyAcceptanceTitle" tabindex="-1" autofocus>
       <p class="eyebrow">One-time acknowledgement</p>
       <h2 id="policyAcceptanceTitle">Review the legal information</h2>
       <p>Before opening the private workspace, please review the current legal documents.</p>
@@ -49,6 +49,9 @@ function collectAcceptance({ user, cloud, root = document }) {
   setPolicyRequired(root);
   dialog.addEventListener('cancel', (event) => event.preventDefault(), { once: true });
   if (!dialog.open) dialog.showModal();
+  const focusDialog = () => dialog.focus({ preventScroll: true });
+  focusDialog();
+  window.requestAnimationFrame(focusDialog);
 
   return new Promise((resolve) => {
     const finish = (accepted) => {
