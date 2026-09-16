@@ -54,25 +54,33 @@ test('Forecast HMO screening flags insufficient communal space', async ({ page }
   await expect(page.locator('#strategySuitabilityResult')).toContainText('4-person benchmark 17 m²');
 });
 
-test('Forecast keeps BTL and HMO strategy cards side by side on mobile', async ({ page }) => {
+test('Forecast shows all three strategy cards side by side on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/forecast/');
+
   const cards = page.locator('.strategy-card');
   const container = page.locator('.strategy-cards');
   await expect(cards).toHaveCount(3);
-  await expect.poll(() => container.evaluate((element) => getComputedStyle(element).display)).toBe('flex');
+  await expect.poll(() => container.evaluate((element) => getComputedStyle(element).display)).toBe('grid');
 
-  const boxes = await cards.evaluateAll((nodes) => nodes.map((node) => {
-    const rect = node.getBoundingClientRect();
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-  }));
-  const rows = boxes.map((box) => box.y);
-  expect(Math.max(...rows) - Math.min(...rows)).toBeLessThanOrEqual(2);
-  expect(boxes.every((box) => box.width >= 280)).toBeTruthy();
+  const layout = await container.evaluate((element) => {
+    const containerRect = element.getBoundingClientRect();
+    const rects = [...element.children].map((child) => child.getBoundingClientRect());
+    return {
+      containerLeft: containerRect.left,
+      containerRight: containerRect.right,
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+      tops: rects.map((rect) => Math.round(rect.top)),
+      left: Math.min(...rects.map((rect) => rect.left)),
+      right: Math.max(...rects.map((rect) => rect.right)),
+      widths: rects.map((rect) => rect.width)
+    };
+  });
 
-  const dimensions = await container.evaluate((element) => ({
-    scrollWidth: element.scrollWidth,
-    clientWidth: element.clientWidth
-  }));
-  expect(dimensions.scrollWidth).toBeGreaterThan(dimensions.clientWidth);
+  expect(new Set(layout.tops).size).toBe(1);
+  expect(layout.widths.every((width) => width > 80)).toBeTruthy();
+  expect(layout.left).toBeGreaterThanOrEqual(layout.containerLeft - 1);
+  expect(layout.right).toBeLessThanOrEqual(layout.containerRight + 1);
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
 });
