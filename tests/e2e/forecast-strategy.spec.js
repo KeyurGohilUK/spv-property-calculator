@@ -53,3 +53,26 @@ test('Forecast HMO screening flags insufficient communal space', async ({ page }
   await expect(page.locator('#strategySuitabilityResult')).toContainText('Does not pass entered-size screening');
   await expect(page.locator('#strategySuitabilityResult')).toContainText('4-person benchmark 17 m²');
 });
+
+test('Forecast keeps BTL and HMO strategy cards side by side on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/forecast/');
+  const cards = page.locator('.strategy-card');
+  const container = page.locator('.strategy-cards');
+  await expect(cards).toHaveCount(3);
+  await expect.poll(() => container.evaluate((element) => getComputedStyle(element).display)).toBe('flex');
+
+  const boxes = await cards.evaluateAll((nodes) => nodes.map((node) => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  }));
+  const rows = boxes.map((box) => box.y);
+  expect(Math.max(...rows) - Math.min(...rows)).toBeLessThanOrEqual(2);
+  expect(boxes.every((box) => box.width >= 280)).toBeTruthy();
+
+  const dimensions = await container.evaluate((element) => ({
+    scrollWidth: element.scrollWidth,
+    clientWidth: element.clientWidth
+  }));
+  expect(dimensions.scrollWidth).toBeGreaterThan(dimensions.clientWidth);
+});
