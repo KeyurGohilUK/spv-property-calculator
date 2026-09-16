@@ -21,12 +21,12 @@ export function setupDialog(dialog, { closeButtons = [], label } = {}) {
   if (!dialog.hasAttribute('autofocus')) dialog.setAttribute('autofocus', '');
   let returnFocus = null;
 
-  const focusDialog = () => dialog.focus({ preventScroll: true });
+  const focusFirst = () => dialog.focus({ preventScroll: true });
   const open = (trigger = document.activeElement) => {
     returnFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
     if (!dialog.open) dialog.showModal();
-    focusDialog();
-    window.requestAnimationFrame(focusDialog);
+    focusFirst();
+    window.requestAnimationFrame(focusFirst);
   };
   const close = () => { if (dialog.open) dialog.close(); };
   const controller = { open, close, dialog };
