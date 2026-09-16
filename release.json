@@ -1,8 +1,8 @@
 {
-  "version": "1.26.0",
+  "version": "1.26.1",
   "notes": [
-    "Forecast now compares Family BTL, 3-person HMO and 4-person HMO side by side with rent, monthly costs, cash flow, gross yield and cash-on-cash return.",
-    "HMO comparison inputs now include individual room rents, landlord-paid household bills, mortgage rates and operating reserves.",
-    "Forecast now includes 4-person HMO room-size and communal-space screening plus editable offer-price sensitivity scenarios."
+    "Forecast strategy cards now stay side by side on mobile in a horizontal swipe layout for faster BTL vs HMO comparison.",
+    "The mobile comparison keeps each strategy card readable while preserving the same metrics and cash-flow differences.",
+    "Forecast still includes 4-person HMO screening and editable offer-price sensitivity scenarios."
   ]
 }
