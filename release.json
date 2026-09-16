@@ -1,8 +1,8 @@
 {
-  "version": "1.26.1",
+  "version": "1.26.2",
   "notes": [
-    "Forecast strategy cards now stay side by side on mobile with horizontal swipe navigation.",
-    "Family BTL, 3-person HMO and 4-person HMO remain directly comparable on iPhone-sized screens.",
-    "Mobile regression coverage now verifies the comparison stays on one row and scrolls horizontally."
+    "Forecast now shows Family BTL, 3-person HMO and 4-person HMO together in a true three-column mobile comparison.",
+    "The mobile cards are compact so all three strategies remain visible at once without horizontal swiping.",
+    "Mobile regression coverage now verifies the strategy cards stay on one row and fit within the comparison area."
   ]
 }
