@@ -1,9 +1,8 @@
 {
-  "version": "1.25.0",
+  "version": "1.26.0",
   "notes": [
-    "All text areas now use a shared rich-text editor with bold, italic, underline, lists and safe web links.",
-    "Task descriptions, Property Notes and Task Discussion now render saved rich-text formatting and clickable links safely.",
-    "Property card titles now open the property in Google Maps.",
-    "Tasks are now a standard feature and no longer display the Beta badge."
+    "Forecast now compares Family BTL, 3-person HMO and 4-person HMO side by side with rent, monthly costs, cash flow, gross yield and cash-on-cash return.",
+    "HMO comparison inputs now include individual room rents, landlord-paid household bills, mortgage rates and operating reserves.",
+    "Forecast now includes 4-person HMO room-size and communal-space screening plus editable offer-price sensitivity scenarios."
   ]
 }

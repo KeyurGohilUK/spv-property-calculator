@@ -1,5 +1,6 @@
 import { getForecastProperty, getPurchaseNumbers } from './forecast-property.js';
 import { formatCurrency, formatNumber, formatPercentage, parseNumber } from '../../utils/format-utils.js';
+import './forecast-letting-strategy.js';
 
 (() => {
 'use strict';

@@ -1,5 +1,5 @@
 {
-  "version": "1.25.0",
+  "version": "1.26.0",
   "assets": [
     "./",
     "./index.html",
@@ -78,9 +78,12 @@
     "./src/features/tasks/task-comment-sync.js",
     "./forecast/",
     "./styles/features/forecast.css",
+    "./styles/features/forecast-letting-strategy.css",
     "./src/features/forecast/forecast.js",
     "./src/features/forecast/forecast-property.js",
     "./src/features/forecast/forecast-advanced.js",
+    "./src/features/forecast/forecast-letting-strategy.js",
+    "./src/features/forecast/letting-strategy-calculations.js",
     "./styles/features/forecast-advanced.css",
     "./brrr/",
     "./src/features/forecast/forecast-brrr.js",
