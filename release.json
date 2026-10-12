@@ -1,6 +1,7 @@
 {
-  "version": "1.27.1",
+  "version": "1.27.2",
   "notes": [
-    "Fixed the offer-history date field overflowing its card on mobile."
+    "Fixed the offer-history date field overflowing its card on mobile.",
+    "Track seller listing price reductions in the opportunity price history."
   ]
 }
