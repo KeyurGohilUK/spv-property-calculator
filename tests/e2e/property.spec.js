@@ -286,7 +286,9 @@ test('accepts a listing reduction below the current calculator price', async ({ 
   const card = page.locator('.property-card').filter({ hasText: 'Current Price Reduction' });
   await card.getByRole('button', { name: 'Open Current Price Reduction for editing' }).click();
 
-  await page.locator('#purchasePrice').fill('300000');
+  await page.locator('#purchasePrice').click();
+  await page.locator('#purchasePrice').press('ControlOrMeta+A');
+  await page.locator('#purchasePrice').pressSequentially('300000');
   await page.locator('#savePropertyBtn').click();
   await page.locator('#priceNegotiationSection > summary').click();
   await expect(page.locator('#priceHistoryList')).toContainText('Original listing price');
