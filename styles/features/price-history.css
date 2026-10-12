@@ -35,21 +35,23 @@
 .price-history-listing { border-style: dashed; }
 .price-history-offer { border-inline-start: 4px solid var(--brand); }
 .price-history-counteroffer { border-inline-start: 4px solid var(--brand-strong); }
-.price-entry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-.price-entry-form .field { margin: 0; }
-.price-entry-form .field { min-width: 0; }
+.price-entry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; min-width: 0; }
+.price-entry-form .field { margin: 0; min-width: 0; }
+.price-entry-form .price-entry-date-field { overflow: hidden; }
 .price-entry-form input[type="date"] {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .price-entry-form > button,.price-entry-form > small { grid-column: 1 / -1; }
 .price-history-state { padding: 10px 2px 0; }
 .price-history-state p { margin: 0; }
 @media (max-width: 620px) {
-  .price-entry-form { grid-template-columns: 1fr; }
+  .price-entry-form { grid-template-columns: minmax(0, 1fr); }
   .price-entry-form > button,.price-entry-form > small { grid-column: auto; }
   .price-history-current { align-items: flex-start; flex-direction: column; }
 }
