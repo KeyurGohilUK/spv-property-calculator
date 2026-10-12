@@ -564,12 +564,9 @@ async function addPriceHistoryEntry() {
     return;
   }
   if ($('priceEntryType').value === 'price_reduction') {
-    const lastListingPrice = currentPriceHistory
-      .filter((item) => item.type === 'price_reduction')
-      .reduce((latest, item) => item.date >= latest.date ? item : latest, { date: '', price: currentListingPrice })
-      .price;
-    if (safeNumber($('priceEntryAmount').value) >= safeNumber(lastListingPrice)) {
-      error.textContent = 'A listing price reduction must be lower than the current listing price.';
+    const currentCalculatorPrice = safeNumber($('purchasePrice').value);
+    if (safeNumber($('priceEntryAmount').value) >= currentCalculatorPrice) {
+      error.textContent = 'A listing price reduction must be lower than the current calculator purchase price.';
       error.classList.remove('hidden');
       return;
     }
