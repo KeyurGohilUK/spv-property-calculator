@@ -1,0 +1,47 @@
+.price-history-section .price-history-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.price-history-current span { color: var(--muted); font-size: 13px; }
+.price-history-current strong { color: var(--brand); font-size: 18px; }
+.price-history-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.price-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.price-history-item > strong { flex: 0 0 auto; color: var(--text); font-variant-numeric: tabular-nums; }
+.price-history-copy { display: grid; gap: 3px; min-width: 0; }
+.price-history-label { color: var(--text); font-weight: 700; }
+.price-history-copy time,.price-history-note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.price-history-listing { border-style: dashed; }
+.price-history-offer { border-inline-start: 4px solid var(--brand); }
+.price-history-counteroffer { border-inline-start: 4px solid var(--success); }
+.price-entry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.price-entry-form .field { margin: 0; }
+.price-entry-form > button,.price-entry-form > small { grid-column: 1 / -1; }
+.price-history-state { padding: 10px 2px 0; }
+.price-history-state p { margin: 0; }
+@media (max-width: 620px) {
+  .price-entry-form { grid-template-columns: 1fr; }
+  .price-entry-form > button,.price-entry-form > small { grid-column: auto; }
+  .price-history-current { align-items: flex-start; flex-direction: column; }
+}
