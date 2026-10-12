@@ -520,14 +520,14 @@ function renderPriceHistory() {
     list.appendChild(baseline);
   }
 
-  currentPriceHistory.forEach((entry) => {
+  [...currentPriceHistory].sort((a, b) => a.date.localeCompare(b.date)).forEach((entry) => {
     const item = document.createElement('li');
     item.className = `price-history-item price-history-${entry.type}`;
     const details = document.createElement('div');
     details.className = 'price-history-copy';
     const heading = document.createElement('span');
     heading.className = 'price-history-label';
-    heading.textContent = entry.type === 'offer' ? 'Offer made' : 'Counteroffer received';
+    heading.textContent = entry.type === 'offer' ? 'Offer made' : entry.type === 'counteroffer' ? 'Counteroffer received' : 'Listing price reduced';
     const date = document.createElement('time');
     date.dateTime = entry.date;
     date.textContent = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(new Date(`${entry.date}T12:00:00`));
@@ -547,13 +547,32 @@ function renderPriceHistory() {
   $('priceHistoryCurrentPrice').textContent = money(safeNumber($('purchasePrice').value));
 }
 
+function updatePriceEntryTypeUI() {
+  const type = $('priceEntryType').value;
+  $('priceEntryAmountLabel').textContent = type === 'price_reduction'
+    ? 'New listing price'
+    : type === 'counteroffer' ? 'Counteroffer price' : 'Offered price';
+  $('priceEntryAmount').placeholder = type === 'price_reduction' ? 'e.g. 235000' : 'e.g. 240000';
+}
+
 async function addPriceHistoryEntry() {
   const error = $('priceEntryError');
   error.classList.add('hidden');
   if (!editingId) {
-    error.textContent = 'Save this property before adding an offer or counteroffer.';
+    error.textContent = 'Save this opportunity before adding a price history update.';
     error.classList.remove('hidden');
     return;
+  }
+  if ($('priceEntryType').value === 'price_reduction') {
+    const lastListingPrice = currentPriceHistory
+      .filter((item) => item.type === 'price_reduction')
+      .reduce((latest, item) => item.date >= latest.date ? item : latest, { date: '', price: currentListingPrice })
+      .price;
+    if (safeNumber($('priceEntryAmount').value) >= safeNumber(lastListingPrice)) {
+      error.textContent = 'A listing price reduction must be lower than the current listing price.';
+      error.classList.remove('hidden');
+      return;
+    }
   }
   let entry;
   try {
@@ -584,6 +603,7 @@ function resetForm() {
   currentListingPrice = null;
   currentPriceHistory = [];
   $('priceEntryType').value = 'offer';
+  updatePriceEntryTypeUI();
   $('priceEntryAmount').value = '';
   $('priceEntryNote').value = '';
   renderPriceHistory();
@@ -1035,6 +1055,7 @@ function init() {
   });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
   $('addPriceEntryBtn').addEventListener('click', addPriceHistoryEntry);
+  $('priceEntryType').addEventListener('change', updatePriceEntryTypeUI);
   $('propertyForm').addEventListener('submit', (event) => {
     event.preventDefault();
     saveCurrentProperty();
