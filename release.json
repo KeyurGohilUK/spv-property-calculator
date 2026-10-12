@@ -1,7 +1,6 @@
 {
-  "version": "1.27.0",
+  "version": "1.27.1",
   "notes": [
-    "Saved opportunities now keep an original listing price and a dated offer and counteroffer history.",
-    "Recorded negotiation prices update the purchase price used by the calculator."
+    "Fixed the offer-history date field overflowing its card on mobile."
   ]
 }
