@@ -198,20 +198,21 @@
                   <span>Current calculator purchase price</span>
                   <strong id="priceHistoryCurrentPrice">£0</strong>
                 </div>
-                <ol id="priceHistoryList" class="price-history-list" aria-label="Price negotiation history"></ol>
+                <ol id="priceHistoryList" class="price-history-list" aria-label="Price history"></ol>
                 <div class="price-entry-form">
                   <label class="field">
-                    <span>Negotiation update</span>
+                    <span>Price update</span>
                     <select id="priceEntryType">
                       <option value="offer">Offer made</option>
                       <option value="counteroffer">Counteroffer received</option>
+                      <option value="price_reduction">Listing price reduced</option>
                     </select>
                   </label>
                   <label class="field currency-field">
-                    <span>Offered price</span>
+                    <span id="priceEntryAmountLabel">Offered price</span>
                     <span class="input-prefix"><span>£</span><input id="priceEntryAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="240000"></span>
                   </label>
-                  <label class="field">
+                  <label class="field price-entry-date-field">
                     <span>Date</span>
                     <input id="priceEntryDate" type="date">
                   </label>
