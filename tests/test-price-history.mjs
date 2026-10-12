@@ -10,6 +10,7 @@ assert.deepEqual(offer, {
 assert.equal(createPriceHistoryEntry({
   type: 'counteroffer', price: '245000', date: '2026-10-13'
 }).type, 'counteroffer');
+assert.equal(createPriceHistoryEntry({ type: 'price_reduction', price: 235000, date: '2026-10-14' }).type, 'price_reduction');
 assert.throws(() => createPriceHistoryEntry({ type: 'other', price: 100, date: '2026-10-12' }));
 assert.throws(() => createPriceHistoryEntry({ type: 'offer', price: 0, date: '2026-10-12' }));
 assert.throws(() => createPriceHistoryEntry({ type: 'offer', price: 100, date: '2026-02-30' }));
