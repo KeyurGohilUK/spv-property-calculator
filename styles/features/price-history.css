@@ -34,7 +34,7 @@
 .price-history-copy time,.price-history-note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .price-history-listing { border-style: dashed; }
 .price-history-offer { border-inline-start: 4px solid var(--brand); }
-.price-history-counteroffer { border-inline-start: 4px solid var(--success); }
+.price-history-counteroffer { border-inline-start: 4px solid var(--brand-strong); }
 .price-entry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .price-entry-form .field { margin: 0; }
 .price-entry-form > button,.price-entry-form > small { grid-column: 1 / -1; }
