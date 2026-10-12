@@ -281,6 +281,29 @@ test('records listing price reductions alongside the full offer history', async 
   await expect(page.locator('#summaryPurchasePrice')).toHaveText('£230,000');
 });
 
+test('accepts a listing reduction below the current calculator price', async ({ page }) => {
+  await createProperty(page, { title: 'Current Price Reduction', price: '261000' });
+  const card = page.locator('.property-card').filter({ hasText: 'Current Price Reduction' });
+  await card.getByRole('button', { name: 'Open Current Price Reduction for editing' }).click();
+
+  await page.locator('#purchasePrice').fill('300000');
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#priceNegotiationSection > summary').click();
+  await expect(page.locator('#priceHistoryList')).toContainText('Original listing price');
+  await expect(page.locator('#priceHistoryList')).toContainText('£261,000');
+  await expect(page.locator('#priceHistoryCurrentPrice')).toHaveText('£300,000');
+
+  await page.locator('#priceEntryType').selectOption('price_reduction');
+  await page.locator('#priceEntryAmount').fill('284950');
+  await page.locator('#priceEntryDate').fill('2026-10-12');
+  await page.locator('#addPriceEntryBtn').click();
+
+  await expect(page.locator('#priceEntryError')).toBeHidden();
+  await expect(page.locator('#priceHistoryList')).toContainText('Listing price reduced');
+  await expect(page.locator('#priceHistoryList')).toContainText('£284,950');
+  await expect(page.locator('#summaryPurchasePrice')).toHaveText('£284,950');
+});
+
 test('records offer and counteroffer history and recalculates from the latest price', async ({ page }) => {
   await createProperty(page, { title: 'Offer History Journey', price: '250000' });
   const card = page.locator('.property-card').filter({ hasText: 'Offer History Journey' });
