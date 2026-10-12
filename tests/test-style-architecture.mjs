@@ -7,7 +7,7 @@ const expected = [
   'styles/tokens.css', 'styles/base.css', 'styles/app-shell-core.css', 'styles/components/chat-thread.css',
   'styles/components/linked-content.css', 'styles/components/rich-textarea.css', 'styles/features/properties.css', 'styles/forms.css', 'styles/features/summary.css',
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
-  'styles/features/editor.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
+  'styles/features/editor.css', 'styles/features/price-history.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
   'styles/app-shell-navigation.css', 'styles/legal.css', 'styles/features/tasks.css'
 ];
 
