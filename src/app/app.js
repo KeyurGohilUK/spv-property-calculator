@@ -583,13 +583,13 @@ function resetForm() {
   editingCreatedAt = null;
   currentListingPrice = null;
   currentPriceHistory = [];
-  const today = new Date();
-  $('priceEntryDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   $('priceEntryType').value = 'offer';
   $('priceEntryAmount').value = '';
   $('priceEntryNote').value = '';
   renderPriceHistory();
   $('propertyForm').reset();
+  const today = new Date();
+  $('priceEntryDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   syncViewingDateFromPicker();
   $('depositPercent').value = '25';
   $('qualifyingCorporateRelief').checked = true;
