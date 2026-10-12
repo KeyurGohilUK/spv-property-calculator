@@ -277,3 +277,20 @@ test('records offer and counteroffer history and recalculates from the latest pr
   await expect(page.locator('#priceHistoryList')).toContainText('£245,000');
   await expect(page.locator('#summaryPurchasePrice')).toHaveText('£245,000');
 });
+
+
+test('keeps the negotiation date field within its card on mobile @mobile', async ({ page }) => {
+  await createProperty(page, { title: 'Mobile Price Date Layout' });
+  const propertyCard = page.locator('.property-card').filter({ hasText: 'Mobile Price Date Layout' });
+  await propertyCard.getByRole('button', { name: 'Open Mobile Price Date Layout for editing' }).click();
+  await page.locator('#priceNegotiationSection > summary').click();
+
+  const dateField = page.locator('#priceEntryDate');
+  const section = page.locator('#priceNegotiationSection');
+  const dateBounds = await dateField.boundingBox();
+  const sectionBounds = await section.boundingBox();
+  expect(dateBounds).toBeTruthy();
+  expect(sectionBounds).toBeTruthy();
+  expect(dateBounds.x).toBeGreaterThanOrEqual(sectionBounds.x);
+  expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(sectionBounds.x + sectionBounds.width);
+});
