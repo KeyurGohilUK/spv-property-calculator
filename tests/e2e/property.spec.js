@@ -240,3 +240,40 @@ for (const route of ['/expenses/', '/forecast/']) {
     await expect(page).toHaveURL(originalUrl);
   });
 }
+
+
+test('records offer and counteroffer history and recalculates from the latest price', async ({ page }) => {
+  await createProperty(page, { title: 'Offer History Journey', price: '250000' });
+  const card = page.locator('.property-card').filter({ hasText: 'Offer History Journey' });
+  await card.getByRole('button', { name: 'Open Offer History Journey for editing' }).click();
+
+  await page.locator('#priceNegotiationSection > summary').click();
+  await expect(page.locator('#priceHistorySectionTotal')).toHaveText('£250,000');
+  await expect(page.locator('#priceHistoryList')).toContainText('Original listing price');
+  await expect(page.locator('#priceHistoryList')).toContainText('£250,000');
+
+  await page.locator('#priceEntryType').selectOption('offer');
+  await page.locator('#priceEntryAmount').fill('240000');
+  await page.locator('#priceEntryDate').fill('2026-10-12');
+  await page.locator('#priceEntryNote').fill('Initial offer');
+  await page.locator('#addPriceEntryBtn').click();
+  await expect(page.locator('#summaryPurchasePrice')).toHaveText('£240,000');
+  await expect(page.locator('#priceHistoryList')).toContainText('Initial offer');
+
+  await page.locator('#priceEntryType').selectOption('counteroffer');
+  await page.locator('#priceEntryAmount').fill('245000');
+  await page.locator('#priceEntryDate').fill('2026-10-13');
+  await page.locator('#priceEntryNote').fill('Seller countered');
+  await page.locator('#addPriceEntryBtn').click();
+  await expect(page.locator('#summaryPurchasePrice')).toHaveText('£245,000');
+  await expect(page.locator('#priceHistoryList')).toContainText('Seller countered');
+
+  await page.locator('#backBtn').click();
+  const updatedCard = page.locator('.property-card').filter({ hasText: 'Offer History Journey' });
+  await updatedCard.getByRole('button', { name: 'Open Offer History Journey for editing' }).click();
+  await page.locator('#priceNegotiationSection > summary').click();
+  await expect(page.locator('#priceHistoryList')).toContainText('£250,000');
+  await expect(page.locator('#priceHistoryList')).toContainText('£240,000');
+  await expect(page.locator('#priceHistoryList')).toContainText('£245,000');
+  await expect(page.locator('#summaryPurchasePrice')).toHaveText('£245,000');
+});

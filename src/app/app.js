@@ -30,6 +30,7 @@ import { buildViewingCalendarInvite, isFutureViewing } from '../features/propert
 import { createPropertyCard, formatViewingDate } from '../features/properties/property-card.js';
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from '../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../utils/validation.js';
+import { createPriceHistoryEntry, normalizePriceHistory } from '../features/properties/price-history.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });
@@ -61,6 +62,8 @@ let notesLoading = false;
 let deletingNoteId = null;
 let savedPropertySnapshot = '';
 let pendingPropertyId = '';
+let currentListingPrice = null;
+let currentPriceHistory = [];
 
 let installComponent = null;
 let accountController = null;
@@ -183,6 +186,8 @@ function getFormModel() {
     listingUrl: $('listingUrl').value.trim(),
     viewingDate: $('viewingDate').value || '',
     purchasePrice: safeNumber($('purchasePrice').value),
+    listingPrice: currentListingPrice,
+    priceHistory: currentPriceHistory,
     depositPercent: safeNumber($('depositPercent').value),
     qualifyingCorporateRelief: $('qualifyingCorporateRelief').checked,
     nonResident: $('nonResident').checked,
@@ -494,10 +499,97 @@ function validateForm() {
   return titleValid && priceValid && depositValid && listingValid;
 }
 
+function renderPriceHistory() {
+  const list = $('priceHistoryList');
+  if (!list) return;
+  const isSaved = Boolean(editingId);
+  $('priceHistoryUnsaved').classList.toggle('hidden', isSaved);
+  $('priceHistoryEditor').classList.toggle('hidden', !isSaved);
+  $('priceHistorySectionTotal').textContent = currentListingPrice ? money(currentListingPrice) : 'Save property first';
+  list.replaceChildren();
+
+  if (currentListingPrice > 0) {
+    const baseline = document.createElement('li');
+    baseline.className = 'price-history-item price-history-listing';
+    const heading = document.createElement('span');
+    heading.className = 'price-history-label';
+    heading.textContent = 'Original listing price';
+    const amount = document.createElement('strong');
+    amount.textContent = money(currentListingPrice);
+    baseline.append(heading, amount);
+    list.appendChild(baseline);
+  }
+
+  currentPriceHistory.forEach((entry) => {
+    const item = document.createElement('li');
+    item.className = `price-history-item price-history-${entry.type}`;
+    const details = document.createElement('div');
+    details.className = 'price-history-copy';
+    const heading = document.createElement('span');
+    heading.className = 'price-history-label';
+    heading.textContent = entry.type === 'offer' ? 'Offer made' : 'Counteroffer received';
+    const date = document.createElement('time');
+    date.dateTime = entry.date;
+    date.textContent = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(new Date(`${entry.date}T12:00:00`));
+    details.append(heading, date);
+    if (entry.note) {
+      const note = document.createElement('span');
+      note.className = 'price-history-note';
+      note.textContent = entry.note;
+      details.appendChild(note);
+    }
+    const amount = document.createElement('strong');
+    amount.textContent = money(entry.price);
+    item.append(details, amount);
+    list.appendChild(item);
+  });
+
+  $('priceHistoryCurrentPrice').textContent = money(safeNumber($('purchasePrice').value));
+}
+
+async function addPriceHistoryEntry() {
+  const error = $('priceEntryError');
+  error.classList.add('hidden');
+  if (!editingId) {
+    error.textContent = 'Save this property before adding an offer or counteroffer.';
+    error.classList.remove('hidden');
+    return;
+  }
+  let entry;
+  try {
+    entry = createPriceHistoryEntry({
+      type: $('priceEntryType').value,
+      price: $('priceEntryAmount').value,
+      date: $('priceEntryDate').value,
+      note: $('priceEntryNote').value
+    });
+  } catch (validationError) {
+    error.textContent = validationError.message;
+    error.classList.remove('hidden');
+    return;
+  }
+  currentPriceHistory = [...currentPriceHistory, entry];
+  $('purchasePrice').value = formatInputValue(entry.price);
+  $('priceEntryAmount').value = '';
+  $('priceEntryNote').value = '';
+  renderCalculation();
+  renderPriceHistory();
+  updateSaveButtonState();
+  await saveCurrentProperty();
+}
+
 function resetForm() {
   editingId = null;
   editingCreatedAt = null;
+  currentListingPrice = null;
+  currentPriceHistory = [];
+  $('priceEntryType').value = 'offer';
+  $('priceEntryAmount').value = '';
+  $('priceEntryNote').value = '';
+  renderPriceHistory();
   $('propertyForm').reset();
+  const today = new Date();
+  $('priceEntryDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   syncViewingDateFromPicker();
   $('depositPercent').value = '25';
   $('qualifyingCorporateRelief').checked = true;
@@ -523,6 +615,8 @@ function loadIntoForm(property) {
   resetForm();
   editingId = property.id;
   editingCreatedAt = property.createdAt || null;
+  currentListingPrice = Number(property.listingPrice) > 0 ? Number(property.listingPrice) : safeNumber(property.purchasePrice);
+  currentPriceHistory = normalizePriceHistory(property.priceHistory);
   $('editorModeLabel').textContent = 'Editing saved property';
 
   $('title').value = property.title || '';
@@ -542,6 +636,7 @@ function loadIntoForm(property) {
   $('customExpenses').innerHTML = '';
   (property.customExpenses || []).forEach(addExpenseRow);
   currentNotes = getCachedNotes(property.id);
+  renderPriceHistory();
   renderCalculation();
   renderNotes();
   captureSavedPropertyState();
@@ -676,10 +771,16 @@ async function saveCurrentProperty() {
   model.listingUrl = normalizeListingUrl(model.listingUrl);
   try {
     const existing = model.id ? getProperty(model.id) : null;
+    if (!currentListingPrice) currentListingPrice = Number(existing?.listingPrice) || Number(existing?.purchasePrice) || safeNumber(model.purchasePrice);
+    model.listingPrice = currentListingPrice;
+    model.priceHistory = normalizePriceHistory(currentPriceHistory);
     const saved = saveProperty({ ...model, calculated: calc, _cloudRevision: Math.max(0, Number(existing?._cloudRevision) || 0) });
     editingId = saved.id;
     editingCreatedAt = saved.createdAt;
+    currentListingPrice = Number(saved.listingPrice) || currentListingPrice;
+    currentPriceHistory = normalizePriceHistory(saved.priceHistory);
     $('editorModeLabel').textContent = 'Editing saved property';
+    renderPriceHistory();
     captureSavedPropertyState();
     renderNotes();
     $('saveMessage').textContent = cloudUser
@@ -933,6 +1034,7 @@ function init() {
     updateSaveButtonState();
   });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
+  $('addPriceEntryBtn').addEventListener('click', addPriceHistoryEntry);
   $('propertyForm').addEventListener('submit', (event) => {
     event.preventDefault();
     saveCurrentProperty();

@@ -1,5 +1,5 @@
 {
-  "version": "1.26.4",
+  "version": "1.27.0",
   "assets": [
     "./",
     "./index.html",
@@ -20,6 +20,7 @@
     "./styles/features/summary.css",
     "./styles/features/archive.css",
     "./styles/features/editor.css",
+    "./styles/features/price-history.css",
     "./styles/features/statuses.css",
     "./src/components/chat-thread.js",
     "./src/components/rich-textarea.js",
@@ -35,6 +36,7 @@
     "./src/features/properties/calendar-invite.js",
     "./cloud.js",
     "./src/features/properties/calculations.js",
+    "./src/features/properties/price-history.js",
     "./src/config/tax-config.js",
     "./src/features/properties/storage.js",
     "./manifest.json",
