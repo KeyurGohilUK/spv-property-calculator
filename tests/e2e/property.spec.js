@@ -325,11 +325,16 @@ test('keeps the negotiation date field within its card on mobile @mobile', async
   await page.locator('#priceNegotiationSection > summary').click();
 
   const dateField = page.locator('#priceEntryDate');
+  const dateFieldContainer = page.locator('.price-entry-date-field');
   const section = page.locator('#priceNegotiationSection');
   const dateBounds = await dateField.boundingBox();
+  const containerBounds = await dateFieldContainer.boundingBox();
   const sectionBounds = await section.boundingBox();
   expect(dateBounds).toBeTruthy();
+  expect(containerBounds).toBeTruthy();
   expect(sectionBounds).toBeTruthy();
+  expect(dateBounds.x).toBeGreaterThanOrEqual(containerBounds.x);
+  expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(containerBounds.x + containerBounds.width);
   expect(dateBounds.x).toBeGreaterThanOrEqual(sectionBounds.x);
   expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(sectionBounds.x + sectionBounds.width);
 });
