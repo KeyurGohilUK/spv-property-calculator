@@ -158,6 +158,8 @@
 .custom-expenses-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid var(--border); margin-top: 18px; padding-top: 18px; }
 .custom-expenses-header h4 { margin: 0 0 3px; }
 .custom-expenses-header p { margin: 0; }
+.refurbishment-items-header { margin-top: 0; padding-top: 0; border-top: 0; }
+.refurbishment-cost-note { margin: 12px 0 0; }
 .custom-expenses { display: grid; gap: 10px; margin-top: 12px; }
 .expense-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
 .expense-row button { min-height: 44px; width: 44px; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--danger) 10%, var(--surface)); color: var(--danger); font-weight: 900; cursor: pointer; }
