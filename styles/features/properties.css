@@ -127,10 +127,10 @@
   -webkit-backdrop-filter: blur(16px);
 }
 .editor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
-.form-column { display: grid; gap: 16px; }
-.section-card { padding: 20px; }
-.section-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.form-column { min-width: 0; display: grid; gap: 16px; }
+.section-card { min-width: 0; padding: 20px; }
+.section-heading { min-width: 0; width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
 .section-heading h2, .section-heading h3 { margin: 4px 0 0; letter-spacing: -.025em; }
 .section-heading h2 { font-size: 25px; }
 .section-heading h3 { font-size: 19px; }
-.section-total { color: var(--brand); font-size: 20px; white-space: nowrap; }
+.section-total { flex: 0 0 auto; color: var(--brand); font-size: 20px; white-space: nowrap; }
