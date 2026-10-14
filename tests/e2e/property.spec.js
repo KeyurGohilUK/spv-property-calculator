@@ -27,8 +27,11 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
   await expect(page.locator('#summaryCostsIncDeposit')).toHaveText('£77,500');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£77,500');
 
-  await openContainingSection(page, '#refurbishmentCost');
-  await page.locator('#refurbishmentCost').fill('10000');
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+  await page.locator('#addRefurbishmentItemBtn').click();
+  const refurbishmentRow = page.locator('#refurbishmentItems .expense-row').first();
+  await refurbishmentRow.locator('[data-cost-name]').fill('Initial works');
+  await refurbishmentRow.locator('[data-cost-amount]').fill('10000');
   await expect(page.locator('#summaryRefurbishment')).toHaveText('£10,000');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£87,500');
 });
@@ -59,6 +62,46 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   const card = page.locator('.property-card').filter({ hasText: 'Updated Playwright Property' });
   await expect(card).toBeVisible();
   await expect(card).toContainText('£300,000');
+});
+
+test('tracks individual refurbishment items and persists their calculated total', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#newPropertyBtn').click();
+  await page.locator('#title').fill('Itemised Refurbishment');
+  await page.locator('#purchasePrice').fill('250000');
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+
+  await page.locator('#addRefurbishmentItemBtn').click();
+  let rows = page.locator('#refurbishmentItems .expense-row');
+  await rows.nth(0).locator('[data-cost-name]').fill('Windows');
+  await rows.nth(0).locator('[data-cost-amount]').fill('6000');
+
+  await page.locator('#addRefurbishmentItemBtn').click();
+  rows = page.locator('#refurbishmentItems .expense-row');
+  await rows.nth(1).locator('[data-cost-name]').fill('Kitchen');
+  await rows.nth(1).locator('[data-cost-amount]').fill('7000');
+
+  await expect(page.locator('#refurbishmentInline')).toHaveText('£13,000');
+  await expect(page.locator('#summaryRefurbishment')).toHaveText('£13,000');
+  await expect(page.locator('#summaryTotalCash')).toHaveText('£90,500');
+
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+  const card = page.locator('.property-card').filter({ hasText: 'Itemised Refurbishment' });
+  await expect(card).toContainText('£13,000');
+  await card.getByRole('button', { name: 'Open Itemised Refurbishment for editing' }).click();
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+
+  rows = page.locator('#refurbishmentItems .expense-row');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0).locator('[data-cost-name]')).toHaveValue('Windows');
+  await expect(rows.nth(0).locator('[data-cost-amount]')).toHaveValue('6,000');
+  await expect(rows.nth(1).locator('[data-cost-name]')).toHaveValue('Kitchen');
+  await expect(rows.nth(1).locator('[data-cost-amount]')).toHaveValue('7,000');
+
+  await rows.nth(0).getByRole('button', { name: 'Remove refurbishment item' }).click();
+  await expect(page.locator('#refurbishmentInline')).toHaveText('£7,000');
+  await expect(page.locator('#summaryTotalCash')).toHaveText('£84,500');
 });
 
 test('downloads a calendar invite for a future property viewing', async ({ page }) => {

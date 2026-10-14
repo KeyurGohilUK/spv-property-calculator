@@ -132,7 +132,12 @@ export function calculateProperty(model = {}) {
   });
 
   const groups = calculateCostGroups(model);
-  const refurbishment = Math.max(0, safeNumber(model.refurbishmentCost));
+  const refurbishmentItems = Array.isArray(model.refurbishmentItems)
+    ? model.refurbishmentItems
+    : [];
+  const refurbishment = Math.max(0, refurbishmentItems.length
+    ? refurbishmentItems.reduce((sum, item) => sum + safeNumber(item.amount), 0)
+    : safeNumber(model.refurbishmentCost));
 
   const feesExcludingDeposit =
     sdlt.total +

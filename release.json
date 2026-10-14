@@ -1,8 +1,9 @@
 {
-  "version": "1.27.3",
+  "version": "1.28.0",
   "notes": [
     "Fixed the offer-history date field overflowing its card on mobile.",
     "Track seller listing price reductions in the opportunity price history.",
-    "Allow a listing reduction whenever it is below the current calculator purchase price."
+    "Allow a listing reduction whenever it is below the current calculator purchase price.",
+    "Track individual refurbishment items and calculate the refurbishment total automatically."
   ]
 }
