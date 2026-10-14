@@ -25,8 +25,11 @@ export async function createProperty(page, {
   await page.locator('#purchasePrice').fill(price);
 
   if (refurbishment !== '0') {
-    await openContainingSection(page, '#refurbishmentCost');
-    await page.locator('#refurbishmentCost').fill(refurbishment);
+    await openContainingSection(page, '#addRefurbishmentItemBtn');
+    await page.locator('#addRefurbishmentItemBtn').click();
+    const row = page.locator('#refurbishmentItems .expense-row').last();
+    await row.locator('[data-cost-name]').fill('Refurbishment estimate');
+    await row.locator('[data-cost-amount]').fill(refurbishment);
   }
 
   await page.locator('#savePropertyBtn').click();
