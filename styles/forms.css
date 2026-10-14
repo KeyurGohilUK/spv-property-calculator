@@ -163,9 +163,11 @@
 .custom-expenses { display: grid; gap: 10px; margin-top: 12px; min-height: 52px; border: 1px dashed transparent; border-radius: 14px; transition: border-color 160ms ease, background 160ms ease; }
 .custom-expenses:empty::before { content: 'Drop items here'; display: grid; min-height: 50px; place-items: center; color: var(--muted); font-size: .84rem; }
 .custom-expenses.is-drop-target { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 8%, transparent); }
-.expense-row { display: grid; grid-template-columns: 36px minmax(0, 1.5fr) minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
+.expense-row { min-width: 0; display: grid; grid-template-columns: 36px minmax(0, 1.5fr) minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
+.expense-row input { min-width: 0; max-width: 100%; }
 .expense-row.is-dragging { opacity: .55; }
 .expense-row [data-remove-cost], .cost-drag-handle { min-height: 44px; border: 0; border-radius: 12px; font-weight: 900; cursor: pointer; }
 .expense-row [data-remove-cost] { width: 44px; background: color-mix(in srgb, var(--danger) 10%, var(--surface)); color: var(--danger); }
-.cost-drag-handle { width: 36px; background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--brand); cursor: grab; touch-action: none; }
+.cost-drag-handle { width: 36px; display: grid; place-items: center; padding: 0; background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--brand); cursor: grab; touch-action: none; }
+.cost-drag-handle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
 .cost-drag-handle:active { cursor: grabbing; }
