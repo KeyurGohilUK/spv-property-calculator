@@ -394,7 +394,9 @@ function addItemisedCostRow(item = {}, containerId) {
   row.className = 'expense-row';
   row.dataset.id = item.id || makeId();
   row.innerHTML = `
-    <button type="button" class="cost-drag-handle" data-move-cost draggable="true">↕</button>
+    <button type="button" class="cost-drag-handle" data-move-cost draggable="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7 4-4 4 4"></path><path d="M12 3v18"></path><path d="m8 17 4 4 4-4"></path></svg>
+    </button>
     <input data-cost-name type="text" maxlength="80" value="${escapeHtml(item.name || '')}">
     <input data-cost-amount type="text" inputmode="decimal" placeholder="£0" value="${item.amount ? escapeHtml(formatInputValue(item.amount)) : ''}">
     <button type="button" data-remove-cost>×</button>
