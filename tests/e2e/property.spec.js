@@ -148,6 +148,52 @@ test('moves an item between purchase costs and refurbishment in both directions'
   await expect(page.locator('#summaryRefurbishment')).toHaveText('£5,000');
 });
 
+test('keeps mobile cost rows aligned without breaking collapsed section headers', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('#newPropertyBtn').click();
+  await page.locator('#title').fill('Mobile Layout');
+  await page.locator('#purchasePrice').fill('250000');
+
+  await openContainingSection(page, '#addExpenseBtn');
+  await page.locator('#addExpenseBtn').click();
+  const row = page.locator('#customExpenses .expense-row').first();
+  await row.locator('[data-cost-name]').fill('Electrical work');
+  await row.locator('[data-cost-amount]').fill('4000');
+
+  const selectors = ['[data-move-cost]', '[data-cost-name]', '[data-cost-amount]', '[data-remove-cost]'];
+  const boxes = await Promise.all(selectors.map((selector) => row.locator(selector).boundingBox()));
+  expect(boxes.every(Boolean)).toBeTruthy();
+  const verticalCentres = boxes.map((box) => box.y + box.height / 2);
+  expect(Math.max(...verticalCentres) - Math.min(...verticalCentres)).toBeLessThanOrEqual(2);
+
+  const rowBox = await row.boundingBox();
+  const containerBox = await page.locator('#customExpenses').boundingBox();
+  expect(rowBox && containerBox).toBeTruthy();
+  expect(rowBox.x).toBeGreaterThanOrEqual(containerBox.x - 1);
+  expect(rowBox.x + rowBox.width).toBeLessThanOrEqual(containerBox.x + containerBox.width + 1);
+  await expect(row.locator('.cost-drag-handle svg')).toBeVisible();
+
+  const heading = page.locator('#priceNegotiationSection > summary');
+  const headingLayout = await heading.evaluate((element) => {
+    const eyebrow = element.querySelector('.eyebrow').getBoundingClientRect();
+    const title = element.querySelector('.section-title').getBoundingClientRect();
+    const card = element.closest('.section-card');
+    return {
+      eyebrowBottom: eyebrow.bottom,
+      titleTop: title.top,
+      summaryFits: element.scrollWidth <= element.clientWidth + 1,
+      cardFits: card.scrollWidth <= card.clientWidth + 1,
+      chevronContent: getComputedStyle(element, '::after').content
+    };
+  });
+  expect(headingLayout.titleTop).toBeGreaterThanOrEqual(headingLayout.eyebrowBottom);
+  expect(headingLayout.summaryFits).toBeTruthy();
+  expect(headingLayout.cardFits).toBeTruthy();
+  expect(headingLayout.chevronContent).not.toBe('none');
+  await expect(page.locator('#savePropertyBtn svg')).toBeVisible();
+});
+
 test('downloads a calendar invite for a future property viewing', async ({ page }) => {
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
