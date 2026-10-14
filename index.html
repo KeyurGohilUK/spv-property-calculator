@@ -301,11 +301,13 @@
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Works</span><span class="section-title">Refurbishment</span></span><strong id="refurbishmentInline" class="section-total">£0</strong></summary>
-              <label class="field currency-field">
-                <span>Estimated Refurbishment Cost</span>
-                <span class="input-prefix"><span>£</span><input id="refurbishmentCost" type="text" inputmode="decimal" value="0"></span>
-                <small>Excluded from SDLT purchase price, but included in total cash required.</small>
-              </label>
+              <input id="refurbishmentCost" type="hidden" value="0">
+              <div class="custom-expenses-header refurbishment-items-header">
+                <div><h4>Refurbishment items</h4><p class="muted small">Track each item or piece of work separately. The total is calculated automatically.</p></div>
+                <button id="addRefurbishmentItemBtn" class="secondary-btn" type="button">+ Add Item</button>
+              </div>
+              <div id="refurbishmentItems" class="custom-expenses" aria-label="Refurbishment cost items"></div>
+              <p class="muted small refurbishment-cost-note">Excluded from SDLT purchase price, but included in total cash required.</p>
             </details>
 
             <details id="notesSection" class="section-card collapsible-section notes-section">
