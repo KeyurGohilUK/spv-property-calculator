@@ -48,7 +48,7 @@ const NOTES_CACHE_KEY = 'spv-property-calculator.notes.v1';
 const FEE_FIELDS = [
   'solicitorFee', 'surveyCost', 'mortgageArrangementFee', 'mortgageBrokerFee',
   'mortgageValuationFee', 'companyFormationCost', 'spvAdministrationCost',
-  'landRegistrySearches', 'insuranceCost', 'auctionReservationFee', 'refurbishmentCost'
+  'landRegistrySearches', 'insuranceCost', 'auctionReservationFee'
 ];
 
 let editingId = null;
@@ -170,13 +170,20 @@ function normalizeListingUrl(value) {
   }
 }
 
+function readItemisedCosts(containerId) {
+  return [...$(containerId).querySelectorAll('.expense-row')].map((row) => ({
+    id: row.dataset.id,
+    name: row.querySelector('[data-cost-name]').value.trim(),
+    amount: safeNumber(row.querySelector('[data-cost-amount]').value)
+  }));
+}
+
 function getFormModel() {
   syncViewingDateFromPicker();
-  const customExpenses = [...document.querySelectorAll('.expense-row')].map((row) => ({
-    id: row.dataset.id,
-    name: row.querySelector('[data-expense-name]').value.trim(),
-    amount: safeNumber(row.querySelector('[data-expense-amount]').value)
-  }));
+  const customExpenses = readItemisedCosts('customExpenses');
+  const refurbishmentItems = readItemisedCosts('refurbishmentItems');
+  const refurbishmentCost = refurbishmentItems.reduce((sum, item) => sum + item.amount, 0);
+  $('refurbishmentCost').value = String(refurbishmentCost);
 
   const model = {
     id: editingId,
@@ -191,7 +198,9 @@ function getFormModel() {
     depositPercent: safeNumber($('depositPercent').value),
     qualifyingCorporateRelief: $('qualifyingCorporateRelief').checked,
     nonResident: $('nonResident').checked,
-    customExpenses
+    customExpenses,
+    refurbishmentItems,
+    refurbishmentCost
   };
 
   for (const field of FEE_FIELDS) model[field] = safeNumber($(field).value);
@@ -286,27 +295,52 @@ function renderCalculation() {
   return { model, calc };
 }
 
-function addExpenseRow(expense = {}) {
-  const id = expense.id || makeId();
+function addItemisedCostRow(item = {}, {
+  containerId,
+  namePlaceholder,
+  nameLabel,
+  amountLabel,
+  removeLabel
+}) {
   const row = document.createElement('div');
   row.className = 'expense-row';
-  row.dataset.id = id;
+  row.dataset.id = item.id || makeId();
   row.innerHTML = `
-    <input data-expense-name type="text" maxlength="80" placeholder="Expense name" aria-label="Expense name" value="${escapeHtml(expense.name || '')}">
-    <input data-expense-amount type="text" inputmode="decimal" placeholder="£0" aria-label="Expense amount" value="${expense.amount ? escapeHtml(formatInputValue(expense.amount)) : ''}">
-    <button type="button" data-remove-expense aria-label="Remove expense">×</button>
+    <input data-cost-name type="text" maxlength="80" placeholder="${namePlaceholder}" aria-label="${nameLabel}" value="${escapeHtml(item.name || '')}">
+    <input data-cost-amount type="text" inputmode="decimal" placeholder="£0" aria-label="${amountLabel}" value="${item.amount ? escapeHtml(formatInputValue(item.amount)) : ''}">
+    <button type="button" data-remove-cost aria-label="${removeLabel}">×</button>
   `;
   row.addEventListener('input', renderCalculation);
-  row.querySelector('[data-remove-expense]').addEventListener('click', () => {
+  row.querySelector('[data-remove-cost]').addEventListener('click', () => {
     row.remove();
     renderCalculation();
     updateSaveButtonState();
   });
-  row.querySelector('[data-expense-amount]').addEventListener('blur', (event) => {
+  row.querySelector('[data-cost-amount]').addEventListener('blur', (event) => {
     const value = safeNumber(event.target.value);
     event.target.value = value ? formatInputValue(value) : '';
   });
-  $('customExpenses').appendChild(row);
+  $(containerId).appendChild(row);
+}
+
+function addExpenseRow(expense = {}) {
+  addItemisedCostRow(expense, {
+    containerId: 'customExpenses',
+    namePlaceholder: 'Expense name',
+    nameLabel: 'Expense name',
+    amountLabel: 'Expense amount',
+    removeLabel: 'Remove expense'
+  });
+}
+
+function addRefurbishmentItemRow(item = {}) {
+  addItemisedCostRow(item, {
+    containerId: 'refurbishmentItems',
+    namePlaceholder: 'Item or work',
+    nameLabel: 'Refurbishment item',
+    amountLabel: 'Refurbishment item cost',
+    removeLabel: 'Remove refurbishment item'
+  });
 }
 
 function readNotesCache() {
@@ -614,6 +648,7 @@ function resetForm() {
   $('auctionReservationFee').value = '0';
   $('refurbishmentCost').value = '0';
   $('customExpenses').innerHTML = '';
+  $('refurbishmentItems').innerHTML = '';
   $('saveMessage').textContent = '';
   clearFieldValidation($('title'), $('titleError'));
   clearFieldValidation($('purchasePrice'), $('priceError'));
@@ -647,11 +682,23 @@ function loadIntoForm(property) {
 
   for (const field of FEE_FIELDS) {
     const value = safeNumber(property[field]);
-    $(field).value = value ? formatInputValue(value) : (field === 'auctionReservationFee' || field === 'refurbishmentCost' ? '0' : '');
+    $(field).value = value ? formatInputValue(value) : (field === 'auctionReservationFee' ? '0' : '');
   }
 
   $('customExpenses').innerHTML = '';
   (property.customExpenses || []).forEach(addExpenseRow);
+  $('refurbishmentItems').innerHTML = '';
+  const refurbishmentItems = Array.isArray(property.refurbishmentItems)
+    ? property.refurbishmentItems
+    : [];
+  if (refurbishmentItems.length) {
+    refurbishmentItems.forEach(addRefurbishmentItemRow);
+  } else if (safeNumber(property.refurbishmentCost) > 0) {
+    addRefurbishmentItemRow({
+      name: 'Existing refurbishment estimate',
+      amount: safeNumber(property.refurbishmentCost)
+    });
+  }
   currentNotes = getCachedNotes(property.id);
   renderPriceHistory();
   renderCalculation();
@@ -1048,6 +1095,10 @@ function init() {
   });
   $('addExpenseBtn').addEventListener('click', () => {
     addExpenseRow();
+    updateSaveButtonState();
+  });
+  $('addRefurbishmentItemBtn').addEventListener('click', () => {
+    addRefurbishmentItemRow();
     updateSaveButtonState();
   });
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
