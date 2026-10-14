@@ -39,13 +39,15 @@
   .property-stats { grid-template-columns: 1fr 1fr; }
   .custom-expenses-header { align-items: flex-start; flex-direction: column; }
   .secondary-btn { width: 100%; }
-  .expense-row { grid-template-columns: 1fr 110px 44px; }
+  .expense-row { grid-template-columns: 36px minmax(0, 1fr) minmax(82px, 96px) 44px; gap: 6px; }
 }
 
 @media (max-width: 390px) {
   .header-inner h1 { font-size: 19px; }
   .icon-btn { min-height: 40px; padding: 8px 11px; font-size: 12px; }
-  .expense-row { grid-template-columns: 1fr 96px 42px; }
+  .expense-row { grid-template-columns: 34px minmax(0, 1fr) 82px 40px; gap: 5px; }
+  .cost-drag-handle { width: 34px; }
+  .expense-row [data-remove-cost] { width: 40px; }
 }
 
 /* Supabase cloud sync */
