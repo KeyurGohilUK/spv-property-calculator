@@ -63,12 +63,23 @@ const withFees = calculateProperty({
   landRegistrySearches: 450,
   insuranceCost: 300,
   auctionReservationFee: 0,
-  refurbishmentCost: 15000,
+  refurbishmentItems: [
+    { name: 'Windows', amount: 6000 },
+    { name: 'Kitchen', amount: 9000 }
+  ],
   customExpenses: [{ name: 'Specialist report', amount: 800 }],
   qualifyingCorporateRelief: true
 });
+assert.equal(withFees.refurbishment, 15000, 'Itemised refurbishment calculation failed');
 assert.equal(withFees.totalCashRequired, 117145, 'Fees/refurbishment total cash calculation failed');
 assert.equal(withFees.totalPurchaseCostsIncludingDeposit, 102145, 'Purchase cash before refurbishment failed');
+
+const legacyRefurbishment = calculateProperty({
+  purchasePrice: 250000,
+  depositPercent: 25,
+  refurbishmentCost: 12000
+});
+assert.equal(legacyRefurbishment.refurbishment, 12000, 'Legacy refurbishment totals must remain supported');
 
 const corporateThreshold = calculateSDLT(500000, { qualifyingCorporateRelief: false });
 assert.equal(corporateThreshold.method, 'company-higher-rates', '17% whole-price rate must apply only above £500,000');
