@@ -64,6 +64,8 @@ let savedPropertySnapshot = '';
 let pendingPropertyId = '';
 let currentListingPrice = null;
 let currentPriceHistory = [];
+let draggedCostRow = null;
+let pointerCostDrag = null;
 
 let installComponent = null;
 let accountController = null;
@@ -295,21 +297,109 @@ function renderCalculation() {
   return { model, calc };
 }
 
-function addItemisedCostRow(item = {}, {
-  containerId,
-  namePlaceholder,
-  nameLabel,
-  amountLabel,
-  removeLabel
-}) {
+const ITEMISED_COST_CONFIG = {
+  customExpenses: {
+    namePlaceholder: 'Expense name',
+    nameLabel: 'Expense name',
+    amountLabel: 'Expense amount',
+    removeLabel: 'Remove expense',
+    moveLabel: 'Move expense to refurbishment'
+  },
+  refurbishmentItems: {
+    namePlaceholder: 'Item or work',
+    nameLabel: 'Refurbishment item',
+    amountLabel: 'Refurbishment item cost',
+    removeLabel: 'Remove refurbishment item',
+    moveLabel: 'Move refurbishment item to purchase costs'
+  }
+};
+
+function configureItemisedCostRow(row, containerId) {
+  const config = ITEMISED_COST_CONFIG[containerId];
+  row.dataset.costContainer = containerId;
+  const nameInput = row.querySelector('[data-cost-name]');
+  nameInput.placeholder = config.namePlaceholder;
+  nameInput.setAttribute('aria-label', config.nameLabel);
+  row.querySelector('[data-cost-amount]').setAttribute('aria-label', config.amountLabel);
+  row.querySelector('[data-remove-cost]').setAttribute('aria-label', config.removeLabel);
+  const moveButton = row.querySelector('[data-move-cost]');
+  moveButton.setAttribute('aria-label', config.moveLabel);
+  moveButton.title = `Drag or tap to ${config.moveLabel.toLowerCase()}`;
+}
+
+function clearItemisedCostDragState() {
+  draggedCostRow?.classList.remove('is-dragging');
+  draggedCostRow = null;
+  document.querySelectorAll('.custom-expenses.is-drop-target')
+    .forEach((container) => container.classList.remove('is-drop-target'));
+}
+
+function getItemisedCostDropContainer(clientX, clientY) {
+  const element = document.elementFromPoint(clientX, clientY);
+  const directContainer = element?.closest?.('#customExpenses, #refurbishmentItems');
+  if (directContainer) return directContainer;
+  return element?.closest?.('details')
+    ?.querySelector?.('#customExpenses, #refurbishmentItems') || null;
+}
+
+function setItemisedCostDropTarget(container) {
+  document.querySelectorAll('.custom-expenses.is-drop-target')
+    .forEach((candidate) => candidate.classList.toggle('is-drop-target', candidate === container));
+}
+
+function moveItemisedCostRow(row, targetContainer) {
+  if (!row || !targetContainer || row.parentElement === targetContainer) return;
+  targetContainer.appendChild(row);
+  configureItemisedCostRow(row, targetContainer.id);
+  renderCalculation();
+  updateSaveButtonState();
+}
+
+function finishPointerCostDrag(event, shouldMove) {
+  if (!pointerCostDrag || event.pointerId !== pointerCostDrag.pointerId) return;
+  const { row, handle, active } = pointerCostDrag;
+  if (active && shouldMove) {
+    const target = getItemisedCostDropContainer(event.clientX, event.clientY);
+    moveItemisedCostRow(row, target);
+  }
+  if (active) {
+    event.preventDefault();
+    handle.dataset.suppressClick = 'true';
+    window.setTimeout(() => delete handle.dataset.suppressClick, 0);
+  }
+  pointerCostDrag = null;
+  clearItemisedCostDragState();
+}
+
+function setupItemisedCostContainers() {
+  ['customExpenses', 'refurbishmentItems'].forEach((containerId) => {
+    const container = $(containerId);
+    container.addEventListener('dragover', (event) => {
+      if (!draggedCostRow) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      setItemisedCostDropTarget(container);
+    });
+    container.addEventListener('drop', (event) => {
+      if (!draggedCostRow) return;
+      event.preventDefault();
+      moveItemisedCostRow(draggedCostRow, container);
+      clearItemisedCostDragState();
+    });
+  });
+}
+
+function addItemisedCostRow(item = {}, containerId) {
   const row = document.createElement('div');
   row.className = 'expense-row';
   row.dataset.id = item.id || makeId();
   row.innerHTML = `
-    <input data-cost-name type="text" maxlength="80" placeholder="${namePlaceholder}" aria-label="${nameLabel}" value="${escapeHtml(item.name || '')}">
-    <input data-cost-amount type="text" inputmode="decimal" placeholder="£0" aria-label="${amountLabel}" value="${item.amount ? escapeHtml(formatInputValue(item.amount)) : ''}">
-    <button type="button" data-remove-cost aria-label="${removeLabel}">×</button>
+    <button type="button" class="cost-drag-handle" data-move-cost draggable="true">↕</button>
+    <input data-cost-name type="text" maxlength="80" value="${escapeHtml(item.name || '')}">
+    <input data-cost-amount type="text" inputmode="decimal" placeholder="£0" value="${item.amount ? escapeHtml(formatInputValue(item.amount)) : ''}">
+    <button type="button" data-remove-cost>×</button>
   `;
+  configureItemisedCostRow(row, containerId);
   row.addEventListener('input', renderCalculation);
   row.querySelector('[data-remove-cost]').addEventListener('click', () => {
     row.remove();
@@ -320,27 +410,62 @@ function addItemisedCostRow(item = {}, {
     const value = safeNumber(event.target.value);
     event.target.value = value ? formatInputValue(value) : '';
   });
+
+  const moveButton = row.querySelector('[data-move-cost]');
+  moveButton.addEventListener('click', () => {
+    if (moveButton.dataset.suppressClick) return;
+    const targetId = row.parentElement?.id === 'customExpenses'
+      ? 'refurbishmentItems'
+      : 'customExpenses';
+    moveItemisedCostRow(row, $(targetId));
+  });
+  moveButton.addEventListener('dragstart', (event) => {
+    draggedCostRow = row;
+    row.classList.add('is-dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', row.dataset.id);
+  });
+  moveButton.addEventListener('dragend', clearItemisedCostDragState);
+  moveButton.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse') return;
+    pointerCostDrag = {
+      row,
+      handle: moveButton,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false
+    };
+    moveButton.setPointerCapture?.(event.pointerId);
+  });
+  moveButton.addEventListener('pointermove', (event) => {
+    if (!pointerCostDrag || event.pointerId !== pointerCostDrag.pointerId) return;
+    const distance = Math.hypot(
+      event.clientX - pointerCostDrag.startX,
+      event.clientY - pointerCostDrag.startY
+    );
+    if (!pointerCostDrag.active && distance < 8) return;
+    pointerCostDrag.active = true;
+    draggedCostRow = row;
+    row.classList.add('is-dragging');
+    event.preventDefault();
+    const target = getItemisedCostDropContainer(event.clientX, event.clientY);
+    setItemisedCostDropTarget(target);
+    if (event.clientY < 72) window.scrollBy({ top: -18, behavior: 'auto' });
+    if (event.clientY > window.innerHeight - 72) window.scrollBy({ top: 18, behavior: 'auto' });
+  });
+  moveButton.addEventListener('pointerup', (event) => finishPointerCostDrag(event, true));
+  moveButton.addEventListener('pointercancel', (event) => finishPointerCostDrag(event, false));
+
   $(containerId).appendChild(row);
 }
 
 function addExpenseRow(expense = {}) {
-  addItemisedCostRow(expense, {
-    containerId: 'customExpenses',
-    namePlaceholder: 'Expense name',
-    nameLabel: 'Expense name',
-    amountLabel: 'Expense amount',
-    removeLabel: 'Remove expense'
-  });
+  addItemisedCostRow(expense, 'customExpenses');
 }
 
 function addRefurbishmentItemRow(item = {}) {
-  addItemisedCostRow(item, {
-    containerId: 'refurbishmentItems',
-    namePlaceholder: 'Item or work',
-    nameLabel: 'Refurbishment item',
-    amountLabel: 'Refurbishment item cost',
-    removeLabel: 'Remove refurbishment item'
-  });
+  addItemisedCostRow(item, 'refurbishmentItems');
 }
 
 function readNotesCache() {
@@ -1076,6 +1201,7 @@ function updateConnectionStatus() {
 }
 
 function init() {
+  setupItemisedCostContainers();
   $('publicLoginBtn').addEventListener('click', () => accountController?.open());
   populateViewingTimeOptions();
   $('homeBrandLink').addEventListener('click', (event) => {
