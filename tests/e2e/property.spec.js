@@ -27,8 +27,11 @@ test('calculates a known £250,000 SPV purchase correctly', async ({ page }) => 
   await expect(page.locator('#summaryCostsIncDeposit')).toHaveText('£77,500');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£77,500');
 
-  await openContainingSection(page, '#refurbishmentCost');
-  await page.locator('#refurbishmentCost').fill('10000');
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+  await page.locator('#addRefurbishmentItemBtn').click();
+  const refurbishmentRow = page.locator('#refurbishmentItems .expense-row').first();
+  await refurbishmentRow.locator('[data-cost-name]').fill('Initial works');
+  await refurbishmentRow.locator('[data-cost-amount]').fill('10000');
   await expect(page.locator('#summaryRefurbishment')).toHaveText('£10,000');
   await expect(page.locator('#summaryTotalCash')).toHaveText('£87,500');
 });
