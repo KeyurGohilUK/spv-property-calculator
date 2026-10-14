@@ -104,6 +104,50 @@ test('tracks individual refurbishment items and persists their calculated total'
   await expect(page.locator('#summaryTotalCash')).toHaveText('£84,500');
 });
 
+test('moves an item between purchase costs and refurbishment in both directions', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#newPropertyBtn').click();
+  await page.locator('#title').fill('Move Cost Items');
+  await page.locator('#purchasePrice').fill('250000');
+
+  await openContainingSection(page, '#addExpenseBtn');
+  await page.locator('#addExpenseBtn').click();
+  let purchaseRow = page.locator('#customExpenses .expense-row').first();
+  await purchaseRow.locator('[data-cost-name]').fill('Windows');
+  await purchaseRow.locator('[data-cost-amount]').fill('5000');
+  await expect(page.locator('#summaryOtherCosts')).toHaveText('£5,000');
+
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+  await purchaseRow.locator('[data-move-cost]').dragTo(page.locator('#refurbishmentItems'));
+  await expect(page.locator('#customExpenses .expense-row')).toHaveCount(0);
+  await expect(page.locator('#refurbishmentItems .expense-row')).toHaveCount(1);
+  await expect(page.locator('#summaryOtherCosts')).toHaveText('£0');
+  await expect(page.locator('#summaryRefurbishment')).toHaveText('£5,000');
+  await expect(page.locator('#summaryTotalCash')).toHaveText('£82,500');
+
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+  const card = page.locator('.property-card').filter({ hasText: 'Move Cost Items' });
+  await card.getByRole('button', { name: 'Open Move Cost Items for editing' }).click();
+  await openContainingSection(page, '#addExpenseBtn');
+  await openContainingSection(page, '#addRefurbishmentItemBtn');
+
+  let refurbishmentRow = page.locator('#refurbishmentItems .expense-row').first();
+  await expect(refurbishmentRow.locator('[data-cost-name]')).toHaveValue('Windows');
+  await refurbishmentRow.locator('[data-move-cost]').dragTo(page.locator('#customExpenses'));
+  purchaseRow = page.locator('#customExpenses .expense-row').first();
+  await expect(purchaseRow.locator('[data-cost-name]')).toHaveValue('Windows');
+  await expect(page.locator('#refurbishmentItems .expense-row')).toHaveCount(0);
+  await expect(page.locator('#summaryOtherCosts')).toHaveText('£5,000');
+  await expect(page.locator('#summaryRefurbishment')).toHaveText('£0');
+
+  await purchaseRow.locator('[data-move-cost]').click();
+  refurbishmentRow = page.locator('#refurbishmentItems .expense-row').first();
+  await expect(refurbishmentRow.locator('[data-cost-name]')).toHaveValue('Windows');
+  await expect(page.locator('#summaryOtherCosts')).toHaveText('£0');
+  await expect(page.locator('#summaryRefurbishment')).toHaveText('£5,000');
+});
+
 test('downloads a calendar invite for a future property viewing', async ({ page }) => {
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
