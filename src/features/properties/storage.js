@@ -65,6 +65,6 @@ export function permanentlyDeleteProperty(id) {
 }
 export function duplicateProperty(id) {
   const source=getProperty(id); if(!source || source.deletedAt) return null; const now=new Date().toISOString();
-  const copy={...source,id:makeId(),title:`${source.title||'Untitled Property'} (Copy)`,listingPrice:Number(source.listingPrice)||Number(source.purchasePrice)||0,priceHistory:[],deletedAt:null,createdAt:now,updatedAt:now,_cloudRevision:0,_cloudDirty:true};
+  const copy={...source,id:makeId(),title:`${source.title||'Untitled Property'} (Copy)`,listingPrice:Number(source.listingPrice)||Number(source.purchasePrice)||0,priceHistory:[],purchaseStage:'opportunity',acceptedOfferId:'',offerAcceptedDate:'',exchangeDate:'',completionDate:'',deletedAt:null,createdAt:now,updatedAt:now,_cloudRevision:0,_cloudDirty:true};
   const properties=readRaw(); properties.push(copy); if(!writeRaw(properties)) return null; return copy;
 }

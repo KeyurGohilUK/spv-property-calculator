@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="../">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="View completed property purchases in your SPV portfolio.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV Portfolio">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./src/components/theme.js"></script>
+  <script type="module" src="./src/components/help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles/features/portfolio.css">
+  <title>Portfolio · SPV Property Calculator</title>
+</head>
+<body class="auth-pending">
+  <div id="app">
+    <header class="app-header"><div class="header-inner">
+      <a class="brand-home" href="./" aria-label="Back to property calculator">
+        <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+        <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+      </a>
+    </div></header>
+    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="portfolio"></nav>
+    <main class="main-shell portfolio-shell">
+      <section class="hero-card portfolio-hero">
+        <div><p class="eyebrow">Completed acquisitions</p><h1>Portfolio</h1><p class="muted">Properties move here when their purchase completes.</p></div>
+        <a class="secondary-btn" href="./">View opportunities</a>
+      </section>
+      <section class="portfolio-summary" aria-label="Portfolio summary">
+        <article><span>Properties owned</span><strong id="portfolioCount">0</strong></article>
+        <article><span>Total purchase price</span><strong id="portfolioPurchaseTotal">£0</strong></article>
+        <article><span>Estimated mortgage</span><strong id="portfolioMortgageTotal">£0</strong></article>
+      </section>
+      <div id="portfolioList" class="portfolio-list" aria-live="polite"></div>
+      <section id="portfolioEmpty" class="empty-state">
+        <div class="empty-icon" aria-hidden="true">⌂</div><h2>No completed properties yet</h2>
+        <p>When a purchase completes, edit its opportunity and change the stage to “Completed · add to Portfolio”.</p>
+        <a class="primary-btn" href="./">Go to opportunities</a>
+      </section>
+    </main>
+  </div>
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./src/components/secondary-page-header.js"></script>
+  <script type="module" src="./src/components/admin-menu.js"></script>
+  <script type="module" src="./src/features/portfolio/portfolio.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+.portfolio-shell { display: grid; gap: 18px; }
+.portfolio-hero { align-items: center; }
+.portfolio-hero h1 { margin: 4px 0 6px; }
+.portfolio-hero .secondary-btn { white-space: nowrap; text-decoration: none; }
+.portfolio-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.portfolio-summary article,.portfolio-card { min-width: 0; padding: 17px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.portfolio-summary article { display: grid; gap: 8px; }
+.portfolio-summary article span,.portfolio-card-stats span { color: var(--muted); font-size: 12px; }
+.portfolio-summary article strong { color: var(--brand); font-size: clamp(18px, 3vw, 25px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.portfolio-list { display: grid; gap: 12px; }
+.portfolio-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.portfolio-card-heading h2 { margin: 3px 0; font-size: 20px; overflow-wrap: anywhere; }
+.portfolio-card-heading p { margin: 0; }
+.portfolio-card-heading .secondary-btn { flex: 0 0 auto; text-decoration: none; }
+.portfolio-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.portfolio-card-stats div { display: grid; gap: 5px; min-width: 0; }
+.portfolio-card-stats strong { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+@media (max-width: 620px) {
+  .portfolio-hero { align-items: stretch; flex-direction: column; }
+  .portfolio-hero .secondary-btn { width: 100%; text-align: center; }
+  .portfolio-summary { grid-template-columns: 1fr; }
+  .portfolio-summary article { grid-template-columns: 1fr auto; align-items: center; }
+  .portfolio-summary article strong { text-align: right; }
+  .portfolio-card-heading { flex-direction: column; }
+  .portfolio-card-heading .secondary-btn { width: 100%; text-align: center; }
+  .portfolio-card-stats { grid-template-columns: 1fr; }
+  .portfolio-card-stats div { grid-template-columns: 1fr auto; align-items: baseline; gap: 10px; }
+  .portfolio-card-stats strong { text-align: right; }
+}

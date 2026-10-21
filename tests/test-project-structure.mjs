@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const projectRoot = new URL('../', import.meta.url);
 const requiredDirectories = [
-  'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/',
+  'database/bootstrap/', 'database/migrations/', 'docs/setup/', 'docs/push-notifications/', 'docs/planning/', 'src/features/portfolio/',
   'docs/history/', 'src/app/', 'src/features/properties/', 'src/features/expenses/',
   'src/features/forecast/', 'src/features/tasks/', 'src/features/users/', 'src/services/', 'src/config/',
   'src/utils/', 'src/components/', 'styles/components/', 'workers/receipt/', 'supabase/functions/note-push/',
@@ -27,6 +27,7 @@ assert.equal(fs.existsSync(new URL('cloudflare/receipt-worker/', projectRoot)), 
 const organisedModules = {
   'src/app/': ['app.js', 'app-shell.js', 'primary-navigation.js'],
   'src/features/properties/': ['calculations.js', 'property-card.js', 'storage.js', 'calendar-invite.js'],
+  'src/features/portfolio/': ['portfolio.js'],
   'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
   'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js', 'forecast-brrr.js'],
   'src/features/tasks/': ['tasks.js', 'task-storage.js', 'task-cloud-sync.js'],
