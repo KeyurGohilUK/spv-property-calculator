@@ -4,7 +4,7 @@
   top: calc(var(--safe-top) + 71px);
   z-index: 18;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   max-width: 1120px;
   margin: 0 auto;
   padding: 8px 16px;

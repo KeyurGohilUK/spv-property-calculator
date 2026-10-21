@@ -33,6 +33,17 @@
 .price-history-label { color: var(--text); font-weight: 700; }
 .price-history-copy time,.price-history-note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .price-history-listing { border-style: dashed; }
+.purchase-progress { display: grid; gap: 12px; margin: 0 0 16px; padding: 15px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
+.purchase-progress h3 { margin: 3px 0 5px; }
+.purchase-progress p { margin: 0; }
+.purchase-progress > .field { margin: 0; }
+.purchase-stage-dates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.purchase-stage-dates .field { min-width: 0; margin: 0; }
+.purchase-stage-dates input { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.accepted-offer-label { flex: 0 0 auto; color: var(--positive); font-size: 11px; font-weight: 800; text-align: right; }
+.accept-offer-btn { flex: 0 0 auto; padding: 6px 8px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); font-size: 11px; }
+.purchase-stage-badge { display: inline-flex; width: fit-content; margin-bottom: 5px; padding: 4px 8px; border-radius: 999px; color: var(--brand-strong); background: color-mix(in srgb, var(--brand) 12%, var(--surface)); font-size: 10px; font-weight: 800; }
+.purchase-stage-badge.stage-under_offer,.purchase-stage-badge.stage-exchanged { color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, var(--surface)); }
 .price-history-offer { border-inline-start: 4px solid var(--brand); }
 .price-history-counteroffer { border-inline-start: 4px solid var(--brand-strong); }
 .price-entry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; min-width: 0; }
@@ -51,6 +62,10 @@
 .price-history-state { padding: 10px 2px 0; }
 .price-history-state p { margin: 0; }
 @media (max-width: 620px) {
+  .purchase-stage-dates { grid-template-columns: 1fr; }
+  .price-history-item { align-items: flex-start; flex-wrap: wrap; }
+  .price-history-item > strong { margin-left: auto; }
+  .accept-offer-btn,.accepted-offer-label { margin-left: auto; }
   .price-entry-form { grid-template-columns: minmax(0, 1fr); }
   .price-entry-form > button,.price-entry-form > small { grid-column: auto; }
   .price-history-current { align-items: flex-start; flex-direction: column; }

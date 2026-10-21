@@ -4,6 +4,7 @@ import { blockExternalServices } from './support/app-helpers.js';
 
 const pages = [
   ['Properties', '/'],
+  ['Portfolio', '/portfolio/'],
   ['Expenses', '/expenses/'],
   ['Forecast', '/forecast/'],
   ['BRRR', '/brrr/'],

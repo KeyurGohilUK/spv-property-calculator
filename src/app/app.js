@@ -31,6 +31,7 @@ import { createPropertyCard, formatViewingDate } from '../features/properties/pr
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from '../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../utils/validation.js';
 import { createPriceHistoryEntry, normalizePriceHistory } from '../features/properties/price-history.js';
+import { getOpportunityProperties, normalizePurchaseStage, PURCHASE_STAGES } from '../features/properties/purchase-lifecycle.js';
 
 setupPrimaryNavigation();
 const appShell = setupAppShell({ home: true });
@@ -64,6 +65,7 @@ let savedPropertySnapshot = '';
 let pendingPropertyId = '';
 let currentListingPrice = null;
 let currentPriceHistory = [];
+let currentAcceptedOfferId = '';
 let draggedCostRow = null;
 let pointerCostDrag = null;
 
@@ -197,6 +199,11 @@ function getFormModel() {
     purchasePrice: safeNumber($('purchasePrice').value),
     listingPrice: currentListingPrice,
     priceHistory: currentPriceHistory,
+    purchaseStage: normalizePurchaseStage($('purchaseStage').value),
+    acceptedOfferId: currentAcceptedOfferId,
+    offerAcceptedDate: $('offerAcceptedDate').value || '',
+    exchangeDate: $('exchangeDate').value || '',
+    completionDate: $('completionDate').value || '',
     depositPercent: safeNumber($('depositPercent').value),
     qualifyingCorporateRelief: $('qualifyingCorporateRelief').checked,
     nonResident: $('nonResident').checked,
@@ -702,10 +709,42 @@ function renderPriceHistory() {
     const amount = document.createElement('strong');
     amount.textContent = money(entry.price);
     item.append(details, amount);
+    if (entry.type === 'offer' || entry.type === 'counteroffer') {
+      if (entry.id === currentAcceptedOfferId) {
+        const accepted = document.createElement('span');
+        accepted.className = 'accepted-offer-label';
+        accepted.textContent = 'Accepted · Sold STC';
+        item.appendChild(accepted);
+      } else {
+        const acceptButton = document.createElement('button');
+        acceptButton.type = 'button';
+        acceptButton.className = 'text-btn accept-offer-btn';
+        acceptButton.textContent = 'Mark accepted';
+        acceptButton.setAttribute('aria-label', `Mark ${money(entry.price)} offer as accepted`);
+        acceptButton.addEventListener('click', () => markOfferAccepted(entry));
+        item.appendChild(acceptButton);
+      }
+    }
     list.appendChild(item);
   });
 
   $('priceHistoryCurrentPrice').textContent = money(safeNumber($('purchasePrice').value));
+}
+
+function todayDateInputValue() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+async function markOfferAccepted(entry) {
+  currentAcceptedOfferId = entry.id;
+  $('purchaseStage').value = 'under_offer';
+  $('offerAcceptedDate').value = entry.date || todayDateInputValue();
+  $('purchasePrice').value = formatInputValue(entry.price);
+  renderCalculation();
+  renderPriceHistory();
+  updateSaveButtonState();
+  await saveCurrentProperty();
 }
 
 function updatePriceEntryTypeUI() {
@@ -760,12 +799,17 @@ function resetForm() {
   editingCreatedAt = null;
   currentListingPrice = null;
   currentPriceHistory = [];
+  currentAcceptedOfferId = '';
   $('priceEntryType').value = 'offer';
   updatePriceEntryTypeUI();
   $('priceEntryAmount').value = '';
   $('priceEntryNote').value = '';
   renderPriceHistory();
   $('propertyForm').reset();
+  $('purchaseStage').value = 'opportunity';
+  $('offerAcceptedDate').value = '';
+  $('exchangeDate').value = '';
+  $('completionDate').value = '';
   const today = new Date();
   $('priceEntryDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   syncViewingDateFromPicker();
@@ -796,6 +840,7 @@ function loadIntoForm(property) {
   editingCreatedAt = property.createdAt || null;
   currentListingPrice = Number(property.listingPrice) > 0 ? Number(property.listingPrice) : safeNumber(property.purchasePrice);
   currentPriceHistory = normalizePriceHistory(property.priceHistory);
+  currentAcceptedOfferId = String(property.acceptedOfferId || '');
   $('editorModeLabel').textContent = 'Editing saved property';
 
   $('title').value = property.title || '';
@@ -803,6 +848,10 @@ function loadIntoForm(property) {
   $('listingUrl').value = property.listingUrl || '';
   setViewingDatePicker(property.viewingDate || '');
   $('purchasePrice').value = property.purchasePrice ? formatInputValue(property.purchasePrice) : '';
+  $('purchaseStage').value = normalizePurchaseStage(property.purchaseStage);
+  $('offerAcceptedDate').value = property.offerAcceptedDate || '';
+  $('exchangeDate').value = property.exchangeDate || '';
+  $('completionDate').value = property.completionDate || '';
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
   $('nonResident').checked = Boolean(property.nonResident);
@@ -878,11 +927,11 @@ function openPendingProperty() {
   return true;
 }
 function updatePropertyCounts() {
-  const activeCount=getActiveProperties().length, archivedCount=getArchivedProperties().length;
+  const activeCount=getOpportunityProperties(getActiveProperties()).length, archivedCount=getArchivedProperties().length;
   $('propertyCount').textContent=activeCount; $('archivedPropertyCount').textContent=archivedCount; $('archiveCountBadge').textContent=archivedCount;
 }
 function renderPropertyList() {
-  const properties=getActiveProperties(); updatePropertyCounts(); $('emptyState').classList.toggle('hidden', properties.length>0); $('propertyList').innerHTML='';
+  const properties=getOpportunityProperties(getActiveProperties()); updatePropertyCounts(); $('emptyState').classList.toggle('hidden', properties.length>0); $('propertyList').innerHTML='';
   properties.forEach((property)=>{
     const calc=calculateProperty(property);
     const propertyTitle=property.title||'Untitled Property';
@@ -910,7 +959,7 @@ function renderPropertyList() {
       </div>`;
     const card=createPropertyCard({
       property, calc,
-      headerHtml:`<h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?formatDate(property.updatedAt):'recently'}</p>${viewingDateRow}`,
+      headerHtml:`<span class="purchase-stage-badge stage-${normalizePurchaseStage(property.purchaseStage)}">${escapeHtml(PURCHASE_STAGES[normalizePurchaseStage(property.purchaseStage)])}</span><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?formatDate(property.updatedAt):'recently'}</p>${viewingDateRow}`,
       toolsHtml,
       formatters:{ money, number:(value)=>formatNumber(value, { maximumFractionDigits: 2 }), escape:escapeHtml }
     });

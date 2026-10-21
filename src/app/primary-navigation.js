@@ -1,5 +1,6 @@
 const icons = Object.freeze({
   properties: '<path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path>',
+  portfolio: '<path d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path><path d="M7 10h.01M17 10h.01"></path>',
   expenses: '<rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h4"></path>',
   forecast: '<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path>',
   tasks: '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect><path d="m9 12 2 2 4-4"></path>',
@@ -22,6 +23,7 @@ export function setupPrimaryNavigation(root = document) {
   const home = nav.dataset.home === 'true';
   const items = [
     { id: 'properties', label: 'Properties', href: './' },
+    { id: 'portfolio', label: 'Portfolio', href: './portfolio/' },
     { id: 'expenses', label: 'Expenses', href: './expenses/' },
     { id: 'tasks', label: 'Tasks', href: './tasks/' },
     { id: 'forecast', label: 'Forecast', href: './forecast/', badge: 'Beta' }

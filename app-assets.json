@@ -1,5 +1,5 @@
 {
-  "version": "1.28.2",
+  "version": "1.29.0",
   "assets": [
     "./",
     "./index.html",
@@ -17,6 +17,7 @@
     "./styles/app-shell-navigation.css",
     "./styles/legal.css",
     "./styles/features/properties.css",
+    "./styles/features/portfolio.css",
     "./styles/features/summary.css",
     "./styles/features/archive.css",
     "./styles/features/editor.css",
@@ -37,8 +38,11 @@
     "./cloud.js",
     "./src/features/properties/calculations.js",
     "./src/features/properties/price-history.js",
+    "./src/features/properties/purchase-lifecycle.js",
     "./src/config/tax-config.js",
     "./src/features/properties/storage.js",
+    "./portfolio/",
+    "./src/features/portfolio/portfolio.js",
     "./manifest.json",
     "./supabase-config.js",
     "./release.json",

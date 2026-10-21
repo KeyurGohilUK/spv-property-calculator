@@ -5,7 +5,7 @@ const { getProperties,getActiveProperties,getArchivedProperties,getProperty,save
 const saved=saveProperty({title:'Test Property',purchasePrice:200000,depositPercent:25});
 assert.ok(saved.id); assert.equal(getActiveProperties().length,1); assert.equal(getArchivedProperties().length,0);
 const updated=saveProperty({...saved,title:'Updated Property'}); assert.equal(getProperty(saved.id).title,'Updated Property');
-const copy=duplicateProperty(saved.id); assert.ok(copy.id!==saved.id); assert.equal(getActiveProperties().length,2);
+const copy=duplicateProperty(saved.id); assert.ok(copy.id!==saved.id); assert.equal(copy.purchaseStage, 'opportunity'); assert.equal(copy.acceptedOfferId, ''); assert.equal(copy.completionDate, ''); assert.equal(getActiveProperties().length,2);
 const archived=archiveProperty(saved.id); assert.ok(archived.deletedAt); assert.equal(getProperties().length,2); assert.equal(getActiveProperties().length,1); assert.equal(getArchivedProperties().length,1); assert.equal(duplicateProperty(saved.id),null);
 const restored=restoreProperty(saved.id); assert.equal(restored.deletedAt,null); assert.equal(getActiveProperties().length,2); assert.equal(getArchivedProperties().length,0);
 const archivedAgain=archiveProperty(saved.id); assert.ok(archivedAgain.deletedAt); assert.equal(permanentlyDeleteProperty(saved.id),true); assert.equal(getProperty(saved.id),null); assert.equal(getProperties().length,1);

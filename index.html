@@ -194,6 +194,24 @@
                 <p class="muted small">Save this opportunity first. Its purchase price will be recorded as the original listing price.</p>
               </div>
               <div id="priceHistoryEditor" class="hidden">
+                <section class="purchase-progress" aria-labelledby="purchaseProgressTitle">
+                  <div><p class="eyebrow">Purchase progress</p><h3 id="purchaseProgressTitle">Deal status</h3>
+                    <p class="muted small">An accepted offer is still subject to contract until exchange. The property enters Portfolio only when the purchase completes.</p>
+                  </div>
+                  <label class="field"><span>Stage</span>
+                    <select id="purchaseStage">
+                      <option value="opportunity">Opportunity</option>
+                      <option value="under_offer">Offer accepted · Sold STC</option>
+                      <option value="exchanged">Exchanged</option>
+                      <option value="completed">Completed · add to Portfolio</option>
+                    </select>
+                  </label>
+                  <div class="purchase-stage-dates">
+                    <label class="field"><span>Offer accepted</span><input id="offerAcceptedDate" type="date"></label>
+                    <label class="field"><span>Contracts exchanged</span><input id="exchangeDate" type="date"></label>
+                    <label class="field"><span>Completion date</span><input id="completionDate" type="date"></label>
+                  </div>
+                </section>
                 <div class="price-history-current">
                   <span>Current calculator purchase price</span>
                   <strong id="priceHistoryCurrentPrice">£0</strong>

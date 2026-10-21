@@ -318,7 +318,7 @@ test('@mobile mobile save control remains fixed while the editor scrolls', async
   expect(after.y + after.height).toBeLessThanOrEqual(844);
 });
 
-for (const route of ['/', '/expenses/', '/forecast/']) {
+for (const route of ['/', '/expenses/', '/forecast/', '/portfolio/']) {
   test(`only Forecast keeps the Beta badge on ${route}`, async ({ page }) => {
     await page.goto(route);
 
@@ -353,7 +353,7 @@ test('home Account, Install and More controls open dialogs without navigation', 
   await expect(page).toHaveURL(originalUrl);
 });
 
-for (const route of ['/expenses/', '/forecast/']) {
+for (const route of ['/expenses/', '/forecast/', '/portfolio/']) {
   test(`secondary-page controls behave as dialogs on ${route}`, async ({ page }) => {
     await page.goto(route);
     const originalUrl = page.url();
@@ -473,6 +473,44 @@ test('records offer and counteroffer history and recalculates from the latest pr
   await expect(page.locator('#priceHistoryList')).toContainText('£240,000');
   await expect(page.locator('#priceHistoryList')).toContainText('£245,000');
   await expect(page.locator('#summaryPurchasePrice')).toHaveText('£245,000');
+});
+
+test('tracks an accepted offer through exchange into the completed Portfolio', async ({ page }) => {
+  await createProperty(page, { title: 'Portfolio Lifecycle', price: '250000' });
+  let card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
+  await card.getByRole('button', { name: 'Open Portfolio Lifecycle for editing' }).click();
+  await openContainingSection(page, '#priceEntryType');
+  await page.locator('#priceEntryType').selectOption('offer');
+  await page.locator('#priceEntryAmount').fill('240000');
+  await page.locator('#priceEntryDate').fill('2026-10-20');
+  await page.locator('#addPriceEntryBtn').click();
+  await page.getByRole('button', { name: 'Mark £240,000 offer as accepted' }).click();
+  await expect(page.locator('#purchaseStage')).toHaveValue('under_offer');
+  await expect(page.locator('#offerAcceptedDate')).toHaveValue('2026-10-20');
+  await expect(page.locator('#priceHistoryList')).toContainText('Accepted · Sold STC');
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
+
+  await page.locator('#backBtn').click();
+  card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
+  await expect(card).toContainText('Under offer · Sold STC');
+  await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'No completed properties yet' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Properties' }).click();
+  card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
+  await card.getByRole('button', { name: 'Open Portfolio Lifecycle for editing' }).click();
+  await openContainingSection(page, '#purchaseStage');
+  await page.locator('#purchaseStage').selectOption('completed');
+  await page.locator('#exchangeDate').fill('2026-10-20');
+  await page.locator('#completionDate').fill('2026-10-21');
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+  await expect(page.locator('#emptyState')).toBeVisible();
+  await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Portfolio Lifecycle' })).toBeVisible();
+  await expect(page.locator('.portfolio-card')).toContainText('Completed 21 Oct 2026');
+  await expect(page.locator('.portfolio-card')).toContainText('£240,000');
+  await expect(page.locator('#portfolioCount')).toHaveText('1');
 });
 
 

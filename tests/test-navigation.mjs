@@ -46,10 +46,11 @@ assert.doesNotMatch(styles, /#homeView > \.hero-card/, 'Page header corner treat
 assert.match(styles, /\.sync-status \{[^}]*color: var\(--muted\)[^}]*text-align: right; \}[\s\S]*\.sync-status\.error \{ color: var\(--danger\); \}[\s\S]*\.sync-status\.synced \{ color: var\(--brand\); \}/, 'Shared sync-status styling is missing');
 assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.property-hero-actions \{[^}]*grid-template-columns: 1fr;[^}]*width: 100%; \}/, 'Property hero actions must stack on mobile');
 
-for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
+const portfolio = fs.readFileSync(new URL('../portfolio/index.html', import.meta.url), 'utf8');
+for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses], ['portfolio', portfolio]]) {
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
-assert.match(primaryNavigation, /Properties[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(primaryNavigation, /Properties[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
 assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
 assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Forecast as Beta');
 assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
@@ -89,6 +90,7 @@ assert.match(dialogHelper, /getBoundingClientRect[\s\S]*outside[\s\S]*close\(\)/
 assert.match(dialogHelper, /aria-labelledby[\s\S]*focusFirst[\s\S]*returnFocus/s, 'Shared helper must label dialogs and manage focus');
 assert.match(primaryNavigation, /href: '\.\/expenses\/'/, 'Shared navigation must link to the clean Expenses route');
 assert.match(primaryNavigation, /href: '\.\/forecast\/'/, 'Shared navigation must link to the clean Forecast route');
+assert.match(primaryNavigation, /href: '\.\/portfolio\/'/, 'Shared navigation must link to the clean Portfolio route');
 assert.doesNotMatch(primaryNavigation, /\.html/, 'Primary navigation must not expose implementation filenames');
 assert.match(appShell, /href="\.\/admin\/users\/"/, 'App Menu must link to the clean user-management route');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');

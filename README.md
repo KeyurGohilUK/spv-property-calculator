@@ -36,6 +36,8 @@ official backend, data, service accounts, or other infrastructure.
 - Unlimited custom expenses
 - Refurbishment cost
 - Total purchase costs and total cash required
+- Track listing reductions, offers, counteroffers and accepted offers through Sold Subject to Contract, exchange and completion
+- Keep completed purchases in a dedicated Portfolio view, using the same property record and calculation
 - Local offline storage
 - Supabase email/password sign-in
 - Shared cloud property list restricted to approved workspace members
