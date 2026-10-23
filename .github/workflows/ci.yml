@@ -104,57 +104,7 @@ jobs:
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             : > /tmp/new-migrations.txt
             if [[ -n "$MIGRATION_FILE" ]]; then
-              migration_pattern='^Update [0-9]+ - [[:alnum:] _-]+\.sql
-                echo "Enter a numbered migration filename, for example: Update 25 - Appointment-based Expense Payers.sql" >&2
-                exit 1
-              fi
-              migration_path="database/migrations/$MIGRATION_FILE"
-              if [[ ! -f "$migration_path" ]]; then
-                echo "Migration file not found: $migration_path" >&2
-                exit 1
-              fi
-              printf '%s\n' "$migration_path" > /tmp/new-migrations.txt
-            fi
-          else
-            if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
-              BEFORE_SHA="$(git rev-list --max-parents=0 "$AFTER_SHA")"
-            fi
-            git diff --name-only --diff-filter=A "$BEFORE_SHA" "$AFTER_SHA" -- 'database/migrations/Update *.sql' \
-              | sort -V > /tmp/new-migrations.txt
-          fi
-          if [[ -s /tmp/new-migrations.txt ]]; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "New migrations to deploy:"
-            cat /tmp/new-migrations.txt
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "No new numbered migrations in this push."
-          fi
-
-      - name: Require Supabase database connection secret
-        if: steps.migrations.outputs.found == 'true'
-        run: |
-          if [[ -z "$SUPABASE_DB_URL" ]]; then
-            echo "Set SUPABASE_DB_URL as a secret in the production GitHub environment." >&2
-            exit 1
-          fi
-
-      - name: Install PostgreSQL client
-        if: steps.migrations.outputs.found == 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
-
-      - name: Apply migrations in order
-        if: steps.migrations.outputs.found == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          while IFS= read -r migration; do
-            echo "Applying $migration"
-            psql "$SUPABASE_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --file "$migration"
-          done < /tmp/new-migrations.txt
-
+              migration_pattern='^Update [0-9]+ - [[:alnum:] _-]+\.sql$'
               if [[ ! "$MIGRATION_FILE" =~ $migration_pattern ]]; then
                 echo "Enter a numbered migration filename, for example: Update 25 - Appointment-based Expense Payers.sql" >&2
                 exit 1
