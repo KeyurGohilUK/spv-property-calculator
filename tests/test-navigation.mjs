@@ -51,6 +51,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
 assert.match(primaryNavigation, /Opportunities[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(primaryNavigation, /portfolio: '[^']*M3 11 12 4l9 7[^']*m10\.5 14 2\.5-2\.5 2 2 4-5[^']*M16 8\.5H19v3/, 'Portfolio navigation must use a house with a rising growth arrow');
 assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Opportunities must stay on one line on every mobile page');
 assert.doesNotMatch(styles, /#editorView \.editor-topbar::after/, 'Editor toolbar must not add a backdrop beneath the bar');
 assert.match(styles, /\.editor-topbar \{[^}]*box-shadow: none;/, 'Editor toolbar must not cast a shadow over the content below');
