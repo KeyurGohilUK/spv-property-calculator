@@ -1,6 +1,7 @@
 {
-  "version": "1.45.3",
+  "version": "1.45.4",
   "notes": [
+    "Use the page background color for the gap above the editor toolbar.",
     "Use the page background to fill the gap between navigation and the editor toolbar.",
     "Preserve a 20px solid themed gap above the fixed editor toolbar.",
     "Keep scrolling property details hidden behind the fixed editor save toolbar.",

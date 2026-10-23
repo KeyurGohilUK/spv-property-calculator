@@ -311,7 +311,7 @@
     width: 100vw;
     height: 20px;
     transform: translateX(-50%);
-    background: var(--surface);
+    background: var(--bg);
     pointer-events: none;
   }
 }
