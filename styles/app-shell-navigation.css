@@ -183,7 +183,7 @@
     overflow-wrap: anywhere;
     text-align: center;
   }
-  #propertiesNavLink span {
+  .primary-app-nav .primary-nav-item:first-child span {
     overflow-wrap: normal;
     white-space: nowrap;
     font-size: clamp(6px, 1.8vw, 9px);
