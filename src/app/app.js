@@ -706,24 +706,10 @@ function renderPriceHistory() {
   $('priceHistoryEditor').classList.toggle('hidden', !isSaved);
   const stage = normalizePurchaseStage($('purchaseStage').value);
   const acceptedOffer = currentPriceHistory.find((entry) => entry.id === currentAcceptedOfferId);
-  const displayedPrice = stage !== 'opportunity' && acceptedOffer
-    ? acceptedOffer.price
-    : currentListingPrice;
+  const displayedPrice = acceptedOffer?.price ?? safeNumber($('purchasePrice').value);
   $('priceHistorySectionTotal').textContent = displayedPrice ? money(displayedPrice) : 'Save property first';
   document.querySelector('.price-entry-form')?.classList.toggle('hidden', stage !== 'opportunity');
   list.replaceChildren();
-
-  if (currentListingPrice > 0) {
-    const baseline = document.createElement('li');
-    baseline.className = 'price-history-item price-history-listing';
-    const heading = document.createElement('span');
-    heading.className = 'price-history-label';
-    heading.textContent = 'Original listing price';
-    const amount = document.createElement('strong');
-    amount.textContent = money(currentListingPrice);
-    baseline.append(heading, amount);
-    list.appendChild(baseline);
-  }
 
   [...currentPriceHistory].sort((a, b) => a.date.localeCompare(b.date)).forEach((entry) => {
     const item = document.createElement('li');
@@ -765,7 +751,17 @@ function renderPriceHistory() {
     list.appendChild(item);
   });
 
-  $('priceHistoryCurrentPrice').textContent = money(safeNumber($('purchasePrice').value));
+  if (currentListingPrice > 0) {
+    const baseline = document.createElement('li');
+    baseline.className = 'price-history-item price-history-listing';
+    const heading = document.createElement('span');
+    heading.className = 'price-history-label';
+    heading.textContent = 'Original listing price';
+    const amount = document.createElement('strong');
+    amount.textContent = money(currentListingPrice);
+    baseline.append(heading, amount);
+    list.appendChild(baseline);
+  }
 }
 
 function todayDateInputValue() {

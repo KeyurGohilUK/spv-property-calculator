@@ -478,7 +478,8 @@ test('accepts a listing reduction below the current calculator price', async ({ 
   await page.locator('#priceNegotiationSection > summary').click();
   await expect(page.locator('#priceHistoryList')).toContainText('Original listing price');
   await expect(page.locator('#priceHistoryList')).toContainText('£261,000');
-  await expect(page.locator('#priceHistoryCurrentPrice')).toHaveText('£300,000');
+  await expect(page.locator('#priceHistorySectionTotal')).toHaveText('£300,000');
+  await expect(page.locator('#priceHistoryList > li').last()).toContainText('Original listing price');
 
   await page.locator('#priceEntryType').selectOption('price_reduction');
   await page.locator('#priceEntryAmount').fill('284950');
@@ -541,6 +542,8 @@ test('tracks an accepted offer through exchange into the completed Portfolio', a
   await expect(page.locator('#offerAcceptedDate')).toHaveValue('2026-10-20');
   await expect(page.locator('#priceHistoryList')).toContainText('Accepted · Sold STC');
   await expect(page.locator('#priceHistorySectionTotal')).toHaveText('£240,000');
+  await expect(page.locator('#priceHistoryList > li').last()).toContainText('Original listing price');
+  await expect(page.locator('#priceHistoryCurrentPrice')).toHaveCount(0);
   await expect(page.locator('.price-entry-form')).toBeHidden();
   await page.locator('#purchaseStage').selectOption('opportunity');
   await expect(page.locator('.price-entry-form')).toBeVisible();
