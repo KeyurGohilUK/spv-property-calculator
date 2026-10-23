@@ -53,17 +53,26 @@ test('desktop primary navigation background spans the viewport', async ({ page }
   expect(bounds.right).toBeGreaterThanOrEqual(bounds.viewportWidth - 1);
 });
 
-test('desktop sticky navigation stays flush below the sticky app header', async ({ page }) => {
+test('desktop navigation does not shift while scrolling below the sticky app header', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.evaluate(() => window.scrollTo(0, 500));
 
-  const positions = await page.evaluate(() => ({
-    headerBottom: document.querySelector('.app-header').getBoundingClientRect().bottom,
-    navigationTop: document.querySelector('.primary-app-nav').getBoundingClientRect().top
-  }));
-  expect(positions.navigationTop).toBeGreaterThanOrEqual(positions.headerBottom - 1);
-  expect(positions.navigationTop - positions.headerBottom).toBeLessThanOrEqual(3);
+  const positions = [];
+  for (const scrollY of [0, 100, 500]) {
+    await page.evaluate((y) => window.scrollTo(0, y), scrollY);
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    positions.push(await page.evaluate(() => ({
+      headerBottom: document.querySelector('.app-header').getBoundingClientRect().bottom,
+      navigationTop: document.querySelector('.primary-app-nav').getBoundingClientRect().top
+    })));
+  }
+
+  positions.forEach(({ headerBottom, navigationTop }) => {
+    expect(Math.abs(navigationTop - headerBottom)).toBeLessThanOrEqual(1);
+  });
+  positions.forEach(({ navigationTop }) => {
+    expect(Math.abs(navigationTop - positions[0].navigationTop)).toBeLessThanOrEqual(1);
+  });
 });
 
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {
