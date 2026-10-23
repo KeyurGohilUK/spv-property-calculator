@@ -983,11 +983,13 @@ function renderPropertyList() {
     const listingUrl = normalizeListingUrl(property.listingUrl);
     const viewingDateLabel = formatViewingDate(property.viewingDate);
     const viewingPassed = isViewingPassed(property.viewingDate);
-    const viewingDateRow = viewingPassed
-      ? `<p class="property-viewing-date viewed"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.2 2.2 4.8-4.8"></path></svg><span>Viewed</span></p>`
-      : viewingDateLabel
-        ? `<p class="property-viewing-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path></svg><span>Viewing ${escapeHtml(viewingDateLabel)}</span></p>`
-        : '';
+    const purchaseStage = normalizePurchaseStage(property.purchaseStage);
+    const stageLabel = purchaseStage === 'opportunity' && viewingPassed
+      ? 'Viewed'
+      : PURCHASE_STAGES[purchaseStage];
+    const viewingDateRow = !viewingPassed && viewingDateLabel
+      ? `<p class="property-viewing-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path></svg><span>Viewing ${escapeHtml(viewingDateLabel)}</span></p>`
+      : '';
     const calendarAction = !viewingPassed && viewingDateLabel ? `<button class="property-card-icon-action calendar" type="button" data-action="calendar" aria-label="Add viewing for ${escapeHtml(propertyTitle)} to calendar" title="Add viewing to calendar" data-tooltip="Calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg></button>` : '';
     const listingAction = listingUrl ? `<a class="property-card-icon-action listing" href="${escapeHtml(listingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open property listing for ${escapeHtml(propertyTitle)}" title="Open property listing" data-tooltip="Listing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg></a>` : '';
     const toolsHtml=`<div class="property-card-tools" role="group" aria-label="Property actions">
@@ -1004,7 +1006,7 @@ function renderPropertyList() {
       </div>`;
     const card=createPropertyCard({
       property, calc,
-      headerHtml:`<span class="purchase-stage-badge stage-${normalizePurchaseStage(property.purchaseStage)}">${escapeHtml(PURCHASE_STAGES[normalizePurchaseStage(property.purchaseStage)])}</span><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?formatDate(property.updatedAt):'recently'}</p>${viewingDateRow}`,
+      headerHtml:`<span class="purchase-stage-badge stage-${purchaseStage}">${escapeHtml(stageLabel)}</span><h3>${escapeHtml(propertyTitle)}</h3><p class="property-meta">Updated ${property.updatedAt?formatDate(property.updatedAt):'recently'}</p>${viewingDateRow}`,
       toolsHtml,
       formatters:{ money, number:(value)=>formatNumber(value, { maximumFractionDigits: 2 }), escape:escapeHtml }
     });
