@@ -107,9 +107,9 @@ const payerProfile = {
   ]
 };
 assert.deepEqual(getExpensePayerOptions(payerProfile), [
-  { value: 'company', label: 'Paid by company · TG Property Invest Ltd' },
-  { value: 'appointment:person-123', label: 'Alex Director · Director, Shareholder' },
-  { value: 'appointment:person-456', label: 'Sam Secretary · Secretary' }
+  { value: 'company', label: 'TG Property Invest Ltd' },
+  { value: 'appointment:person-123', label: 'Alex Director' },
+  { value: 'appointment:person-456', label: 'Sam Secretary' }
 ]);
 assert.equal(getExpensePayerLabel('appointment:person-123', payerProfile), 'Alex Director');
 assert.equal(getExpensePayerLabel('company', payerProfile), 'Company · TG Property Invest Ltd');

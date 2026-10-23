@@ -18,18 +18,15 @@ export function getExpensePayerOptions(profile = getCompanyProfile()) {
   const companyName = String(profile?.companyName || '').trim();
   const options = [{
     value: 'company',
-    label: companyName ? `Paid by company · ${companyName}` : 'Paid by company'
+    label: companyName || 'Company'
   }];
   (Array.isArray(profile?.appointments) ? profile.appointments : []).forEach((person) => {
     const id = String(person?.id || '').trim();
     const name = String(person?.name || '').trim();
     if (!id || !name || !Array.isArray(person.roles) || !person.roles.length) return;
-    const roles = person.roles.map((role) => ({
-      director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
-    }[role])).filter(Boolean);
     options.push({
       value: `appointment:${id}`,
-      label: roles.length ? `${name} · ${roles.join(', ')}` : name
+      label: name
     });
   });
   return options;
