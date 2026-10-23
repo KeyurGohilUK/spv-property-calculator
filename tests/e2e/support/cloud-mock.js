@@ -129,6 +129,7 @@ const MOCK_SUPABASE_SDK = `
         amount: args.p_amount,
         expense_date: args.p_expense_date,
         category: args.p_category,
+        paid_by: args.p_paid_by,
         scope: args.p_scope,
         property_id: args.p_property_id,
         description: args.p_description,

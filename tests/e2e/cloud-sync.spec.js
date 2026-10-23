@@ -37,6 +37,7 @@ function pendingExpense(overrides = {}) {
     amount: 45,
     date: '2026-08-23',
     category: 'Office & administration',
+    paidBy: 'director-a',
     scope: 'company',
     propertyId: '',
     description: 'Pending cloud expense',
@@ -71,6 +72,8 @@ test('one workspace sync uploads pending properties and expenses', async ({ page
     const calls = await cloudCalls(page);
     return calls.filter((call) => call.type === 'rpc').map((call) => call.name).sort();
   }).toEqual(['upsert_expense_if_current', 'upsert_property_if_current']);
+  const expenseWrite = (await cloudCalls(page)).find((call) => call.name === 'upsert_expense_if_current');
+  expect(expenseWrite.args.p_paid_by).toBe('director-a');
 
   await page.locator('#accountBtn').click();
   await page.locator('#dialogSyncBtn').click();
@@ -84,6 +87,7 @@ test('one workspace sync uploads pending properties and expenses', async ({ page
   expect(localState.expenses[0]._cloudDirty).toBe(false);
   expect(localState.properties[0]._cloudRevision).toBe(1);
   expect(localState.expenses[0]._cloudRevision).toBe(1);
+  expect(localState.expenses[0].paidBy).toBe('director-a');
 });
 
 test('property download failure is reported with the real safe error message', async ({ page }) => {
@@ -105,6 +109,7 @@ test('expense conflict preserves the dirty local record and explains the conflic
       amount: 40,
       expense_date: '2026-08-23',
       category: 'Office & administration',
+      paid_by: 'director-a',
       scope: 'company',
       property_id: null,
       description: 'Remote expense',

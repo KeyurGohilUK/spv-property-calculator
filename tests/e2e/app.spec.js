@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { blockExternalServices } from './support/app-helpers.js';
 
-async function addExpense(page, { amount = '125.50', description = 'Companies House filing fee', receipt } = {}) {
+async function addExpense(page, { amount = '125.50', description = 'Companies House filing fee', paidBy = 'company', receipt } = {}) {
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseAmount').fill(amount);
   await page.locator('#expenseDescription').fill(description);
+  await page.locator('#expensePaidBy').selectOption(paidBy);
   if (receipt) await page.locator('#expenseReceipt').setInputFiles(receipt);
   await page.getByRole('button', { name: 'Save Expense' }).click();
   await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
@@ -48,6 +49,29 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
   await page.getByRole('button', { name: /Delete expense/i }).click();
   await expect(page.locator('#expenseCount')).toHaveText('0');
   await expect(page.getByRole('heading', { name: 'No expenses recorded' })).toBeVisible();
+});
+
+test('records and filters expenses by payer', async ({ page }) => {
+  await page.goto('/expenses/');
+  await addExpense(page, { amount: '240', description: 'Survey paid personally', paidBy: 'director-a' });
+  await addExpense(page, { amount: '80', description: 'Company filing fee', paidBy: 'company' });
+
+  const personalExpense = page.locator('.expense-card').filter({ hasText: 'Survey paid personally' });
+  await expect(personalExpense).toContainText('Paid by Director A (personal funds)');
+  await personalExpense.getByRole('button', { name: 'Edit expense Survey paid personally' }).click();
+  await page.locator('#expensePaidBy').selectOption('director-b');
+  await page.getByRole('button', { name: 'Save Changes' }).click();
+  await expect(personalExpense).toContainText('Paid by Director B (personal funds)');
+
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]'));
+  expect(stored.find((expense) => expense.description === 'Survey paid personally')?.paidBy).toBe('director-b');
+
+  await page.getByRole('button', { name: 'Filter & Export' }).click();
+  await page.locator('#expensePaidByFilter').selectOption('director-b');
+  await expect(page.locator('#expenseCount')).toHaveText('1');
+  await expect(page.locator('.expense-card')).toContainText('Survey paid personally');
+  await expect(page.locator('#expensePayerReport')).toContainText('Director B (personal funds)');
+  await expect(page.locator('#expensePayerReport')).toContainText('£240.00');
 });
 
 test('shows selected receipt size and keeps receipt metadata locally', async ({ page, browserName }) => {

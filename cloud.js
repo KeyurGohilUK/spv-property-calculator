@@ -531,6 +531,7 @@
       amount: Number(row.amount) || 0,
       date: row.expense_date || '',
       category: row.category || 'Other',
+      paidBy: row.paid_by || 'unrecorded',
       scope: row.scope === 'property' ? 'property' : 'company',
       propertyId: row.property_id || '',
       description: row.description || '',
@@ -551,7 +552,7 @@
     await requireUser();
     const { data, error } = await supabaseClient
       .from('expenses')
-      .select('id,amount,expense_date,category,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision')
+      .select('id,amount,expense_date,category,paid_by,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision')
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data || []).map(fromCloudExpense);
@@ -573,6 +574,7 @@
         p_expense_date: record.date,
         p_category: record.category || 'Other',
         p_scope: record.scope === 'property' ? 'property' : 'company',
+        p_paid_by: record.paidBy || 'unrecorded',
         p_property_id: record.scope === 'property' ? String(record.propertyId || '') : null,
         p_description: record.description || '',
         p_notes: record.notes || '',

@@ -11,6 +11,7 @@ import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 import { formatCurrency, formatDate } from '../../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
 import { populateScopeFilterOptions } from '../../utils/scope-filter.js';
+import { EXPENSE_PAYER_OPTIONS, getExpensePayerLabel, normalizeExpensePayer } from './expense-payers.js';
 
 const $ = (id) => document.getElementById(id);
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
@@ -209,6 +210,12 @@ function populateProperties() {
   populateScopeFilterOptions($('expenseProperty'), $('expenseFilter'), properties);
 }
 
+function populatePayerOptions() {
+  const options = EXPENSE_PAYER_OPTIONS.map(({ value, label }) => new Option(label, value));
+  $('expensePaidBy').replaceChildren(...options.map((option) => option.cloneNode(true)));
+  $('expensePaidByFilter').replaceChildren(new Option('All payers', 'all'), ...options);
+}
+
 function updateScope() {
   const propertyScope = $('expenseScope').value === 'property';
   $('expensePropertyField').classList.toggle('hidden', !propertyScope);
@@ -233,6 +240,7 @@ function openForm(expense = null) {
   $('expenseDate').value = expense?.date || today();
   $('expenseAmount').value = expense?.amount || '';
   $('expenseCategory').value = expense?.category || $('expenseCategory').options[0].value;
+  $('expensePaidBy').value = expense ? normalizeExpensePayer(expense.paidBy) : 'company';
   $('expenseScope').value = expense?.scope || 'company';
   $('expenseProperty').value = expense?.propertyId || '';
   $('expenseDescription').value = expense?.description || '';
@@ -261,6 +269,8 @@ function expenseMatchesFilter(expense) {
   if (filter.startsWith('property:') && !(expense.scope === 'property' && expense.propertyId === filter.slice(9))) return false;
   const category = $('expenseCategoryFilter').value;
   if (category !== 'all' && expense.category !== category) return false;
+  const payer = $('expensePaidByFilter').value;
+  if (payer !== 'all' && normalizeExpensePayer(expense.paidBy) !== payer) return false;
   const from = $('expenseDateFrom').value;
   const to = $('expenseDateTo').value;
   if (from && String(expense.date || '') < from) return false;
@@ -308,6 +318,7 @@ function renderReports(items) {
   renderBreakdown('expenseAllocationReport', items, (item) =>
     item.scope === 'property' ? propertyName(item.propertyId) : 'General company'
   );
+  renderBreakdown('expensePayerReport', items, (item) => getExpensePayerLabel(item.paidBy));
   $('exportExpensesBtn').disabled = items.length === 0;
 }
 
@@ -318,11 +329,12 @@ function csvCell(value) {
 function exportFilteredExpenses() {
   const items = getExpenses().filter(expenseMatchesFilter);
   if (!items.length) return;
-  const header = ['Date', 'Amount GBP', 'Category', 'Allocation', 'Property', 'Description', 'Notes', 'Receipt file', 'Cloud sync'];
+  const header = ['Date', 'Amount GBP', 'Category', 'Paid by', 'Allocation', 'Property', 'Description', 'Notes', 'Receipt file', 'Cloud sync'];
   const rows = items.map((item) => [
     item.date,
     Number(item.amount || 0).toFixed(2),
     item.category || '',
+    getExpensePayerLabel(item.paidBy),
     item.scope === 'property' ? 'Specific property' : 'General company',
     item.scope === 'property' ? propertyName(item.propertyId) : '',
     item.description || '',
@@ -387,6 +399,10 @@ function render() {
     scope.className = `expense-chip ${expense.scope === 'property' ? 'property' : ''}`;
     scope.textContent = expense.scope === 'property' ? propertyName(expense.propertyId) : 'General company';
     meta.append(category, scope);
+    const payer = document.createElement('span');
+    payer.className = 'expense-chip payer';
+    payer.textContent = `Paid by ${getExpensePayerLabel(expense.paidBy)}`;
+    meta.appendChild(payer);
     if (expense.receipt) {
       const receipt = document.createElement('span');
       receipt.className = 'expense-chip';
@@ -508,6 +524,7 @@ async function submitExpense(event) {
       amount,
       date: $('expenseDate').value || today(),
       category: expenseCategory,
+      paidBy: normalizeExpensePayer($('expensePaidBy').value),
       scope,
       propertyId,
       description: expenseDescription,
@@ -595,6 +612,7 @@ $('expenseReceipt').addEventListener('input', updateReceiptSelectionDetails);
 $('expenseReceipt').addEventListener('change', updateReceiptSelectionDetails);
 $('expenseFilter').addEventListener('change', render);
 $('expenseCategoryFilter').addEventListener('change', render);
+$('expensePaidByFilter').addEventListener('change', render);
 $('expenseDateFrom').addEventListener('change', render);
 $('expenseDateTo').addEventListener('change', render);
 $('toggleExpenseFiltersBtn').addEventListener('click', () => {
@@ -606,6 +624,7 @@ $('exportExpensesBtn').addEventListener('click', exportFilteredExpenses);
 $('clearExpenseFiltersBtn').addEventListener('click', () => {
   $('expenseFilter').value = 'all';
   $('expenseCategoryFilter').value = 'all';
+  $('expensePaidByFilter').value = 'all';
   $('expenseDateFrom').value = '';
   $('expenseDateTo').value = '';
   render();
@@ -619,6 +638,7 @@ window.addEventListener('spv-workspace-synced', () => {
 });
 
 populateProperties();
+populatePayerOptions();
 Array.from($('expenseCategory').options).forEach((option) => {
   const filterOption = option.cloneNode(true);
   $('expenseCategoryFilter').appendChild(filterOption);

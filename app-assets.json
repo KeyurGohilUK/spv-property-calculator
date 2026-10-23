@@ -1,5 +1,5 @@
 {
-  "version": "1.29.1",
+  "version": "1.30.0",
   "assets": [
     "./",
     "./index.html",
@@ -58,6 +58,7 @@
     "./src/features/users/manage-users.js",
     "./styles/features/expenses.css",
     "./src/features/expenses/expenses.js",
+    "./src/features/expenses/expense-payers.js",
     "./src/features/expenses/expense-storage.js",
     "./src/features/expenses/expense-cloud-sync.js",
     "./src/components/sync-status.js",

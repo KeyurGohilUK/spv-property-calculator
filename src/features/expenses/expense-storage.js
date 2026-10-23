@@ -1,3 +1,5 @@
+import { normalizeExpensePayer } from './expense-payers.js';
+
 const EXPENSE_STORAGE_KEY = 'spv-property-calculator.expenses.v1';
 const RECEIPT_DB_NAME = 'spv-property-calculator.receipts.v1';
 const RECEIPT_STORE = 'receipts';
@@ -54,6 +56,7 @@ export function saveExpense(expense) {
     id: expense.id || makeId(),
     amount: Math.max(0, Number(expense.amount) || 0),
     scope,
+    paidBy: normalizeExpensePayer(expense.paidBy ?? existing?.paidBy),
     propertyId: scope === 'property' ? String(expense.propertyId || '') : '',
     receipt: expense.receipt || null,
     deletedAt: null,

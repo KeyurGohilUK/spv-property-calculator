@@ -10,6 +10,7 @@ const policyMigration = fs.readFileSync(new URL('../database/migrations/Update 1
 const viewingReminderMigration = fs.readFileSync(new URL('../database/migrations/Update 16 - Viewing Push Reminders.sql', import.meta.url), 'utf8');
 const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 21 - Task Discussions.sql', import.meta.url), 'utf8');
 const editableTaskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 22 - Editable Task Discussions.sql', import.meta.url), 'utf8');
+const expensePayerMigration = fs.readFileSync(new URL('../database/migrations/Update 23 - Expense Payer Attribution.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
@@ -22,6 +23,7 @@ for (const table of ['workspace_members', 'properties', 'property_notes', 'prope
 assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS');
 assert.match(bootstrap, /upsert_property_if_current/, 'Bootstrap must include conflict-safe property writes');
 assert.match(bootstrap, /upsert_expense_if_current/, 'Bootstrap must include conflict-safe expense writes');
+assert.match(bootstrap, /paid_by text not null default 'unrecorded'/, 'Bootstrap must include expense payer attribution');
 assert.match(expenseMigration, /create table if not exists public\.expenses/, 'Update 10 must create expenses');
 assert.match(expenseMigration, /expenses_scope_property_check/, 'Expense scope/property integrity check missing');
 assert.match(receiptMigration, /add column if not exists receipt_object_path/, 'Update 11 must preserve a private R2 object key');
@@ -48,6 +50,9 @@ assert.match(taskDiscussionMigration, /char_length\(btrim\(p_message\)\)>2000/, 
 assert.match(editableTaskDiscussionMigration, /add column if not exists updated_at/, 'Update 22 must add task comment edit timestamps');
 assert.match(editableTaskDiscussionMigration, /create or replace function public\.upsert_task_comment/, 'Update 22 must add the protected comment upsert RPC');
 assert.match(editableTaskDiscussionMigration, /v_existing_user is distinct from auth\.uid\(\)/, 'Update 22 must only allow authors to edit their own comments');
+assert.match(expensePayerMigration, /add column if not exists paid_by text not null default 'unrecorded'/, 'Update 23 must add payer attribution and preserve legacy expenses');
+assert.match(expensePayerMigration, /p_paid_by text[\s\S]*paid_by = p_paid_by/, 'Update 23 must save the payer through the conflict-safe expense RPC');
+assert.match(expensePayerMigration, /Keep the earlier RPC overload available/, 'Update 23 must preserve compatibility with installed older clients');
 assert.match(bootstrap, /create or replace function public\.upsert_task_comment/, 'Bootstrap must include editable task discussions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
