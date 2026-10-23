@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SPV Property Calculator - complete database bootstrap
--- Current through Update 20 (Task Reminders)
+-- Current through Update 24 (Company Profile and Appointments)
 --
 -- Use for a fresh or replacement Supabase project. Create at least one Auth user
 -- first; the oldest account is made the initial administrator. Safe to re-run.
@@ -110,6 +110,13 @@ create index if not exists expenses_updated_idx on public.expenses(updated_at de
 create unique index if not exists expenses_receipt_object_path_idx
   on public.expenses(receipt_object_path) where receipt_object_path is not null;
 
+create table if not exists public.company_profiles (
+  id text primary key check (id = 'default'),
+  details jsonb not null default '{}'::jsonb check (jsonb_typeof(details) = 'object'),
+  updated_at timestamptz not null default now(),
+  revision bigint not null default 1 check (revision >= 1)
+);
+
 create table if not exists public.tasks (
   id text primary key,
   user_id uuid not null default auth.uid() references auth.users(id) on delete restrict,
@@ -179,6 +186,7 @@ alter table public.properties enable row level security;
 alter table public.property_notes enable row level security;
 alter table public.property_deletions enable row level security;
 alter table public.expenses enable row level security;
+alter table public.company_profiles enable row level security;
 alter table public.tasks enable row level security;
 alter table public.task_events enable row level security;
 alter table public.task_comments enable row level security;
@@ -208,9 +216,33 @@ create or replace function public.is_workspace_admin() returns boolean
 language sql stable security definer set search_path=public,pg_temp
 as $$ select exists(select 1 from public.workspace_members where user_id=auth.uid() and active and role='admin') $$;
 
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from anon;
-revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from authenticated;
-grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.tasks, public.task_events, public.task_comments to authenticated;
+create or replace function public.upsert_company_profile_if_current(
+ p_details jsonb,p_expected_revision bigint)
+returns table(new_revision bigint,server_updated_at timestamptz)
+language plpgsql security definer set search_path=public,pg_temp as $$
+begin
+ if auth.uid() is null or not public.is_workspace_editor() then raise exception 'Approved editor access is required'; end if;
+ if p_details is null or jsonb_typeof(p_details)<>'object' then raise exception 'Company details must be a JSON object'; end if;
+ if p_expected_revision is null or p_expected_revision<0 then raise exception 'Expected revision must be zero or greater'; end if;
+ if p_expected_revision=0 then
+  insert into public.company_profiles(id,details,updated_at,revision)
+  values('default',p_details,now(),1)
+  on conflict(id) do nothing
+  returning public.company_profiles.revision,public.company_profiles.updated_at into new_revision,server_updated_at;
+ else
+  update public.company_profiles set details=p_details,updated_at=now(),revision=revision+1
+  where id='default' and revision=p_expected_revision
+  returning public.company_profiles.revision,public.company_profiles.updated_at into new_revision,server_updated_at;
+ end if;
+ if new_revision is null then raise exception using errcode='40001',message='COMPANY_PROFILE_CONFLICT: company details changed on another device'; end if;
+ return next;
+end $$;
+revoke all on function public.upsert_company_profile_if_current(jsonb,bigint) from public,anon;
+grant execute on function public.upsert_company_profile_if_current(jsonb,bigint) to authenticated;
+
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.company_profiles, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from anon;
+revoke all on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.company_profiles, public.tasks, public.task_events, public.task_comments, public.push_subscriptions, public.policy_acceptances, public.viewing_reminder_deliveries, public.task_reminder_deliveries from authenticated;
+grant select on table public.workspace_members, public.properties, public.property_notes, public.property_deletions, public.expenses, public.company_profiles, public.tasks, public.task_events, public.task_comments to authenticated;
 grant select, insert, update, delete on table public.push_subscriptions to authenticated;
 grant select, insert, update on table public.policy_acceptances to authenticated;
 revoke all on function public.is_workspace_member(), public.is_workspace_editor(), public.is_workspace_admin() from public, anon;
@@ -242,6 +274,8 @@ drop policy if exists "Members read deletion tombstones" on public.property_dele
 create policy "Members read deletion tombstones" on public.property_deletions for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read expenses" on public.expenses;
 create policy "Members read expenses" on public.expenses for select to authenticated using (public.is_workspace_member());
+drop policy if exists "Members read company profile" on public.company_profiles;
+create policy "Members read company profile" on public.company_profiles for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read tasks" on public.tasks;
 create policy "Members read tasks" on public.tasks for select to authenticated using (public.is_workspace_member());
 drop policy if exists "Members read task events" on public.task_events;

@@ -1,6 +1,6 @@
 {
-  "version": "1.30.0",
+  "version": "1.31.0",
   "notes": [
-    "Record whether each expense was paid from the company account or personally by a director, and review spending by payer."
+    "Manage company particulars and an editable appointments register from More."
   ]
 }

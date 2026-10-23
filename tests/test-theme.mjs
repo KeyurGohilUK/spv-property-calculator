@@ -7,6 +7,7 @@ const styles = readStyles();
 const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const expenses = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
+const company = fs.readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
@@ -19,7 +20,7 @@ assert.doesNotMatch(styles, /@media \(prefers-color-scheme: dark\)/, 'Device Dar
 assert.match(styles, /\.property-cost-breakdown \.investment-total strong \{[^}]*color: var\(--brand\)/, 'Property total must use the selected theme colour');
 assert.match(styles, /\.editor-save-icon\.is-saved \{[^}]*var\(--brand\)/, 'Saved property action must use the selected theme colour');
 
-for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
+for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses], ['company', company]]) {
   assert.match(page, /<script src="\.\/src\/components\/theme\.js"><\/script>[\s\S]*<link rel="stylesheet" href="\.\/styles\.css">/, `${name} must apply the canonical theme component before loading styles`);
 }
 assert.match(appShell, /data-theme-toggle[\s\S]*SPVTheme\?\.bindThemeControls\(dialog\)/, 'Shared App Menu must include and bind the theme switch');
