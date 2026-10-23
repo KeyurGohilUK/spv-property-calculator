@@ -104,13 +104,13 @@ test('selects expense allocation first and reveals a property only when needed',
   );
   expect(selectOrder).toEqual(['expenseScope', 'expenseProperty', 'expensePaidBy']);
   await expect(page.locator('#expensePropertyField')).toBeHidden();
-  await expect(page.locator('#expensePaidBy option').first()).toHaveText('Paid by company · TG Property Invest Ltd');
+  await expect(page.locator('#expensePaidBy option').first()).toHaveText('TG Property Invest Ltd');
 
   await page.locator('#expenseScope').selectOption('property');
   await expect(page.locator('#expensePropertyField')).toBeVisible();
   await expect(page.locator('#expenseProperty option')).toHaveText(['Select property', '55 Royal Road, Bristol']);
   await expect(page.locator('#expensePaidBy option')).toHaveText([
-    'Paid by company · TG Property Invest Ltd', 'Alex Director · Director'
+    'TG Property Invest Ltd', 'Alex Director'
   ]);
 
   await page.locator('#expenseProperty').selectOption('property-1');
