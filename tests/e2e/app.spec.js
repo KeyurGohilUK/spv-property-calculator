@@ -35,6 +35,24 @@ test('@mobile More menu stays inside a short viewport and scrolls its contents',
   expect(itemBox.y + itemBox.height).toBeLessThanOrEqual(dialogBox.y + dialogBox.height);
 });
 
+test('desktop primary navigation background spans the viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const nav = page.locator('.primary-app-nav');
+  await expect(nav).toBeVisible();
+  const bounds = await nav.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      left: rect.left,
+      right: rect.right,
+      viewportWidth: document.documentElement.clientWidth
+    };
+  });
+  expect(bounds.left).toBe(0);
+  expect(bounds.right).toBeGreaterThanOrEqual(bounds.viewportWidth - 1);
+});
+
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {
   await page.goto('/expenses/');
   const originalUrl = page.url();
