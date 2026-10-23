@@ -314,6 +314,18 @@
     background: var(--bg);
     pointer-events: none;
   }
+  #editorView .editor-topbar::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: calc(100% - 1px);
+    left: 50%;
+    width: calc(100vw + 44px);
+    height: 30px;
+    transform: translateX(-50%);
+    background: var(--bg);
+    pointer-events: none;
+  }
 }
 
 @media (max-width: 700px) {

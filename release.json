@@ -1,6 +1,7 @@
 {
-  "version": "1.45.4",
+  "version": "1.45.5",
   "notes": [
+    "Keep scrolling content hidden beneath the property editor toolbar shadow.",
     "Use the page background color for the gap above the editor toolbar.",
     "Use the page background to fill the gap between navigation and the editor toolbar.",
     "Preserve a 20px solid themed gap above the fixed editor toolbar.",
