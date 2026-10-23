@@ -1,6 +1,7 @@
 {
-  "version": "1.45.10",
+  "version": "1.45.11",
   "notes": [
+    "Show Portfolio with a house and rising growth arrow icon.",
     "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",
     "Remove the overlapping shadow and backdrop below the property editor toolbar.",
     "Keep the Opportunities label on one line on every mobile page.",
