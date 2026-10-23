@@ -76,6 +76,9 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   await openCard.focus();
   await openCard.press('Enter');
   await expect(page.locator('#editorView')).not.toHaveClass(/hidden/);
+  const primaryNavigation = await page.locator('.primary-app-nav').boundingBox();
+  const editorToolbar = await page.locator('#editorView .editor-topbar').boundingBox();
+  expect(primaryNavigation.y + primaryNavigation.height).toBeLessThanOrEqual(editorToolbar.y);
   await expect(page.locator('#title')).toHaveValue('Playwright Test Property');
 
   await page.locator('#title').fill('Updated Playwright Property');
