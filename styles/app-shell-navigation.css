@@ -5,10 +5,10 @@
   z-index: 18;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  width: 100%;
+  width: 100vw;
   max-width: none;
-  margin: 0 auto;
-  padding: 8px max(16px, calc((100% - 1120px) / 2 + 16px));
+  margin: 0 0 0 calc(50% - 50vw);
+  padding: 8px max(16px, calc((100vw - 1120px) / 2 + 16px));
   gap: 6px;
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
