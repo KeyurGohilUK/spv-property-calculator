@@ -1,6 +1,7 @@
 {
   "version": "1.44.0",
   "notes": [
+    "Show viewing progress as a single property stage, replaced by Under offer when accepted.",
     "Keep desktop navigation aligned below the app header while scrolling.",
     "Keep the Opportunities label on one line in the mobile navigation.",
     "Keep the app menu inside short viewports and theme application scrollbars.",
