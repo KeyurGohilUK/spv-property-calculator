@@ -50,7 +50,7 @@ const portfolio = fs.readFileSync(new URL('../portfolio/index.html', import.meta
 for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses], ['portfolio', portfolio]]) {
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
-assert.match(primaryNavigation, /Properties[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(primaryNavigation, /Opportunities[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
 assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
 assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Forecast as Beta');
 assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
