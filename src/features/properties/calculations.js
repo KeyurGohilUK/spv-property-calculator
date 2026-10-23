@@ -106,10 +106,6 @@ export function calculateCostGroups(model = {}) {
     safeNumber(model.mortgageBrokerFee) +
     safeNumber(model.mortgageValuationFee);
 
-  const companyCosts =
-    safeNumber(model.companyFormationCost) +
-    safeNumber(model.spvAdministrationCost);
-
   const otherPurchaseCosts =
     safeNumber(model.landRegistrySearches) +
     safeNumber(model.insuranceCost) +
@@ -118,7 +114,7 @@ export function calculateCostGroups(model = {}) {
       ? model.customExpenses.reduce((sum, item) => sum + safeNumber(item.amount), 0)
       : 0);
 
-  return { legalProfessional, mortgageCosts, companyCosts, otherPurchaseCosts };
+  return { legalProfessional, mortgageCosts, otherPurchaseCosts };
 }
 
 export function calculateProperty(model = {}) {
@@ -143,7 +139,6 @@ export function calculateProperty(model = {}) {
     sdlt.total +
     groups.legalProfessional +
     groups.mortgageCosts +
-    groups.companyCosts +
     groups.otherPurchaseCosts +
     refurbishment;
 

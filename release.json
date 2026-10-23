@@ -1,6 +1,6 @@
 {
-  "version": "1.31.0",
+  "version": "1.32.0",
   "notes": [
-    "Manage company particulars and an editable appointments register from More."
+    "Choose the purchasing company on each property and remove company fees from purchase calculations."
   ]
 }
