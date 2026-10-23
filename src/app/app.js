@@ -104,6 +104,14 @@ function renderPurchasingCompanyOptions(selectedId = $('purchasingCompanyId')?.v
   $('purchasingCompanyHint').textContent = companies.length
     ? 'Manage company details in More → Manage Company.'
     : 'No company is registered yet. Add one in More → Manage Company.';
+  updatePurchasingCompanySummary();
+}
+
+function updatePurchasingCompanySummary() {
+  const select = $('purchasingCompanyId');
+  const summary = $('purchasingCompanySummary');
+  if (!select || !summary) return;
+  summary.textContent = select.selectedOptions[0]?.textContent || 'Select a company';
 }
 
 function money(value) {
@@ -839,6 +847,7 @@ function resetForm() {
   $('priceEntryNote').value = '';
   renderPriceHistory();
   $('propertyForm').reset();
+  $('purchasingCompanySection').open = true;
   renderPurchasingCompanyOptions();
   $('purchaseStage').value = 'opportunity';
   $('offerAcceptedDate').value = '';
@@ -887,6 +896,7 @@ function loadIntoForm(property) {
   $('exchangeDate').value = property.exchangeDate || '';
   $('completionDate').value = property.completionDate || '';
   renderPurchasingCompanyOptions(property.purchasingCompanyId || '');
+  $('purchasingCompanySection').open = !property.purchasingCompanyId;
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
   $('nonResident').checked = Boolean(property.nonResident);
@@ -1049,6 +1059,8 @@ async function saveCurrentProperty() {
     model.listingPrice = currentListingPrice;
     model.priceHistory = normalizePriceHistory(currentPriceHistory);
     const saved = saveProperty({ ...model, calculated: calc, _cloudRevision: Math.max(0, Number(existing?._cloudRevision) || 0) });
+    if (saved.purchasingCompanyId) $('purchasingCompanySection').open = false;
+    updatePurchasingCompanySummary();
     editingId = saved.id;
     editingCreatedAt = saved.createdAt;
     currentListingPrice = Number(saved.listingPrice) || currentListingPrice;
