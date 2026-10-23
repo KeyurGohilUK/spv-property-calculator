@@ -17,12 +17,14 @@ export async function openContainingSection(page, fieldSelector) {
 export async function createProperty(page, {
   title = 'Playwright Test Property',
   price = '250000',
-  refurbishment = '0'
+  refurbishment = '0',
+  listingUrl = ''
 } = {}) {
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
   await page.locator('#title').fill(title);
   await page.locator('#purchasePrice').fill(price);
+  if (listingUrl) await page.locator('#listingUrl').fill(listingUrl);
 
   if (refurbishment !== '0') {
     await openContainingSection(page, '#addRefurbishmentItemBtn');

@@ -1,7 +1,6 @@
 {
-  "version": "1.29.0",
+  "version": "1.29.1",
   "notes": [
-    "Track accepted offers as Sold Subject to Contract and record exchange and completion dates.",
-    "Move completed purchases into a dedicated Portfolio view without duplicating property records."
+    "Keep the app open when opening an external property listing from an installed iPhone app."
   ]
 }
