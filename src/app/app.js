@@ -713,18 +713,6 @@ function renderPriceHistory() {
   document.querySelector('.price-entry-form')?.classList.toggle('hidden', stage !== 'opportunity');
   list.replaceChildren();
 
-  if (currentListingPrice > 0) {
-    const baseline = document.createElement('li');
-    baseline.className = 'price-history-item price-history-listing';
-    const heading = document.createElement('span');
-    heading.className = 'price-history-label';
-    heading.textContent = 'Original listing price';
-    const amount = document.createElement('strong');
-    amount.textContent = money(currentListingPrice);
-    baseline.append(heading, amount);
-    list.appendChild(baseline);
-  }
-
   [...currentPriceHistory].sort((a, b) => a.date.localeCompare(b.date)).forEach((entry) => {
     const item = document.createElement('li');
     item.className = `price-history-item price-history-${entry.type}`;
@@ -765,7 +753,17 @@ function renderPriceHistory() {
     list.appendChild(item);
   });
 
-  $('priceHistoryCurrentPrice').textContent = money(safeNumber($('purchasePrice').value));
+  if (currentListingPrice > 0) {
+    const baseline = document.createElement('li');
+    baseline.className = 'price-history-item price-history-listing';
+    const heading = document.createElement('span');
+    heading.className = 'price-history-label';
+    heading.textContent = 'Original listing price';
+    const amount = document.createElement('strong');
+    amount.textContent = money(currentListingPrice);
+    baseline.append(heading, amount);
+    list.appendChild(baseline);
+  }
 }
 
 function todayDateInputValue() {
