@@ -81,6 +81,7 @@ jobs:
       - unit
       - browser
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    environment: production
     timeout-minutes: 10
     permissions:
       contents: read
