@@ -1,6 +1,7 @@
 {
-  "version": "1.35.0",
+  "version": "1.36.0",
   "notes": [
+    "Show the accepted offer amount and hide price entry controls after an offer is accepted.",
     "Rename the Properties navigation item to Opportunities.",
     "Show only company and person names in expense payer choices.",
     "Choose the property allocation and the registered company or appointment that paid each expense."
