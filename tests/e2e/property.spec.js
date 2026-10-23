@@ -548,7 +548,7 @@ test('tracks an accepted offer through exchange into the completed Portfolio', a
   await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'No completed properties yet' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Opportunities' }).click();
+  await page.getByRole('link', { name: 'Opportunities', exact: true }).click();
   card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
   await card.getByRole('button', { name: 'Open Portfolio Lifecycle for editing' }).click();
   await openContainingSection(page, '#purchaseStage');
