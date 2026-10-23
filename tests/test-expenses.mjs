@@ -44,6 +44,11 @@ assert.doesNotMatch(expenseHtml, /id="syncExpensesBtn"/, 'Expense page must not 
 assert.match(expenseHtml, /id="expenseSyncStatus" class="sync-status"/, 'Expenses must use the shared sync-status component');
 assert.match(expensePage, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/components\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
+assert.match(expenseHtml, /id="expensePaidBy"[^>]*required/, 'Expense form must require a payer selection');
+assert.match(expensePage, /populatePayerOptions\(\)[\s\S]*EXPENSE_PAYER_OPTIONS\.map/, 'Expense form and filter must share the payer choices');
+assert.match(expenseHtml, /id="expensePaidByFilter"[\s\S]*id="expensePayerReport"/, 'Payer filter and report are missing');
+assert.match(expensePage, /paidBy: normalizeExpensePayer\(\$\('expensePaidBy'\)\.value\)/, 'The selected payer must be saved with the expense');
+assert.match(expensePage, /getExpensePayerLabel\(expense\.paidBy\)/, 'Expense cards must identify who paid');
 assert.match(expenseHtml, /id="toggleExpenseFiltersBtn"[\s\S]*Filter &amp; Export/, 'Combined Filter & Export action is missing');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"/, 'CSV export must live inside the filter panel');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"[\s\S]*class="expense-report-card expense-report-inline"[\s\S]*id="expenseMonthlyReport"/, 'Expense Summary must live beneath the controls in the Filter & Export panel');
@@ -68,15 +73,17 @@ assert.match(expenseStyles, /@media \(max-width: 820px\) and \(min-width: 621px\
 assert.match(expenseHtml, /class="dialog-close expense-dialog-close"/, 'Expense popup must use the shared close control');
 assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="expenseCategoryFilter"[\s\S]*id="expenseDateFrom"[\s\S]*id="expenseDateTo"/, 'Expense filter controls are missing');
 
-const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Office & administration', scope: 'company', propertyId: 'ignored' });
+const company = saveExpense({ amount: 42.5, date: '2026-08-23', category: 'Office & administration', scope: 'company', propertyId: 'ignored', paidBy: 'company' });
 assert.equal(company.scope, 'company');
+assert.equal(company.paidBy, 'company');
 assert.equal(company.propertyId, '');
 assert.equal(company.amount, 42.5);
 assert.equal(company._cloudDirty, true);
 assert.equal(company._cloudRevision, 0);
 
-const property = saveExpense({ amount: 125, date: '2026-08-24', category: 'Repairs & maintenance', scope: 'property', propertyId: 'property-1' });
+const property = saveExpense({ amount: 125, date: '2026-08-24', category: 'Repairs & maintenance', scope: 'property', propertyId: 'property-1', paidBy: 'director-a' });
 assert.equal(property.propertyId, 'property-1');
+assert.equal(property.paidBy, 'director-a');
 assert.deepEqual(getExpenses().map((item) => item.id), [property.id, company.id], 'Expenses should be newest-date first');
 assert.equal(deleteExpense(company.id), true);
 assert.deepEqual(getExpenses().map((item) => item.id), [property.id]);
@@ -86,6 +93,8 @@ assert.equal(deletedCompany._cloudDirty, true);
 replaceExpenses(getAllExpenses().map((item) => ({ ...item, _cloudDirty: false })));
 assert.equal(getAllExpenses().every((item) => item._cloudDirty === false), true);
 assert.equal(deleteExpense('missing'), false);
+const invalidPayer = saveExpense({ amount: 1, date: '2026-08-25', paidBy: 'unknown-payer' });
+assert.equal(invalidPayer.paidBy, 'unrecorded', 'Unknown payer values must be normalised safely');
 
 const cachedBlob = new Blob(['new receipt'], { type: 'image/jpeg' });
 assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/new.jpg' }, 'receipts/e1/new.jpg'), cachedBlob);

@@ -53,6 +53,8 @@ if (!source.includes('_cloudDirty: false')) throw new Error('downloaded records 
 if (!source.includes('PROPERTY_CONFLICT')) throw new Error('conflict error handling missing');
 if (!source.includes('archivedLegacyIds')) throw new Error('legacy conversion missing');
 if (!source.includes("rpc('permanently_delete_property'")) throw new Error('permanent-delete RPC missing');
+if (!source.includes('category,paid_by,scope')) throw new Error('expense payer must download from Supabase');
+if (!source.includes('p_paid_by: record.paidBy')) throw new Error('expense payer must upload to Supabase');
 if (!source.includes("from('property_deletions')")) throw new Error('permanent deletion tombstones missing');
 if (!source.includes('permanentlyDeletedIds')) throw new Error('permanent deletion sync filtering missing');
 if (!source.includes("from('push_subscriptions')")) throw new Error('push subscription persistence missing');

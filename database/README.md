@@ -40,6 +40,8 @@ Run only migrations newer than the last applied update, in number order:
 - Update 20 — task due-date reminders
 - Update 21 — task discussion comments
 - Update 22 — editable task discussion comments
+- Update 23 — expense payer attribution
+- Update 24 — company particulars and appointments
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -51,7 +53,7 @@ Receipt binaries live in a private Cloudflare R2 bucket. The database stores onl
 
 ## Rules for future changes
 
-The current schema is complete through **Update 21 - Task Discussions**.
+The current schema is complete through **Update 24 - Company Profile and Appointments**.
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.

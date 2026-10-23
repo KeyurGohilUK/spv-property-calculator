@@ -1,6 +1,6 @@
 {
-  "version": "1.29.1",
+  "version": "1.31.0",
   "notes": [
-    "Keep the app open when opening an external property listing from an installed iPhone app."
+    "Manage company particulars and an editable appointments register from More."
   ]
 }

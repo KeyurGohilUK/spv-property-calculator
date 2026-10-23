@@ -404,6 +404,63 @@
     return (data || []).map(fromCloudTask);
   }
 
+  async function getCompanyProfile() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient
+      .from('company_profiles')
+      .select('details,updated_at,revision')
+      .eq('id', 'default')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return {
+      ...(data.details && typeof data.details === 'object' ? data.details : {}),
+      id: 'default',
+      updatedAt: data.updated_at || new Date().toISOString(),
+      _cloudRevision: Math.max(0, Number(data.revision) || 0),
+      _cloudDirty: false
+    };
+  }
+
+  function isCompanyProfileConflict(error) {
+    return error?.code === '40001'
+      || String(error?.message || '').includes('COMPANY_PROFILE_CONFLICT');
+  }
+
+  async function upsertCompanyProfile(record) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const details = {
+      companyName: String(record?.companyName || '').trim(),
+      companyNumber: String(record?.companyNumber || '').trim(),
+      registeredOffice: String(record?.registeredOffice || '').trim(),
+      incorporationDate: String(record?.incorporationDate || '').trim(),
+      companyStatus: String(record?.companyStatus || '').trim(),
+      appointments: Array.isArray(record?.appointments) ? record.appointments : []
+    };
+    const { data, error } = await supabaseClient
+      .rpc('upsert_company_profile_if_current', {
+        p_details: details,
+        p_expected_revision: Math.max(0, Number(record?._cloudRevision) || 0)
+      })
+      .single();
+    if (error) {
+      if (isCompanyProfileConflict(error)) {
+        const conflict = new Error('Company details changed on another device. Your local changes have been kept.');
+        conflict.code = 'COMPANY_PROFILE_CONFLICT';
+        throw conflict;
+      }
+      throw error;
+    }
+    return {
+      ...record,
+      updatedAt: data?.server_updated_at || new Date().toISOString(),
+      _cloudRevision: Math.max(1, Number(data?.new_revision) || Number(record?._cloudRevision) + 1),
+      _cloudDirty: false
+    };
+  }
+
   async function listActiveMembers() {
     const supabaseClient = ensureClient();
     await requireUser();
@@ -531,6 +588,7 @@
       amount: Number(row.amount) || 0,
       date: row.expense_date || '',
       category: row.category || 'Other',
+      paidBy: row.paid_by || 'unrecorded',
       scope: row.scope === 'property' ? 'property' : 'company',
       propertyId: row.property_id || '',
       description: row.description || '',
@@ -551,7 +609,7 @@
     await requireUser();
     const { data, error } = await supabaseClient
       .from('expenses')
-      .select('id,amount,expense_date,category,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision')
+      .select('id,amount,expense_date,category,paid_by,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision')
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data || []).map(fromCloudExpense);
@@ -573,6 +631,7 @@
         p_expense_date: record.date,
         p_category: record.category || 'Other',
         p_scope: record.scope === 'property' ? 'property' : 'company',
+        p_paid_by: record.paidBy || 'unrecorded',
         p_property_id: record.scope === 'property' ? String(record.propertyId || '') : null,
         p_description: record.description || '',
         p_notes: record.notes || '',
@@ -801,6 +860,9 @@
     signOut,
     listProperties,
     listTasks,
+    getCompanyProfile,
+    upsertCompanyProfile,
+    isCompanyProfileConflict,
     upsertTask,
     isTaskConflict,
     listTaskEvents,

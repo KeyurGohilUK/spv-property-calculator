@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="../">
+  <meta name="theme-color" content="#966540">
+  <meta name="description" content="Manage your SPV company particulars and appointments.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SPV Company">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <script src="./src/components/theme.js"></script>
+  <script type="module" src="./src/components/help-guide.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles/features/company.css">
+  <title>Company Management · SPV Property Calculator</title>
+</head>
+<body class="auth-pending">
+  <div id="app">
+    <header class="app-header"><div class="header-inner">
+      <a class="brand-home" href="./" aria-label="Back to property calculator">
+        <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
+        <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
+      </a>
+    </div></header>
+    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="company"></nav>
+    <main class="main-shell company-shell">
+      <section class="hero-card company-hero">
+        <div><p class="eyebrow">Company records</p><h1>Company Management</h1><p class="muted">Keep your company particulars and appointments together. This is a manually maintained workspace register, not a Companies House feed.</p></div>
+        <span id="companySyncStatus" class="sync-status" role="status">Saved on this device</span>
+      </section>
+
+      <section class="company-section" aria-labelledby="companyParticularsTitle">
+        <div class="company-section-heading"><div><p class="eyebrow">Company Overview</p><h2 id="companyParticularsTitle">Particulars</h2></div>
+          <button id="editCompanyDetailsBtn" class="secondary-btn company-edit-btn" type="button">Edit details</button>
+        </div>
+        <dl class="company-particulars">
+          <div><dt>Name</dt><dd id="companyNameValue">Not added</dd></div>
+          <div><dt>Company number</dt><dd id="companyNumberValue">Not recorded</dd></div>
+          <div><dt>Registered office</dt><dd id="companyOfficeValue">Not recorded</dd></div>
+          <div><dt>Company status</dt><dd id="companyStatusValue">Not recorded</dd></div>
+          <div><dt>Incorporation date</dt><dd id="companyDateValue">Not recorded</dd></div>
+        </dl>
+        <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
+      </section>
+
+      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
+        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
+          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
+        </div>
+        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
+          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
+        </div>
+        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
+          <table class="company-appointments-table">
+            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody id="companyAppointmentsRows"></tbody>
+          </table>
+        </div>
+        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="companyDetailsDialog" class="install-dialog company-dialog">
+    <form id="companyDetailsForm" novalidate>
+      <div class="company-dialog-header"><div><p class="eyebrow">Company particulars</p><h2 id="companyDetailsDialogTitle">Edit company details</h2></div><button id="closeCompanyDetailsDialog" class="dialog-close" type="button" aria-label="Close company details">×</button></div>
+      <label class="field"><span>Company name <strong aria-hidden="true">*</strong></span><input id="companyNameInput" type="text" maxlength="160" autocomplete="organization" required></label>
+      <label class="field"><span>Company number</span><input id="companyNumberInput" type="text" maxlength="32" autocomplete="off" aria-describedby="companyNumberHelp"><small id="companyNumberHelp">As shown on Companies House. This register is managed manually.</small></label>
+      <label class="field"><span>Registered office</span><textarea id="companyOfficeInput" rows="3" maxlength="500" autocomplete="street-address"></textarea></label>
+      <div class="company-form-columns">
+        <label class="field"><span>Company status</span><input id="companyStatusInput" type="text" maxlength="80" placeholder="e.g. Active"></label>
+        <label class="field"><span>Incorporation date</span><input id="companyDateInput" type="date"></label>
+      </div>
+      <p id="companyDetailsMessage" class="save-message" aria-live="polite"></p>
+      <div class="company-form-actions"><button id="cancelCompanyDetailsBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save details</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="appointmentDialog" class="install-dialog company-dialog">
+    <form id="appointmentForm" novalidate>
+      <div class="company-dialog-header"><div><p class="eyebrow">Company appointments</p><h2 id="appointmentDialogTitle">Add person</h2></div><button id="closeAppointmentDialog" class="dialog-close" type="button" aria-label="Close appointment form">×</button></div>
+      <input id="appointmentIdInput" type="hidden">
+      <label class="field"><span>Full name <strong aria-hidden="true">*</strong></span><input id="appointmentNameInput" type="text" maxlength="160" autocomplete="name" required></label>
+      <fieldset class="company-role-fieldset"><legend>Appointments <strong aria-hidden="true">*</strong></legend>
+        <label><input type="checkbox" name="appointmentDirector" data-appointment-role value="director"> <span>Director</span></label>
+        <label><input type="checkbox" name="appointmentShareholder" data-appointment-role value="shareholder"> <span>Shareholder</span></label>
+        <label><input type="checkbox" name="appointmentSecretary" data-appointment-role value="secretary"> <span>Secretary</span></label>
+        <label><input type="checkbox" name="appointmentPsc" data-appointment-role value="psc"> <span>Person with significant control (PSC)</span></label>
+      </fieldset>
+      <p id="appointmentMessage" class="save-message" aria-live="polite"></p>
+      <div class="company-form-actions"><button id="deleteAppointmentBtn" class="text-btn danger-text hidden" type="button">Remove person</button><span class="company-action-spacer"></span><button id="cancelAppointmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save person</button></div>
+    </form>
+  </dialog>
+
+  <script defer src="./supabase-config.js"></script>
+  <script defer src="./cloud.js"></script>
+  <script type="module" src="./src/components/secondary-page-header.js"></script>
+  <script type="module" src="./src/components/admin-menu.js"></script>
+  <script type="module" src="./src/features/company/company.js"></script>
+</body>
+</html>

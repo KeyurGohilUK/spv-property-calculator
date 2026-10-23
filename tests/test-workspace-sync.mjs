@@ -41,6 +41,18 @@ assert.equal(result.changes, 6, 'property and expense changes must share one tot
 assert.equal(result.conflictCount, 0);
 assert.equal(result.message, 'Synced 6 changes with the shared workspace.');
 
+let companySyncCalled = false;
+const companySyncResult = await syncWorkspace({
+  syncAll: async () => ({ merged: [], clearedDeleteIds: [], uploadedCount: 0, downloadedCount: 0, conflicts: [] })
+}, adapters({
+  syncExpenses: async () => ({ changes: 1, conflicts: [] }),
+  syncTasks: async () => ({ changes: 0, conflicts: [] }),
+  syncCompany: async () => { companySyncCalled = true; return { changes: 2, conflicts: ['default'] }; }
+}));
+assert.equal(companySyncCalled, true, 'Shared workspace sync must include company profile sync');
+assert.equal(companySyncResult.changes, 3, 'Company profile changes must contribute to the shared sync total');
+assert.equal(companySyncResult.conflictCount, 1, 'Company profile conflicts must appear in the shared sync result');
+
 const conflict = await syncWorkspace({
   syncAll: async () => ({
     merged: [], clearedDeleteIds: [], uploadedCount: 0, downloadedCount: 0,
