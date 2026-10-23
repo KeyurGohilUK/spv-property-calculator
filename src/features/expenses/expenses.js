@@ -11,7 +11,8 @@ import { syncExpenseWorkspace } from './expense-cloud-sync.js';
 import { formatCurrency, formatDate } from '../../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
 import { populateScopeFilterOptions } from '../../utils/scope-filter.js';
-import { EXPENSE_PAYER_OPTIONS, getExpensePayerLabel, normalizeExpensePayer } from './expense-payers.js';
+import { getExpensePayerLabel, getExpensePayerOptions, normalizeExpensePayer } from './expense-payers.js';
+import { getCompanyProfile } from '../company/company-storage.js';
 
 const $ = (id) => document.getElementById(id);
 const allowedReceiptTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
@@ -210,10 +211,22 @@ function populateProperties() {
   populateScopeFilterOptions($('expenseProperty'), $('expenseFilter'), properties);
 }
 
-function populatePayerOptions() {
-  const options = EXPENSE_PAYER_OPTIONS.map(({ value, label }) => new Option(label, value));
-  $('expensePaidBy').replaceChildren(...options.map((option) => option.cloneNode(true)));
-  $('expensePaidByFilter').replaceChildren(new Option('All payers', 'all'), ...options);
+function populatePayerOptions(selectedPayer = $('expensePaidBy').value || 'company') {
+  const options = getExpensePayerOptions();
+  const knownValues = new Set(options.map((option) => option.value));
+  const retainedValues = new Set([
+    ...getAllExpenses().map((expense) => normalizeExpensePayer(expense.paidBy)),
+    normalizeExpensePayer(selectedPayer)
+  ]);
+  retainedValues.forEach((value) => {
+    if (knownValues.has(value)) return;
+    options.push({ value, label: getExpensePayerLabel(value, getCompanyProfile()) });
+    knownValues.add(value);
+  });
+  const optionElements = options.map(({ value, label }) => new Option(label, value));
+  $('expensePaidBy').replaceChildren(...optionElements.map((option) => option.cloneNode(true)));
+  $('expensePaidBy').value = knownValues.has(selectedPayer) ? selectedPayer : 'company';
+  $('expensePaidByFilter').replaceChildren(new Option('All payers', 'all'), ...optionElements);
 }
 
 function updateScope() {
@@ -235,6 +248,8 @@ $('expenseDialog').addEventListener('close', () => { editingExpenseId = null; })
 function openForm(expense = null) {
   editingExpenseId = expense?.id || null;
   $('expenseForm').reset();
+  populateProperties();
+  populatePayerOptions(expense ? normalizeExpensePayer(expense.paidBy) : 'company');
   $('expenseDialogTitle').textContent = expense ? 'Edit Expense' : 'Add Expense';
   $('saveExpenseBtn').textContent = expense ? 'Save Changes' : 'Save Expense';
   $('expenseDate').value = expense?.date || today();
@@ -634,11 +649,12 @@ window.addEventListener('online', () => syncExpenses({ showFeedback: false }));
 window.addEventListener('offline', () => setSyncStatus('Offline · changes will sync later'));
 window.addEventListener('spv-workspace-synced', () => {
   populateProperties();
+  populatePayerOptions($('expensePaidBy').value || 'company');
   render();
 });
 
 populateProperties();
-populatePayerOptions();
+populatePayerOptions('company');
 Array.from($('expenseCategory').options).forEach((option) => {
   const filterOption = option.cloneNode(true);
   $('expenseCategoryFilter').appendChild(filterOption);

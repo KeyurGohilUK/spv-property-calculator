@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SPV Property Calculator - complete database bootstrap
--- Current through Update 24 (Company Profile and Appointments)
+-- Current through Update 25 (Appointment-based expense payers)
 --
 -- Use for a fresh or replacement Supabase project. Create at least one Auth user
 -- first; the oldest account is made the initial administrator. Safe to re-run.
@@ -84,7 +84,7 @@ create table if not exists public.expenses (
   amount numeric(14,2) not null check (amount > 0),
   expense_date date not null,
   category text not null,
-  paid_by text not null default 'unrecorded' check (paid_by in ('company','director-a','director-b','unrecorded')),
+  paid_by text not null default 'unrecorded' check (paid_by in ('company','director-a','director-b','unrecorded') or paid_by ~ '^appointment:[A-Za-z0-9_-]{1,160}$'),
   scope text not null check (scope in ('company','property')),
   property_id text null references public.properties(id) on delete set null,
   description text not null default '',
@@ -423,7 +423,7 @@ declare v_now timestamptz:=now();
 begin
  if auth.uid() is null or not public.is_workspace_editor() then raise exception 'Approved editor access is required'; end if;
  if p_amount<=0 or p_scope not in ('company','property') then raise exception 'Invalid expense'; end if;
- if p_paid_by not in ('company','director-a','director-b','unrecorded') then raise exception 'Invalid expense payer'; end if;
+ if p_paid_by is null or p_paid_by !~ '^(company|director-a|director-b|unrecorded|appointment:[A-Za-z0-9_-]{1,160})$' then raise exception 'Invalid expense payer'; end if;
  if (p_scope='company' and nullif(p_property_id,'') is not null) or (p_scope='property' and nullif(p_property_id,'') is null) then raise exception 'Expense property does not match scope'; end if;
  if p_expected_revision=0 then
   insert into public.expenses(id,user_id,amount,expense_date,category,paid_by,scope,property_id,description,notes,receipt_metadata,receipt_object_path,created_at,updated_at,deleted_at,revision)

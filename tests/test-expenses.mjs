@@ -7,6 +7,7 @@ globalThis.localStorage = {
 };
 
 const { getExpenses, getAllExpenses, replaceExpenses, saveExpense, deleteExpense, receiptFileFromCache } = await import('../src/features/expenses/expense-storage.js');
+const { getExpensePayerOptions, getExpensePayerLabel, normalizeExpensePayer } = await import('../src/features/expenses/expense-payers.js');
 
 const expensePage = await import('node:fs').then((fs) => fs.readFileSync(new URL('../src/features/expenses/expenses.js', import.meta.url), 'utf8'));
 const expenseHtml = await import('node:fs').then((fs) => fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8'));
@@ -45,7 +46,8 @@ assert.match(expenseHtml, /id="expenseSyncStatus" class="sync-status"/, 'Expense
 assert.match(expensePage, /import \{ renderSyncStatus \} from '\.\.\/\.\.\/components\/sync-status\.js';[\s\S]*renderSyncStatus\(\$\('expenseSyncStatus'\), message, state\)/, 'Expense status updates must use the shared component');
 assert.match(expenseHtml, /id="expenseMonthlyReport"[\s\S]*id="expenseCategoryReport"[\s\S]*id="expenseAllocationReport"/, 'Expense report breakdowns are missing');
 assert.match(expenseHtml, /id="expensePaidBy"[^>]*required/, 'Expense form must require a payer selection');
-assert.match(expensePage, /populatePayerOptions\(\)[\s\S]*EXPENSE_PAYER_OPTIONS\.map/, 'Expense form and filter must share the payer choices');
+assert.match(expensePage, /populatePayerOptions\(selectedPayer[\s\S]*getExpensePayerOptions\(\)/, 'Expense form and filter must share the managed payer choices');
+assert.match(expenseHtml, /id="expenseScope"[\s\S]*id="expensePropertyField"[\s\S]*id="expensePaidBy"/, 'Expense allocation, property and payer fields must appear in sequence');
 assert.match(expenseHtml, /id="expensePaidByFilter"[\s\S]*id="expensePayerReport"/, 'Payer filter and report are missing');
 assert.match(expensePage, /paidBy: normalizeExpensePayer\(\$\('expensePaidBy'\)\.value\)/, 'The selected payer must be saved with the expense');
 assert.match(expensePage, /getExpensePayerLabel\(expense\.paidBy\)/, 'Expense cards must identify who paid');
@@ -95,6 +97,22 @@ assert.equal(getAllExpenses().every((item) => item._cloudDirty === false), true)
 assert.equal(deleteExpense('missing'), false);
 const invalidPayer = saveExpense({ amount: 1, date: '2026-08-25', paidBy: 'unknown-payer' });
 assert.equal(invalidPayer.paidBy, 'unrecorded', 'Unknown payer values must be normalised safely');
+assert.equal(normalizeExpensePayer('appointment:person-123'), 'appointment:person-123');
+assert.equal(normalizeExpensePayer('appointment:invalid value'), 'unrecorded');
+const payerProfile = {
+  companyName: 'TG Property Invest Ltd',
+  appointments: [
+    { id: 'person-123', name: 'Alex Director', roles: ['director', 'shareholder'] },
+    { id: 'person-456', name: 'Sam Secretary', roles: ['secretary'] }
+  ]
+};
+assert.deepEqual(getExpensePayerOptions(payerProfile), [
+  { value: 'company', label: 'Paid by company · TG Property Invest Ltd' },
+  { value: 'appointment:person-123', label: 'Alex Director · Director, Shareholder' },
+  { value: 'appointment:person-456', label: 'Sam Secretary · Secretary' }
+]);
+assert.equal(getExpensePayerLabel('appointment:person-123', payerProfile), 'Alex Director');
+assert.equal(getExpensePayerLabel('company', payerProfile), 'Company · TG Property Invest Ltd');
 
 const cachedBlob = new Blob(['new receipt'], { type: 'image/jpeg' });
 assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/new.jpg' }, 'receipts/e1/new.jpg'), cachedBlob);
