@@ -308,3 +308,15 @@
     top: calc(var(--safe-top) + 94px);
   }
 }
+
+
+/* Keep the selected purchasing company visible when its section is collapsed. */
+.purchasing-company-summary {
+  flex: 0 1 auto;
+  max-width: 45%;
+  margin-right: 8px;
+  color: var(--brand);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.purchasing-company-fields { padding-top: 2px; }
