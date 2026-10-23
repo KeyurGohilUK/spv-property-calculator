@@ -33,6 +33,13 @@ dialog {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--brand) 58%, var(--muted)) transparent;
 }
+dialog::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+dialog::-webkit-scrollbar-thumb {
+  border-width: 2px;
+}
 button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 2px; }
