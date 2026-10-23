@@ -290,22 +290,25 @@
               </div>
             </details>
 
-            <section class="section-card purchasing-company-card" aria-labelledby="purchasingCompanyHeading">
-              <div class="section-heading">
-                <div class="section-heading-copy">
+            <details id="purchasingCompanySection" class="section-card collapsible-section purchasing-company-card" aria-labelledby="purchasingCompanyHeading">
+              <summary class="section-heading collapsible-heading">
+                <span class="section-heading-copy">
                   <span class="eyebrow">SPV</span>
-                  <h3 class="section-title" id="purchasingCompanyHeading">Purchasing company</h3>
+                  <span class="section-title" id="purchasingCompanyHeading">Purchasing company</span>
                   <span class="section-description muted">Choose which registered company will purchase this property.</span>
-                </div>
+                </span>
+                <strong id="purchasingCompanySummary" class="section-total purchasing-company-summary">Select a company</strong>
+              </summary>
+              <div class="purchasing-company-fields">
+                <label class="field">
+                  <span>Company</span>
+                  <select id="purchasingCompanyId" aria-describedby="purchasingCompanyHint">
+                    <option value="">Select a company</option>
+                  </select>
+                </label>
+                <p id="purchasingCompanyHint" class="muted small">Add or update companies in More → Manage Company.</p>
               </div>
-              <label class="field">
-                <span>Company</span>
-                <select id="purchasingCompanyId" aria-describedby="purchasingCompanyHint">
-                  <option value="">Select a company</option>
-                </select>
-              </label>
-              <p id="purchasingCompanyHint" class="muted small">Add or update companies in More → Manage Company.</p>
-            </section>
+            </details>
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Other</span><span class="section-title">Purchase costs</span></span><strong id="purchaseCostsInline" class="section-total">£0</strong></summary>

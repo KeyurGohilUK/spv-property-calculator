@@ -44,8 +44,12 @@ test('chooses and saves the company used to purchase a property', async ({ page 
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
 
+  const companySection = page.locator('#purchasingCompanySection');
+  const companySummary = page.locator('#purchasingCompanySummary');
   const companySelect = page.locator('#purchasingCompanyId');
   await expect(companySelect.locator('option')).toHaveText(['Select a company', 'TG Property Invest Ltd']);
+  await expect(companySection).toHaveAttribute('open', '');
+  await expect(companySummary).toHaveText('Select a company');
   await expect(page.getByText('Company costs', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Company / SPV Costs', { exact: true })).toHaveCount(0);
 
@@ -54,6 +58,8 @@ test('chooses and saves the company used to purchase a property', async ({ page 
   await companySelect.selectOption('default');
   await page.locator('#savePropertyBtn').click();
   await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
+  await expect(companySection).not.toHaveAttribute('open', '');
+  await expect(companySummary).toHaveText('TG Property Invest Ltd');
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.properties.v1') || '[]'));
   expect(stored[0]?.purchasingCompanyId).toBe('default');
@@ -61,6 +67,8 @@ test('chooses and saves the company used to purchase a property', async ({ page 
   await page.locator('#backBtn').click();
   await page.getByRole('button', { name: 'Open Company Purchase Selection for editing' }).click();
   await expect(page.locator('#purchasingCompanyId')).toHaveValue('default');
+  await expect(page.locator('#purchasingCompanySection')).not.toHaveAttribute('open', '');
+  await expect(page.locator('#purchasingCompanySummary')).toHaveText('TG Property Invest Ltd');
 });
 
 test('saves a property and edits it by clicking its card', async ({ page }) => {

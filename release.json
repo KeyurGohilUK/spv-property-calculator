@@ -1,6 +1,8 @@
 {
-  "version": "1.40.0",
+  "version": "1.42.0",
   "notes": [
+    "Keep the app menu inside short viewports and theme application scrollbars.",
+    "Collapse the purchasing company section after saving and show the selected company.",
     "Keep the Opportunities navigation label within its mobile button.",
     "Reduce excess space below the property editor toolbar.",
     "Keep the property editor toolbar below the primary navigation.",
