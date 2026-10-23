@@ -1,6 +1,7 @@
 {
-  "version": "1.45.1",
+  "version": "1.45.2",
   "notes": [
+    "Preserve a 20px solid themed gap above the fixed editor toolbar.",
     "Keep scrolling property details hidden behind the fixed editor save toolbar.",
     "Keep the desktop menu stationary beneath the header while scrolling.",
     "Show viewing progress as a single property stage, replaced by Under offer when accepted.",
