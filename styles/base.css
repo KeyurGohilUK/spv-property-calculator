@@ -1,4 +1,4 @@
-html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+html { overflow-x: clip; -webkit-text-size-adjust: 100%; background: var(--bg); }
 body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
 
 /* App-themed scrollbars across the page and scrollable panels. */
