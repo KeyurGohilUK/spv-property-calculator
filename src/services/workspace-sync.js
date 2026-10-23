@@ -8,6 +8,7 @@ import { syncExpenseWorkspace } from '../features/expenses/expense-cloud-sync.js
 import { syncTaskWorkspace } from '../features/tasks/task-cloud-sync.js';
 import { syncTaskEvents } from '../features/tasks/task-event-sync.js';
 import { syncTaskComments } from '../features/tasks/task-comment-sync.js';
+import { syncCompanyProfile } from '../features/company/company-cloud-sync.js';
 
 let activeSync = null;
 
@@ -41,17 +42,19 @@ async function performWorkspaceSync(cloud, adapters) {
 
   const expenseResult = await adapters.syncExpenses(cloud);
   const taskResult = await adapters.syncTasks(cloud);
+  const companyResult = await adapters.syncCompany(cloud);
   await Promise.all([
     adapters.syncTaskEvents(cloud),
     adapters.syncTaskComments(cloud)
   ]);
-  const conflictCount = (propertyResult.conflicts?.length || 0) + (expenseResult.conflicts?.length || 0) + (taskResult.conflicts?.length || 0);
+  const conflictCount = (propertyResult.conflicts?.length || 0) + (expenseResult.conflicts?.length || 0) + (taskResult.conflicts?.length || 0) + (companyResult.conflicts?.length || 0);
   const changes = Number(propertyResult.uploadedCount || 0)
     + Number(propertyResult.downloadedCount || 0)
     + (propertyResult.archivedLegacyIds?.length || 0)
     + (propertyResult.permanentlyDeletedIds?.length || 0)
     + Number(expenseResult.changes || 0)
-    + Number(taskResult.changes || 0);
+    + Number(taskResult.changes || 0)
+    + Number(companyResult.changes || 0);
 
   const message = conflictCount
     ? `${conflictCount} sync conflict${conflictCount === 1 ? '' : 's'} detected. Local changes are safe and were not overwritten.`
@@ -59,7 +62,7 @@ async function performWorkspaceSync(cloud, adapters) {
       ? `Synced ${changes} change${changes === 1 ? '' : 's'} with the shared workspace.`
       : 'Cloud is up to date.';
 
-  return { propertyResult, expenseResult, taskResult, conflictCount, changes, message };
+  return { propertyResult, expenseResult, taskResult, companyResult, conflictCount, changes, message };
 }
 
 export function syncWorkspace(cloud, overrides = {}) {
@@ -71,6 +74,7 @@ export function syncWorkspace(cloud, overrides = {}) {
     clearPendingDeletes,
     syncExpenses: syncExpenseWorkspace,
     syncTasks: syncTaskWorkspace,
+    syncCompany: syncCompanyProfile,
     syncTaskEvents,
     syncTaskComments,
     ...overrides

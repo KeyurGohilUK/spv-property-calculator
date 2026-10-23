@@ -17,7 +17,7 @@ async function syncWorkspace() {
   if (syncing || !cloudUser || !navigator.onLine) return;
   syncing = true;
   accountController?.render();
-  $('secondaryAccountMessage').textContent = 'Syncing properties and expenses…';
+    $('secondaryAccountMessage').textContent = 'Syncing workspace data…';
   try {
     const result = await syncWorkspaceData(window.SPVCloud);
     $('secondaryAccountMessage').textContent = result.message;
@@ -41,7 +41,7 @@ document.body.insertAdjacentHTML('beforeend', `
       <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondarySignedIn" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Signed in</h3><p id="secondarySignedInEmail" class="muted"></p>
-      <div class="auth-account-card"><strong>Supabase connected</strong><small>Properties and expenses share the same workspace.</small></div>
+      <div class="auth-account-card"><strong>Supabase connected</strong><small>Company details, properties, expenses and tasks share the same workspace.</small></div>
       <div class="auth-actions"><button id="secondarySyncBtn" class="primary-btn" type="button">Sync now</button><button id="secondarySignOutBtn" class="secondary-btn" type="button">Sign out</button></div>
       <p id="secondaryAccountMessage" class="auth-message" aria-live="polite"></p>
     </div>

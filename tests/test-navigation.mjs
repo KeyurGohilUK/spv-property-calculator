@@ -91,6 +91,7 @@ assert.match(dialogHelper, /aria-labelledby[\s\S]*focusFirst[\s\S]*returnFocus/s
 assert.match(primaryNavigation, /href: '\.\/expenses\/'/, 'Shared navigation must link to the clean Expenses route');
 assert.match(primaryNavigation, /href: '\.\/forecast\/'/, 'Shared navigation must link to the clean Forecast route');
 assert.match(primaryNavigation, /href: '\.\/portfolio\/'/, 'Shared navigation must link to the clean Portfolio route');
+assert.match(appShell, /href="\.\/company\/"[\s\S]*<strong>Manage Company<\/strong>/, 'App Menu must link to Company Management');
 assert.doesNotMatch(primaryNavigation, /\.html/, 'Primary navigation must not expose implementation filenames');
 assert.match(appShell, /href="\.\/admin\/users\/"/, 'App Menu must link to the clean user-management route');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');

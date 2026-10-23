@@ -1,0 +1,62 @@
+.company-shell { display: grid; gap: 18px; }
+.company-hero { align-items: center; }
+.company-hero h1 { margin: 4px 0 6px; }
+.company-section { min-width: 0; padding: clamp(18px, 3vw, 26px); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.company-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.company-section-heading h2 { margin: 3px 0 5px; }
+.company-section-heading p { margin: 0; }
+.company-section-heading .eyebrow { color: var(--brand); }
+.company-edit-btn, .company-add-btn { flex: 0 0 auto; text-decoration: none; white-space: nowrap; }
+.company-particulars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; }
+.company-particulars > div { display: grid; grid-template-columns: minmax(120px, .65fr) minmax(0, 1.35fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
+.company-particulars dt { font-weight: 700; }
+.company-particulars dd { margin: 0; overflow-wrap: anywhere; }
+.company-empty-hint { margin: 12px 0 0; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--surface-2); color: var(--muted); }
+.company-appointments-empty { display: grid; justify-items: center; gap: 7px; padding: 28px 18px; border: 1px dashed var(--border); border-radius: 16px; text-align: center; }
+.company-appointments-empty .empty-icon { margin: 0; }
+.company-appointments-empty h3, .company-appointments-empty p { margin: 0; }
+.company-appointments-empty p { max-width: 420px; color: var(--muted); }
+.company-appointments-table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; scrollbar-color: var(--brand) var(--surface-2); }
+.company-appointments-table { width: 100%; min-width: 680px; border-collapse: collapse; text-align: left; }
+.company-appointments-table th, .company-appointments-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); }
+.company-appointments-table thead { background: var(--surface-2); }
+.company-appointments-table thead th { color: var(--muted); font-size: 13px; }
+.company-appointments-table tbody tr:last-child > * { border-bottom: 0; }
+.company-appointments-table tbody th { font-weight: 650; overflow-wrap: anywhere; }
+.company-appointments-table tbody td { text-align: center; }
+.company-role-mark { color: var(--positive); font-size: 19px; font-weight: 800; }
+.company-role-none { color: var(--muted); }
+.compact-company-btn { min-height: 38px; padding: 7px 13px; font-size: 13px; }
+.company-appointment-cards { display: none; }
+.company-dialog { max-width: 620px; }
+.company-dialog form { display: grid; gap: 16px; }
+.company-dialog-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.company-dialog-header h2 { margin: 2px 0 0; font-size: 22px; }
+.company-dialog-header .eyebrow { margin: 0; color: var(--brand); }
+.company-form-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.company-role-fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: 14px; }
+.company-role-fieldset legend { padding: 0 6px; font-weight: 700; }
+.company-role-fieldset label { display: flex; align-items: flex-start; gap: 9px; min-height: 44px; padding: 10px; border-radius: 10px; background: var(--surface-2); line-height: 1.35; }
+.company-role-fieldset input { flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--brand); }
+.company-form-actions { display: flex; align-items: center; gap: 10px; }
+.company-action-spacer { flex: 1; }
+.company-form-actions .primary-btn, .company-form-actions .secondary-btn { text-decoration: none; }
+.danger-text { color: var(--danger); }
+.company-dialog .save-message { min-height: 1.4em; margin: 0; color: var(--danger); }
+.company-dialog .field small { display: block; }
+
+@media (max-width: 680px) {
+  .company-hero { align-items: flex-start; flex-direction: column; }
+  .company-section-heading { align-items: stretch; flex-direction: column; }
+  .company-section-heading > button { width: 100%; }
+  .company-particulars { grid-template-columns: 1fr; }
+  .company-particulars > div { grid-template-columns: minmax(115px, .7fr) minmax(0, 1.3fr); }
+  .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
+  .company-form-actions { flex-wrap: wrap; }
+  .company-form-actions > button { flex: 1 1 auto; }
+  .company-action-spacer { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-section, .company-appointments-table-wrap { scroll-behavior: auto; }
+}
