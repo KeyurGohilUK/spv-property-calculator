@@ -22,7 +22,7 @@ export function setupPrimaryNavigation(root = document) {
   const activePage = nav.dataset.activePage || 'properties';
   const home = nav.dataset.home === 'true';
   const items = [
-    { id: 'properties', label: 'Properties', href: './' },
+    { id: 'properties', label: 'Opportunities', href: './' },
     { id: 'portfolio', label: 'Portfolio', href: './portfolio/' },
     { id: 'expenses', label: 'Expenses', href: './expenses/' },
     { id: 'tasks', label: 'Tasks', href: './tasks/' },
