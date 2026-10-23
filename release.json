@@ -1,6 +1,7 @@
 {
-  "version": "1.45.9",
+  "version": "1.45.10",
   "notes": [
+    "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",
     "Remove the overlapping shadow and backdrop below the property editor toolbar.",
     "Keep the Opportunities label on one line on every mobile page.",
     "Align the editor shadow backdrop with the toolbar edges.",
