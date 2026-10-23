@@ -53,6 +53,19 @@ test('desktop primary navigation background spans the viewport', async ({ page }
   expect(bounds.right).toBeGreaterThanOrEqual(bounds.viewportWidth - 1);
 });
 
+test('desktop sticky navigation stays flush below the sticky app header', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 500));
+
+  const positions = await page.evaluate(() => ({
+    headerBottom: document.querySelector('.app-header').getBoundingClientRect().bottom,
+    navigationTop: document.querySelector('.primary-app-nav').getBoundingClientRect().top
+  }));
+  expect(positions.navigationTop).toBeGreaterThanOrEqual(positions.headerBottom - 1);
+  expect(positions.navigationTop - positions.headerBottom).toBeLessThanOrEqual(3);
+});
+
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {
   await page.goto('/expenses/');
   const originalUrl = page.url();
