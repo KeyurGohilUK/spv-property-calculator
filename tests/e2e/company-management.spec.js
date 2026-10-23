@@ -72,7 +72,7 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   }));
   expect(dimensions.content).toBeGreaterThan(dimensions.viewport);
   await page.locator('#companyAppointmentsTable').evaluate((element) => { element.scrollLeft = element.scrollWidth; });
-  await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
 });
 
 test('workspace viewers can read but not edit company records', async ({ page }) => {
