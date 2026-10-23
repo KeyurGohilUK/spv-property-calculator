@@ -64,6 +64,31 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   await expect(card).toContainText('£300,000');
 });
 
+test('opens property listings externally while keeping the app page intact', async ({ page }) => {
+  await createProperty(page, {
+    title: 'External Listing Journey',
+    listingUrl: 'https://example.com/property-details'
+  });
+
+  const appUrl = page.url();
+  const listingLink = page.getByRole('link', {
+    name: 'Open property listing for External Listing Journey'
+  });
+  await expect(listingLink).toHaveAttribute('href', 'https://example.com/property-details');
+  await expect(listingLink).toHaveAttribute('target', '_blank');
+  await expect(listingLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+  const listingPagePromise = page.waitForEvent('popup');
+  await listingLink.click();
+  const listingPage = await listingPagePromise;
+  await expect(listingPage).toHaveURL('https://example.com/property-details');
+  await listingPage.close();
+
+  await expect(page).toHaveURL(appUrl);
+  await expect(page.locator('#homeView')).not.toHaveClass(/hidden/);
+  await expect(page.getByRole('heading', { name: 'External Listing Journey' })).toBeVisible();
+});
+
 test('tracks individual refurbishment items and persists their calculated total', async ({ page }) => {
   await page.goto('/');
   await page.locator('#newPropertyBtn').click();
