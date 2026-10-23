@@ -179,10 +179,13 @@
   .primary-nav-item svg { width: 22px; height: 22px; }
   .primary-nav-item span {
     max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  #propertiesNavLink span {
     overflow-wrap: normal;
     white-space: nowrap;
-    text-align: center;
-    font-size: clamp(7px, 2.1vw, 9px);
+    font-size: clamp(6px, 1.8vw, 9px);
   }
   .primary-nav-item { font-size: 9px; }
   .primary-nav-item small {
