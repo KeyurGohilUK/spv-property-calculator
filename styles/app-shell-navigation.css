@@ -155,7 +155,7 @@
     box-shadow: 0 -10px 30px rgba(0, 0, 0, .08);
   }
   .primary-nav-item {
-    min-height: 54px;
+    min-height: 60px;
     flex-direction: column;
     gap: 3px;
     padding: 5px 2px;
@@ -164,6 +164,12 @@
     line-height: 1.1;
   }
   .primary-nav-item svg { width: 22px; height: 22px; }
+  .primary-nav-item span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .primary-nav-item { font-size: 9px; }
   .primary-nav-item small {
     position: absolute;
     margin: -30px 0 0 39px;
