@@ -365,7 +365,8 @@ test('property card cost amounts use the full totals panel width', async ({ page
   alignment.forEach((rightInset) => expect(rightInset).toBeLessThanOrEqual(16));
 });
 
-test('@mobile Opportunities label stays within the navigation button @mobile', async ({ page }) => {
+test('@mobile Opportunities label stays on one line and fits the navigation button @mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/');
   const link = page.locator('#propertiesNavLink');
   const label = link.locator('span');
@@ -374,6 +375,7 @@ test('@mobile Opportunities label stays within the navigation button @mobile', a
   const labelBox = await label.boundingBox();
   expect(labelBox.x).toBeGreaterThanOrEqual(buttonBox.x);
   expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(buttonBox.x + buttonBox.width);
+  expect(await label.evaluate((element) => getComputedStyle(element).whiteSpace)).toBe('nowrap');
   expect(await label.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
 });
 
