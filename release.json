@@ -1,6 +1,7 @@
 {
-  "version": "1.45.5",
+  "version": "1.45.6",
   "notes": [
+    "Align the editor shadow backdrop with the toolbar edges.",
     "Keep scrolling content hidden beneath the property editor toolbar shadow.",
     "Use the page background color for the gap above the editor toolbar.",
     "Use the page background to fill the gap between navigation and the editor toolbar.",

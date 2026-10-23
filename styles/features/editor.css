@@ -320,7 +320,7 @@
     z-index: -1;
     top: calc(100% - 1px);
     left: 50%;
-    width: calc(100vw + 44px);
+    width: calc(100% + 44px);
     height: 30px;
     transform: translateX(-50%);
     background: var(--bg);
