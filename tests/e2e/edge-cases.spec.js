@@ -86,7 +86,8 @@ test('past viewing date is represented as Viewed on the property card', async ({
   await page.locator('#backBtn').click();
 
   const card = page.locator('.property-card').filter({ hasText: 'Completed Viewing' });
-  await expect(card.locator('.property-viewing-date.viewed')).toContainText('Viewed');
+  await expect(card.locator('.purchase-stage-badge')).toHaveText('Viewed');
+  await expect(card.locator('.property-viewing-date')).toHaveCount(0);
   await expect(card).not.toContainText('1 Jan 2020');
 });
 

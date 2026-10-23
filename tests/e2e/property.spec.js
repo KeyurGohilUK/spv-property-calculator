@@ -555,6 +555,38 @@ test('records offer and counteroffer history and recalculates from the latest pr
   await expect(page.locator('#summaryPurchasePrice')).toHaveText('£245,000');
 });
 
+test('shows Viewed as the opportunity stage and hides it once an offer is accepted', async ({ page }) => {
+  await createProperty(page, { title: 'Viewed Stage Journey' });
+  let card = page.locator('.property-card').filter({ hasText: 'Viewed Stage Journey' });
+  await card.getByRole('button', { name: 'Open Viewed Stage Journey for editing' }).click();
+
+  const yesterday = await page.evaluate(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+  });
+  await page.locator('#viewingDateDay').fill(yesterday);
+  await page.locator('#viewingTime').selectOption('10:30');
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+
+  card = page.locator('.property-card').filter({ hasText: 'Viewed Stage Journey' });
+  await expect(card.locator('.purchase-stage-badge')).toHaveText('Viewed');
+  await expect(card.locator('.property-viewing-date')).toHaveCount(0);
+
+  await card.getByRole('button', { name: 'Open Viewed Stage Journey for editing' }).click();
+  await openContainingSection(page, '#purchaseStage');
+  await page.locator('#purchaseStage').selectOption('under_offer');
+  await page.locator('#savePropertyBtn').click();
+  await page.locator('#backBtn').click();
+
+  card = page.locator('.property-card').filter({ hasText: 'Viewed Stage Journey' });
+  await expect(card.locator('.purchase-stage-badge')).toHaveText('Under offer · Sold STC');
+  await expect(card.locator('.purchase-stage-badge')).toHaveCount(1);
+  await expect(card.getByText('Viewed', { exact: true })).toHaveCount(0);
+  await expect(card.locator('.property-viewing-date')).toHaveCount(0);
+});
+
 test('tracks an accepted offer through exchange into the completed Portfolio', async ({ page }) => {
   await createProperty(page, { title: 'Portfolio Lifecycle', price: '250000' });
   let card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
