@@ -51,6 +51,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
 assert.match(primaryNavigation, /Opportunities[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Opportunities must stay on one line on every mobile page');
 assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
 assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Forecast as Beta');
 assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
