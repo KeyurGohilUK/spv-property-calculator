@@ -52,7 +52,8 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
 }
 assert.match(primaryNavigation, /Opportunities[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
 assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Opportunities must stay on one line on every mobile page');
-assert.match(styles, /#editorView \.editor-topbar::after \{[^}]*width: 100vw;[^}]*height: 42px;/, 'Editor backdrop must cover viewport edges and extend below the toolbar shadow');
+assert.doesNotMatch(styles, /#editorView \.editor-topbar::after/, 'Editor toolbar must not add a backdrop beneath the bar');
+assert.match(styles, /\.editor-topbar \{[^}]*box-shadow: none;/, 'Editor toolbar must not cast a shadow over the content below');
 assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
 assert.match(primaryNavigation, /id: 'forecast'[\s\S]*badge: 'Beta'/, 'Shared navigation must label Forecast as Beta');
 assert.match(primaryNavigation, /aria-current="page"/, 'Shared navigation must expose the active page');
