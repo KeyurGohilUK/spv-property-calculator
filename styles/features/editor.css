@@ -285,4 +285,17 @@
 
 @media (max-width: 620px) {
   #editorView {
-    padding-top: 72px;
+    padding-top: 82px;
+  }
+  #editorView .editor-topbar {
+    top: calc(var(--safe-top) + 94px);
+  }
+}
+
+/* Keep the fixed editor actions below the desktop navigation. */
+#editorView {
+  padding-top: 146px;
+}
+#editorView .editor-topbar {
+  top: calc(var(--safe-top) + 158px);
+}
