@@ -59,6 +59,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
 });
 
 test('@mobile company appointment table remains usable in a horizontally scrollable panel', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await mockCompanyWorkspace(page, 'editor', {
     companyName: 'Example SPV Ltd',
     appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director', 'psc'] }]
