@@ -294,13 +294,22 @@
               </div>
             </details>
 
-            <details class="section-card collapsible-section">
-              <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">SPV</span><span class="section-title">Company costs</span></span><strong id="companyCostsInline" class="section-total">£0</strong></summary>
-              <div class="field-grid">
-                <label class="field currency-field"><span>Company Formation Cost</span><span class="input-prefix"><span>£</span><input id="companyFormationCost" type="text" inputmode="decimal" placeholder="0"></span></label>
-                <label class="field currency-field"><span>SPV Mortgage Administration Costs</span><span class="input-prefix"><span>£</span><input id="spvAdministrationCost" type="text" inputmode="decimal" placeholder="0"></span></label>
+            <section class="section-card purchasing-company-card" aria-labelledby="purchasingCompanyHeading">
+              <div class="section-heading">
+                <div class="section-heading-copy">
+                  <span class="eyebrow">SPV</span>
+                  <h3 class="section-title" id="purchasingCompanyHeading">Purchasing company</h3>
+                  <span class="section-description muted">Choose which registered company will purchase this property.</span>
+                </div>
               </div>
-            </details>
+              <label class="field">
+                <span>Company</span>
+                <select id="purchasingCompanyId" aria-describedby="purchasingCompanyHint">
+                  <option value="">Select a company</option>
+                </select>
+              </label>
+              <p id="purchasingCompanyHint" class="muted small">Add or update companies in More → Manage Company.</p>
+            </section>
 
             <details class="section-card collapsible-section">
               <summary class="section-heading collapsible-heading"><span class="section-heading-copy"><span class="eyebrow">Other</span><span class="section-title">Purchase costs</span></span><strong id="purchaseCostsInline" class="section-total">£0</strong></summary>
@@ -386,7 +395,6 @@
                 <div class="separator"><span>Stamp Duty</span><strong id="summarySDLT">£0</strong></div>
                 <div><span>Legal &amp; Professional</span><strong id="summaryLegal">£0</strong></div>
                 <div><span>Mortgage Costs</span><strong id="summaryMortgageCosts">£0</strong></div>
-                <div><span>Company / SPV Costs</span><strong id="summaryCompanyCosts">£0</strong></div>
                 <div><span>Other Purchase Costs</span><strong id="summaryOtherCosts">£0</strong></div>
                 <div><span>Refurbishment</span><strong id="summaryRefurbishment">£0</strong></div>
               </div>

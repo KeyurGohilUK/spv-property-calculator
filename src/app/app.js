@@ -28,6 +28,7 @@ import {
 import { syncWorkspace, formatWorkspaceSyncError } from '../services/workspace-sync.js';
 import { buildViewingCalendarInvite, isFutureViewing } from '../features/properties/calendar-invite.js';
 import { createPropertyCard, formatViewingDate } from '../features/properties/property-card.js';
+import { getCompanyProfile } from '../features/company/company-storage.js';
 import { escapeHtml, formatCurrency, formatDate, formatNumber } from '../utils/format-utils.js';
 import { clearFieldValidation, setFieldValidation } from '../utils/validation.js';
 import { createPriceHistoryEntry, normalizePriceHistory } from '../features/properties/price-history.js';
@@ -48,8 +49,7 @@ const NOTES_CACHE_KEY = 'spv-property-calculator.notes.v1';
 
 const FEE_FIELDS = [
   'solicitorFee', 'surveyCost', 'mortgageArrangementFee', 'mortgageBrokerFee',
-  'mortgageValuationFee', 'companyFormationCost', 'spvAdministrationCost',
-  'landRegistrySearches', 'insuranceCost', 'auctionReservationFee'
+  'mortgageValuationFee', 'landRegistrySearches', 'insuranceCost', 'auctionReservationFee'
 ];
 
 let editingId = null;
@@ -77,6 +77,34 @@ function makeId() {
 }
 
 const $ = (id) => document.getElementById(id);
+
+function getManagedCompanies() {
+  const profile = getCompanyProfile();
+  const records = Array.isArray(profile.companies)
+    ? profile.companies
+    : profile.companyName ? [profile] : [];
+  return records.map((company, index) => ({
+    id: String(company.id || (index === 0 ? 'default' : `company-${index + 1}`)),
+    name: String(company.companyName || company.name || '').trim()
+  })).filter((company) => company.name);
+}
+
+function renderPurchasingCompanyOptions(selectedId = $('purchasingCompanyId')?.value || '') {
+  const select = $('purchasingCompanyId');
+  if (!select) return;
+  const companies = getManagedCompanies();
+  const selected = String(selectedId || '');
+  const options = [new Option('Select a company', '')];
+  companies.forEach((company) => options.push(new Option(company.name, company.id)));
+  if (selected && !companies.some((company) => company.id === selected)) {
+    options.push(new Option('Previously selected company', selected));
+  }
+  select.replaceChildren(...options);
+  select.value = selected;
+  $('purchasingCompanyHint').textContent = companies.length
+    ? 'Manage company details in More → Manage Company.'
+    : 'No company is registered yet. Add one in More → Manage Company.';
+}
 
 function money(value) {
   return formatCurrency(value);
@@ -184,6 +212,7 @@ function readItemisedCosts(containerId) {
 
 function getFormModel() {
   syncViewingDateFromPicker();
+  const existing = editingId ? getProperty(editingId) : null;
   const customExpenses = readItemisedCosts('customExpenses');
   const refurbishmentItems = readItemisedCosts('refurbishmentItems');
   const refurbishmentCost = refurbishmentItems.reduce((sum, item) => sum + item.amount, 0);
@@ -204,6 +233,10 @@ function getFormModel() {
     offerAcceptedDate: $('offerAcceptedDate').value || '',
     exchangeDate: $('exchangeDate').value || '',
     completionDate: $('completionDate').value || '',
+    purchasingCompanyId: $('purchasingCompanyId').value || '',
+    // Keep legacy values so existing forecasting assumptions survive edits.
+    companyFormationCost: safeNumber(existing?.companyFormationCost),
+    spvAdministrationCost: safeNumber(existing?.spvAdministrationCost),
     depositPercent: safeNumber($('depositPercent').value),
     qualifyingCorporateRelief: $('qualifyingCorporateRelief').checked,
     nonResident: $('nonResident').checked,
@@ -269,7 +302,6 @@ function renderCalculation() {
   $('sdltInline').textContent = money(calc.sdlt.total);
   $('legalInline').textContent = money(calc.legalProfessional);
   $('mortgageCostsInline').textContent = money(calc.mortgageCosts);
-  $('companyCostsInline').textContent = money(calc.companyCosts);
   $('purchaseCostsInline').textContent = money(calc.otherPurchaseCosts);
   $('refurbishmentInline').textContent = money(calc.refurbishment);
   $('summaryInline').textContent = money(calc.totalCashRequired);
@@ -281,7 +313,6 @@ function renderCalculation() {
   $('summarySDLT').textContent = money(calc.sdlt.total);
   $('summaryLegal').textContent = money(calc.legalProfessional);
   $('summaryMortgageCosts').textContent = money(calc.mortgageCosts);
-  $('summaryCompanyCosts').textContent = money(calc.companyCosts);
   $('summaryOtherCosts').textContent = money(calc.otherPurchaseCosts);
   $('summaryRefurbishment').textContent = money(calc.refurbishment);
   $('summaryCostsExDeposit').textContent = money(calc.totalPurchaseCostsExcludingDeposit);
@@ -806,6 +837,7 @@ function resetForm() {
   $('priceEntryNote').value = '';
   renderPriceHistory();
   $('propertyForm').reset();
+  renderPurchasingCompanyOptions();
   $('purchaseStage').value = 'opportunity';
   $('offerAcceptedDate').value = '';
   $('exchangeDate').value = '';
@@ -852,6 +884,7 @@ function loadIntoForm(property) {
   $('offerAcceptedDate').value = property.offerAcceptedDate || '';
   $('exchangeDate').value = property.exchangeDate || '';
   $('completionDate').value = property.completionDate || '';
+  renderPurchasingCompanyOptions(property.purchasingCompanyId || '');
   $('depositPercent').value = normalizeDepositPercent(property.depositPercent ?? 25);
   $('qualifyingCorporateRelief').checked = property.qualifyingCorporateRelief !== false;
   $('nonResident').checked = Boolean(property.nonResident);
@@ -1153,6 +1186,7 @@ async function syncCloud({ showFeedback = true } = {}) {
 
   try {
     const result = await syncWorkspace(window.SPVCloud);
+    renderPurchasingCompanyOptions($('purchasingCompanyId').value);
     renderPropertyList();
     renderArchiveList();
     openPendingProperty();
@@ -1300,6 +1334,9 @@ function init() {
   $('viewingTime').addEventListener('change', syncViewingDateFromPicker);
   $('propertyForm').addEventListener('input', handlePropertyFormMutation);
   $('propertyForm').addEventListener('change', handlePropertyFormMutation);
+  window.addEventListener('spv-workspace-synced', () => {
+    renderPurchasingCompanyOptions($('purchasingCompanyId').value);
+  });
 
   [$('purchasePrice'), ...FEE_FIELDS.map((id) => $(id))].forEach(attachFormatting);
 
