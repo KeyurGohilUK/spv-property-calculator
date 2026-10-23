@@ -221,3 +221,14 @@
 }
 .more-menu-header h3 { margin: 0; }
 .more-menu-close { position: static; margin: 0; flex: 0 0 auto; }
+
+
+/* Apply the mobile menu height limit after the shared dialog sizing rules. */
+@media (max-width: 700px) {
+  .more-menu-dialog {
+    max-height: calc(100vh - 110px - var(--safe-bottom));
+  }
+  @supports (height: 100dvh) {
+    .more-menu-dialog { max-height: calc(100dvh - 110px - var(--safe-bottom)); }
+  }
+}
