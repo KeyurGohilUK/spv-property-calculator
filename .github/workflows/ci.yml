@@ -41,6 +41,8 @@ jobs:
 
   browser:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
     timeout-minutes: 15
     steps:
       - name: Check out repository
@@ -56,9 +58,6 @@ jobs:
 
       - name: Validate HTML
         run: npm run test:html
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit
 
       - name: Run Playwright tests
         run: npm run test:e2e
