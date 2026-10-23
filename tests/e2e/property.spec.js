@@ -53,7 +53,7 @@ test('chooses and saves the company used to purchase a property', async ({ page 
   await page.locator('#purchasePrice').fill('250000');
   await companySelect.selectOption('default');
   await page.locator('#savePropertyBtn').click();
-  await expect(page.locator('#saveMessage')).toContainText(/Saved on this device/);
+  await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.properties.v1') || '[]'));
   expect(stored[0]?.purchasingCompanyId).toBe('default');
