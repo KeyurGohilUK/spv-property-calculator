@@ -706,9 +706,7 @@ function renderPriceHistory() {
   $('priceHistoryEditor').classList.toggle('hidden', !isSaved);
   const stage = normalizePurchaseStage($('purchaseStage').value);
   const acceptedOffer = currentPriceHistory.find((entry) => entry.id === currentAcceptedOfferId);
-  const displayedPrice = stage !== 'opportunity' && acceptedOffer
-    ? acceptedOffer.price
-    : currentListingPrice;
+  const displayedPrice = acceptedOffer?.price ?? safeNumber($('purchasePrice').value);
   $('priceHistorySectionTotal').textContent = displayedPrice ? money(displayedPrice) : 'Save property first';
   document.querySelector('.price-entry-form')?.classList.toggle('hidden', stage !== 'opportunity');
   list.replaceChildren();
