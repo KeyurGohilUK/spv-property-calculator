@@ -1,7 +1,7 @@
 {
-  "version": "1.45.8",
+  "version": "1.45.9",
   "notes": [
-    "Extend the editor toolbar backdrop across the screen and below its shadow.",
+    "Remove the overlapping shadow and backdrop below the property editor toolbar.",
     "Keep the Opportunities label on one line on every mobile page.",
     "Align the editor shadow backdrop with the toolbar edges.",
     "Keep scrolling content hidden beneath the property editor toolbar shadow.",
