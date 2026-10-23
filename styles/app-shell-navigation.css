@@ -141,6 +141,19 @@
   .help-guide-body { min-height: 165px; }
 }
 
+@media (min-width: 701px) and (max-width: 900px) {
+  .primary-app-nav {
+    gap: 2px;
+    padding-inline: 8px;
+  }
+  .primary-nav-item {
+    gap: 5px;
+    padding-inline: 4px;
+    font-size: clamp(11px, 1.4vw, 13px);
+  }
+  .primary-nav-item svg { width: 19px; height: 19px; }
+}
+
 @media (max-width: 700px) {
   .primary-app-nav {
     position: fixed;
@@ -179,13 +192,26 @@
   .main-shell { padding-bottom: calc(112px + var(--safe-bottom)); }
   .more-menu-dialog {
     width: calc(100% - 20px);
+    max-height: calc(100vh - 110px - var(--safe-bottom));
     margin-bottom: calc(82px + var(--safe-bottom));
+  }
+  @supports (height: 100dvh) {
+    .more-menu-dialog { max-height: calc(100dvh - 110px - var(--safe-bottom)); }
   }
 }
 
 
 /* More popup header */
-.more-menu-dialog { position: relative; }
+/* Keep the app menu usable when its content is taller than the viewport. */
+.more-menu-dialog {
+  position: relative;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@supports (height: 100dvh) {
+  .more-menu-dialog { max-height: calc(100dvh - 40px); }
+}
 .more-menu-header {
   display: flex;
   align-items: center;
