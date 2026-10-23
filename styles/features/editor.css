@@ -299,13 +299,13 @@
 }
 #editorView .editor-topbar {
   top: calc(var(--sticky-header-offset, calc(var(--safe-top) + 76px)) + 83px);
-  background: var(--surface);
+  background: var(--bg);
 }
 @media (min-width: 701px) {
   #editorView .editor-topbar::before {
     content: "";
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     top: -20px;
     left: 50%;
     width: 100vw;
