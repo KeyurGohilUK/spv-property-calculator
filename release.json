@@ -1,6 +1,7 @@
 {
-  "version": "1.45.7",
+  "version": "1.45.8",
   "notes": [
+    "Extend the editor toolbar backdrop across the screen and below its shadow.",
     "Keep the Opportunities label on one line on every mobile page.",
     "Align the editor shadow backdrop with the toolbar edges.",
     "Keep scrolling content hidden beneath the property editor toolbar shadow.",
@@ -19,7 +20,6 @@
     "Show the accepted offer first in price history and remove the duplicate calculator price row.",
     "Show the accepted offer amount and hide price entry controls after an offer is accepted.",
     "Rename the Properties navigation item to Opportunities.",
-    "Show only company and person names in expense payer choices.",
-    "Choose the property allocation and the registered company or appointment that paid each expense."
+    "Show only company and person names in expense payer choices."
   ]
 }
