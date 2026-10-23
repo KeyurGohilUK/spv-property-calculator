@@ -566,6 +566,7 @@ test('shows Viewed as the opportunity stage and hides it once an offer is accept
     return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
   });
   await page.locator('#viewingDateDay').fill(yesterday);
+  await page.locator('#viewingTime').selectOption('10:30');
   await page.locator('#savePropertyBtn').click();
   await page.locator('#backBtn').click();
 
