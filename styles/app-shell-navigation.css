@@ -1,7 +1,7 @@
 /* Primary application navigation */
 .primary-app-nav {
   position: sticky;
-  top: calc(var(--safe-top) + 76px);
+  top: var(--sticky-header-offset, calc(var(--safe-top) + 76px));
   z-index: 18;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
