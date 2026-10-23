@@ -104,7 +104,8 @@ jobs:
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             : > /tmp/new-migrations.txt
             if [[ -n "$MIGRATION_FILE" ]]; then
-              if [[ ! "$MIGRATION_FILE" =~ ^Update\ [0-9]+\ -\ [A-Za-z0-9 _-]+\.sql$ ]]; then
+              migration_pattern='^Update [0-9]+ - [[:alnum:] _-]+\.sql$'
+              if [[ ! "$MIGRATION_FILE" =~ $migration_pattern ]]; then
                 echo "Enter a numbered migration filename, for example: Update 25 - Appointment-based Expense Payers.sql" >&2
                 exit 1
               fi
