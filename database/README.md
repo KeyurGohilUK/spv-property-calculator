@@ -54,6 +54,8 @@ Before merging a migration, add a repository Actions secret named `SUPABASE_DB_U
 
 Continue adding the next numbered migration and make it safe to rerun. The workflow detects newly added files, so edits to an already merged migration will not be deployed. A failed migration blocks the deployment job and stops later migration files in that push.
 
+To apply an already merged, safely rerunnable migration once, open **Actions → CI → Run workflow**, select `main`, and enter its exact filename in **migration_file** (for example, `Update 25 - Appointment-based Expense Payers.sql`). Leave the field blank to run checks without deploying an old migration.
+
 ## Portability boundary
 
 The table and function definitions use PostgreSQL SQL. Authentication references `auth.users`, `auth.uid()` and Row Level Security conventions supplied by Supabase. Moving to another Supabase project requires no structural rewrite. Moving to a different PostgreSQL host requires replacing those authentication helpers while keeping the public tables, constraints and indexes.
