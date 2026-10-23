@@ -1,6 +1,7 @@
 {
-  "version": "1.40.0",
+  "version": "1.41.0",
   "notes": [
+    "Collapse the purchasing company section after saving and show the selected company.",
     "Keep the Opportunities navigation label within its mobile button.",
     "Reduce excess space below the property editor toolbar.",
     "Keep the property editor toolbar below the primary navigation.",
