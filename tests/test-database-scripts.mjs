@@ -12,6 +12,7 @@ const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/
 const editableTaskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 22 - Editable Task Discussions.sql', import.meta.url), 'utf8');
 const expensePayerMigration = fs.readFileSync(new URL('../database/migrations/Update 23 - Expense Payer Attribution.sql', import.meta.url), 'utf8');
 const companyMigration = fs.readFileSync(new URL('../database/migrations/Update 24 - Company Profile and Appointments.sql', import.meta.url), 'utf8');
+const appointmentPayerMigration = fs.readFileSync(new URL('../database/migrations/Update 25 - Appointment-based Expense Payers.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
 const migrationGuide = fs.readFileSync(new URL('../database/README.md', import.meta.url), 'utf8');
@@ -25,6 +26,7 @@ assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS
 assert.match(bootstrap, /upsert_property_if_current/, 'Bootstrap must include conflict-safe property writes');
 assert.match(bootstrap, /upsert_expense_if_current/, 'Bootstrap must include conflict-safe expense writes');
 assert.match(bootstrap, /paid_by text not null default 'unrecorded'/, 'Bootstrap must include expense payer attribution');
+assert.match(bootstrap, /appointment:/, 'Bootstrap must accept registered appointments as expense payers');
 assert.match(expenseMigration, /create table if not exists public\.expenses/, 'Update 10 must create expenses');
 assert.match(expenseMigration, /expenses_scope_property_check/, 'Expense scope/property integrity check missing');
 assert.match(receiptMigration, /add column if not exists receipt_object_path/, 'Update 11 must preserve a private R2 object key');
@@ -60,6 +62,8 @@ assert.match(companyMigration, /public\.is_workspace_editor\(\)/, 'Only editors 
 assert.match(companyMigration, /COMPANY_PROFILE_CONFLICT/, 'Company profile updates must detect stale revisions');
 assert.match(bootstrap, /upsert_company_profile_if_current/, 'Bootstrap must include conflict-safe company-profile writes');
 assert.match(bootstrap, /Members read company profile/, 'Bootstrap must protect company-profile reads with workspace membership');
+assert.match(appointmentPayerMigration, /drop constraint if exists expenses_paid_by_check[\s\S]*appointment:/, 'Update 25 must allow appointment IDs as payers while preserving legacy values');
+assert.match(appointmentPayerMigration, /p_paid_by is null or p_paid_by !~[\s\S]*appointment:/, 'Update 25 must validate appointment payer IDs in the conflict-safe expense RPC');
 assert.match(bootstrap, /create or replace function public\.upsert_task_comment/, 'Bootstrap must include editable task discussions');
 assert.match(receiptMigration, /grant execute on function public\.is_workspace_member\(\), public\.is_workspace_editor\(\) to authenticated/, 'Worker access-check functions must be available to authenticated users');
 assert.match(bootstrap, /expenses_receipt_object_path_idx/, 'Bootstrap must include the receipt object-path index');
@@ -70,6 +74,7 @@ assert.match(workerConfig, /"binding": "RECEIPTS"[\s\S]*"bucket_name": "spv-prop
 assert.match(migrationGuide, /Never edit an already-deployed numbered migration/, 'Migration immutability rule missing');
 assert.match(migrationGuide, /bootstrap\/.*new or replacement Supabase project[\s\S]*migrations\/.*existing database/, 'Database workflow directories must be documented');
 assert.match(migrationGuide, /Update 24 — company particulars and appointments/, 'Database guide must include the company-management migration');
+assert.match(migrationGuide, /Update 25 — appointment-based expense payers/, 'Database guide must include the appointment-payer migration');
 assert.equal(fs.existsSync(new URL('database-scripts/', projectRoot)), false, 'Legacy database-scripts directory must not be recreated');
 assert.ok(fs.readdirSync(migrationDirectory).every((name) => name.endsWith('.sql')), 'Migration directory must contain only SQL migration files');
 

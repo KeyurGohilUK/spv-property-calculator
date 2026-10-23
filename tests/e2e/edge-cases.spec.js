@@ -143,7 +143,7 @@ test('expense allocation, filtering and CSV export work together', async ({ page
   for await (const chunk of csvStream) csvChunks.push(chunk);
   const csv = Buffer.concat(csvChunks).toString('utf8');
   expect(csv).toContain('"Paid by"');
-  expect(csv).toContain('"Company account"');
+  expect(csv).toContain('"Company"');
 
   await page.locator('#expenseFilter').selectOption('company');
   await expect(page.locator('#expenseCount')).toHaveText('0');

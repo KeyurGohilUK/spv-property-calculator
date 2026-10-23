@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { blockExternalServices } from './support/app-helpers.js';
 
-async function addExpense(page, { amount = '125.50', description = 'Companies House filing fee', paidBy = 'company', receipt } = {}) {
+async function addExpense(page, { amount = '125.50', description = 'Companies House filing fee', paidBy = 'company', receipt, scope, propertyId } = {}) {
   await page.getByRole('button', { name: /Add Expense/i }).click();
+  if (scope) await page.locator('#expenseScope').selectOption(scope);
+  if (propertyId) await page.locator('#expenseProperty').selectOption(propertyId);
   await page.locator('#expenseAmount').fill(amount);
   await page.locator('#expenseDescription').fill(description);
   await page.locator('#expensePaidBy').selectOption(paidBy);
@@ -52,26 +54,77 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
 });
 
 test('records and filters expenses by payer', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem(
+    'spv-property-calculator.company-profile.v1',
+    JSON.stringify({
+      companyName: 'TG Property Invest Ltd',
+      appointments: [
+        { id: 'director-a', name: 'Alex Director', roles: ['director'] },
+        { id: 'director-b', name: 'Sam Director', roles: ['director', 'shareholder'] }
+      ]
+    })
+  ));
   await page.goto('/expenses/');
-  await addExpense(page, { amount: '240', description: 'Survey paid personally', paidBy: 'director-a' });
+  await addExpense(page, { amount: '240', description: 'Survey paid personally', paidBy: 'appointment:director-a' });
   await addExpense(page, { amount: '80', description: 'Company filing fee', paidBy: 'company' });
 
   const personalExpense = page.locator('.expense-card').filter({ hasText: 'Survey paid personally' });
-  await expect(personalExpense).toContainText('Paid by Director A (personal funds)');
+  await expect(personalExpense).toContainText('Paid by Alex Director');
   await personalExpense.getByRole('button', { name: 'Edit expense Survey paid personally' }).click();
-  await page.locator('#expensePaidBy').selectOption('director-b');
+  await page.locator('#expensePaidBy').selectOption('appointment:director-b');
   await page.getByRole('button', { name: 'Save Changes' }).click();
-  await expect(personalExpense).toContainText('Paid by Director B (personal funds)');
+  await expect(personalExpense).toContainText('Paid by Sam Director');
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]'));
-  expect(stored.find((expense) => expense.description === 'Survey paid personally')?.paidBy).toBe('director-b');
+  expect(stored.find((expense) => expense.description === 'Survey paid personally')?.paidBy).toBe('appointment:director-b');
 
   await page.getByRole('button', { name: 'Filter & Export' }).click();
-  await page.locator('#expensePaidByFilter').selectOption('director-b');
+  await page.locator('#expensePaidByFilter').selectOption('appointment:director-b');
   await expect(page.locator('#expenseCount')).toHaveText('1');
   await expect(page.locator('.expense-card')).toContainText('Survey paid personally');
-  await expect(page.locator('#expensePayerReport')).toContainText('Director B (personal funds)');
+  await expect(page.locator('#expensePayerReport')).toContainText('Sam Director');
   await expect(page.locator('#expensePayerReport')).toContainText('£240.00');
+});
+
+test('selects expense allocation first and reveals a property only when needed', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('spv-property-calculator.company-profile.v1', JSON.stringify({
+      companyName: 'TG Property Invest Ltd',
+      appointments: [{ id: 'officer-1', name: 'Alex Director', roles: ['director'] }]
+    }));
+    localStorage.setItem('spv-property-calculator.properties.v1', JSON.stringify([
+      { id: 'property-1', title: '55 Royal Road, Bristol' }
+    ]));
+  });
+  await page.goto('/expenses/');
+  await page.getByRole('button', { name: /Add Expense/i }).click();
+
+  const selectOrder = await page.locator('#expenseForm').evaluate((form) =>
+    [...form.querySelectorAll('select')].slice(0, 3).map((select) => select.id)
+  );
+  expect(selectOrder).toEqual(['expenseScope', 'expenseProperty', 'expensePaidBy']);
+  await expect(page.locator('#expensePropertyField')).toBeHidden();
+  await expect(page.locator('#expensePaidBy option').first()).toHaveText('Paid by company · TG Property Invest Ltd');
+
+  await page.locator('#expenseScope').selectOption('property');
+  await expect(page.locator('#expensePropertyField')).toBeVisible();
+  await expect(page.locator('#expenseProperty option')).toHaveText(['Select property', '55 Royal Road, Bristol']);
+  await expect(page.locator('#expensePaidBy option')).toHaveText([
+    'Paid by company · TG Property Invest Ltd', 'Alex Director · Director'
+  ]);
+
+  await page.locator('#expenseProperty').selectOption('property-1');
+  await page.locator('#expensePaidBy').selectOption('appointment:officer-1');
+  await page.locator('#expenseAmount').fill('35');
+  await page.locator('#expenseDescription').fill('Property survey');
+  await page.getByRole('button', { name: 'Save Expense' }).click();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]')[0]);
+  expect(saved).toMatchObject({
+    scope: 'property', propertyId: 'property-1', paidBy: 'appointment:officer-1', amount: 35
+  });
+  const card = page.locator('.expense-card');
+  await expect(card).toContainText('55 Royal Road, Bristol');
+  await expect(card).toContainText('Paid by Alex Director');
 });
 
 test('shows selected receipt size and keeps receipt metadata locally', async ({ page, browserName }) => {

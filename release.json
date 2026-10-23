@@ -1,6 +1,6 @@
 {
-  "version": "1.32.0",
+  "version": "1.33.0",
   "notes": [
-    "Choose the purchasing company on each property and remove company fees from purchase calculations."
+    "Choose the property allocation and the registered company or appointment that paid each expense."
   ]
 }
