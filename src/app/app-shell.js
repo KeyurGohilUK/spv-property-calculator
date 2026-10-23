@@ -18,6 +18,23 @@ function renderHeaderControls(root) {
     </div>`);
 }
 
+function syncPrimaryNavigationOffset(root) {
+  const header = root.querySelector('.app-header');
+  const navigation = root.querySelector('.primary-app-nav');
+  if (!header || !navigation) return;
+
+  const updateOffset = () => {
+    navigation.style.setProperty('--sticky-header-offset', `${header.getBoundingClientRect().height}px`);
+  };
+  updateOffset();
+
+  if (typeof ResizeObserver === 'function') {
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(header);
+  }
+  window.addEventListener('resize', updateOffset, { passive: true });
+}
+
 function renderAppMenu(root, { home }) {
   if ($('moreMenuDialog', root)) return $('moreMenuDialog', root);
   root.body.insertAdjacentHTML('beforeend', `
@@ -38,6 +55,7 @@ function renderAppMenu(root, { home }) {
 
 export function setupAppShell({ root = document, home = false } = {}) {
   renderHeaderControls(root);
+  syncPrimaryNavigationOffset(root);
   const dialog = renderAppMenu(root, { home });
   const notificationSettings = setupNotificationSettings({ root });
   const dialogController = setupDialog(dialog, { closeButtons: [$('closeMoreMenuDialog', root)] });
