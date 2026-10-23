@@ -1,6 +1,7 @@
 {
-  "version": "1.37.0",
+  "version": "1.38.0",
   "notes": [
+    "Keep the property editor toolbar below the primary navigation.",
     "Show the accepted offer first in price history and remove the duplicate calculator price row.",
     "Show the accepted offer amount and hide price entry controls after an offer is accepted.",
     "Rename the Properties navigation item to Opportunities.",
