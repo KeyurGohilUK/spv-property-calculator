@@ -1,6 +1,7 @@
 {
-  "version": "1.45.2",
+  "version": "1.45.3",
   "notes": [
+    "Use the page background to fill the gap between navigation and the editor toolbar.",
     "Preserve a 20px solid themed gap above the fixed editor toolbar.",
     "Keep scrolling property details hidden behind the fixed editor save toolbar.",
     "Keep the desktop menu stationary beneath the header while scrolling.",
