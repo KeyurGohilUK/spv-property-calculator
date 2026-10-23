@@ -299,3 +299,12 @@
 #editorView .editor-topbar {
   top: calc(var(--safe-top) + 158px);
 }
+
+@media (max-width: 700px) {
+  #editorView {
+    padding-top: 82px;
+  }
+  #editorView .editor-topbar {
+    top: calc(var(--safe-top) + 94px);
+  }
+}
