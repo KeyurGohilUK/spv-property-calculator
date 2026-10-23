@@ -305,7 +305,7 @@
   #editorView .editor-topbar::before {
     content: "";
     position: absolute;
-    z-index: 0;
+    z-index: 1;
     top: -20px;
     left: 50%;
     width: 100vw;
