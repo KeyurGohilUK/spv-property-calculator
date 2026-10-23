@@ -71,8 +71,9 @@ const withFees = calculateProperty({
   qualifyingCorporateRelief: true
 });
 assert.equal(withFees.refurbishment, 15000, 'Itemised refurbishment calculation failed');
-assert.equal(withFees.totalCashRequired, 117145, 'Fees/refurbishment total cash calculation failed');
-assert.equal(withFees.totalPurchaseCostsIncludingDeposit, 102145, 'Purchase cash before refurbishment failed');
+assert.equal(withFees.companyCosts, undefined, 'Company costs are no longer part of property acquisition calculations');
+assert.equal(withFees.totalCashRequired, 116795, 'Fees/refurbishment total cash calculation failed');
+assert.equal(withFees.totalPurchaseCostsIncludingDeposit, 101795, 'Purchase cash before refurbishment failed');
 
 const legacyRefurbishment = calculateProperty({
   purchasePrice: 250000,
