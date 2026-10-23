@@ -1,6 +1,7 @@
 {
-  "version": "1.33.0",
+  "version": "1.34.0",
   "notes": [
+    "Show only company and person names in expense payer choices.",
     "Choose the property allocation and the registered company or appointment that paid each expense."
   ]
 }
