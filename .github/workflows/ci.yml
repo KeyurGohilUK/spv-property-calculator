@@ -68,3 +68,66 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  deploy-database:
+    name: Deploy Supabase migrations
+    runs-on: ubuntu-latest
+    needs:
+      - unit
+      - browser
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BEFORE_SHA: ${{ github.event.before }}
+      AFTER_SHA: ${{ github.sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find newly added migration files
+        id: migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+            BEFORE_SHA="$(git rev-list --max-parents=0 "$AFTER_SHA")"
+          fi
+          git diff --name-only --diff-filter=A "$BEFORE_SHA" "$AFTER_SHA" -- 'database/migrations/Update *.sql' \
+            | sort -V > /tmp/new-migrations.txt
+          if [[ -s /tmp/new-migrations.txt ]]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "New migrations to deploy:"
+            cat /tmp/new-migrations.txt
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No new numbered migrations in this push."
+          fi
+
+      - name: Require Supabase database connection secret
+        if: steps.migrations.outputs.found == 'true'
+        run: |
+          if [[ -z "$SUPABASE_DB_URL" ]]; then
+            echo "Set the SUPABASE_DB_URL repository secret to the Supabase PostgreSQL connection string." >&2
+            exit 1
+          fi
+
+      - name: Install PostgreSQL client
+        if: steps.migrations.outputs.found == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      - name: Apply migrations in order
+        if: steps.migrations.outputs.found == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r migration; do
+            echo "Applying $migration"
+            psql "$SUPABASE_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --file "$migration"
+          done < /tmp/new-migrations.txt

@@ -46,6 +46,14 @@ Run only migrations newer than the last applied update, in number order:
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
+## GitHub Actions deployment
+
+The CI workflow applies newly added `database/migrations/Update *.sql` files to Supabase after both the unit and browser jobs pass on `main`. Files are applied in numeric order. It does not replay old migrations or deploy changes from pull requests.
+
+Before merging a migration, add a repository Actions secret named `SUPABASE_DB_URL` containing the PostgreSQL connection string for the target Supabase project. Find it in the Supabase project under **Connect** (or **Project Settings → Database**). Use the production database connection string and keep it only in GitHub Secrets; never add it to the repository. The workflow reports a clear error when a migration is merged before this secret is configured.
+
+Continue adding the next numbered migration and make it safe to rerun. The workflow detects newly added files, so edits to an already merged migration will not be deployed. A failed migration blocks the deployment job and stops later migration files in that push.
+
 ## Portability boundary
 
 The table and function definitions use PostgreSQL SQL. Authentication references `auth.users`, `auth.uid()` and Row Level Security conventions supplied by Supabase. Moving to another Supabase project requires no structural rewrite. Moving to a different PostgreSQL host requires replacing those authentication helpers while keeping the public tables, constraints and indexes.
