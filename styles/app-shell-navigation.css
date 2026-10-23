@@ -179,8 +179,10 @@
   .primary-nav-item svg { width: 22px; height: 22px; }
   .primary-nav-item span {
     max-width: 100%;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    white-space: nowrap;
     text-align: center;
+    font-size: clamp(7px, 2.1vw, 9px);
   }
   .primary-nav-item { font-size: 9px; }
   .primary-nav-item small {
