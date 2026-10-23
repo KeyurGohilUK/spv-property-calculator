@@ -704,7 +704,13 @@ function renderPriceHistory() {
   const isSaved = Boolean(editingId);
   $('priceHistoryUnsaved').classList.toggle('hidden', isSaved);
   $('priceHistoryEditor').classList.toggle('hidden', !isSaved);
-  $('priceHistorySectionTotal').textContent = currentListingPrice ? money(currentListingPrice) : 'Save property first';
+  const stage = normalizePurchaseStage($('purchaseStage').value);
+  const acceptedOffer = currentPriceHistory.find((entry) => entry.id === currentAcceptedOfferId);
+  const displayedPrice = stage !== 'opportunity' && acceptedOffer
+    ? acceptedOffer.price
+    : currentListingPrice;
+  $('priceHistorySectionTotal').textContent = displayedPrice ? money(displayedPrice) : 'Save property first';
+  document.querySelector('.price-entry-form')?.classList.toggle('hidden', stage !== 'opportunity');
   list.replaceChildren();
 
   if (currentListingPrice > 0) {
@@ -1314,6 +1320,7 @@ function init() {
   $('savePropertyBtn').addEventListener('click', saveCurrentProperty);
   $('addPriceEntryBtn').addEventListener('click', addPriceHistoryEntry);
   $('priceEntryType').addEventListener('change', updatePriceEntryTypeUI);
+  $('purchaseStage').addEventListener('change', renderPriceHistory);
   $('propertyForm').addEventListener('submit', (event) => {
     event.preventDefault();
     saveCurrentProperty();

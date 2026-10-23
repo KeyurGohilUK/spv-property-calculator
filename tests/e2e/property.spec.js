@@ -540,6 +540,12 @@ test('tracks an accepted offer through exchange into the completed Portfolio', a
   await expect(page.locator('#purchaseStage')).toHaveValue('under_offer');
   await expect(page.locator('#offerAcceptedDate')).toHaveValue('2026-10-20');
   await expect(page.locator('#priceHistoryList')).toContainText('Accepted · Sold STC');
+  await expect(page.locator('#priceHistorySectionTotal')).toHaveText('£240,000');
+  await expect(page.locator('.price-entry-form')).toBeHidden();
+  await page.locator('#purchaseStage').selectOption('opportunity');
+  await expect(page.locator('.price-entry-form')).toBeVisible();
+  await page.locator('#purchaseStage').selectOption('under_offer');
+  await expect(page.locator('.price-entry-form')).toBeHidden();
   await expect(page.locator('#saveMessage')).toContainText(/Saved (?:on this device|locally and synced to Supabase)/);
 
   await page.locator('#backBtn').click();
