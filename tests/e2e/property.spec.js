@@ -357,6 +357,17 @@ test('property card cost amounts use the full totals panel width', async ({ page
   alignment.forEach((rightInset) => expect(rightInset).toBeLessThanOrEqual(16));
 });
 
+test('@mobile Opportunities label stays within the navigation button @mobile', async ({ page }) => {
+  const link = page.locator('#propertiesNavLink');
+  const label = link.locator('span');
+  await expect(link).toBeVisible();
+  const buttonBox = await link.boundingBox();
+  const labelBox = await label.boundingBox();
+  expect(labelBox.x).toBeGreaterThanOrEqual(buttonBox.x);
+  expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(buttonBox.x + buttonBox.width);
+  expect(await label.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+});
+
 test('@mobile mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'Mobile WebKit regression');
   await page.goto('/');
