@@ -128,4 +128,6 @@ assert.match(styles, /dialog \{[\s\S]*scrollbar-width: thin[\s\S]*scrollbar-colo
 assert.match(styles, /dialog::\-webkit-scrollbar \{[\s\S]*width: 7px/, 'Every popup must use a thin WebKit scrollbar');
 assert.match(styles, /dialog::\-webkit-scrollbar-thumb[\s\S]*var\(--brand\)/, 'Popup scrollbar thumb must use app theme colours');
 
+assert.match(styles, /html \{[^}]*overflow-x: clip;/, 'Full-bleed navigation must not create a horizontal page scrollbar');
+
 console.log('Primary navigation structure checks passed.');
