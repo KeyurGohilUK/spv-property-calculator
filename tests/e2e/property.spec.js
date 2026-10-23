@@ -358,6 +358,7 @@ test('property card cost amounts use the full totals panel width', async ({ page
 });
 
 test('@mobile Opportunities label stays within the navigation button @mobile', async ({ page }) => {
+  await page.goto('/');
   const link = page.locator('#propertiesNavLink');
   const label = link.locator('span');
   await expect(link).toBeVisible();
