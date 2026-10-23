@@ -17,6 +17,24 @@ test.beforeEach(async ({ page }) => {
   await blockExternalServices(page);
 });
 
+test('@mobile More menu stays inside a short viewport and scrolls its contents', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 480 });
+  await page.goto('/');
+  await page.locator('#moreNavBtn').click();
+
+  const dialog = page.locator('#moreMenuDialog');
+  await expect(dialog).toBeVisible();
+  const dialogBox = await dialog.boundingBox();
+  expect(dialogBox.y).toBeGreaterThanOrEqual(0);
+  expect(dialogBox.y + dialogBox.height).toBeLessThanOrEqual(480);
+
+  const lastItem = page.getByRole('link', { name: /Privacy & Terms/ });
+  await lastItem.scrollIntoViewIfNeeded();
+  const itemBox = await lastItem.boundingBox();
+  expect(itemBox.y).toBeGreaterThanOrEqual(dialogBox.y);
+  expect(itemBox.y + itemBox.height).toBeLessThanOrEqual(dialogBox.y + dialogBox.height);
+});
+
 test('More opens a modal without navigating and closes from the backdrop', async ({ page }) => {
   await page.goto('/expenses/');
   const originalUrl = page.url();
