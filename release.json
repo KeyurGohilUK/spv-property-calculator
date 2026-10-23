@@ -1,6 +1,7 @@
 {
-  "version": "1.45.6",
+  "version": "1.45.7",
   "notes": [
+    "Keep the Opportunities label on one line on every mobile page.",
     "Align the editor shadow backdrop with the toolbar edges.",
     "Keep scrolling content hidden beneath the property editor toolbar shadow.",
     "Use the page background color for the gap above the editor toolbar.",
@@ -10,7 +11,6 @@
     "Keep the desktop menu stationary beneath the header while scrolling.",
     "Show viewing progress as a single property stage, replaced by Under offer when accepted.",
     "Keep desktop navigation aligned below the app header while scrolling.",
-    "Keep the Opportunities label on one line in the mobile navigation.",
     "Keep the app menu inside short viewports and theme application scrollbars.",
     "Collapse the purchasing company section after saving and show the selected company.",
     "Keep the Opportunities navigation label within its mobile button.",
