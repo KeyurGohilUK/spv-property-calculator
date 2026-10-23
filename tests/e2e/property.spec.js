@@ -79,6 +79,8 @@ test('saves a property and edits it by clicking its card', async ({ page }) => {
   const primaryNavigation = await page.locator('.primary-app-nav').boundingBox();
   const editorToolbar = await page.locator('#editorView .editor-topbar').boundingBox();
   expect(primaryNavigation.y + primaryNavigation.height).toBeLessThanOrEqual(editorToolbar.y);
+  const firstEditorSection = await page.locator('#editorView .section-card').first().boundingBox();
+  expect(firstEditorSection.y - (editorToolbar.y + editorToolbar.height)).toBeLessThan(48);
   await expect(page.locator('#title')).toHaveValue('Playwright Test Property');
 
   await page.locator('#title').fill('Updated Playwright Property');
@@ -353,6 +355,18 @@ test('property card cost amounts use the full totals panel width', async ({ page
   expect(alignment).toHaveLength(3);
   alignment.forEach((rightInset) => expect(rightInset).toBeGreaterThanOrEqual(12));
   alignment.forEach((rightInset) => expect(rightInset).toBeLessThanOrEqual(16));
+});
+
+test('@mobile Opportunities label stays within the navigation button @mobile', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator('#propertiesNavLink');
+  const label = link.locator('span');
+  await expect(link).toBeVisible();
+  const buttonBox = await link.boundingBox();
+  const labelBox = await label.boundingBox();
+  expect(labelBox.x).toBeGreaterThanOrEqual(buttonBox.x);
+  expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(buttonBox.x + buttonBox.width);
+  expect(await label.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
 });
 
 test('@mobile mobile save control remains fixed while the editor scrolls', async ({ page, browserName }) => {
