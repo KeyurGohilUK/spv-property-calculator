@@ -1,6 +1,7 @@
 {
-  "version": "1.43.0",
+  "version": "1.44.0",
   "notes": [
+    "Keep desktop navigation aligned below the app header while scrolling.",
     "Keep the Opportunities label on one line in the mobile navigation.",
     "Keep the app menu inside short viewports and theme application scrollbars.",
     "Collapse the purchasing company section after saving and show the selected company.",
