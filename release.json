@@ -1,6 +1,7 @@
 {
-  "version": "1.45.10",
+  "version": "1.46.0",
   "notes": [
+    "Record company member funding entries and show each member’s total contribution percentage.",
     "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",
     "Remove the overlapping shadow and backdrop below the property editor toolbar.",
     "Keep the Opportunities label on one line on every mobile page.",

@@ -60,3 +60,21 @@
 @media (prefers-reduced-motion: reduce) {
   .company-section, .company-appointments-table-wrap { scroll-behavior: auto; }
 }
+
+.company-investment-table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; scrollbar-color: var(--brand) var(--surface-2); }
+.company-investment-table { width: 100%; min-width: 560px; border-collapse: collapse; text-align: left; }
+.company-investment-table th, .company-investment-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.company-investment-table thead, .company-investment-table tfoot { background: var(--surface-2); }
+.company-investment-table thead th { color: var(--muted); font-size: 13px; }
+.company-investment-table tbody tr:last-child > * { border-bottom: 0; }
+.company-investment-table tbody th, .company-investment-table tfoot th { font-weight: 650; overflow-wrap: anywhere; }
+.company-investment-table td:nth-child(2), .company-investment-table td:nth-child(3) { white-space: nowrap; }
+.company-investment-table tfoot th, .company-investment-table tfoot td { border-top: 1px solid var(--border); border-bottom: 0; font-weight: 750; }
+.company-investment-entries { display: grid; gap: 12px; margin-top: 24px; }
+.company-investment-entries h3 { margin: 0; font-size: 17px; }
+.company-investment-reference { min-width: 180px; max-width: 340px; overflow-wrap: anywhere; }
+.company-dialog select { min-height: 46px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; }
+.company-dialog select:disabled { opacity: .65; }
+@media (max-width: 680px) {
+  .company-investment-table { min-width: 560px; }
+}
