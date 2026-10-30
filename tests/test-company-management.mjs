@@ -12,6 +12,9 @@ const {
   saveCompanyProfile,
   saveAppointment,
   deleteAppointment,
+  saveInvestment,
+  deleteInvestment,
+  getInvestmentSummary,
   replaceCompanyProfile
 } = await import('../src/features/company/company-storage.js');
 const { performCompanyProfileSync } = await import('../src/features/company/company-cloud-sync.js');
@@ -38,6 +41,26 @@ assert.equal(edited.appointments.length, 1, 'Editing a person must not create a 
 assert.equal(edited.appointments[0].name, 'Person One Updated');
 assert.equal(deleteAppointment(director.id), true);
 assert.equal(getCompanyProfile().appointments.length, 0);
+
+
+const memberA = saveAppointment({ name: 'Investor A', roles: ['director'] }).appointments.at(-1);
+const memberB = saveAppointment({ name: 'Investor B', roles: ['shareholder'] }).appointments.at(-1);
+saveInvestment({ memberId: memberA.id, amount: '6000', date: '2026-10-01', reference: 'Initial funding' });
+saveInvestment({ memberId: memberA.id, amount: 4000.5, date: '2026-10-10', reference: 'Second transfer' });
+saveInvestment({ memberId: memberB.id, amount: 9999.5, date: '2026-10-11', reference: 'Shareholder loan' });
+let investmentSummary = getInvestmentSummary();
+assert.equal(investmentSummary.total, 20000);
+assert.equal(investmentSummary.members.length, 2);
+assert.equal(investmentSummary.members.find((member) => member.memberId === memberA.id).amount, 10000.5);
+assert.equal(investmentSummary.members.find((member) => member.memberId === memberB.id).contributionPercentage, 49.9975);
+assert.throws(() => saveInvestment({ memberId: memberB.id, amount: 0 }), /greater than £0/);
+const firstInvestment = getCompanyProfile().investments[0];
+const editedInvestment = saveInvestment({ ...firstInvestment, amount: 6500, reference: 'Updated funding note' });
+assert.equal(editedInvestment.investments[0].amount, 6500, 'Editing an entry must update it without duplicating it');
+assert.equal(editedInvestment.investments[0].reference, 'Updated funding note');
+assert.equal(deleteInvestment(firstInvestment.id), true, 'Investment entries can be removed');
+assert.equal(getCompanyProfile().investments.length, 2);
+assert.equal(getInvestmentSummary().total, 14000);
 
 let local = { ...created, _cloudDirty: true, _cloudRevision: 0 };
 let uploadCount = 0;

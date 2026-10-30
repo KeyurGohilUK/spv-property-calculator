@@ -437,7 +437,8 @@
       registeredOffice: String(record?.registeredOffice || '').trim(),
       incorporationDate: String(record?.incorporationDate || '').trim(),
       companyStatus: String(record?.companyStatus || '').trim(),
-      appointments: Array.isArray(record?.appointments) ? record.appointments : []
+      appointments: Array.isArray(record?.appointments) ? record.appointments : [],
+      investments: Array.isArray(record?.investments) ? record.investments : []
     };
     const { data, error } = await supabaseClient
       .rpc('upsert_company_profile_if_current', {
