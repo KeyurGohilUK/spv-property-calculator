@@ -29,7 +29,18 @@
 .compact-company-btn { min-height: 38px; padding: 7px 13px; font-size: 13px; }
 .company-appointment-cards { display: none; }
 .company-dialog { max-width: 620px; }
-.company-dialog form { display: grid; gap: 16px; }
+.company-dialog form { display: grid; min-width: 0; gap: 16px; }
+.company-dialog .field { min-width: 0; }
+.company-dialog input[type="date"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.company-dialog input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
 .company-dialog-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .company-dialog-header h2 { margin: 2px 0 0; font-size: 22px; }
 .company-dialog-header .eyebrow { margin: 0; color: var(--brand); }
