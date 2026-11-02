@@ -189,6 +189,22 @@ function renderCompanyCompliance() {
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
+  const historyRoot = $('companyFilingHistory');
+  if (historyRoot) {
+    const records = Array.isArray(companyHouseData?.filingHistory) ? companyHouseData.filingHistory : [];
+    historyRoot.innerHTML = !companyHouseData
+      ? '<p class="muted">Filing history is unavailable while the Companies House lookup is offline.</p>'
+      : !companyHouseData.filingHistoryAvailable
+        ? '<p class="muted">Filing history could not be retrieved. Check the official register.</p>'
+        : !records.length
+          ? '<p class="muted">No accounts or confirmation statement filings found in the latest 100 public filing records.</p>'
+          : `<ul class="company-filing-history-list">${records.map((record) => {
+              const date = formatComplianceDateUK(record.date) || 'Date unavailable';
+              const label = record.category === 'accounts' ? 'Annual accounts' : 'Confirmation statement / annual return';
+              const filingUrl = `https://find-and-update.company-information.service.gov.uk/company/${encodeURIComponent(profile.companyNumber)}/filing-history`;
+              return `<li><span><strong>${escapeHtml(label)}</strong><small>${escapeHtml(date)} · ${escapeHtml(record.type)}</small></span><a href="${escapeHtml(filingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="View ${escapeHtml(label)} filing on Companies House">View official record</a></li>`;
+            }).join('')}</ul>`;
+  }
   $('companyComplianceItems').innerHTML = items.map((item) => `
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
