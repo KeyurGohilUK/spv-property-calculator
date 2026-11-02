@@ -293,6 +293,7 @@ $('companyComplianceItems').addEventListener('click', async (event) => {
   const key = button.dataset.complianceKey;
   const current = buildCompanyCompliance({
     today: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
+    company: companyHouseData || {},
     confirmations: profile.complianceConfirmations
   }).find((item) => item.key === key);
   if (!current) return;
