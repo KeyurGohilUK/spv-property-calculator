@@ -39,8 +39,8 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
 
   await page.getByRole('button', { name: 'Edit your message' }).click();
   await expect(page.locator('#taskComment')).toHaveValue('Need an Agreement in Principle first: https://example.com/aip');
-  await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Save' })).toHaveCount(1);
+  await expect(page.locator('#taskDialog').getByRole('button', { name: 'Save' })).toBeVisible();
+  await expect(page.locator('#taskDialog').getByRole('button', { name: 'Save' })).toHaveCount(1);
 });
 
 test('BRRR calculator renders scenarios and reacts to an offer-range change', async ({ page }) => {

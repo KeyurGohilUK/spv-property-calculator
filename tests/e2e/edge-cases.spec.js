@@ -192,7 +192,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
 
   expect(originalSize).toBeGreaterThan(2 * 1024 * 1024);
   await expect(page.locator('#expenseReceiptSize')).toContainText('will be optimised when saved');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.locator('#expenseDialog').getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '', { timeout: 15_000 });
 
   const stored = await page.evaluate(async () => {
