@@ -49,12 +49,39 @@ Deno.serve(async (request) => {
     if (String(record.company_number || '').toUpperCase() !== companyNumber) {
       return respond({ error: 'Unexpected company response' }, 502);
     }
+    // Fetch a bounded first page of the public filing history; a failure here
+    // must not hide otherwise-valid company deadlines.
+    let filingHistory: { date: string; category: string; type: string; transactionId: string; description: string }[] = [];
+    let filingHistoryAvailable = false;
+    try {
+      const history = await fetch(`https://api.company-information.service.gov.uk/company/${companyNumber}/filing-history?items_per_page=100&start_index=0`, {
+        headers: { Authorization: 'Basic ' + btoa(apiKey + ':'), Accept: 'application/json' },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (history.ok) {
+        const historyRecord = await history.json();
+        filingHistoryAvailable = true;
+        filingHistory = (Array.isArray(historyRecord.items) ? historyRecord.items : [])
+          .filter((item: { category?: string; type?: string }) =>
+            item.category === 'accounts' || item.category === 'confirmation-statement' ||
+            item.category === 'annual-return' || /^CS\\d/i.test(item.type || ''))
+          .slice(0, 30)
+          .map((item: { date?: string; category?: string; type?: string; transaction_id?: string; description?: string }) => ({
+            date: String(item.date || ''), category: String(item.category || ''),
+            type: String(item.type || ''), transactionId: String(item.transaction_id || ''),
+            description: String(item.description || '').slice(0, 160)
+          }));
+      }
+    } catch {
+      // Keep the company-profile result available if history is down.
+    }
     // Only return public fields needed by the app; never return the API key.
     return respond({
       companyNumber,
       companyName: String(record.company_name || '').slice(0, 160),
       accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null }, last_accounts: { period_end_on: record.accounts?.last_accounts?.period_end_on || null, made_up_to: record.accounts?.last_accounts?.made_up_to || null }, overdue: record.accounts?.overdue === true },
       confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
+      filingHistory, filingHistoryAvailable,
       fetchedAt: new Date().toISOString()
     });
   } catch {
