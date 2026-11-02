@@ -1,7 +1,7 @@
 {
-  "version": "1.50.0",
+  "version": "1.51.0",
   "notes": [
-    "Display Companies House deadlines, last-filed periods and manual confirmation dates in UK format.",
-    "Show in-app 30-, 14- and 7-day filing reminder windows when the Company Compliance page is opened."
+    "Display recent official Companies House accounts and confirmation statement filing history.",
+    "Link to the public Companies House filing register, with safe fallbacks when history is unavailable."
   ]
 }
