@@ -1,3 +1,5 @@
+import { COMPANY_COMPLIANCE_RULES, validDate, normalizeConfirmation } from './compliance-rules.js';
+const VALID_RULE_IDS = new Set(COMPANY_COMPLIANCE_RULES.map((rule) => rule.id));
 const COMPANY_STORAGE_KEY = 'spv-property-calculator.company-profile.v1';
 const APPOINTMENT_ROLES = Object.freeze(['director', 'shareholder', 'secretary', 'psc']);
 const INVESTMENT_MEMBER_ROLES = Object.freeze(['director', 'shareholder']);
@@ -9,7 +11,7 @@ function makeId(prefix = 'appointment') {
 function emptyProfile() {
   return {
     id: 'default', companyName: '', companyNumber: '', registeredOffice: '',
-    incorporationDate: '', companyStatus: '', appointments: [], investments: [], _cloudRevision: 0, _cloudDirty: false
+    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, _cloudRevision: 0, _cloudDirty: false
   };
 }
 
@@ -52,6 +54,12 @@ export function normalizeCompanyProfile(profile = {}) {
     companyStatus: String(profile.companyStatus || '').trim().slice(0, 80),
     appointments,
     investments,
+    complianceConfirmations: Object.fromEntries(
+      Object.entries(profile.complianceConfirmations && typeof profile.complianceConfirmations === 'object' && !Array.isArray(profile.complianceConfirmations)
+        ? profile.complianceConfirmations : {})
+        .filter(([key, value]) => VALID_RULE_IDS.has(key.split(':')[0]) && normalizeConfirmation(value))
+        .map(([key, value]) => [key, normalizeConfirmation(value)])
+    ),
     _cloudRevision: Math.max(0, Number(profile._cloudRevision) || 0),
     _cloudDirty: Boolean(profile._cloudDirty)
   };
@@ -149,6 +157,17 @@ export function deleteInvestment(id) {
   if (investments.length === profile.investments.length) return false;
   saveCompanyProfile({ ...profile, investments });
   return true;
+}
+
+export function saveComplianceConfirmation(key, confirmed, date) {
+  const profile = getCompanyProfile();
+  const ruleId = String(key).split(':')[0];
+  if (!VALID_RULE_IDS.has(ruleId) || !String(key).startsWith(ruleId + ':')) throw new Error('Unknown compliance requirement.');
+  if (confirmed && !validDate(date)) throw new Error('Enter a valid confirmation date.');
+  const confirmations = { ...profile.complianceConfirmations };
+  if (confirmed) confirmations[key] = { status: 'confirmed', confirmedOn: date, period: String(key).slice(ruleId.length + 1) };
+  else delete confirmations[key];
+  return saveCompanyProfile({ ...profile, complianceConfirmations: confirmations });
 }
 
 export function getInvestmentSummary(profile = getCompanyProfile()) {
