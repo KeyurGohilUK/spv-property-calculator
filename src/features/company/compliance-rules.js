@@ -42,7 +42,7 @@ export function normalizeConfirmation(value) {
  * filing date as confirmation of a tax payment or director verification.
  */
 export function companyHouseDeadlines(company = {}) {
-  const nextAccounts = company.accounts?.next_due;
+  const nextAccounts = company.accounts?.next_accounts?.due_on || company.accounts?.next_due;
   const nextStatement = company.confirmation_statement?.next_due;
   return {
     'annual-accounts': validDate(nextAccounts) ? nextAccounts : null,

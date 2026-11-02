@@ -1,6 +1,7 @@
 {
-  "version": "1.47.1",
+  "version": "1.48.0",
   "notes": [
-    "Allow company compliance requirements to be user-confirmed or reopened, synced with the shared company profile."
+    "Retrieve Companies House annual accounts and confirmation statement filing deadlines through an authenticated server-side lookup.",
+    "Show due dates and upcoming deadlines within Company Compliance without implying filings are complete."
   ]
 }

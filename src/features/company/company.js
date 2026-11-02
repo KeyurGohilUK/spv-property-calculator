@@ -22,6 +22,9 @@ const ROLE_LABELS = Object.freeze({
 });
 let profile = getCompanyProfile();
 let editingAllowed = true;
+let companyHouseData = null;
+let companyHouseError = '';
+let lookupCompanyNumber = '';
 
 const detailsDialog = setupDialog($('companyDetailsDialog'), {
   closeButtons: [$('closeCompanyDetailsDialog'), $('cancelCompanyDetailsBtn')]
@@ -182,16 +185,17 @@ function openInvestment(id = '') {
 
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const items = buildCompanyCompliance({ today, confirmations: profile.complianceConfirmations });
+  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations });
   $('companyComplianceSummary').textContent = profile.companyNumber
-    ? `${items.filter((item) => item.status === 'user-confirmed').length} of ${items.length} user-confirmed · not officially verified`
+    ? `${items.filter((item) => item.status === 'user-confirmed').length} of ${items.length} user-confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('companyComplianceItems').innerHTML = items.map((item) => `
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
-        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : 'Needs verification'}</span></div>
+        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div>
+      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(item.dueDate)} · Companies House</p>` : ''}
       <p class="muted">${item.source === 'companies-house'
-        ? 'Verify the filing deadline at Companies House.'
+        ? companyHouseData ? 'Deadline retrieved from the public Companies House record; completion is not verified.' : 'Filing deadline not available; check Companies House.'
         : item.source === 'hmrc'
           ? 'Check your HMRC account or ask your accountant.'
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
@@ -214,6 +218,26 @@ function renderProfile() {
   $('addAppointmentBtn').disabled = !editingAllowed;
   renderAppointments();
   renderInvestments();
+  renderCompanyCompliance();
+}
+
+async function refreshCompanyHouseDeadlines() {
+  const companyNumber = String(profile.companyNumber || '').trim().toUpperCase();
+  if (!companyNumber || !navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) return;
+  lookupCompanyNumber = companyNumber;
+  companyHouseError = 'Checking Companies House…';
+  renderCompanyCompliance();
+  try {
+    const data = await window.SPVCloud.getCompanyHouseDeadlines(companyNumber);
+    if (String(profile.companyNumber || '').trim().toUpperCase() !== companyNumber || lookupCompanyNumber !== companyNumber) return;
+    companyHouseData = data;
+    companyHouseError = '';
+  } catch (error) {
+    if (lookupCompanyNumber !== companyNumber) return;
+    companyHouseData = null;
+    companyHouseError = 'Lookup unavailable';
+    console.warn('Companies House lookup failed:', error);
+  }
   renderCompanyCompliance();
 }
 
@@ -299,6 +323,7 @@ $('companyDetailsForm').addEventListener('submit', async (event) => {
     renderProfile();
     detailsDialog.close();
     await syncAfterSave();
+    if (profile.companyNumber) await refreshCompanyHouseDeadlines();
   } catch (error) {
     $('companyDetailsMessage').textContent = error.message || 'Company details could not be saved.';
   }
@@ -380,6 +405,7 @@ async function initialiseCompanyPage() {
       $('companySyncStatus').classList.remove('error', 'synced');
       renderProfile();
     }
+    await refreshCompanyHouseDeadlines();
   } catch (error) {
     if (navigator.onLine) console.warn('Company access could not be verified:', error);
   }
