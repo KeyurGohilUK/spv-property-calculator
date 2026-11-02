@@ -189,6 +189,28 @@ function renderCompanyCompliance() {
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
+  const peopleRoot = $('companyOfficialPeople');
+  if (peopleRoot) {
+    const people = companyHouseData?.officialPeople;
+    const normalized = (name) => String(name || '').toUpperCase().replace(/[^A-Z ]/g, ' ').split(/\\s+/).filter(Boolean).sort().join(' ');
+    const internalDirectors = profile.appointments.filter((a) => a.roles.includes('director'));
+    const officialDirectors = (people?.officers || []).filter((a) => a.role === 'director');
+    const namesMatch = (name) => internalDirectors.some((a) => normalized(a.name) === normalized(name));
+    const showDate = (date) => date ? formatComplianceDateUK(date) : '';
+    const verification = (entry) => entry.verification?.statementStartOn
+      ? `Appointment verification statement recorded ${escapeHtml(showDate(entry.verification.statementStartOn))}`
+      : entry.verification?.verifiedOn
+        ? `Identity verification date published: ${escapeHtml(showDate(entry.verification.verifiedOn))}`
+        : 'Verification status not publicly confirmed';
+    const renderPeople = (items, isDirector) => items.map((entry) => `<li><strong>${escapeHtml(entry.name)}</strong> · ${isDirector ? namesMatch(entry.name) ? 'Name matches internal director' : 'Review internal director record' : 'PSC on public register'}<small>${verification(entry)}${entry.verification?.statementDueOn ? ' · Statement due ' + escapeHtml(showDate(entry.verification.statementDueOn)) : ''}</small></li>`).join('');
+    peopleRoot.innerHTML = !people
+      ? '<p class="muted">Official people records unavailable until Companies House lookup completes.</p>'
+      : `<p class="muted">Directors: ${people.officersAvailable ? 'Public register retrieved' : 'Unavailable'} · PSCs: ${people.pscsAvailable ? 'Public register retrieved' : 'Unavailable'}</p>
+          ${people.officersAvailable ? `<h4>Current directors</h4><ul>${renderPeople(officialDirectors, true) || '<li>No current directors returned.</li>'}</ul>` : ''}
+          ${people.pscsAvailable ? `<h4>Current PSCs</h4><ul>${renderPeople(people.pscs || [], false) || '<li>No PSC entries returned. Check for PSC statements.</li>'}</ul>` : ''}
+          ${people.officersAvailable && officialDirectors.length !== internalDirectors.length ? '<p class="muted">Director counts differ between internal and official records. Check the names and appointment details.</p>' : ''}
+          <p class="muted">Name matching is indicative only, not identity proof. Check the official register for discrepancies.</p>`;
+  }
   const historyRoot = $('companyFilingHistory');
   if (historyRoot) {
     const records = Array.isArray(companyHouseData?.filingHistory) ? companyHouseData.filingHistory : [];
