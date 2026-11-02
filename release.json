@@ -1,34 +1,6 @@
 {
-  "version": "1.46.6",
+  "version": "1.47.0",
   "notes": [
-    "Use the standard Save label across website actions.",
-    "Show member investment shares in a labelled pie chart.",
-    "Show each company member’s investment contribution in a responsive chart.",
-    "Use consistent, right-aligned action buttons and contained date fields across dialogs.",
-    "Replace Company Management edit text buttons with accessible pencil icon buttons.",
-    "Align company dialog actions and keep the incorporation date field within its column.",
-    "Use plain textareas for company addresses and funding references, and keep dialog date fields within their columns.",
-    "Record company member funding entries and show each member’s total contribution percentage.",
-    "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",
-    "Remove the overlapping shadow and backdrop below the property editor toolbar.",
-    "Keep the Opportunities label on one line on every mobile page.",
-    "Align the editor shadow backdrop with the toolbar edges.",
-    "Keep scrolling content hidden beneath the property editor toolbar shadow.",
-    "Use the page background color for the gap above the editor toolbar.",
-    "Use the page background to fill the gap between navigation and the editor toolbar.",
-    "Preserve a 20px solid themed gap above the fixed editor toolbar.",
-    "Keep scrolling property details hidden behind the fixed editor save toolbar.",
-    "Keep the desktop menu stationary beneath the header while scrolling.",
-    "Show viewing progress as a single property stage, replaced by Under offer when accepted.",
-    "Keep desktop navigation aligned below the app header while scrolling.",
-    "Keep the app menu inside short viewports and theme application scrollbars.",
-    "Collapse the purchasing company section after saving and show the selected company.",
-    "Keep the Opportunities navigation label within its mobile button.",
-    "Reduce excess space below the property editor toolbar.",
-    "Keep the property editor toolbar below the primary navigation.",
-    "Show the accepted offer first in price history and remove the duplicate calculator price row.",
-    "Show the accepted offer amount and hide price entry controls after an offer is accepted.",
-    "Rename the Properties navigation item to Opportunities.",
-    "Show only company and person names in expense payer choices."
+    "Show mandatory company compliance obligations in Company Management with explicit unverified statuses."
   ]
 }
