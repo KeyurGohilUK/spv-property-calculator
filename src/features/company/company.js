@@ -15,6 +15,7 @@ import {
 const $ = (id) => document.getElementById(id);
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+const INVESTMENT_CHART_COLORS = ['#3267e8', '#e17700', '#4f7a5d', '#9a6a43', '#7957b5', '#c64c62'];
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
 });
@@ -79,6 +80,38 @@ function memberName(memberId, fallback = '') {
   return profile.appointments.find((appointment) => appointment.id === memberId)?.name || fallback || 'Former member';
 }
 
+function investmentPieMarkup(members, total) {
+  const center = 210;
+  const radius = 180;
+  let angle = -90;
+  const slices = members.map((member, index) => {
+    const amount = Number(member.amount) || 0;
+    const sweep = total > 0 ? amount / total * 360 : 0;
+    const endAngle = angle + sweep;
+    const startRadians = angle * Math.PI / 180;
+    const endRadians = endAngle * Math.PI / 180;
+    const start = { x: center + radius * Math.cos(startRadians), y: center + radius * Math.sin(startRadians) };
+    const end = { x: center + radius * Math.cos(endRadians), y: center + radius * Math.sin(endRadians) };
+    const name = memberName(member.memberId, member.memberName);
+    const percentage = member.contributionPercentage;
+    const color = INVESTMENT_CHART_COLORS[index % INVESTMENT_CHART_COLORS.length];
+    const path = sweep >= 359.999
+      ? `M ${center} ${center - radius} A ${radius} ${radius} 0 1 1 ${center} ${center + radius} A ${radius} ${radius} 0 1 1 ${center} ${center - radius} Z`
+      : `M ${center} ${center} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${sweep > 180 ? 1 : 0} 1 ${end.x} ${end.y} Z`;
+    let label = '';
+    if (percentage >= 8) {
+      const midRadians = (angle + sweep / 2) * Math.PI / 180;
+      const labelRadius = radius * (percentage < 18 ? 0.68 : 0.56);
+      const x = center + labelRadius * Math.cos(midRadians);
+      const y = center + labelRadius * Math.sin(midRadians);
+      label = `<text class="company-investment-chart-slice-label" x="${x}" y="${y - 5}" text-anchor="middle"><tspan x="${x}">${escapeHtml(name)}</tspan><tspan x="${x}" dy="18">${percentage.toFixed(1)}%</tspan></text>`;
+    }
+    angle = endAngle;
+    return `<path d="${path}" fill="${color}" stroke="var(--surface)" stroke-width="3"><title>${escapeHtml(name)}: ${percentage.toFixed(2)}%</title></path>${label}`;
+  });
+  return `<svg class="company-investment-chart-pie" viewBox="0 0 420 420" role="img" aria-labelledby="companyInvestmentPieTitle companyInvestmentPieDescription"><title id="companyInvestmentPieTitle">Overall member investment split</title><desc id="companyInvestmentPieDescription">${members.map((member) => `${escapeHtml(memberName(member.memberId, member.memberName))}: ${member.contributionPercentage.toFixed(2)}%`).join('; ')}</desc>${slices.join('')}</svg>`;
+}
+
 function renderInvestments() {
   const investments = profile.investments || [];
   const empty = investments.length === 0;
@@ -97,15 +130,10 @@ function renderInvestments() {
       <td>${CURRENCY_FORMAT.format(member.amount)}</td>
       <td>${member.contributionPercentage.toFixed(2)}%</td>
     </tr>`).join('');
-  $('companyInvestmentChart').innerHTML = [...summary.members]
-    .sort((a, b) => b.contributionPercentage - a.contributionPercentage)
-    .map((member) => {
-      const percentage = member.contributionPercentage.toFixed(2);
-      return `<li class="company-investment-chart-row">
-        <div class="company-investment-chart-label"><strong>${escapeHtml(memberName(member.memberId, member.memberName))}</strong><span>${CURRENCY_FORMAT.format(member.amount)} · ${percentage}%</span></div>
-        <progress class="company-investment-chart-track" max="100" value="${Math.min(100, Math.max(0, member.contributionPercentage))}" aria-label="${escapeHtml(memberName(member.memberId, member.memberName))}: ${percentage}% of contributions">${percentage}%</progress>
-      </li>`;
-    }).join('');
+  const chartMembers = [...summary.members].sort((a, b) => b.contributionPercentage - a.contributionPercentage);
+  $('companyInvestmentChart').querySelector('.company-investment-chart-legend').innerHTML = chartMembers.map((member, index) => `
+    <li><span class="company-investment-chart-key chart-color-${index % INVESTMENT_CHART_COLORS.length}" aria-hidden="true"></span><span>${escapeHtml(memberName(member.memberId, member.memberName))}: ${member.contributionPercentage.toFixed(1)}%</span></li>`).join('');
+  $('companyInvestmentChart').querySelector('.company-investment-chart-plot').innerHTML = investmentPieMarkup(chartMembers, summary.total);
   $('companyInvestmentTotal').textContent = CURRENCY_FORMAT.format(summary.total);
   $('companyInvestmentEntryRows').innerHTML = [...investments].sort((a, b) =>
     String(b.date).localeCompare(String(a.date))
