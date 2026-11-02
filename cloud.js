@@ -404,6 +404,17 @@
     return (data || []).map(fromCloudTask);
   }
 
+  async function getCompanyHouseDeadlines(companyNumber) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient.functions.invoke('company-house-lookup', {
+      body: { companyNumber }
+    });
+    if (error) throw new Error('Could not retrieve Companies House filing deadlines.');
+    if (!data || data.error) throw new Error(data?.error || 'Company lookup returned no results.');
+    return data;
+  }
+
   async function getCompanyProfile() {
     const supabaseClient = ensureClient();
     await requireUser();
@@ -863,6 +874,7 @@
     listProperties,
     listTasks,
     getCompanyProfile,
+    getCompanyHouseDeadlines,
     upsertCompanyProfile,
     isCompanyProfileConflict,
     upsertTask,
