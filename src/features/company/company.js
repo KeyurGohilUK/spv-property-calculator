@@ -1,5 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
-import { buildCompanyCompliance } from './compliance-rules.js';
+import { buildCompanyCompliance, formatComplianceDateUK } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
@@ -193,15 +193,16 @@ function renderCompanyCompliance() {
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
         <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div>
-      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(item.dueDate)} · Companies House</p>` : ''}
-      ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(item.officialFiling.lastPeriod)} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
+      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · Companies House</p>` : ''}
+      ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(formatComplianceDateUK(item.officialFiling.lastPeriod))} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
+      ${item.reminder ? `<p class="company-compliance-reminder">Filing reminder: ${escapeHtml(item.reminder.message)} · ${item.reminder.windowDays}-day reminder window</p>` : ''}
       <p class="muted">${item.source === 'companies-house'
         ? companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.'
         : item.source === 'hmrc'
           ? 'Check your HMRC account or ask your accountant.'
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
-      ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(item.confirmation.confirmedOn)}</small>` : ''}
+      ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
     </article>`).join('');
 }
 
