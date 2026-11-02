@@ -1,7 +1,9 @@
 {
-  "version": "1.46.2",
+  "version": "1.46.3",
   "notes": [
+    "Use consistent, right-aligned action buttons and contained date fields across dialogs.",
     "Replace Company Management edit text buttons with accessible pencil icon buttons.",
+    "Align company dialog actions and keep the incorporation date field within its column.",
     "Use plain textareas for company addresses and funding references, and keep dialog date fields within their columns.",
     "Record company member funding entries and show each member’s total contribution percentage.",
     "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",

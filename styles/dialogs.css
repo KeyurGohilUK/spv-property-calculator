@@ -3,6 +3,34 @@
 .install-dialog::backdrop { background: rgba(0,0,0,.42); backdrop-filter: blur(3px); }
 .install-dialog h3 { margin: 0 0 8px; }
 .install-dialog p { line-height: 1.55; }
+.install-dialog input[type="date"] {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.install-dialog input[type="date"]::-webkit-date-and-time-value {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.dialog-actions > .primary-btn,
+.dialog-actions > .secondary-btn {
+  flex: 0 0 160px;
+  width: 160px;
+  min-width: 0;
+}
+.dialog-actions > .danger-text { margin-right: auto; }
 .dialog-close { position: absolute; right: 10px; top: 10px; width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--surface-2); color: var(--text); font-size: 22px; cursor: pointer; }
 
 @media (max-width: 820px) {
@@ -57,6 +85,7 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .auth-dialog { max-width: 460px; }
 .auth-dialog code { padding: 2px 5px; border-radius: 6px; background: var(--surface-2); color: var(--text); }
 .auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.auth-actions.dialog-actions { display: flex; margin-top: 18px; }
 .auth-message { min-height: 20px; margin: 12px 0 0; color: var(--brand); font-size: 12px; font-weight: 700; line-height: 1.45; }
 .auth-account-card { margin: 16px 0 4px; padding: 14px; border-radius: 14px; background: var(--surface-2); }
 .auth-account-card strong, .auth-account-card small { display: block; }
@@ -68,7 +97,16 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .policy-acceptance-dialog a { color: var(--brand); font-weight: 700; }
 .policy-confirmation { display: flex; align-items: flex-start; gap: 11px; margin-top: 20px; padding: 15px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); line-height: 1.5; cursor: pointer; }
 .policy-confirmation input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--brand); }
-.policy-acceptance-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
+.policy-acceptance-actions.dialog-actions { margin-top: 14px; }
+
+@media (max-width: 620px) {
+  .dialog-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dialog-actions > .primary-btn,
+  .dialog-actions > .secondary-btn { width: 100%; min-width: 0; }
+  .dialog-actions > :only-child,
+  .help-guide-actions [data-help-next] { grid-column: 2; }
+  .dialog-actions > .danger-text { grid-column: 1 / -1; margin-right: 0; }
+}
 
 @media (max-width: 620px) {
   .header-actions { gap: 5px; }
@@ -77,5 +115,5 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 
 @media (max-width: 390px) {
   #installBtn { display: none; }
-  .auth-actions { grid-template-columns: 1fr; }
+  .auth-actions:not(.dialog-actions) { grid-template-columns: 1fr; }
 }

@@ -34,16 +34,6 @@
 .company-dialog { max-width: 620px; }
 .company-dialog form { display: grid; min-width: 0; gap: 16px; }
 .company-dialog .field { min-width: 0; }
-.company-dialog input[type="date"] {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-.company-dialog input[type="date"]::-webkit-date-and-time-value {
-  min-width: 0;
-  text-align: left;
-}
 .company-dialog-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .company-dialog-header h2 { margin: 2px 0 0; font-size: 22px; }
 .company-dialog-header .eyebrow { margin: 0; color: var(--brand); }
@@ -52,8 +42,6 @@
 .company-role-fieldset legend { padding: 0 6px; font-weight: 700; }
 .company-role-fieldset label { display: flex; align-items: flex-start; gap: 9px; min-height: 44px; padding: 10px; border-radius: 10px; background: var(--surface-2); line-height: 1.35; }
 .company-role-fieldset input { flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--brand); }
-.company-form-actions { display: flex; align-items: center; gap: 10px; }
-.company-action-spacer { flex: 1; }
 .company-form-actions .primary-btn, .company-form-actions .secondary-btn { text-decoration: none; }
 .danger-text { color: var(--danger); }
 .company-dialog .save-message { min-height: 1.4em; margin: 0; color: var(--danger); }
@@ -67,9 +55,6 @@
   .company-particulars { grid-template-columns: 1fr; }
   .company-particulars > div { grid-template-columns: minmax(115px, .7fr) minmax(0, 1.3fr); }
   .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
-  .company-form-actions { flex-wrap: wrap; }
-  .company-form-actions > button { flex: 1 1 auto; }
-  .company-action-spacer { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

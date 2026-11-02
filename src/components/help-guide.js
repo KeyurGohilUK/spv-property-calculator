@@ -50,7 +50,7 @@ import { setupDialog } from './dialog-helper.js';
         <div class="help-guide-progress-row"><span data-help-progress>1 of ${steps.length}</span><div class="help-guide-dots" aria-hidden="true">${steps.map((_, index) => `<i data-help-dot class="${index === 0 ? 'active' : ''}"></i>`).join('')}</div></div>
         <div class="help-guide-icon" data-help-icon aria-hidden="true"></div><p class="eyebrow" data-help-eyebrow></p>
         <h3 id="helpGuideTitle" data-help-title></h3><div class="help-guide-body" data-help-body></div>
-        <div class="help-guide-actions"><button class="secondary-btn hidden" type="button" data-help-back>Back</button><button class="primary-btn" type="button" data-help-next>Next</button></div>
+        <div class="dialog-actions help-guide-actions"><button class="secondary-btn hidden" type="button" data-help-back>Back</button><button class="primary-btn" type="button" data-help-next>Next</button></div>
       </dialog>`);
     dialog = document.getElementById('helpGuideDialog');
     dialogController = setupDialog(dialog, {

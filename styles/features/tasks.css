@@ -106,18 +106,9 @@
 .task-dialog-header h3 { margin: 4px 0 0; }
 .task-dialog-close { margin: 0; }
 .task-dialog .field { margin-bottom: 13px; }
-.task-dialog input[type="date"] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.task-dialog input[type="date"]::-webkit-date-and-time-value { min-width: 0; text-align: left; }
 .task-form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .task-form-grid > .field { min-width: 0; }
-.task-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 10px; }
+.task-form-actions { margin-top: 10px; }
 
 /* Status history */
 .task-history { margin: 18px 0 4px; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -156,7 +147,7 @@
 .suggestion-btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 35%, transparent); outline-offset: 2px; }
 .suggestion-btn strong { font-size: 14px; font-weight: 750; }
 .suggestion-btn small { font-size: 12px; color: var(--muted); }
-.suggestion-footer { display: flex; justify-content: flex-end; padding-top: 12px; margin-top: 6px; }
+.suggestion-footer { padding-top: 12px; margin-top: 6px; }
 
 /* Template dialog */
 .template-dialog { width: min(580px, calc(100% - 24px)); max-width: calc(100% - 24px); max-height: calc(100dvh - 28px); overflow-y: auto; }
@@ -178,7 +169,7 @@
 .template-task-list li { margin-bottom: 6px; padding-left: 3px; }
 .template-task-list li:last-child { margin-bottom: 0; }
 .template-dialog #templatePropertyRow .field { margin-top: 14px; }
-.template-dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.template-dialog-actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
 
 @media (max-width: 620px) {
   .task-list-heading { align-items: stretch; flex-direction: column; }
