@@ -63,7 +63,7 @@ Do **not** put a Supabase Secret key or `service_role` key in this project.
 
 ## Project documentation
 
-- `docs/setup/` contains current environment and service setup instructions.
+- `docs/setup/` contains current environment and service setup instructions. For Companies House REST API and Supabase Edge Function deployment/server migration, use [`docs/setup/COMPANIES_HOUSE_LOOKUP.md`](docs/setup/COMPANIES_HOUSE_LOOKUP.md).
 - `docs/planning/` contains active architecture and improvement backlogs.
 - `docs/history/` contains completed upgrade notes retained for project history.
 - `database/` documents and stores database bootstrap and migration workflows.
