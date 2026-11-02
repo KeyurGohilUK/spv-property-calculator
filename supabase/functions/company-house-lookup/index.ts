@@ -75,6 +75,38 @@ Deno.serve(async (request) => {
     } catch {
       // Keep the company-profile result available if history is down.
     }
+    // Public officer/PSC verification fields are optional. Do not treat absence as unverified.
+    const readRegistry = async (path: string) => {
+      try {
+        const response = await fetch(`https://api.company-information.service.gov.uk/company/${companyNumber}/${path}?items_per_page=100&start_index=0`, {
+          headers: { Authorization: 'Basic ' + btoa(apiKey + ':'), Accept: 'application/json' },
+          signal: AbortSignal.timeout(8000)
+        });
+        if (!response.ok) return { available: false, records: [] };
+        const data = await response.json();
+        return { available: true, records: Array.isArray(data.items) ? data.items : [] };
+      } catch {
+        return { available: false, records: [] };
+      }
+    };
+    const [officerResponse, pscResponse] = await Promise.all([
+      readRegistry('officers'), readRegistry('persons-with-significant-control')
+    ]);
+    const verificationFields = (entry: { identity_verification_details?: Record<string, string> }) => ({
+      verifiedOn: entry.identity_verification_details?.identity_verified_on || null,
+      statementDueOn: entry.identity_verification_details?.appointment_verification_statement_due_on || null,
+      statementStartOn: entry.identity_verification_details?.appointment_verification_start_on || null
+    });
+    const officers = officerResponse.records.filter((e: { resigned_on?: string }) => !e.resigned_on).slice(0, 50)
+      .map((e: { name?: string; officer_role?: string; appointed_on?: string; identity_verification_details?: Record<string, string> }) => ({
+        name: String(e.name || '').slice(0, 160), role: String(e.officer_role || ''),
+        appointedOn: e.appointed_on || null, verification: verificationFields(e)
+      }));
+    const pscs = pscResponse.records.filter((e: { ceased_on?: string }) => !e.ceased_on).slice(0, 50)
+      .map((e: { name?: string; kind?: string; identity_verification_details?: Record<string, string> }) => ({
+        name: String(e.name || '').slice(0, 160), kind: String(e.kind || ''),
+        verification: verificationFields(e)
+      }));
     // Only return public fields needed by the app; never return the API key.
     return respond({
       companyNumber,
@@ -82,6 +114,7 @@ Deno.serve(async (request) => {
       accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null }, last_accounts: { period_end_on: record.accounts?.last_accounts?.period_end_on || null, made_up_to: record.accounts?.last_accounts?.made_up_to || null }, overdue: record.accounts?.overdue === true },
       confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
       filingHistory, filingHistoryAvailable,
+      officialPeople: { officers, pscs, officersAvailable: officerResponse.available, pscsAvailable: pscResponse.available },
       fetchedAt: new Date().toISOString()
     });
   } catch {
