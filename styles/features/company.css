@@ -10,9 +10,9 @@
 .company-edit-btn { display: inline-grid; width: 48px; height: 48px; min-height: 48px; padding: 12px; place-items: center; }
 .company-edit-btn svg, .company-edit-icon-btn svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 .company-particulars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; }
-.company-particulars > div { display: grid; grid-template-columns: minmax(120px, .65fr) minmax(0, 1.35fr); align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
-.company-particulars dt { font-weight: 700; }
-.company-particulars dd { margin: 0; overflow-wrap: anywhere; }
+.company-particulars > div { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
+.company-particulars dt { font-size: clamp(13px, 1.4vw, 16px); font-weight: 700; white-space: nowrap; }
+.company-particulars dd { margin: 0; overflow-wrap: anywhere; text-align: left; }
 .company-empty-hint { margin: 12px 0 0; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--surface-2); color: var(--muted); }
 .company-appointments-empty { display: grid; justify-items: center; gap: 7px; padding: 28px 18px; border: 1px dashed var(--border); border-radius: 16px; text-align: center; }
 .company-appointments-empty .empty-icon { margin: 0; }
@@ -55,7 +55,8 @@
   .company-section-heading > .company-edit-btn { align-self: flex-end; width: 48px; }
   .company-section[aria-labelledby="companyParticularsTitle"] .company-section-heading { align-items: center; flex-direction: row; }
   .company-particulars { grid-template-columns: 1fr; }
-  .company-particulars > div { grid-template-columns: minmax(115px, .7fr) minmax(0, 1.3fr); }
+  .company-particulars > div { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 8px; }
+  .company-particulars dt { font-size: clamp(11px, 3.1vw, 14px); }
   .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
 }
 
