@@ -54,6 +54,18 @@ export function companyHouseDeadlines(company = {}) {
  * Each recurring item is keyed by its due-date period so last year's confirmation
  * never marks the next year's filing complete.
  */
+export function companyHouseFilingInfo(company = {}, id) {
+  if (id === 'annual-accounts') {
+    const date = company.accounts?.last_accounts?.made_up_to || company.accounts?.last_accounts?.period_end_on;
+    return { lastPeriod: validDate(date) ? date : null, overdue: company.accounts?.overdue === true };
+  }
+  if (id === 'confirmation-statement') {
+    const date = company.confirmation_statement?.last_made_up_to;
+    return { lastPeriod: validDate(date) ? date : null, overdue: company.confirmation_statement?.overdue === true };
+  }
+  return null;
+}
+
 export function buildCompanyCompliance({ company = {}, confirmations = {}, today, enabledConditional = [] } = {}) {
   if (!validDate(today)) throw new Error('A valid current date is required.');
   const deadlineMap = companyHouseDeadlines(company);
@@ -62,16 +74,18 @@ export function buildCompanyCompliance({ company = {}, confirmations = {}, today
     .filter((rule) => !rule.conditional || enabled.has(rule.id))
     .map((rule) => {
       const dueDate = deadlineMap[rule.id] ?? null;
+      const officialFiling = rule.source === 'companies-house' ? companyHouseFilingInfo(company, rule.id) : null;
       const period = rule.recurring ? dueDate || 'unconfirmed-period' : 'once';
       const key = rule.id + ':' + period;
       const confirmation = normalizeConfirmation(confirmations[key]);
       const remaining = dueDate ? daysUntil(dueDate, today) : null;
       let status = 'needs-verification';
-      if (confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
-      else if (confirmation?.status === 'confirmed') status = 'user-confirmed';
+      if (officialFiling?.overdue) status = 'past-deadline-unverified';
+      else if (rule.source !== 'companies-house' && confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
+      else if (rule.source !== 'companies-house' && confirmation?.status === 'confirmed') status = 'user-confirmed';
       else if (remaining !== null && remaining < 0) status = 'past-deadline-unverified';
       else if (remaining !== null && remaining <= 30) status = 'due-soon';
       else if (remaining !== null) status = 'upcoming';
-      return { ...rule, key, period, dueDate, daysRemaining: remaining, status, confirmation };
+      return { ...rule, key, period, dueDate, daysRemaining: remaining, status, confirmation: rule.source === 'companies-house' ? null : confirmation, officialFiling };
     });
 }
