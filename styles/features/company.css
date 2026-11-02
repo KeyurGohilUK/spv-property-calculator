@@ -52,6 +52,7 @@
   .company-section-heading { align-items: stretch; flex-direction: column; }
   .company-section-heading > button { width: 100%; }
   .company-section-heading > .company-edit-btn { align-self: flex-end; width: 48px; }
+  .company-section[aria-labelledby="companyParticularsTitle"] .company-section-heading { align-items: center; flex-direction: row; }
   .company-particulars { grid-template-columns: 1fr; }
   .company-particulars > div { grid-template-columns: minmax(115px, .7fr) minmax(0, 1.3fr); }
   .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
