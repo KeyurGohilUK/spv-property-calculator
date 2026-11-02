@@ -26,6 +26,20 @@ export function validDate(date) {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
 }
 
+/** Format an ISO date for UK display without local time-zone shifts. */
+export function formatComplianceDateUK(date) {
+  if (!validDate(date)) return '';
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(date + 'T12:00:00Z'));
+}
+
+/** In-app reminder windows before Companies House filings become due. */
+export function filingReminder(daysRemaining) {
+  if (!Number.isInteger(daysRemaining) || daysRemaining < 0 || daysRemaining > 30) return null;
+  const windowDays = daysRemaining <= 7 ? 7 : daysRemaining <= 14 ? 14 : 30;
+  return { windowDays, message: daysRemaining === 0 ? 'Due today' : `Due in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}` };
+}
+
 export function daysUntil(dueDate, today) {
   if (!validDate(dueDate) || !validDate(today)) return null;
   return Math.round((Date.parse(dueDate + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 86400000);
@@ -79,6 +93,7 @@ export function buildCompanyCompliance({ company = {}, confirmations = {}, today
       const key = rule.id + ':' + period;
       const confirmation = normalizeConfirmation(confirmations[key]);
       const remaining = dueDate ? daysUntil(dueDate, today) : null;
+      const reminder = rule.source === 'companies-house' && !officialFiling?.overdue ? filingReminder(remaining) : null;
       let status = 'needs-verification';
       if (officialFiling?.overdue) status = 'past-deadline-unverified';
       else if (rule.source !== 'companies-house' && confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
@@ -86,6 +101,6 @@ export function buildCompanyCompliance({ company = {}, confirmations = {}, today
       else if (remaining !== null && remaining < 0) status = 'past-deadline-unverified';
       else if (remaining !== null && remaining <= 30) status = 'due-soon';
       else if (remaining !== null) status = 'upcoming';
-      return { ...rule, key, period, dueDate, daysRemaining: remaining, status, confirmation: rule.source === 'companies-house' ? null : confirmation, officialFiling };
+      return { ...rule, key, period, dueDate, daysRemaining: remaining, status, reminder, confirmation: rule.source === 'companies-house' ? null : confirmation, officialFiling };
     });
 }
