@@ -9,12 +9,12 @@ const { saveCompanyProfile, getCompanyProfile, saveComplianceConfirmation, repla
   await import('../src/features/company/company-storage.js');
 const { buildCompanyCompliance } = await import('../src/features/company/compliance-rules.js');
 saveCompanyProfile({ companyName: 'Example SPV', companyNumber: '12345678' });
-const requirement = buildCompanyCompliance({ today: '2026-11-02' })[0];
+const requirement = buildCompanyCompliance({ today: '2026-11-02' }).find(item => item.id === 'director-identity');
 saveComplianceConfirmation(requirement.key, true, '2026-11-02');
 let saved = getCompanyProfile();
 assert.equal(saved.complianceConfirmations[requirement.key].status, 'confirmed');
 assert.equal(saved._cloudDirty, true, 'Confirmation must queue workspace sync');
-assert.equal(buildCompanyCompliance({ today: '2026-11-02', confirmations: saved.complianceConfirmations })[0].status, 'user-confirmed');
+assert.equal(buildCompanyCompliance({ today: '2026-11-02', confirmations: saved.complianceConfirmations }).find(item => item.id === 'director-identity').status, 'user-confirmed');
 assert.throws(() => saveComplianceConfirmation('invalid:once', true, '2026-11-02'), /Unknown/);
 assert.throws(() => saveComplianceConfirmation(requirement.key, true, '2026-02-30'), /valid/);
 saveComplianceConfirmation(requirement.key, false, '');

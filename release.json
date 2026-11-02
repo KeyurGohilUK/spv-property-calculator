@@ -1,7 +1,7 @@
 {
-  "version": "1.48.0",
+  "version": "1.49.0",
   "notes": [
-    "Retrieve Companies House annual accounts and confirmation statement filing deadlines through an authenticated server-side lookup.",
-    "Show due dates and upcoming deadlines within Company Compliance without implying filings are complete."
+    "Show Companies House official last-filed periods and overdue indicators for accounts and confirmation statements.",
+    "Remove manual completion actions from Companies House obligations while retaining manual checks for HMRC and internal records."
   ]
 }

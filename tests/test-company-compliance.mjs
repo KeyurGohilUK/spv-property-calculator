@@ -32,7 +32,7 @@ const confirmed = buildCompanyCompliance({
   company, today: '2026-11-02',
   confirmations: { [filing.key]: { status: 'confirmed', confirmedOn: '2026-10-30' } }
 });
-assert.equal(confirmed.find((r) => r.id === 'confirmation-statement').status, 'user-confirmed');
+assert.equal(confirmed.find((r) => r.id === 'confirmation-statement').status, 'due-soon', 'Manual confirmations must not override Companies House filing status');
 assert.equal(confirmed.find((r) => r.id === 'annual-accounts').status, 'upcoming');
 
 const nextCycle = buildCompanyCompliance({

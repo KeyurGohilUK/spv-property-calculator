@@ -187,19 +187,20 @@ function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations });
   $('companyComplianceSummary').textContent = profile.companyNumber
-    ? `${items.filter((item) => item.status === 'user-confirmed').length} of ${items.length} user-confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
+    ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('companyComplianceItems').innerHTML = items.map((item) => `
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
         <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div>
       ${item.dueDate ? `<p class="muted">Due ${escapeHtml(item.dueDate)} · Companies House</p>` : ''}
+      ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(item.officialFiling.lastPeriod)} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
       <p class="muted">${item.source === 'companies-house'
-        ? companyHouseData ? 'Deadline retrieved from the public Companies House record; completion is not verified.' : 'Filing deadline not available; check Companies House.'
+        ? companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.'
         : item.source === 'hmrc'
           ? 'Check your HMRC account or ask your accountant.'
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
-      <button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>
+      ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(item.confirmation.confirmedOn)}</small>` : ''}
     </article>`).join('');
 }
@@ -295,7 +296,7 @@ $('companyComplianceItems').addEventListener('click', async (event) => {
     today: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
     confirmations: profile.complianceConfirmations
   }).find((item) => item.key === key);
-  if (!current) return;
+  if (!current || current.source === 'companies-house') return;
   const alreadyConfirmed = current.status === 'user-confirmed';
   if (!alreadyConfirmed && !window.confirm('Confirm that you completed this requirement? This is your own record, not official verification.')) return;
   try {
