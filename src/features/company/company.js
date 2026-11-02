@@ -84,7 +84,7 @@ function renderInvestments() {
   const empty = investments.length === 0;
   const members = eligibleInvestmentMembers();
   const summary = getInvestmentSummary(profile);
-  $('companyInvestmentsEmpty').classList.toggle('hidden', !summary.members.length);
+  $('companyInvestmentsEmpty').classList.toggle('hidden', summary.members.length > 0);
   $('companyInvestmentSummaryWrap').classList.toggle('hidden', !summary.members.length);
   $('companyInvestmentsEntriesEmpty').classList.toggle('hidden', empty);
   $('companyInvestmentEntriesWrap').classList.toggle('hidden', empty);
