@@ -114,3 +114,13 @@
   .company-investment-chart-plot { width: min(100%, 360px); }
   .company-investment-chart-pie { width: 100%; max-width: 100%; }
 }
+
+/* Read-only company compliance summary */
+.company-compliance-summary { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font-weight: 650; }
+.company-compliance-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 12px; margin-top: 14px; }
+.company-compliance-item { padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); min-width: 0; }
+.company-compliance-item-heading { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 10px; }
+.company-compliance-item h3 { margin: 0; font-size: 1rem; }
+.company-compliance-status { color: var(--text); background: var(--surface); border: 1px solid var(--border); padding: 5px 9px; border-radius: 99px; font-size: .77rem; }
+.company-compliance-item p { margin: 10px 0 0; font-size: .88rem; }
+.company-compliance-disclaimer { margin-top: 12px; font-size: .85rem; }
