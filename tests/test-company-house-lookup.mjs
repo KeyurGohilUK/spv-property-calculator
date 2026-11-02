@@ -23,7 +23,7 @@ assert.match(source, /workspace_members/);
 assert.match(source, /next_accounts\?\.due_on/);
 assert.match(source, /last_made_up_to/);
 assert.match(source, /last_accounts/);
-assert.match(source, /filing-history\\?items_per_page=100/);
+assert.match(source, /filing-history\?items_per_page=100/);
 assert.match(source, /filingHistoryAvailable/);
 assert.match(source, /history\.ok/);
 assert.doesNotMatch(ui, /COMPANIES_HOUSE_API_KEY/);
