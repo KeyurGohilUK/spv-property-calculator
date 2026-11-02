@@ -1,7 +1,7 @@
 {
-  "version": "1.51.0",
+  "version": "1.52.0",
   "notes": [
-    "Display recent official Companies House accounts and confirmation statement filing history.",
-    "Link to the public Companies House filing register, with safe fallbacks when history is unavailable."
+    "Check official Companies House directors and PSCs alongside internal appointment records without overwriting internal data.",
+    "Display published identity verification statement dates and deadlines, treating missing information as unknown."
   ]
 }
