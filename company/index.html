@@ -46,21 +46,6 @@
         <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
       </section>
 
-      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
-          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
-        </div>
-        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
-        </div>
-        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
-          <table class="company-appointments-table">
-            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
-            <tbody id="companyAppointmentsRows"></tbody>
-          </table>
-        </div>
-        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
-      </section>
       <section class="company-section" aria-labelledby="companyInvestmentsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Funding</p><h2 id="companyInvestmentsTitle">Member investments</h2><p class="muted">Track funding from company directors and shareholders. Contribution percentages are based on the total recorded investment.</p></div>
           <button id="addInvestmentBtn" class="primary-btn company-add-btn" type="button">＋ Add investment</button>
@@ -85,6 +70,21 @@
             </table>
           </div>
         </div>
+      </section>
+      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
+        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
+          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
+        </div>
+        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
+          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
+        </div>
+        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
+          <table class="company-appointments-table">
+            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody id="companyAppointmentsRows"></tbody>
+          </table>
+        </div>
+        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
       </section>
     </main>
   </div>
