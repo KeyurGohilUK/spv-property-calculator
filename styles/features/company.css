@@ -82,15 +82,23 @@
 .company-investment-chart-legend { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .company-investment-chart-legend li { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--muted); }
 .company-investment-chart-key { flex: 0 0 14px; width: 14px; height: 14px; border-radius: 50%; }
-.chart-color-0 { background: #3267e8; }
-.chart-color-1 { background: #e17700; }
-.chart-color-2 { background: #4f7a5d; }
-.chart-color-3 { background: #9a6a43; }
-.chart-color-4 { background: #7957b5; }
-.chart-color-5 { background: #c64c62; }
+.company-investment-chart-slice { fill: var(--brand); }
+.chart-color-0 { --chart-color: var(--brand); }
+.chart-color-1 { --chart-color: var(--positive); }
+.chart-color-2 { --chart-color: var(--warning); }
+.chart-color-3 { --chart-color: var(--danger); }
+.chart-color-4 { --chart-color: color-mix(in srgb, var(--brand) 55%, var(--text)); }
+.chart-color-5 { --chart-color: color-mix(in srgb, var(--positive) 55%, var(--text)); }
+.company-investment-chart-key { background: var(--chart-color); }
+.company-investment-chart-slice.chart-color-0 { fill: var(--brand); }
+.company-investment-chart-slice.chart-color-1 { fill: var(--positive); }
+.company-investment-chart-slice.chart-color-2 { fill: var(--warning); }
+.company-investment-chart-slice.chart-color-3 { fill: var(--danger); }
+.company-investment-chart-slice.chart-color-4 { fill: color-mix(in srgb, var(--brand) 55%, var(--text)); }
+.company-investment-chart-slice.chart-color-5 { fill: color-mix(in srgb, var(--positive) 55%, var(--text)); }
 .company-investment-chart-plot { display: grid; justify-items: center; min-width: 0; }
 .company-investment-chart-pie { display: block; width: min(100%, 420px); height: auto; overflow: visible; }
-.company-investment-chart-slice-label { fill: #fff; font-size: 14px; font-weight: 750; paint-order: stroke; stroke: rgb(0 0 0 / 12%); stroke-width: 2px; stroke-linejoin: round; }
+.company-investment-chart-slice-label { fill: var(--on-brand); font-size: 14px; font-weight: 750; paint-order: stroke; stroke: color-mix(in srgb, var(--text) 16%, transparent); stroke-width: 2px; stroke-linejoin: round; }
 .company-investment-entries h3 { margin: 0; font-size: 17px; }
 .company-investment-reference { min-width: 180px; max-width: 340px; overflow-wrap: anywhere; }
 .company-dialog select { min-height: 46px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; }
