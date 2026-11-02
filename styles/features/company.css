@@ -10,7 +10,7 @@
 .company-edit-btn { display: inline-grid; width: 48px; height: 48px; min-height: 48px; padding: 12px; place-items: center; }
 .company-edit-btn svg, .company-edit-icon-btn svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 .company-particulars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; }
-.company-particulars > div { display: grid; grid-template-columns: minmax(120px, .65fr) minmax(0, 1.35fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
+.company-particulars > div { display: grid; grid-template-columns: minmax(120px, .65fr) minmax(0, 1.35fr); align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
 .company-particulars dt { font-weight: 700; }
 .company-particulars dd { margin: 0; overflow-wrap: anywhere; }
 .company-empty-hint { margin: 12px 0 0; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--surface-2); color: var(--muted); }
@@ -23,6 +23,7 @@
 .company-appointments-table th, .company-appointments-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); }
 .company-appointments-table thead { background: var(--surface-2); }
 .company-appointments-table thead th { color: var(--muted); font-size: 13px; }
+.company-appointments-table thead th:not(:first-child) { text-align: center; }
 .company-appointments-table tbody tr:last-child > * { border-bottom: 0; }
 .company-appointments-table tbody th { font-weight: 650; overflow-wrap: anywhere; }
 .company-appointments-table tbody td { text-align: center; }
