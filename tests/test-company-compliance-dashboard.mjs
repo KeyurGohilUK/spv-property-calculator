@@ -8,6 +8,7 @@ const assets = JSON.parse(readFileSync(new URL('../app-assets.json', import.meta
 assert.match(html, /id="companyComplianceTitle"/);
 assert.match(html, /id="companyComplianceItems"/);
 assert.match(html, /companyComplianceSummary/);
+assert.match(html, /id="companyOfficialPeople"/);
 assert.match(html, /id="companyFilingHistory"/);
 assert.match(html, /id="companyFilingHistoryTitle"/);
 assert.match(script, /buildCompanyCompliance\(\{ today, company: companyHouseData \|\| \{\}, confirmations: profile\.complianceConfirmations \}\)/);

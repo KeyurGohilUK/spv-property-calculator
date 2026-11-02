@@ -134,3 +134,10 @@
 .company-filing-history-list li { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--border); padding: 12px 0; }
 .company-filing-history-list small { display: block; color: var(--text-muted); margin-top: 4px; }
 .company-filing-history-list a { overflow-wrap: anywhere; }
+
+.company-official-people { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.company-official-people h3 { margin: 0; font-size: 1rem; }
+.company-official-people h4 { margin: 16px 0 8px; font-size: .94rem; }
+.company-official-people ul { margin: 0; padding-left: 20px; }
+.company-official-people li { margin: 10px 0; overflow-wrap: anywhere; }
+.company-official-people li small { display: block; color: var(--text-muted); }
