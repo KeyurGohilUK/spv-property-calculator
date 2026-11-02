@@ -31,7 +31,7 @@ function getDialog(root = document) {
       </ul>
       <label class="policy-confirmation"><input id="policyAcceptanceCheck" type="checkbox"><span>I agree to the Terms of Use and acknowledge that I have read the Privacy Policy and Disclaimer.</span></label>
       <p id="policyAcceptanceMessage" class="auth-message" role="status" aria-live="polite"></p>
-      <div class="policy-acceptance-actions"><button id="acceptPoliciesBtn" class="primary-btn" type="button" disabled>Accept and continue</button><button id="declinePoliciesBtn" class="secondary-btn" type="button">Sign out</button></div>
+      <div class="dialog-actions policy-acceptance-actions"><button id="acceptPoliciesBtn" class="primary-btn" type="button" disabled>Accept and continue</button><button id="declinePoliciesBtn" class="secondary-btn" type="button">Sign out</button></div>
       <p class="muted tiny">Acceptance version ${POLICY_VERSION}. The date and versions accepted will be stored with your account.</p>
     </dialog>`);
   return root.getElementById('policyAcceptanceDialog');

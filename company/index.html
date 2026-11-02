@@ -46,21 +46,6 @@
         <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
       </section>
 
-      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
-          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
-        </div>
-        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
-        </div>
-        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
-          <table class="company-appointments-table">
-            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
-            <tbody id="companyAppointmentsRows"></tbody>
-          </table>
-        </div>
-        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
-      </section>
       <section class="company-section" aria-labelledby="companyInvestmentsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Funding</p><h2 id="companyInvestmentsTitle">Member investments</h2><p class="muted">Track funding from company directors and shareholders. Contribution percentages are based on the total recorded investment.</p></div>
           <button id="addInvestmentBtn" class="primary-btn company-add-btn" type="button">＋ Add investment</button>
@@ -86,6 +71,21 @@
           </div>
         </div>
       </section>
+      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
+        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
+          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
+        </div>
+        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
+          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
+        </div>
+        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
+          <table class="company-appointments-table">
+            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody id="companyAppointmentsRows"></tbody>
+          </table>
+        </div>
+        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
+      </section>
     </main>
   </div>
 
@@ -100,7 +100,7 @@
         <label class="field"><span>Incorporation date</span><input id="companyDateInput" type="date"></label>
       </div>
       <p id="companyDetailsMessage" class="save-message" aria-live="polite"></p>
-      <div class="company-form-actions"><button id="cancelCompanyDetailsBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save details</button></div>
+      <div class="dialog-actions company-form-actions"><button id="cancelCompanyDetailsBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save details</button></div>
     </form>
   </dialog>
 
@@ -116,7 +116,7 @@
         <label><input type="checkbox" name="appointmentPsc" data-appointment-role value="psc"> <span>Person with significant control (PSC)</span></label>
       </fieldset>
       <p id="appointmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="company-form-actions"><button id="deleteAppointmentBtn" class="text-btn danger-text hidden" type="button">Remove person</button><span class="company-action-spacer"></span><button id="cancelAppointmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save person</button></div>
+      <div class="dialog-actions company-form-actions"><button id="deleteAppointmentBtn" class="text-btn danger-text hidden" type="button">Remove person</button><button id="cancelAppointmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save person</button></div>
     </form>
   </dialog>
 
@@ -131,7 +131,7 @@
       </div>
       <label class="field"><span>Funding reference / note</span><textarea id="investmentReferenceInput" rows="3" maxlength="500" placeholder="e.g. Initial director funding or bank transfer reference" data-plain-text></textarea><small>Add a short reference or note for this funding entry.</small></label>
       <p id="investmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="company-form-actions"><button id="deleteInvestmentBtn" class="text-btn danger-text hidden" type="button">Remove entry</button><span class="company-action-spacer"></span><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save investment</button></div>
+      <div class="dialog-actions company-form-actions"><button id="deleteInvestmentBtn" class="text-btn danger-text hidden" type="button">Remove entry</button><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save investment</button></div>
     </form>
   </dialog>
 

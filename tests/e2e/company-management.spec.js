@@ -40,6 +40,28 @@ test('editor manages company particulars and appointment roles', async ({ page }
   const editCompanyButton = page.getByRole('button', { name: 'Edit company details' });
   await expect(editCompanyButton.locator('svg')).toBeVisible();
   await editCompanyButton.click();
+  const cancelCompanyDetailsButton = page.locator('#cancelCompanyDetailsBtn');
+  const saveCompanyDetailsButton = page.locator('#companyDetailsForm button[type="submit"]');
+  await expect(cancelCompanyDetailsButton).toBeVisible();
+  await expect(saveCompanyDetailsButton).toBeVisible();
+  const companyDetailsLayout = await page.evaluate(() => {
+    const actions = document.querySelector('.company-form-actions').getBoundingClientRect();
+    const cancel = document.querySelector('#cancelCompanyDetailsBtn').getBoundingClientRect();
+    const save = document.querySelector('#companyDetailsForm button[type="submit"]').getBoundingClientRect();
+    const dateField = document.querySelector('#companyDateInput').getBoundingClientRect();
+    const dateLabel = document.querySelector('#companyDateInput').parentElement.getBoundingClientRect();
+    return {
+      actionsRight: actions.right,
+      cancelWidth: cancel.width,
+      saveWidth: save.width,
+      saveRight: save.right,
+      dateFieldRight: dateField.right,
+      dateLabelRight: dateLabel.right
+    };
+  });
+  expect(Math.abs(companyDetailsLayout.cancelWidth - companyDetailsLayout.saveWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(companyDetailsLayout.actionsRight - companyDetailsLayout.saveRight)).toBeLessThanOrEqual(1);
+  expect(companyDetailsLayout.dateFieldRight).toBeLessThanOrEqual(companyDetailsLayout.dateLabelRight + 1);
   await page.getByLabel('Company name').fill('Example Property SPV Ltd');
   await page.getByLabel('Company number').fill('01234567');
   await page.getByLabel('Registered office').fill('1 Example Street, Bristol');
