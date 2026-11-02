@@ -85,6 +85,7 @@ function renderInvestments() {
   const members = eligibleInvestmentMembers();
   const summary = getInvestmentSummary(profile);
   $('companyInvestmentsEmpty').classList.toggle('hidden', summary.members.length > 0);
+  $('companyInvestmentChart').classList.toggle('hidden', !summary.members.length);
   $('companyInvestmentSummaryWrap').classList.toggle('hidden', !summary.members.length);
   $('companyInvestmentsEntriesEmpty').classList.toggle('hidden', empty);
   $('companyInvestmentEntriesWrap').classList.toggle('hidden', empty);
@@ -96,6 +97,15 @@ function renderInvestments() {
       <td>${CURRENCY_FORMAT.format(member.amount)}</td>
       <td>${member.contributionPercentage.toFixed(2)}%</td>
     </tr>`).join('');
+  $('companyInvestmentChart').innerHTML = [...summary.members]
+    .sort((a, b) => b.contributionPercentage - a.contributionPercentage)
+    .map((member) => {
+      const percentage = member.contributionPercentage.toFixed(2);
+      return `<div class="company-investment-chart-row" role="listitem">
+        <div class="company-investment-chart-label"><strong>${escapeHtml(memberName(member.memberId, member.memberName))}</strong><span>${CURRENCY_FORMAT.format(member.amount)} · ${percentage}%</span></div>
+        <progress class="company-investment-chart-track" max="100" value="${Math.min(100, Math.max(0, member.contributionPercentage))}" aria-label="${escapeHtml(memberName(member.memberId, member.memberName))}: ${percentage}% of contributions">${percentage}%</progress>
+      </div>`;
+    }).join('');
   $('companyInvestmentTotal').textContent = CURRENCY_FORMAT.format(summary.total);
   $('companyInvestmentEntryRows').innerHTML = [...investments].sort((a, b) =>
     String(b.date).localeCompare(String(a.date))
