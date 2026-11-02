@@ -1,7 +1,6 @@
 {
-  "version": "1.48.0",
+  "version": "1.48.1",
   "notes": [
-    "Retrieve Companies House annual accounts and confirmation statement filing deadlines through an authenticated server-side lookup.",
-    "Show due dates and upcoming deadlines within Company Compliance without implying filings are complete."
+    "Fix Mark as done and Undo confirmation for Companies House filing dates by resolving the same filing period on click."
   ]
 }
