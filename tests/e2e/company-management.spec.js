@@ -37,7 +37,9 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await page.goto('/company/');
 
   await expect(page.getByRole('heading', { name: 'Company Management' })).toBeVisible();
-  await page.getByRole('button', { name: 'Edit details' }).click();
+  const editCompanyButton = page.getByRole('button', { name: 'Edit company details' });
+  await expect(editCompanyButton.locator('svg')).toBeVisible();
+  await editCompanyButton.click();
   await page.getByLabel('Company name').fill('Example Property SPV Ltd');
   await page.getByLabel('Company number').fill('01234567');
   await page.getByLabel('Registered office').fill('1 Example Street, Bristol');
@@ -73,7 +75,9 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   }));
   expect(dimensions.content).toBeGreaterThan(dimensions.viewport);
   await page.locator('#companyAppointmentsTable').evaluate((element) => { element.scrollLeft = element.scrollWidth; });
-  await expect(page.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
+  const editAppointmentButton = page.getByRole('button', { name: 'Edit appointment for Alex Director' });
+  await expect(editAppointmentButton).toBeVisible();
+  await expect(editAppointmentButton.locator('svg')).toBeVisible();
 });
 
 test('workspace viewers can read but not edit company records', async ({ page }) => {
@@ -83,7 +87,7 @@ test('workspace viewers can read but not edit company records', async ({ page })
   });
   await page.goto('/company/');
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
-  await expect(page.getByRole('button', { name: 'Edit details' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Add person' })).toBeDisabled();
   await expect(page.getByText(/View-only/)).toBeVisible();
 });

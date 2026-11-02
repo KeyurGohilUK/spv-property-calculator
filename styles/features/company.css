@@ -7,6 +7,8 @@
 .company-section-heading p { margin: 0; }
 .company-section-heading .eyebrow { color: var(--brand); }
 .company-edit-btn, .company-add-btn { flex: 0 0 auto; text-decoration: none; white-space: nowrap; }
+.company-edit-btn { display: inline-grid; width: 48px; height: 48px; min-height: 48px; padding: 12px; place-items: center; }
+.company-edit-btn svg, .company-edit-icon-btn svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 .company-particulars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; }
 .company-particulars > div { display: grid; grid-template-columns: minmax(120px, .65fr) minmax(0, 1.35fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
 .company-particulars dt { font-weight: 700; }
@@ -27,6 +29,7 @@
 .company-role-mark { color: var(--positive); font-size: 19px; font-weight: 800; }
 .company-role-none { color: var(--muted); }
 .compact-company-btn { min-height: 38px; padding: 7px 13px; font-size: 13px; }
+.company-edit-icon-btn { display: inline-grid; width: 42px; height: 42px; min-height: 42px; padding: 10px; place-items: center; }
 .company-appointment-cards { display: none; }
 .company-dialog { max-width: 620px; }
 .company-dialog form { display: grid; min-width: 0; gap: 16px; }
@@ -60,6 +63,7 @@
   .company-hero { align-items: flex-start; flex-direction: column; }
   .company-section-heading { align-items: stretch; flex-direction: column; }
   .company-section-heading > button { width: 100%; }
+  .company-section-heading > .company-edit-btn { align-self: flex-end; width: 48px; }
   .company-particulars { grid-template-columns: 1fr; }
   .company-particulars > div { grid-template-columns: minmax(115px, .7fr) minmax(0, 1.3fr); }
   .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
