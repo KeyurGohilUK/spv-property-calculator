@@ -1,6 +1,7 @@
 {
-  "version": "1.46.4",
+  "version": "1.46.5",
   "notes": [
+    "Show member investment shares in a labelled pie chart.",
     "Show each company member\u2019s investment contribution in a responsive chart.",
     "Use consistent, right-aligned action buttons and contained date fields across dialogs.",
     "Replace Company Management edit text buttons with accessible pencil icon buttons.",

@@ -53,7 +53,10 @@
         <div id="companyInvestmentsEmpty" class="company-appointments-empty">
           <span class="empty-icon" aria-hidden="true">£</span><h3>No investments recorded</h3><p>Add a funding entry to see each member’s total contribution and percentage.</p>
         </div>
-        <ul id="companyInvestmentChart" class="company-investment-chart hidden" aria-label="Member contribution breakdown"></ul>
+        <figure id="companyInvestmentChart" class="company-investment-chart hidden" aria-labelledby="companyInvestmentChartTitle">
+          <figcaption id="companyInvestmentChartTitle">Overall member investment split</figcaption>
+          <div class="company-investment-chart-content"><ul class="company-investment-chart-legend" aria-label="Contribution percentages"></ul><div class="company-investment-chart-plot"></div></div>
+        </figure>
         <div id="companyInvestmentSummaryWrap" class="company-investment-table-wrap hidden" tabindex="0" aria-label="Member investment contributions">
           <table class="company-investment-table">
             <thead><tr><th scope="col">Member</th><th scope="col">Total invested</th><th scope="col">Contribution</th></tr></thead>
