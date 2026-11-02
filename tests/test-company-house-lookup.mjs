@@ -20,7 +20,7 @@ assert.match(cloud, /functions\.invoke\('company-house-lookup'/);
 assert.match(ui, /refreshCompanyHouseDeadlines\(\)/);
 assert.match(ui, /companyHouseData/);
 const clickHandler = ui.slice(ui.indexOf("companyComplianceItems').addEventListener"), ui.indexOf("companyDetailsForm').addEventListener"));
-assert.match(clickHandler, /company: companyHouseData \\|\\| \\{\\}/, 'Click handler must resolve items against the same fetched deadlines as rendering');
+assert.match(clickHandler, /company: companyHouseData \|\| \{\}/, 'Click handler must resolve items against the same fetched deadlines as rendering');
 for (const id of ['confirmation-statement', 'annual-accounts']) {
   const visible = buildCompanyCompliance({ company: incoming, today: '2026-11-02' }).find(item => item.id === id);
   const clickable = buildCompanyCompliance({ company: incoming, today: '2026-11-02' }).find(item => item.key === visible.key);
