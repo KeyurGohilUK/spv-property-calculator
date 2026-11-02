@@ -127,3 +127,10 @@
 
 .company-compliance-action { margin-top: 12px; }
 .company-compliance-item small { display: block; margin-top: 8px; }
+
+.company-filing-history { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.company-filing-history h3 { margin: 0; font-size: 1rem; }
+.company-filing-history-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.company-filing-history-list li { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--border); padding: 12px 0; }
+.company-filing-history-list small { display: block; color: var(--text-muted); margin-top: 4px; }
+.company-filing-history-list a { overflow-wrap: anywhere; }
