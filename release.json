@@ -1,7 +1,7 @@
 {
-  "version": "1.49.0",
+  "version": "1.50.0",
   "notes": [
-    "Show Companies House official last-filed periods and overdue indicators for accounts and confirmation statements.",
-    "Remove manual completion actions from Companies House obligations while retaining manual checks for HMRC and internal records."
+    "Display Companies House deadlines, last-filed periods and manual confirmation dates in UK format.",
+    "Show in-app 30-, 14- and 7-day filing reminder windows when the Company Compliance page is opened."
   ]
 }

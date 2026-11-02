@@ -1,9 +1,17 @@
 import assert from 'node:assert/strict';
 import {
   COMPANY_COMPLIANCE_RULES, validDate, daysUntil, companyHouseDeadlines,
-  buildCompanyCompliance, normalizeConfirmation
+  buildCompanyCompliance, normalizeConfirmation, filingReminder, formatComplianceDateUK
 } from '../src/features/company/compliance-rules.js';
 
+assert.equal(formatComplianceDateUK('2027-11-02'), '2 Nov 2027');
+assert.equal(formatComplianceDateUK('2028-07-20'), '20 Jul 2028');
+assert.equal(formatComplianceDateUK('invalid'), '');
+for (const [days, windowDays] of [[30, 30], [29, 30], [14, 14], [13, 14], [7, 7], [1, 7], [0, 7]]) {
+  assert.equal(filingReminder(days).windowDays, windowDays);
+}
+for (const days of [-1, 31, null, undefined]) assert.equal(filingReminder(days), null);
+assert.equal(filingReminder(0).message, 'Due today');
 assert.equal(COMPANY_COMPLIANCE_RULES.length, 14);
 assert.equal(new Set(COMPANY_COMPLIANCE_RULES.map((r) => r.id)).size, COMPANY_COMPLIANCE_RULES.length);
 assert.equal(validDate('2026-02-29'), false);
@@ -21,6 +29,8 @@ const company = {
 const base = buildCompanyCompliance({ company, today: '2026-11-02' });
 assert.equal(base.length, 8, 'Conditional items must not appear before applicability is known');
 assert.equal(base.find((r) => r.id === 'confirmation-statement').status, 'due-soon');
+assert.equal(base.find((r) => r.id === 'confirmation-statement').reminder.windowDays, 14);
+assert.equal(base.find((r) => r.id === 'annual-accounts').reminder, null);
 assert.equal(base.find((r) => r.id === 'confirmation-statement').daysRemaining, 14);
 assert.equal(base.find((r) => r.id === 'annual-accounts').status, 'upcoming');
 assert.equal(base.find((r) => r.id === 'corporation-tax-return').dueDate, null,
