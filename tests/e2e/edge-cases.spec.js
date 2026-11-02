@@ -107,7 +107,7 @@ test('expense validation requires an amount and a selected property', async ({ p
 
   await page.getByRole('button', { name: /Add Expense/i }).click();
   await page.locator('#expenseScope').selectOption('property');
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.locator('#expenseAmountError')).toBeVisible();
   await expect(page.locator('#expensePropertyError')).toBeVisible();
@@ -127,7 +127,7 @@ test('expense allocation, filtering and CSV export work together', async ({ page
   await page.locator('#expenseDescription').fill('Property insurance');
   await page.locator('#expenseScope').selectOption('property');
   await page.locator('#expenseProperty').selectOption({ label: 'Filter Property' });
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await page.getByRole('button', { name: 'Filter & Export' }).click();
   await page.locator('#expenseFilter').selectOption({ label: 'Filter Property' });
@@ -192,7 +192,7 @@ test('large receipt photos are compressed below 2 MB before being saved', async 
 
   expect(originalSize).toBeGreaterThan(2 * 1024 * 1024);
   await expect(page.locator('#expenseReceiptSize')).toContainText('will be optimised when saved');
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '', { timeout: 15_000 });
 
   const stored = await page.evaluate(async () => {
@@ -236,7 +236,7 @@ test('receipt PDFs larger than 2 MB are rejected before local save', async ({ pa
   });
 
   await expect(page.locator('#expenseReceiptSize')).toContainText('oversized-receipt.pdf');
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#expenseReceiptError')).toContainText('2 MB');
   await expect(page.locator('#expenseReceipt')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('#expenseReceipt')).toHaveAttribute('aria-describedby', /\bexpenseReceiptError\b/);

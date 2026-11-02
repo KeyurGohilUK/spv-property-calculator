@@ -9,7 +9,7 @@ async function addExpense(page, { amount = '125.50', description = 'Companies Ho
   await page.locator('#expenseDescription').fill(description);
   await page.locator('#expensePaidBy').selectOption(paidBy);
   if (receipt) await page.locator('#expenseReceipt').setInputFiles(receipt);
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
 }
 
@@ -102,7 +102,7 @@ test('adds, edits by clicking the listing, and deletes an expense', async ({ pag
   await page.getByRole('button', { name: 'Edit expense Companies House filing fee' }).click();
   await expect(page.getByRole('heading', { name: 'Edit Expense' })).toBeVisible();
   await page.locator('#expenseAmount').fill('150');
-  await page.getByRole('button', { name: 'Save Changes' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('.expense-card')).toContainText('£150.00');
 
   page.once('dialog', (dialog) => dialog.accept());
@@ -130,7 +130,7 @@ test('records and filters expenses by payer', async ({ page }) => {
   await expect(personalExpense).toContainText('Paid by Alex Director');
   await personalExpense.getByRole('button', { name: 'Edit expense Survey paid personally' }).click();
   await page.locator('#expensePaidBy').selectOption('appointment:director-b');
-  await page.getByRole('button', { name: 'Save Changes' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(personalExpense).toContainText('Paid by Sam Director');
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]'));
@@ -175,7 +175,7 @@ test('selects expense allocation first and reveals a property only when needed',
   await page.locator('#expensePaidBy').selectOption('appointment:officer-1');
   await page.locator('#expenseAmount').fill('35');
   await page.locator('#expenseDescription').fill('Property survey');
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('spv-property-calculator.expenses.v1') || '[]')[0]);
   expect(saved).toMatchObject({
     scope: 'property', propertyId: 'property-1', paidBy: 'appointment:officer-1', amount: 35
@@ -208,7 +208,7 @@ test('shows selected receipt size and keeps receipt metadata locally', async ({ 
   // complete browser persistence journey, backed by receipt-storage unit tests.
   if (browserName === 'webkit') return;
 
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.locator('#expenseDialog')).not.toHaveAttribute('open', '');
   const storedReceipt = await page.evaluate(() => {
