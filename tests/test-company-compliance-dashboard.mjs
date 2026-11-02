@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { buildCompanyCompliance } from '../src/features/company/compliance-rules.js';
+const html = readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const script = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
+const style = readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
+const assets = JSON.parse(readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8'));
+assert.match(html, /id="companyComplianceTitle"/);
+assert.match(html, /id="companyComplianceItems"/);
+assert.match(html, /Companies House and HMRC are not connected/);
+assert.match(script, /buildCompanyCompliance\(\{ today \}\)/);
+assert.match(script, /renderCompanyCompliance\(\)/);
+assert.match(script, /escapeHtml\(item.title\)/);
+assert.match(script, /Needs verification/);
+assert.match(style, /\.company-compliance-list/);
+assert.ok(assets.assets.includes('./src/features/company/compliance-rules.js'), 'Offline PWA must cache compliance rules');
+assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 8);
+console.log('Company compliance dashboard integration checks passed.');

@@ -1,4 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
+import { buildCompanyCompliance } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
@@ -178,6 +179,24 @@ function openInvestment(id = '') {
   investmentDialog.open(trigger || document.activeElement);
 }
 
+function renderCompanyCompliance() {
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const items = buildCompanyCompliance({ today });
+  $('companyComplianceSummary').textContent = profile.companyNumber
+    ? `${items.length} core obligations to review · no filings verified`
+    : 'Add a company number in Particulars to associate this checklist with your SPV.';
+  $('companyComplianceItems').innerHTML = items.map((item) => `
+    <article class="company-compliance-item">
+      <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
+        <span class="company-compliance-status">Needs verification</span></div>
+      <p class="muted">${item.source === 'companies-house'
+        ? 'Verify the filing deadline at Companies House.'
+        : item.source === 'hmrc'
+          ? 'Check your HMRC account or ask your accountant.'
+          : 'Confirm this requirement and keep appropriate evidence.'}</p>
+    </article>`).join('');
+}
+
 function renderProfile() {
   profile = getCompanyProfile();
   $('companyNameValue').textContent = profile.companyName || 'Not added';
@@ -192,6 +211,7 @@ function renderProfile() {
   $('addAppointmentBtn').disabled = !editingAllowed;
   renderAppointments();
   renderInvestments();
+  renderCompanyCompliance();
 }
 
 function showDetailsDialog() {
