@@ -75,7 +75,7 @@
 .company-investment-table td:nth-child(2), .company-investment-table td:nth-child(3) { white-space: nowrap; }
 .company-investment-table tfoot th, .company-investment-table tfoot td { border-top: 1px solid var(--border); border-bottom: 0; font-weight: 750; }
 .company-investment-entries { display: grid; gap: 12px; margin-top: 24px; }
-.company-investment-chart { display: grid; gap: 16px; margin: 18px 0 22px; padding: clamp(16px, 2vw, 22px); border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
+.company-investment-chart { display: grid; gap: 16px; margin: 18px 0 22px; padding: clamp(16px, 2vw, 22px); border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); list-style: none; }
 .company-investment-chart-row { display: grid; gap: 8px; min-width: 0; }
 .company-investment-chart-label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .company-investment-chart-label strong { min-width: 0; overflow-wrap: anywhere; }

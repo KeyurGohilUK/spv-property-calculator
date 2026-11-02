@@ -101,10 +101,10 @@ function renderInvestments() {
     .sort((a, b) => b.contributionPercentage - a.contributionPercentage)
     .map((member) => {
       const percentage = member.contributionPercentage.toFixed(2);
-      return `<div class="company-investment-chart-row" role="listitem">
+      return `<li class="company-investment-chart-row">
         <div class="company-investment-chart-label"><strong>${escapeHtml(memberName(member.memberId, member.memberName))}</strong><span>${CURRENCY_FORMAT.format(member.amount)} · ${percentage}%</span></div>
         <progress class="company-investment-chart-track" max="100" value="${Math.min(100, Math.max(0, member.contributionPercentage))}" aria-label="${escapeHtml(memberName(member.memberId, member.memberName))}: ${percentage}% of contributions">${percentage}%</progress>
-      </div>`;
+      </li>`;
     }).join('');
   $('companyInvestmentTotal').textContent = CURRENCY_FORMAT.format(summary.total);
   $('companyInvestmentEntryRows').innerHTML = [...investments].sort((a, b) =>
