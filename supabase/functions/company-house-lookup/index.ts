@@ -53,8 +53,8 @@ Deno.serve(async (request) => {
     return respond({
       companyNumber,
       companyName: String(record.company_name || '').slice(0, 160),
-      accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null } },
-      confirmation_statement: { next_due: record.confirmation_statement?.next_due || null },
+      accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null }, last_accounts: { period_end_on: record.accounts?.last_accounts?.period_end_on || null, made_up_to: record.accounts?.last_accounts?.made_up_to || null }, overdue: record.accounts?.overdue === true },
+      confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
       fetchedAt: new Date().toISOString()
     });
   } catch {
