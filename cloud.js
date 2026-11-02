@@ -438,7 +438,8 @@
       incorporationDate: String(record?.incorporationDate || '').trim(),
       companyStatus: String(record?.companyStatus || '').trim(),
       appointments: Array.isArray(record?.appointments) ? record.appointments : [],
-      investments: Array.isArray(record?.investments) ? record.investments : []
+      investments: Array.isArray(record?.investments) ? record.investments : [],
+      complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {}
     };
     const { data, error } = await supabaseClient
       .rpc('upsert_company_profile_if_current', {

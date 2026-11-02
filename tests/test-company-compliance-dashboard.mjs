@@ -8,7 +8,7 @@ const assets = JSON.parse(readFileSync(new URL('../app-assets.json', import.meta
 assert.match(html, /id="companyComplianceTitle"/);
 assert.match(html, /id="companyComplianceItems"/);
 assert.match(html, /Companies House and HMRC are not connected/);
-assert.match(script, /buildCompanyCompliance\(\{ today \}\)/);
+assert.match(script, /buildCompanyCompliance\(\{ today, confirmations: profile\.complianceConfirmations \}\)/);
 assert.match(script, /renderCompanyCompliance\(\)/);
 assert.match(script, /escapeHtml\(item.title\)/);
 assert.match(script, /Needs verification/);

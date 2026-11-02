@@ -1,6 +1,6 @@
 {
-  "version": "1.47.0",
+  "version": "1.47.1",
   "notes": [
-    "Show mandatory company compliance obligations in Company Management with explicit unverified statuses."
+    "Allow company compliance requirements to be user-confirmed or reopened, synced with the shared company profile."
   ]
 }

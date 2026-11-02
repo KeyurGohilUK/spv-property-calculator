@@ -5,6 +5,7 @@ import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
   getCompanyProfile,
   saveCompanyProfile,
+  saveComplianceConfirmation,
   saveAppointment,
   deleteAppointment,
   saveInvestment,
@@ -181,19 +182,21 @@ function openInvestment(id = '') {
 
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const items = buildCompanyCompliance({ today });
+  const items = buildCompanyCompliance({ today, confirmations: profile.complianceConfirmations });
   $('companyComplianceSummary').textContent = profile.companyNumber
-    ? `${items.length} core obligations to review · no filings verified`
+    ? `${items.filter((item) => item.status === 'user-confirmed').length} of ${items.length} user-confirmed · not officially verified`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('companyComplianceItems').innerHTML = items.map((item) => `
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
-        <span class="company-compliance-status">Needs verification</span></div>
+        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : 'Needs verification'}</span></div>
       <p class="muted">${item.source === 'companies-house'
         ? 'Verify the filing deadline at Companies House.'
         : item.source === 'hmrc'
           ? 'Check your HMRC account or ask your accountant.'
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
+      <button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>
+      ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(item.confirmation.confirmedOn)}</small>` : ''}
     </article>`).join('');
 }
 
@@ -260,6 +263,26 @@ async function syncAfterSave() {
 $('editCompanyDetailsBtn').addEventListener('click', showDetailsDialog);
 $('addAppointmentBtn').addEventListener('click', () => openAppointment());
 $('addInvestmentBtn').addEventListener('click', () => openInvestment());
+$('companyComplianceItems').addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-compliance-key]');
+  if (!button || !editingAllowed) return;
+  const key = button.dataset.complianceKey;
+  const current = buildCompanyCompliance({
+    today: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
+    confirmations: profile.complianceConfirmations
+  }).find((item) => item.key === key);
+  if (!current) return;
+  const alreadyConfirmed = current.status === 'user-confirmed';
+  if (!alreadyConfirmed && !window.confirm('Confirm that you completed this requirement? This is your own record, not official verification.')) return;
+  try {
+    profile = saveComplianceConfirmation(key, !alreadyConfirmed,
+      new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
+    renderProfile();
+    await syncAfterSave();
+  } catch (error) {
+    setSyncStatus(error.message || 'Could not save confirmation', 'error');
+  }
+});
 
 $('companyDetailsForm').addEventListener('submit', async (event) => {
   event.preventDefault();
