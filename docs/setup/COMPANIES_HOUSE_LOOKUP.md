@@ -10,6 +10,24 @@ This document is the repeatable deployment guide for the Companies House Public 
 - Access control: a valid Supabase user JWT and active membership of `workspace_members`; the API key stays server-side.
 - Database: the lookup does not introduce schema changes. The surrounding app needs the existing Supabase schema and authorised workspace users.
 
+## Automated Supabase Edge Function deployment (GitHub Actions)
+
+Workflow: [`.github/workflows/deploy-supabase-functions.yml`](../../.github/workflows/deploy-supabase-functions.yml).
+
+The workflow runs after a push/merge to `main` changes `supabase/functions/**`, `supabase/config.toml` or its workflow file. It can also be started manually in **GitHub → Actions → Deploy Supabase Edge Functions → Run workflow**. It runs `npm test` before deploying **all** version-controlled Edge Functions with `--use-api` (Docker is not required). It does not delete remote-only functions, change database schema, or copy secrets.
+
+**One-time GitHub setup:**
+
+1. In [Supabase account access tokens](https://supabase.com/dashboard/account/tokens), create a personal access token authorised to deploy to the target project. Treat it as sensitive; never place it in the repository.
+2. In **GitHub repository → Settings → Environments**, create/select the `production` environment. Add these **environment secrets**:
+   - `SUPABASE_ACCESS_TOKEN` = the Supabase account access token from step 1 (not the Companies House API key, not a Supabase publishable/anon key).
+   - `SUPABASE_PROJECT_REF` = the target Supabase project ID/reference, for example `abegxabdlecgznapukzq`. Adjust for a migrated project.
+3. Recommended: configure environment protection rules (required reviewers where available), restrict deployments to `main`, and restrict who can change GitHub secrets/workflow files.
+4. Keep `COMPANIES_HOUSE_API_KEY` and other **function runtime** secrets in the Supabase target project's Edge Function Secrets. The workflow does **not** upload or print these secrets.
+5. Once the deployment PR is merged, open **GitHub → Actions**, inspect the first deployment log, then verify the live Company Compliance lookup. Successful deployment does not establish that every function works end to end.
+
+**Notes:** This is a dedicated deployment workflow, distinct from the repository's CI job. It runs `npm test` as a deployment gate, but not the full Playwright browser suite; check that the main CI run is green before merging. Deploying all functions also republishes unchanged functions from the checkout and uses each function's `supabase/config.toml` JWT setting. If a deploy fails, check that the token has access to the project, the reference is correct, and Supabase CLI logs (without exposing secrets). When migrating to a new Supabase project, update `SUPABASE_PROJECT_REF` and replicate runtime secrets first.
+
 ## Initial deployment from Windows / VS Code
 
 1. Open the `spv-property-calculator` repository folder in VS Code and choose **Terminal → New Terminal** (PowerShell).
