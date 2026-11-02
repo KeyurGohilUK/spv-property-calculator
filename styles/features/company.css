@@ -57,6 +57,7 @@
   .company-particulars { grid-template-columns: 1fr; }
   .company-particulars > div { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 8px; }
   .company-particulars dt { font-size: clamp(11px, 3.1vw, 14px); }
+  .company-investment-chart-label { align-items: flex-start; flex-direction: column; gap: 2px; }
   .company-form-columns, .company-role-fieldset { grid-template-columns: 1fr; }
 }
 
@@ -74,6 +75,15 @@
 .company-investment-table td:nth-child(2), .company-investment-table td:nth-child(3) { white-space: nowrap; }
 .company-investment-table tfoot th, .company-investment-table tfoot td { border-top: 1px solid var(--border); border-bottom: 0; font-weight: 750; }
 .company-investment-entries { display: grid; gap: 12px; margin-top: 24px; }
+.company-investment-chart { display: grid; gap: 16px; margin: 18px 0 22px; padding: clamp(16px, 2vw, 22px); border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); list-style: none; }
+.company-investment-chart-row { display: grid; gap: 8px; min-width: 0; }
+.company-investment-chart-label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.company-investment-chart-label strong { min-width: 0; overflow-wrap: anywhere; }
+.company-investment-chart-label span { flex: 0 0 auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+.company-investment-chart-track { display: block; width: 100%; height: 12px; overflow: hidden; border: 0; border-radius: 999px; background: var(--border); appearance: none; }
+.company-investment-chart-track::-webkit-progress-bar { border-radius: 999px; background: var(--border); }
+.company-investment-chart-track::-webkit-progress-value { border-radius: 999px; background: var(--brand); }
+.company-investment-chart-track::-moz-progress-bar { border-radius: 999px; background: var(--brand); }
 .company-investment-entries h3 { margin: 0; font-size: 17px; }
 .company-investment-reference { min-width: 180px; max-width: 340px; overflow-wrap: anywhere; }
 .company-dialog select { min-height: 46px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; }
