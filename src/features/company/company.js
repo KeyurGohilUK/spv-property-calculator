@@ -14,6 +14,7 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
+const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
 });
@@ -55,11 +56,11 @@ function renderAppointments() {
       <td>${roleMark(appointment, 'shareholder')}</td>
       <td>${roleMark(appointment, 'secretary')}</td>
       <td>${roleMark(appointment, 'psc')}</td>
-      <td><button class="secondary-btn compact-company-btn" type="button" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>Edit</button></td>
+      <td><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></td>
     </tr>`).join('');
   $('companyAppointmentCards').innerHTML = profile.appointments.map((appointment) => `
     <article class="company-appointment-card">
-      <div class="company-appointment-card-heading"><h3>${escapeHtml(appointment.name)}</h3><button class="secondary-btn compact-company-btn" type="button" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>Edit</button></div>
+      <div class="company-appointment-card-heading"><h3>${escapeHtml(appointment.name)}</h3><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></div>
       <ul class="company-role-chips">${appointment.roles.map((role) => `<li>${escapeHtml(ROLE_LABELS[role])}</li>`).join('')}</ul>
     </article>`).join('');
   document.querySelectorAll('[data-edit-appointment]').forEach((button) => {
@@ -104,7 +105,7 @@ function renderInvestments() {
       <th scope="row">${escapeHtml(memberName(investment.memberId, investment.memberName))}</th>
       <td>${CURRENCY_FORMAT.format(investment.amount)}</td>
       <td class="company-investment-reference">${escapeHtml(investment.reference || '—')}</td>
-      <td><button class="secondary-btn compact-company-btn" type="button" data-edit-investment="${escapeHtml(investment.id)}" ${editingAllowed ? '' : 'disabled'}>Edit</button></td>
+      <td><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit funding entry for ${escapeHtml(memberName(investment.memberId, investment.memberName))}" title="Edit funding entry" data-edit-investment="${escapeHtml(investment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></td>
     </tr>`).join('');
   document.querySelectorAll('[data-edit-investment]').forEach((button) => {
     button.addEventListener('click', () => openInvestment(button.dataset.editInvestment));
