@@ -37,7 +37,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
   await openNewExpense(page);
   await page.locator('#expenseDescription').fill('Receipt lifecycle');
   await page.locator('#expenseReceipt').setInputFiles(smallPdf('first-receipt.pdf'));
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect.poll(() => worker.callsFor('PUT').length).toBe(1);
   const firstUpload = worker.callsFor('PUT')[0];
@@ -51,7 +51,7 @@ test('uploads, replaces and deletes a receipt through the private Worker contrac
 
   await page.getByRole('button', { name: 'Edit expense Receipt lifecycle' }).click();
   await page.locator('#expenseReceipt').setInputFiles(smallPdf('replacement-receipt.pdf'));
-  await page.getByRole('button', { name: 'Save Changes' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect.poll(() => worker.callsFor('PUT').length).toBe(2);
   const replacement = worker.callsFor('PUT')[1];
@@ -129,7 +129,7 @@ test('pending offline receipt uploads after reconnecting and shared sync', async
   await context.setOffline(true);
   await openNewExpense(page, '31');
   await page.locator('#expenseReceipt').setInputFiles(smallPdf('offline-receipt.pdf'));
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   expect(worker.callsFor('PUT')).toHaveLength(0);
   expect((await storedExpense(page)).receiptCloudPending).toBe(true);
@@ -155,7 +155,7 @@ test('unauthorized Worker response keeps the receipt safely pending locally', as
   await openNewExpense(page, '19');
   await page.locator('#expenseDescription').fill('Protected receipt');
   await page.locator('#expenseReceipt').setInputFiles(smallPdf('protected-receipt.pdf'));
-  await page.getByRole('button', { name: 'Save Expense' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect.poll(() => worker.callsFor('PUT').length).toBeGreaterThan(0);
   const expense = await storedExpense(page);

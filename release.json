@@ -1,13 +1,14 @@
 {
-  "version": "1.46.5",
+  "version": "1.46.6",
   "notes": [
+    "Use the standard Save label across website actions.",
     "Show member investment shares in a labelled pie chart.",
-    "Show each company member\u2019s investment contribution in a responsive chart.",
+    "Show each company member’s investment contribution in a responsive chart.",
     "Use consistent, right-aligned action buttons and contained date fields across dialogs.",
     "Replace Company Management edit text buttons with accessible pencil icon buttons.",
     "Align company dialog actions and keep the incorporation date field within its column.",
     "Use plain textareas for company addresses and funding references, and keep dialog date fields within their columns.",
-    "Record company member funding entries and show each member\u2019s total contribution percentage.",
+    "Record company member funding entries and show each member’s total contribution percentage.",
     "Prevent full-width navigation and editor backdrops from creating a horizontal page scrollbar.",
     "Remove the overlapping shadow and backdrop below the property editor toolbar.",
     "Keep the Opportunities label on one line on every mobile page.",

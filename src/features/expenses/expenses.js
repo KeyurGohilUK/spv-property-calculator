@@ -251,7 +251,7 @@ function openForm(expense = null) {
   populateProperties();
   populatePayerOptions(expense ? normalizeExpensePayer(expense.paidBy) : 'company');
   $('expenseDialogTitle').textContent = expense ? 'Edit Expense' : 'Add Expense';
-  $('saveExpenseBtn').textContent = expense ? 'Save Changes' : 'Save Expense';
+  $('saveExpenseBtn').textContent = 'Save';
   $('expenseDate').value = expense?.date || today();
   $('expenseAmount').value = expense?.amount || '';
   $('expenseCategory').value = expense?.category || $('expenseCategory').options[0].value;

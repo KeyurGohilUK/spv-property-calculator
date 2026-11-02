@@ -699,7 +699,7 @@ function openForm(task = null, { preset = null } = {}) {
   editingTaskId = task?.id || null;
   $('taskForm').reset();
   $('taskDialogTitle').textContent = task ? (readOnly ? 'View Task' : 'Edit Task') : 'New Task';
-  $('saveTaskBtn').textContent = task ? 'Save Changes' : 'Save Task';
+  $('saveTaskBtn').textContent = 'Save';
   $('saveTaskBtn').classList.toggle('hidden', readOnly);
   $('cancelTaskBtn').textContent = readOnly ? 'Close' : 'Cancel';
   $('taskTitle').value = task?.title ?? preset?.title ?? '';

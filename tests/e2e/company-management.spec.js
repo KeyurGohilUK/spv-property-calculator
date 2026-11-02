@@ -65,7 +65,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await page.getByLabel('Company name').fill('Example Property SPV Ltd');
   await page.getByLabel('Company number').fill('01234567');
   await page.getByLabel('Registered office').fill('1 Example Street, Bristol');
-  await page.getByRole('button', { name: 'Save details' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#companyNameValue')).toHaveText('Example Property SPV Ltd');
   await expect(page.locator('#companyNumberValue')).toHaveText('01234567');
 
@@ -73,7 +73,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await page.getByLabel('Full name').fill('Alex Director');
   await page.getByLabel('Director', { exact: true }).check();
   await page.getByLabel('Person with significant control (PSC)').check();
-  await page.getByRole('button', { name: 'Save person' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
   await expect(page.locator('#companyAppointmentsRows')).toContainText('✓');
   await expect.poll(() => page.evaluate(() => window.savedCompanyProfile?.appointments?.length)).toBe(1);

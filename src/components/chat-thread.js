@@ -118,7 +118,7 @@ export function setChatComposerMode({
     textarea.placeholder = editing ? 'Update your message…' : 'Write a message…';
   }
   if (sendButton) {
-    const action = editing ? 'Save edited message' : 'Send message';
+    const action = editing ? 'Save' : 'Send message';
     sendButton.setAttribute('aria-label', action);
     sendButton.title = action;
   }
