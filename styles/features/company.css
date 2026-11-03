@@ -280,3 +280,17 @@
 .hmrc-period-history li { display:grid; gap:5px; min-width:0; border:1px solid var(--border); border-radius:12px; background:var(--surface); padding:12px 14px; }
 .hmrc-period-history li span { font-size:.83rem; color:var(--text-muted); }
 .hmrc-period-history li strong { font-size:.9rem; }
+
+/* Unified, read-only Companies House people and identity overview. */
+.company-identity-overview { margin-top:20px; }
+.company-identity-heading h3 { margin:4px 0 8px; }
+.company-identity-summary { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:14px 0; padding:12px 14px; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; }
+.company-identity-chip { display:inline-flex; align-items:center; flex:0 0 auto; padding:5px 10px; border:1px solid var(--border); border-radius:999px; font-size:.8rem; font-weight:700; color:var(--text); background:var(--surface); }
+.company-identity-chip--recorded { border-color:var(--positive); color:var(--positive); background:color-mix(in srgb, var(--positive) 8%, var(--surface)); }
+.company-identity-chip--neutral { border-color:var(--border); }
+.company-identity-person { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; padding:12px 0; border-bottom:1px solid var(--border); }
+.company-identity-person:last-child { border-bottom:0; }
+.company-identity-person > div { min-width:0; overflow-wrap:anywhere; }
+.company-identity-person small { display:block; margin-top:5px; font-size:.8rem; color:var(--text-muted); }
+.company-identity-note { margin-top:14px; }
+@media (max-width:600px) { .company-identity-person { grid-template-columns:minmax(0,1fr); gap:8px; } }

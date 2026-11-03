@@ -1,7 +1,7 @@
 {
-  "version": "1.54.6",
+  "version": "1.54.7",
   "notes": [
-    "Track multiple HMRC Corporation Tax periods, including first-year split returns.",
-    "Keep prior-year completion records and prepare future periods without automatically confirming HMRC dates."
+    "Combine director and PSC identity verification into one official Companies House people section.",
+    "Show per-person public verification evidence and avoid duplicate manual confirmation cards."
   ]
 }

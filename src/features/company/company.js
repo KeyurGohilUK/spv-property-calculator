@@ -248,15 +248,23 @@ function renderCompanyCompliance() {
     const officialDirectors = (people?.officers || []).filter((a) => a.role === 'director');
     const namesMatch = (name) => internalDirectors.some((a) => normalized(a.name) === normalized(name));
     const showDate = (date) => date ? formatComplianceDateUK(date) : '';
+    const directors = people?.officersAvailable ? officialDirectors : [];
+    const pscs = people?.pscsAvailable ? (people.pscs || []) : [];
+    const counted = [...directors, ...pscs];
+    const recorded = counted.filter((entry) => entry.verification?.statementStartOn || entry.verification?.verifiedOn).length;
+    const complete = people?.officersAvailable && people?.pscsAvailable && directors.length > 0 && recorded === counted.length && counted.length > 0;
+    $('companyIdentitySummary').innerHTML = !people || !people.officersAvailable || !people.pscsAvailable
+      ? '<span class="company-identity-chip company-identity-chip--neutral">Unable to verify public records</span><span>Check the official register when available.</span>'
+      : `<span class="company-identity-chip ${complete ? 'company-identity-chip--recorded' : 'company-identity-chip--neutral'}">${complete ? 'Statements recorded' : 'Review verification records'}</span><span>${recorded} of ${counted.length} director and PSC roles have published verification evidence.</span>`;
     const verification = (entry) => entry.verification?.statementStartOn
       ? `Appointment verification statement recorded ${escapeHtml(showDate(entry.verification.statementStartOn))}`
       : entry.verification?.verifiedOn
         ? `Identity verification date published: ${escapeHtml(showDate(entry.verification.verifiedOn))}`
         : 'Verification status not publicly confirmed';
-    const renderPeople = (items, isDirector) => items.map((entry) => `<li><strong>${escapeHtml(entry.name)}</strong> · ${isDirector ? namesMatch(entry.name) ? 'Name matches internal director' : 'Review internal director record' : 'PSC on public register'}<small>${verification(entry)}${entry.verification?.statementDueOn ? ' · Statement due ' + escapeHtml(showDate(entry.verification.statementDueOn)) : ''}</small></li>`).join('');
+    const renderPeople = (entries, isDirector) => entries.map((entry) => `<li class="company-identity-person"><div><strong>${escapeHtml(entry.name)}</strong><small>${isDirector ? namesMatch(entry.name) ? 'Name matches internal director' : 'Review internal director record' : 'PSC on public register'}</small></div><div><span class="company-identity-chip ${entry.verification?.statementStartOn || entry.verification?.verifiedOn ? 'company-identity-chip--recorded' : 'company-identity-chip--neutral'}">${entry.verification?.statementStartOn ? 'Statement recorded' : entry.verification?.verifiedOn ? 'Verification date published' : 'Not confirmed publicly'}</span><small>${verification(entry)}${entry.verification?.statementDueOn ? ' · Statement due ' + escapeHtml(showDate(entry.verification.statementDueOn)) : ''}</small></div></li>`).join('');
     peopleRoot.innerHTML = !people
       ? '<p class="muted">Official people records unavailable until Companies House lookup completes.</p>'
-      : `<p class="muted">Directors: ${people.officersAvailable ? 'Public register retrieved' : 'Unavailable'} · PSCs: ${people.pscsAvailable ? 'Public register retrieved' : 'Unavailable'}</p>
+      : `<p class="muted">Official Companies House records · Directors: ${people.officersAvailable ? 'Retrieved' : 'Unavailable'} · PSCs: ${people.pscsAvailable ? 'Retrieved' : 'Unavailable'}</p>
           ${people.officersAvailable ? `<h4>Current directors</h4><ul>${renderPeople(officialDirectors, true) || '<li>No current directors returned.</li>'}</ul>` : ''}
           ${people.pscsAvailable ? `<h4>Current PSCs</h4><ul>${renderPeople(people.pscs || [], false) || '<li>No PSC entries returned. Check for PSC statements.</li>'}</ul>` : ''}
           ${people.officersAvailable && officialDirectors.length !== internalDirectors.length ? '<p class="muted">Director counts differ between internal and official records. Check the names and appointment details.</p>' : ''}
@@ -294,7 +302,7 @@ function renderCompanyCompliance() {
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
     </article>`).join('');
-  $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && item.id !== 'corporation-tax-registration'));
+  $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
   $('hmrcComplianceItems').innerHTML = renderCards(items.filter((item) => item.source === 'hmrc' || item.id === 'corporation-tax-registration'));
 }
 
