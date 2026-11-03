@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildCompanyCompliance } from '../src/features/company/compliance-rules.js';
-const html = readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
 const script = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
 const style = readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
 const assets = JSON.parse(readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8'));
