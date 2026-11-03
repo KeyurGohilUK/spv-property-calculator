@@ -70,4 +70,15 @@ assert.match(detail, /id="companyInvestmentSummaryRows"/);
 assert.match(detail, /All companies/);
 assert.match(cloud, /async function listCompanyProfiles\(/);
 assert.match(cloud, /upsert_company_profile_by_id_if_current/);
+
+const listJs = readFileSync(new URL('../src/features/company/company-list.js', import.meta.url), 'utf8');
+const detailsJs = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
+const styles = readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
+assert.match(listJs, /searchCompanyStatus\('This registered company already has a card\. Open the existing company instead\.', 'error'\)/);
+assert.match(listJs, /status\.setAttribute\('role', kind === 'error' \? 'alert' : 'status'\)/);
+assert.match(detailsJs, /companyDetailsError\('This company number is already recorded in another company card\.'\)/);
+assert.match(styles, /\.company-official-search \.is-error/);
+assert.match(styles, /border-inline-start-width: 4px/);
+assert.match(styles, /var\(--danger\)/);
+
 console.log('Multiple company isolation, legacy preservation and sync tests passed.');
