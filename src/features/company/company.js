@@ -5,6 +5,7 @@ import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
   getCompanyProfile,
   setActiveCompanyId,
+  listStoredCompanyProfiles,
   saveCompanyProfile,
   saveComplianceConfirmation,
   saveAppointment,
@@ -328,6 +329,12 @@ async function searchCompanyParticulars() {
 
 async function selectCompanyParticulars(companyNumber) {
   if (!editingAllowed || !/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) return;
+  const anotherCompany = listStoredCompanyProfiles().find((item) =>
+    item.id !== profile.id && item.companyNumber.trim().toUpperCase() === companyNumber);
+  if (anotherCompany) {
+    setCompanySearchStatus('This registered company already has a card. Return to All companies to open it.');
+    return;
+  }
   const previousNumber = String(profile.companyNumber || '').trim().toUpperCase();
   if (previousNumber && previousNumber !== companyNumber) {
     setCompanySearchStatus('This is a different registered company. Return to All companies and choose Add new company.');
@@ -443,6 +450,12 @@ $('companyDetailsForm').addEventListener('submit', async (event) => {
   if (!editingAllowed) return;
   const originalNumber = String(profile.companyNumber || '').trim().toUpperCase();
   const enteredNumber = $('companyNumberInput').value.trim().toUpperCase();
+  if (enteredNumber && listStoredCompanyProfiles().some((item) =>
+    item.id !== profile.id && item.companyNumber.trim().toUpperCase() === enteredNumber)) {
+    $('companyDetailsMessage').textContent = 'This company number is already recorded in another company card.';
+    return;
+  }
+
   if (originalNumber && enteredNumber && enteredNumber !== originalNumber &&
       (profile.appointments.length || profile.investments.length || Object.keys(profile.complianceConfirmations).length)) {
     $('companyDetailsMessage').textContent = 'A different registration number may belong to another company. Use Add new company to keep existing records separate.';
