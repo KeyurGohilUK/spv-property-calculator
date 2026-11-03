@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   COMPANY_COMPLIANCE_RULES, validDate, daysUntil, companyHouseDeadlines,
-  buildCompanyCompliance, normalizeConfirmation, filingReminder, formatComplianceDateUK, hmrcDeadlines, addMonthsClamped
+  buildCompanyCompliance, normalizeConfirmation, filingReminder, formatComplianceDateUK, hmrcDeadlines, addMonthsClamped, hmrcTaxPeriods
 } from '../src/features/company/compliance-rules.js';
 
 assert.equal(formatComplianceDateUK('2027-11-02'), '2 Nov 2027');
@@ -85,3 +85,22 @@ const hmrcCycle = buildCompanyCompliance({
 assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-payment').status, 'due-soon');
 assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-return').period, '2026-12-31');
 assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-return').dueDate, '2027-12-31');
+
+const firstYearPeriods = [
+  { status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' },
+  { status: 'active', periodStart: '2027-01-01', periodEnd: '2027-03-31' }
+];
+const multiple = buildCompanyCompliance({
+  today: '2027-03-01', hmrc: { status: 'active', periods: firstYearPeriods },
+  confirmations: { 'corporation-tax-return:2026-12-31': { status: 'confirmed', confirmedOn: '2027-02-01' } }
+});
+const returns = multiple.filter((item) => item.id === 'corporation-tax-return');
+assert.equal(returns.length, 2, 'An extended first financial year needs separate tax returns');
+assert.equal(returns[0].status, 'user-confirmed', 'Prior period remains confirmed');
+assert.notEqual(returns[1].status, 'user-confirmed', 'Next period must not inherit earlier completion');
+assert.equal(returns[0].dueDate, '2027-12-31');
+assert.equal(returns[1].dueDate, '2028-03-31');
+assert.equal(multiple.filter((item) => item.id === 'corporation-tax-payment').length, 2);
+assert.equal(multiple.filter((item) => item.id === 'corporation-tax-registration').length, 1);
+assert.equal(hmrcTaxPeriods({ status: 'dormant', periods: firstYearPeriods }).length, 2, 'Dormancy must preserve historical active return periods');
+assert.deepEqual(hmrcDeadlines({ status: 'active', periodStart: '2026-01-01', periodEnd: '2027-01-01' }), {}, 'A tax return cannot cover 12 months and one extra day');

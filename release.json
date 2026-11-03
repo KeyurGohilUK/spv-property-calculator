@@ -1,7 +1,7 @@
 {
-  "version": "1.54.5",
+  "version": "1.54.6",
   "notes": [
-    "Separate Companies House and HMRC compliance into clear sections.",
-    "Track Corporation Tax activity status, UTR receipt and HMRC tax period deadlines."
+    "Track multiple HMRC Corporation Tax periods, including first-year split returns.",
+    "Keep prior-year completion records and prepare future periods without automatically confirming HMRC dates."
   ]
 }
