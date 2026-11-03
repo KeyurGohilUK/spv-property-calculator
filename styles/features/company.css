@@ -170,3 +170,47 @@
 .company-list-card-chevron svg { width: 20px; height: 20px; }
 .company-list-add { align-items: center; text-align: center; }
 .company-list-add .company-list-plus { display: grid; place-items: center; width: 44px; height: 44px; }
+
+/* High-visibility validation feedback in company search and edit dialogs.
+   Theme --danger works in both light and dark colour schemes. */
+.company-official-search [role="status"],
+.company-official-search [role="alert"],
+.company-dialog .save-message {
+  overflow-wrap: anywhere;
+}
+.company-official-search .is-error,
+.company-dialog .save-message:not(:empty) {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--danger);
+  border-inline-start-width: 4px;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  color: var(--danger);
+  font-weight: 650;
+  line-height: 1.45;
+}
+.company-official-search .is-error::before,
+.company-dialog .save-message:not(:empty)::before {
+  content: "!";
+  flex: 0 0 22px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: .9rem;
+  line-height: 1;
+  font-weight: 800;
+}
+.company-official-search .is-success {
+  border-inline-start: 4px solid var(--brand);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  color: var(--text);
+  font-weight: 600;
+}
