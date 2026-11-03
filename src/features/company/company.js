@@ -537,6 +537,8 @@ async function initialiseCompanyPage() {
       $('companySyncStatus').classList.remove('error', 'synced');
       renderProfile();
     }
+    await syncCompanyProfile(window.SPVCloud);
+    renderProfile();
     await refreshCompanyHouseDeadlines();
   } catch (error) {
     if (navigator.onLine) console.warn('Company access could not be verified:', error);
