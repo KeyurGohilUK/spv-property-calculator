@@ -149,3 +149,17 @@
 .company-search-result { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; min-width: 0; }
 .company-search-result > span { flex: 1 1 190px; min-width: 0; overflow-wrap: anywhere; }
 .company-search-result small { display: block; margin-top: 4px; color: var(--text-muted); }
+
+/* Company chooser and per-company navigation */
+.company-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)); gap: 16px; margin-top: 16px; }
+.company-list-card { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; min-height: 190px; padding: 20px; border: 1px solid var(--border); border-radius: 16px; color: var(--text); background: var(--surface); text-decoration: none; text-align: left; overflow-wrap: anywhere; }
+.company-list-card:hover:not(:disabled), .company-list-card:focus-visible { border-color: var(--primary, var(--text)); outline-offset: 3px; }
+.company-list-card strong { font-size: 1.08rem; }
+.company-list-card small { color: var(--text-muted); }
+.company-list-card-status { border: 1px solid var(--border); border-radius: 24px; padding: 4px 10px; font-size: .79rem; }
+.company-list-card-open { margin-top: auto; font-size: .88rem; font-weight: 650; }
+.company-list-card-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--surface-raised, var(--surface)); border: 1px solid var(--border); font-size: 1.3rem; }
+.company-list-add { cursor: pointer; justify-content: center; border-style: dashed; }
+.company-list-add:disabled { opacity: .6; cursor: not-allowed; }
+.company-list-plus { font-size: 2rem; line-height: 1; }
+.company-back-link { display: inline-flex; margin: 4px 0 16px; align-items: center; font-weight: 650; text-decoration: none; color: var(--text); }
