@@ -115,6 +115,7 @@ test('workspace viewers can read but not edit company records', async ({ page })
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
   await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Add person' })).toBeDisabled();
+  await expect(page.locator('#openDeleteCompanyBtn')).toBeDisabled();
   await expect(page.getByText(/View-only/)).toBeVisible();
 });
 
@@ -134,4 +135,33 @@ test('company chooser adds a second company without changing the first', async (
   await page.getByRole('link', { name: /All companies/ }).click();
   await expect(page.getByRole('link', { name: /First SPV Ltd/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /Second SPV Ltd/ })).toBeVisible();
+});
+
+test('editor confirms company deletion and keeps other workspace data', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Temporary SPV Ltd', companyNumber: '11223344',
+    appointments: [{ id: 'dir-1', name: 'Director One', roles: ['director'] }],
+    investments: [{ id: 'invest-1', memberId: 'dir-1', memberName: 'Director One', amount: 1000 }]
+  });
+  await page.goto('/company/');
+  await page.getByRole('link', { name: /Temporary SPV Ltd/ }).click();
+  const deleteButton = page.locator('#openDeleteCompanyBtn');
+  await expect(deleteButton).toBeEnabled();
+  await deleteButton.click();
+  await expect(page.locator('#deleteCompanyName')).toHaveText('Temporary SPV Ltd');
+  await page.locator('#confirmDeleteCompanyInput').fill('wrong');
+  await page.locator('#confirmDeleteCompanyBtn').click();
+  await expect(page.locator('#deleteCompanyMessage')).toContainText('Type DELETE');
+  await page.locator('#confirmDeleteCompanyInput').fill('DELETE');
+  await page.locator('#confirmDeleteCompanyBtn').click();
+  await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Temporary SPV Ltd/ })).toHaveCount(0);
+  const tombstone = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('spv-property-calculator.company-profile.v1'))
+  );
+  expect(tombstone.deletedAt).toBeTruthy();
+  expect(tombstone.appointments).toHaveLength(1);
+  expect(tombstone.investments).toHaveLength(1);
+  await page.goto('/company/details.html?company=default');
+  await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
 });
