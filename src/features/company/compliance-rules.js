@@ -93,7 +93,7 @@ export function addMonthsClamped(date, months, days = 0) {
 export function hmrcDeadlines(hmrc = {}) {
   const { status, periodStart, periodEnd } = hmrc;
   if (status !== 'active' || !validDate(periodStart) || !validDate(periodEnd) ||
-      periodStart > periodEnd || periodEnd > addMonthsClamped(periodStart, 12)) return {};
+      periodStart > periodEnd || periodEnd >= addMonthsClamped(periodStart, 12)) return {};
   return {
     'corporation-tax-registration': addMonthsClamped(periodStart, 3),
     'corporation-tax-return': addMonthsClamped(periodEnd, 12),
@@ -101,27 +101,44 @@ export function hmrcDeadlines(hmrc = {}) {
   };
 }
 
+/** Validated tax-return periods. Legacy single-period records remain readable. */
+export function hmrcTaxPeriods(hmrc = {}) {
+  const source = Array.isArray(hmrc.periods) && hmrc.periods.length
+    ? hmrc.periods : (hmrc.periodStart && hmrc.periodEnd ? [{ status: 'active', periodStart: hmrc.periodStart, periodEnd: hmrc.periodEnd }] : []);
+  return source.filter((p) => p?.status === 'active' && Object.keys(hmrcDeadlines(p)).length)
+    .map((p) => ({ status: 'active', periodStart: p.periodStart, periodEnd: p.periodEnd }))
+    .sort((a, b) => a.periodStart.localeCompare(b.periodStart));
+}
+
 export function buildCompanyCompliance({ company = {}, confirmations = {}, today, enabledConditional = [], hmrc = {} } = {}) {
   if (!validDate(today)) throw new Error('A valid current date is required.');
-  const deadlineMap = { ...companyHouseDeadlines(company), ...hmrcDeadlines(hmrc) };
+  const periods = hmrcTaxPeriods(hmrc);
+  const first = periods[0];
   const enabled = new Set(enabledConditional);
+  if (periods.length) enabled.add('corporation-tax-payment');
+  const baseDeadlines = { ...companyHouseDeadlines(company), ...(first ? { 'corporation-tax-registration': hmrcDeadlines(first)['corporation-tax-registration'] } : {}) };
   return COMPANY_COMPLIANCE_RULES
     .filter((rule) => !rule.conditional || enabled.has(rule.id))
-    .map((rule) => {
-      const dueDate = deadlineMap[rule.id] ?? null;
-      const officialFiling = rule.source === 'companies-house' ? companyHouseFilingInfo(company, rule.id) : null;
-      const period = rule.recurring ? (rule.source === 'hmrc' && validDate(hmrc.periodEnd) ? hmrc.periodEnd : dueDate || 'unconfirmed-period') : 'once';
-      const key = rule.id + ':' + period;
-      const confirmation = normalizeConfirmation(confirmations[key]);
-      const remaining = dueDate ? daysUntil(dueDate, today) : null;
-      const reminder = !officialFiling?.overdue ? filingReminder(remaining) : null;
-      let status = 'needs-verification';
-      if (officialFiling?.overdue) status = 'past-deadline-unverified';
-      else if (rule.source !== 'companies-house' && confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
-      else if (rule.source !== 'companies-house' && confirmation?.status === 'confirmed') status = 'user-confirmed';
-      else if (remaining !== null && remaining < 0) status = 'past-deadline-unverified';
-      else if (remaining !== null && remaining <= 30) status = 'due-soon';
-      else if (remaining !== null) status = 'upcoming';
-      return { ...rule, key, period, dueDate, daysRemaining: remaining, status, reminder, confirmation: rule.source === 'companies-house' ? null : confirmation, officialFiling };
+    .flatMap((rule) => {
+      // Each tax return/payment belongs to its own HMRC accounting period.
+      const copies = rule.source === 'hmrc' && rule.recurring && periods.length ? periods : [null];
+      return copies.map((taxPeriod) => {
+        const dueDate = taxPeriod ? hmrcDeadlines(taxPeriod)[rule.id] ?? null : baseDeadlines[rule.id] ?? null;
+        const officialFiling = rule.source === 'companies-house' ? companyHouseFilingInfo(company, rule.id) : null;
+        const period = taxPeriod ? taxPeriod.periodEnd : (rule.recurring ? dueDate || 'unconfirmed-period' : 'once');
+        const key = rule.id + ':' + period;
+        const confirmation = normalizeConfirmation(confirmations[key]);
+        const remaining = dueDate ? daysUntil(dueDate, today) : null;
+        const reminder = !officialFiling?.overdue ? filingReminder(remaining) : null;
+        let status = 'needs-verification';
+        if (officialFiling?.overdue) status = 'past-deadline-unverified';
+        else if (rule.source !== 'companies-house' && confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
+        else if (rule.source !== 'companies-house' && confirmation?.status === 'confirmed') status = 'user-confirmed';
+        else if (remaining !== null && remaining < 0) status = 'past-deadline-unverified';
+        else if (remaining !== null && remaining <= 30) status = 'due-soon';
+        else if (remaining !== null) status = 'upcoming';
+        return { ...rule, key, period, taxPeriod, dueDate, daysRemaining: remaining, status, reminder,
+          confirmation: rule.source === 'companies-house' ? null : confirmation, officialFiling };
+      });
     });
 }

@@ -32,3 +32,13 @@ assert.match(ui, /data-compliance-key/);
 assert.match(ui, /!editingAllowed/, 'View-only mode must not allow compliance edits');
 assert.match(ui, /syncAfterSave\(\)/);
 console.log('Company compliance confirmation persistence and shared-sync wiring passed.');
+
+const firstYear = [
+  { status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' },
+  { status: 'active', periodStart: '2027-01-01', periodEnd: '2027-02-28' }
+];
+saveCompanyProfile({ ...getCompanyProfile(), hmrc: { status: 'active', periods: firstYear, periodStart: '', periodEnd: '' } });
+assert.equal(getCompanyProfile().hmrc.periods.length, 2, 'Both tax return periods survive local persistence');
+const copy = getCompanyProfile();
+replaceCompanyProfile({ ...copy, _cloudRevision: 7 });
+assert.deepEqual(getCompanyProfile().hmrc.periods, firstYear, 'Period history survives cloud profile replacement');

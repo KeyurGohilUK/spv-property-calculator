@@ -272,3 +272,11 @@
 .hmrc-period-form input,.hmrc-period-form select { width:100%; min-width:0; min-height:44px; padding:9px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font:inherit; }
 .hmrc-period-form p { grid-column:1/-1; margin:0; font-size:.85rem; }
 #hmrcPeriodMessage { font-size:.85rem; }
+
+/* Historical HMRC periods remain visible when current activity changes. */
+.hmrc-period-history { margin-top:18px; }
+.hmrc-period-history h4 { margin:0 0 10px; font-size:1rem; }
+.hmrc-period-history ul { margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:10px; list-style:none; }
+.hmrc-period-history li { display:grid; gap:5px; min-width:0; border:1px solid var(--border); border-radius:12px; background:var(--surface); padding:12px 14px; }
+.hmrc-period-history li span { font-size:.83rem; color:var(--text-muted); }
+.hmrc-period-history li strong { font-size:.9rem; }
