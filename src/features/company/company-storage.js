@@ -27,8 +27,11 @@ function storedCompanyIds() {
     return Array.isArray(ids) ? [...new Set(['default', ...ids.filter(validCompanyId)])] : ['default'];
   } catch { return ['default']; }
 }
-export function listStoredCompanyProfiles() {
+export function listAllStoredCompanyProfiles() {
   return storedCompanyIds().map((id) => getStoredCompanyProfile(id)).filter((profile) => profile?.companyName);
+}
+export function listStoredCompanyProfiles() {
+  return listAllStoredCompanyProfiles().filter((profile) => !profile.deletedAt);
 }
 
 const APPOINTMENT_ROLES = Object.freeze(['director', 'shareholder', 'secretary', 'psc']);
@@ -41,7 +44,7 @@ function makeId(prefix = 'appointment') {
 function emptyProfile(id = 'default') {
   return {
     id, companyName: '', companyNumber: '', registeredOffice: '',
-    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, _cloudRevision: 0, _cloudDirty: false
+    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, deletedAt: null, _cloudRevision: 0, _cloudDirty: false
   };
 }
 
@@ -82,6 +85,7 @@ export function normalizeCompanyProfile(profile = {}) {
     registeredOffice: String(profile.registeredOffice || '').trim().slice(0, 500),
     incorporationDate: /^\d{4}-\d{2}-\d{2}$/.test(String(profile.incorporationDate || '')) ? profile.incorporationDate : '',
     companyStatus: String(profile.companyStatus || '').trim().slice(0, 80),
+    deletedAt: /^\\d{4}-\\d{2}-\\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
     appointments,
     investments,
     complianceConfirmations: Object.fromEntries(
@@ -126,6 +130,7 @@ function writeProfile(profile) {
 
 export function saveCompanyProfile(profile) {
   const existing = getCompanyProfile();
+  if (existing.deletedAt) throw new Error('This company has been deleted.');
   const next = normalizeCompanyProfile({
     ...existing,
     ...profile,
@@ -137,6 +142,21 @@ export function saveCompanyProfile(profile) {
   if (!next.companyName) throw new Error('Enter the company name.');
   if (!writeProfile(next)) throw new Error('Unable to save company details on this device.');
   return next;
+}
+
+/** Mark a company deleted while retaining a versioned tombstone for cross-device sync. */
+export function deleteCompanyProfile(id = getActiveCompanyId()) {
+  if (!validCompanyId(id)) throw new Error('Invalid company.');
+  const existing = getStoredCompanyProfile(id);
+  if (!existing?.companyName || existing.deletedAt) throw new Error('Company not available for deletion.');
+  const tombstone = normalizeCompanyProfile({
+    ...existing,
+    deletedAt: new Date().toISOString(),
+    _cloudDirty: true,
+    updatedAt: new Date().toISOString()
+  });
+  if (!writeProfile(tombstone)) throw new Error('Unable to record company deletion.');
+  return tombstone;
 }
 
 export function saveAppointment(appointment) {
