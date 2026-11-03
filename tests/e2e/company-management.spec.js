@@ -91,7 +91,7 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   });
   await page.goto('/company/');
   await page.getByRole('link', { name: /Example SPV Ltd/ }).click();
-  await expect(page.getByRole('heading', { name: 'Appointments' })).toBeVisible();
+  await expect(page.locator('#companyAppointmentsTitle')).toBeVisible();
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
   const dimensions = await page.locator('#companyAppointmentsTable').evaluate((element) => ({
     viewport: element.clientWidth,
