@@ -293,8 +293,19 @@ async function refreshCompanyHouseDeadlines() {
   renderCompanyCompliance();
 }
 
-function setCompanySearchStatus(message) {
-  $('companySearchStatus').textContent = message;
+function setCompanySearchStatus(message, kind = 'info') {
+  const status = $('companySearchStatus');
+  status.textContent = message;
+  status.classList.toggle('is-error', Boolean(message) && kind === 'error');
+  status.classList.toggle('is-success', Boolean(message) && kind === 'success');
+  status.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+}
+
+function companyDetailsError(message) {
+  const status = $('companyDetailsMessage');
+  status.textContent = message;
+  status.classList.toggle('is-error', Boolean(message));
+  status.setAttribute('role', message ? 'alert' : 'status');
 }
 
 async function searchCompanyParticulars() {
@@ -303,11 +314,11 @@ async function searchCompanyParticulars() {
   const requestId = ++companySearchSequence;
   $('companySearchResults').replaceChildren();
   if (query.length < 2) {
-    setCompanySearchStatus('Enter at least two characters to search.');
+    setCompanySearchStatus('Enter at least two characters to search.', 'error');
     return;
   }
   if (!navigator.onLine || !window.SPVCloud?.searchCompaniesHouse) {
-    setCompanySearchStatus('Company search requires an internet connection and sign-in.');
+    setCompanySearchStatus('Company search requires an internet connection and sign-in.', 'error');
     return;
   }
   $('companySearchBtn').disabled = true;
@@ -315,13 +326,13 @@ async function searchCompanyParticulars() {
   try {
     const matches = await window.SPVCloud.searchCompaniesHouse(query);
     if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
-    setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
+    setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.', matches.length ? 'info' : 'error');
     $('companySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
       <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(displayCompanyStatus(item.companyStatus) || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
       <button type="button" class="secondary-btn" data-company-lookup="${escapeHtml(item.companyNumber)}" aria-label="Select ${escapeHtml(item.companyName)}">Select</button>
     </div>`).join('');
   } catch (error) {
-    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company search failed.');
+    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company search failed.', 'error');
   } finally {
     if (requestId === companySearchSequence) $('companySearchBtn').disabled = !editingAllowed;
   }
@@ -332,12 +343,12 @@ async function selectCompanyParticulars(companyNumber) {
   const anotherCompany = listStoredCompanyProfiles().find((item) =>
     item.id !== profile.id && item.companyNumber.trim().toUpperCase() === companyNumber);
   if (anotherCompany) {
-    setCompanySearchStatus('This registered company already has a card. Return to All companies to open it.');
+    setCompanySearchStatus('This registered company already has a card. Return to All companies to open it.', 'error');
     return;
   }
   const previousNumber = String(profile.companyNumber || '').trim().toUpperCase();
   if (previousNumber && previousNumber !== companyNumber) {
-    setCompanySearchStatus('This is a different registered company. Return to All companies and choose Add new company.');
+    setCompanySearchStatus('This is a different registered company. Return to All companies and choose Add new company.', 'error');
     return;
   }
   const requestId = ++companySearchSequence;
@@ -352,10 +363,10 @@ async function selectCompanyParticulars(companyNumber) {
     $('companyOfficeInput').value = official.registeredOffice || '';
     $('companyStatusInput').value = displayCompanyStatus(official.companyStatus);
     $('companyDateInput').value = official.incorporationDate || '';
-    setCompanySearchStatus('Official details populated. Review them and press Save to update the workspace.');
+    setCompanySearchStatus('Official details populated. Review them and press Save to update the workspace.', 'success');
     $('companySearchResults').replaceChildren();
   } catch (error) {
-    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company lookup failed.');
+    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company lookup failed.', 'error');
   } finally {
     if (requestId === companySearchSequence) $('companySearchBtn').disabled = !editingAllowed;
   }
@@ -372,7 +383,7 @@ function showDetailsDialog() {
   $('companySearchResults').replaceChildren();
   setCompanySearchStatus('');
   $('companySearchBtn').disabled = !editingAllowed;
-  $('companyDetailsMessage').textContent = '';
+  companyDetailsError('');
   detailsDialog.open($('editCompanyDetailsBtn'));
 }
 
@@ -452,13 +463,13 @@ $('companyDetailsForm').addEventListener('submit', async (event) => {
   const enteredNumber = $('companyNumberInput').value.trim().toUpperCase();
   if (enteredNumber && listStoredCompanyProfiles().some((item) =>
     item.id !== profile.id && item.companyNumber.trim().toUpperCase() === enteredNumber)) {
-    $('companyDetailsMessage').textContent = 'This company number is already recorded in another company card.';
+    companyDetailsError('This company number is already recorded in another company card.');
     return;
   }
 
   if (originalNumber && enteredNumber && enteredNumber !== originalNumber &&
       (profile.appointments.length || profile.investments.length || Object.keys(profile.complianceConfirmations).length)) {
-    $('companyDetailsMessage').textContent = 'A different registration number may belong to another company. Use Add new company to keep existing records separate.';
+    companyDetailsError('A different registration number may belong to another company. Use Add new company to keep existing records separate.');
     return;
   }
   try {
@@ -475,7 +486,7 @@ $('companyDetailsForm').addEventListener('submit', async (event) => {
     await syncAfterSave();
     if (profile.companyNumber) await refreshCompanyHouseDeadlines();
   } catch (error) {
-    $('companyDetailsMessage').textContent = error.message || 'Company details could not be saved.';
+    companyDetailsError(error.message || 'Company details could not be saved.');
   }
 });
 
