@@ -307,7 +307,7 @@ async function searchCompanyParticulars() {
     if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
     setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
     $('companySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
-      <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(item.companyStatus || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
+      <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(item.companyStatus ? item.companyStatus.charAt(0).toUpperCase() + item.companyStatus.slice(1) : 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
       <button type="button" class="secondary-btn" data-company-lookup="${escapeHtml(item.companyNumber)}" aria-label="Select ${escapeHtml(item.companyName)}">Select</button>
     </div>`).join('');
   } catch (error) {
