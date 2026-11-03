@@ -1,7 +1,7 @@
 {
-  "version": "1.52.0",
+  "version": "1.53.0",
   "notes": [
-    "Check official Companies House directors and PSCs alongside internal appointment records without overwriting internal data.",
-    "Display published identity verification statement dates and deadlines, treating missing information as unknown."
+    "Search Companies House by company name or registration number directly from Company Particulars.",
+    "Select a verified official company record to fill name, company number, full registered office address, company status and incorporation date before explicitly saving."
   ]
 }
