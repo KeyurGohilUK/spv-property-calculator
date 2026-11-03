@@ -265,6 +265,7 @@ function renderProfile() {
 async function refreshCompanyHouseDeadlines() {
   const companyNumber = String(profile.companyNumber || '').trim().toUpperCase();
   if (!companyNumber || !navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) return;
+  if (lookupCompanyNumber !== companyNumber) companyHouseData = null;
   lookupCompanyNumber = companyNumber;
   companyHouseError = 'Checking Companies House…';
   renderCompanyCompliance();
@@ -303,7 +304,7 @@ async function searchCompanyParticulars() {
   setCompanySearchStatus('Searching Companies House…');
   try {
     const matches = await window.SPVCloud.searchCompaniesHouse(query);
-    if (requestId !== companySearchSequence || !detailsDialog.open) return;
+    if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
     setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
     $('companySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
       <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(item.companyStatus || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
@@ -326,7 +327,7 @@ async function selectCompanyParticulars(companyNumber) {
   setCompanySearchStatus('Retrieving official company particulars…');
   try {
     const official = await window.SPVCloud.getCompanyHouseDeadlines(companyNumber);
-    if (requestId !== companySearchSequence || !detailsDialog.open) return;
+    if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
     if (String(official.companyNumber).toUpperCase() !== companyNumber) throw new Error('Unexpected company number returned.');
     $('companyNameInput').value = official.companyName || '';
     $('companyNumberInput').value = official.companyNumber;
