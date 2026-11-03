@@ -118,6 +118,7 @@ test('workspace viewers can read but not edit company records', async ({ page })
   await page.getByRole('link', { name: /Read Only SPV Ltd/ }).click();
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
   await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
+  await page.getByRole('tab', { name: 'Appointment' }).click();
   await expect(page.getByRole('button', { name: 'Add person' })).toBeDisabled();
   await expect(page.locator('#openDeleteCompanyBtn')).toBeDisabled();
   await expect(page.getByText(/View-only/)).toBeVisible();
