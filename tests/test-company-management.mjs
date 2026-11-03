@@ -26,10 +26,10 @@ for (const id of ['companySearchInput', 'companySearchBtn', 'companySearchStatus
   assert.match(companyEditor, new RegExp(`id="${id}"`));
 }
 assert.match(companyController, /selectCompanyParticulars/);
-assert.match(companyController, /detailsDialog\\.dialog\\.open/);
+assert.match(companyController, /detailsDialog\.dialog\.open/);
 assert.match(companyController, /Existing appointments, investments and compliance records/);
 assert.match(companyController, /profile = saveCompanyProfile/);
-assert.match(companyController, /await syncAfterSave\\(\\)/);
+assert.match(companyController, /await syncAfterSave\(\)/);
 
 assert.equal(getStoredCompanyProfile(), null, 'A new device must not invent a stored company profile');
 assert.equal(getCompanyProfile().companyName, '', 'The page must have an empty profile fallback');
