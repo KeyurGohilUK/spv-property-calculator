@@ -39,15 +39,26 @@ $('companyCards').addEventListener('click', (event) => {
   companySearchSequence++;
   $('addCompanyForm').reset();
   $('newCompanySearchResults').replaceChildren();
-  $('newCompanySearchStatus').textContent = '';
+  searchCompanyStatus('');
   $('newCompanySearchBtn').disabled = false;
-  $('addCompanyMessage').textContent = '';
+  addCompanyError('');
   addDialog.open(add);
 });
 
 
-function searchCompanyStatus(message) {
-  $('newCompanySearchStatus').textContent = message;
+function searchCompanyStatus(message, kind = 'info') {
+  const status = $('newCompanySearchStatus');
+  status.textContent = message;
+  status.classList.toggle('is-error', Boolean(message) && kind === 'error');
+  status.classList.toggle('is-success', Boolean(message) && kind === 'success');
+  status.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+}
+
+function addCompanyError(message) {
+  const status = $('addCompanyMessage');
+  status.textContent = message;
+  status.classList.toggle('is-error', Boolean(message));
+  status.setAttribute('role', message ? 'alert' : 'status');
 }
 
 async function searchNewCompany() {
@@ -56,11 +67,11 @@ async function searchNewCompany() {
   const requestId = ++companySearchSequence;
   $('newCompanySearchResults').replaceChildren();
   if (query.length < 2) {
-    searchCompanyStatus('Enter at least two characters to search.');
+    searchCompanyStatus('Enter at least two characters to search.', 'error');
     return;
   }
   if (!navigator.onLine || !window.SPVCloud?.searchCompaniesHouse) {
-    searchCompanyStatus('Company search requires an internet connection and sign-in.');
+    searchCompanyStatus('Company search requires an internet connection and sign-in.', 'error');
     return;
   }
   $('newCompanySearchBtn').disabled = true;
@@ -68,13 +79,13 @@ async function searchNewCompany() {
   try {
     const matches = await window.SPVCloud.searchCompaniesHouse(query);
     if (requestId !== companySearchSequence || !addDialog.dialog.open) return;
-    searchCompanyStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
+    searchCompanyStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.', matches.length ? 'info' : 'error');
     $('newCompanySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
       <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(displayCompanyStatus(item.companyStatus) || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
       <button type="button" class="secondary-btn" data-company-lookup="${escapeHtml(item.companyNumber)}" aria-label="Select ${escapeHtml(item.companyName)}">Select</button>
     </div>`).join('');
   } catch (error) {
-    if (requestId === companySearchSequence) searchCompanyStatus(error.message || 'Company search failed.');
+    if (requestId === companySearchSequence) searchCompanyStatus(error.message || 'Company search failed.', 'error');
   } finally {
     if (requestId === companySearchSequence) $('newCompanySearchBtn').disabled = !editingAllowed;
   }
@@ -83,11 +94,11 @@ async function searchNewCompany() {
 async function selectNewCompany(companyNumber) {
   if (!editingAllowed || !/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) return;
   if (listStoredCompanyProfiles().some((item) => String(item.companyNumber || '').trim().toUpperCase() === companyNumber)) {
-    searchCompanyStatus('This registered company already has a card. Open the existing company instead.');
+    searchCompanyStatus('This registered company already has a card. Open the existing company instead.', 'error');
     return;
   }
   if (!navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) {
-    searchCompanyStatus('Retrieving company details requires an internet connection and sign-in.');
+    searchCompanyStatus('Retrieving company details requires an internet connection and sign-in.', 'error');
     return;
   }
   const requestId = ++companySearchSequence;
@@ -102,10 +113,10 @@ async function selectNewCompany(companyNumber) {
     $('newCompanyOffice').value = official.registeredOffice || '';
     $('newCompanyStatus').value = displayCompanyStatus(official.companyStatus);
     $('newCompanyDate').value = official.incorporationDate || '';
-    searchCompanyStatus('Official details populated. Review and press Add company.');
+    searchCompanyStatus('Official details populated. Review and press Add company.', 'success');
     $('newCompanySearchResults').replaceChildren();
   } catch (error) {
-    if (requestId === companySearchSequence) searchCompanyStatus(error.message || 'Company lookup failed.');
+    if (requestId === companySearchSequence) searchCompanyStatus(error.message || 'Company lookup failed.', 'error');
   } finally {
     if (requestId === companySearchSequence) $('newCompanySearchBtn').disabled = !editingAllowed;
   }
@@ -124,16 +135,16 @@ $('addCompanyForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
   const name = $('newCompanyName').value.trim();
-  if (!name) { $('addCompanyMessage').textContent = 'Enter a company name.'; return; }
+  if (!name) { addCompanyError('Enter a company name.'); return; }
   const number = $('newCompanyNumber').value.trim().toUpperCase();
   const existing = listStoredCompanyProfiles();
   if (number && existing.some((item) => String(item.companyNumber || '').trim().toUpperCase() === number)) {
-    $('addCompanyMessage').textContent = 'This company number is already recorded in another company card.';
+    addCompanyError('This company number is already recorded in another company card.');
     return;
   }
   const id = newCompanyId();
   if (existing.some((item) => item.companyName.toLowerCase() === name.toLowerCase())) {
-    $('addCompanyMessage').textContent = 'A company with that name is already recorded.';
+    addCompanyError('A company with that name is already recorded.');
     return;
   }
   try {
@@ -142,7 +153,7 @@ $('addCompanyForm').addEventListener('submit', async (event) => {
     addDialog.close();
     window.location.assign(new URL(`./company/details.html?company=${encodeURIComponent(id)}`, document.baseURI).href);
   } catch (error) {
-    $('addCompanyMessage').textContent = error.message || 'Company could not be created.';
+    addCompanyError(error.message || 'Company could not be created.');
   }
 });
 

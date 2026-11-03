@@ -1,7 +1,7 @@
 {
-  "version": "1.54.1",
+  "version": "1.54.2",
   "notes": [
-    "Improve company cards with a centred chevron and a clearer Add new company card.",
-    "Search Companies House by name or number when adding a company, review official details and save to its own record."
+    "Make duplicate company, search failure and other validation messages clearly visible using theme-aware error styling.",
+    "Highlight important Companies House feedback in both Add Company and Edit Company dialogs."
   ]
 }
