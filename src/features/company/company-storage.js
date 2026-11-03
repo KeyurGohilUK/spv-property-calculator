@@ -44,7 +44,7 @@ function makeId(prefix = 'appointment') {
 function emptyProfile(id = 'default') {
   return {
     id, companyName: '', companyNumber: '', registeredOffice: '',
-    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, deletedAt: null, _cloudRevision: 0, _cloudDirty: false
+    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, hmrc: { status: 'unknown', periodStart: '', periodEnd: '' }, deletedAt: null, _cloudRevision: 0, _cloudDirty: false
   };
 }
 
@@ -85,6 +85,7 @@ export function normalizeCompanyProfile(profile = {}) {
     registeredOffice: String(profile.registeredOffice || '').trim().slice(0, 500),
     incorporationDate: /^\d{4}-\d{2}-\d{2}$/.test(String(profile.incorporationDate || '')) ? profile.incorporationDate : '',
     companyStatus: String(profile.companyStatus || '').trim().slice(0, 80),
+    hmrc: { status: ['unknown', 'active', 'dormant'].includes(profile.hmrc?.status) ? profile.hmrc.status : 'unknown', periodStart: validDate(profile.hmrc?.periodStart) ? profile.hmrc.periodStart : '', periodEnd: validDate(profile.hmrc?.periodEnd) ? profile.hmrc.periodEnd : '' },
     deletedAt: /^\d{4}-\d{2}-\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
     appointments,
     investments,

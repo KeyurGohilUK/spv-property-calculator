@@ -478,6 +478,7 @@
       companyStatus: String(record?.companyStatus || '').trim(),
       appointments: Array.isArray(record?.appointments) ? record.appointments : [],
       investments: Array.isArray(record?.investments) ? record.investments : [],
+      hmrc: record?.hmrc && typeof record.hmrc === 'object' ? record.hmrc : { status: 'unknown', periodStart: '', periodEnd: '' },
       complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {},
       deletedAt: record?.deletedAt ? String(record.deletedAt) : null
     };

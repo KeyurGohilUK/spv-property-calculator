@@ -6,6 +6,7 @@
 export const COMPANY_COMPLIANCE_RULES = Object.freeze([
   { id: 'confirmation-statement', title: 'Confirmation statement', source: 'companies-house', recurring: true },
   { id: 'annual-accounts', title: 'Annual company accounts', source: 'companies-house', recurring: true },
+  { id: 'company-utr-received', title: 'Company UTR received', source: 'hmrc', recurring: false },
   { id: 'corporation-tax-registration', title: 'Corporation Tax registration', source: 'manual', recurring: false },
   { id: 'corporation-tax-return', title: 'Corporation Tax return', source: 'hmrc', recurring: true },
   { id: 'corporation-tax-payment', title: 'Corporation Tax payment (if due)', source: 'hmrc', recurring: true, conditional: true },
@@ -80,20 +81,40 @@ export function companyHouseFilingInfo(company = {}, id) {
   return null;
 }
 
-export function buildCompanyCompliance({ company = {}, confirmations = {}, today, enabledConditional = [] } = {}) {
+export function addMonthsClamped(date, months, days = 0) {
+  if (!validDate(date)) return null;
+  const [year, month, day] = date.split('-').map(Number);
+  const target = new Date(Date.UTC(year, month - 1 + months, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay) + days);
+  return target.toISOString().slice(0, 10);
+}
+
+export function hmrcDeadlines(hmrc = {}) {
+  const { status, periodStart, periodEnd } = hmrc;
+  if (status !== 'active' || !validDate(periodStart) || !validDate(periodEnd) ||
+      periodStart > periodEnd || periodEnd > addMonthsClamped(periodStart, 12)) return {};
+  return {
+    'corporation-tax-registration': addMonthsClamped(periodStart, 3),
+    'corporation-tax-return': addMonthsClamped(periodEnd, 12),
+    'corporation-tax-payment': addMonthsClamped(periodEnd, 9, 1)
+  };
+}
+
+export function buildCompanyCompliance({ company = {}, confirmations = {}, today, enabledConditional = [], hmrc = {} } = {}) {
   if (!validDate(today)) throw new Error('A valid current date is required.');
-  const deadlineMap = companyHouseDeadlines(company);
+  const deadlineMap = { ...companyHouseDeadlines(company), ...hmrcDeadlines(hmrc) };
   const enabled = new Set(enabledConditional);
   return COMPANY_COMPLIANCE_RULES
     .filter((rule) => !rule.conditional || enabled.has(rule.id))
     .map((rule) => {
       const dueDate = deadlineMap[rule.id] ?? null;
       const officialFiling = rule.source === 'companies-house' ? companyHouseFilingInfo(company, rule.id) : null;
-      const period = rule.recurring ? dueDate || 'unconfirmed-period' : 'once';
+      const period = rule.recurring ? (rule.source === 'hmrc' && validDate(hmrc.periodEnd) ? hmrc.periodEnd : dueDate || 'unconfirmed-period') : 'once';
       const key = rule.id + ':' + period;
       const confirmation = normalizeConfirmation(confirmations[key]);
       const remaining = dueDate ? daysUntil(dueDate, today) : null;
-      const reminder = rule.source === 'companies-house' && !officialFiling?.overdue ? filingReminder(remaining) : null;
+      const reminder = !officialFiling?.overdue ? filingReminder(remaining) : null;
       let status = 'needs-verification';
       if (officialFiling?.overdue) status = 'past-deadline-unverified';
       else if (rule.source !== 'companies-house' && confirmation?.status === 'not-applicable' && rule.conditional) status = 'not-applicable';
