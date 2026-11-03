@@ -100,7 +100,7 @@ assert.match(detail, /id="deleteCompanyDialog"/);
 assert.match(detail, /id="confirmDeleteCompanyInput"/);
 assert.match(cloud, /async function listCompanyProfiles\(/);
 assert.match(cloud, /upsert_company_profile_by_id_if_current/);
-assert.match(cloud, /deletedAt: record\\?\\.deletedAt/);
+assert.match(cloud, /deletedAt: record\?\.deletedAt/);
 
 const listJs = readFileSync(new URL('../src/features/company/company-list.js', import.meta.url), 'utf8');
 const detailsJs = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
