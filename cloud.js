@@ -447,6 +447,21 @@
     };
   }
 
+  async function listCompanyProfiles() {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient.from('company_profiles')
+      .select('id,details,updated_at,revision').order('updated_at', { ascending: false });
+    if (error) throw error;
+    return (data || []).map((row) => ({
+      ...(row.details && typeof row.details === 'object' ? row.details : {}),
+      id: row.id,
+      updatedAt: row.updated_at || '',
+      _cloudRevision: Math.max(0, Number(row.revision) || 0),
+      _cloudDirty: false
+    }));
+  }
+
   function isCompanyProfileConflict(error) {
     return error?.code === '40001'
       || String(error?.message || '').includes('COMPANY_PROFILE_CONFLICT');
@@ -466,10 +481,13 @@
       complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {}
     };
     const { data, error } = await supabaseClient
-      .rpc('upsert_company_profile_if_current', {
-        p_details: details,
-        p_expected_revision: Math.max(0, Number(record?._cloudRevision) || 0)
-      })
+      .rpc(record?.id && record.id !== 'default' ? 'upsert_company_profile_by_id_if_current' : 'upsert_company_profile_if_current',
+        record?.id && record.id !== 'default' ? {
+          p_id: record.id, p_details: details,
+          p_expected_revision: Math.max(0, Number(record?._cloudRevision) || 0)
+        } : {
+          p_details: details, p_expected_revision: Math.max(0, Number(record?._cloudRevision) || 0)
+        })
       .single();
     if (error) {
       if (isCompanyProfileConflict(error)) {
@@ -887,6 +905,7 @@
     listProperties,
     listTasks,
     getCompanyProfile,
+    listCompanyProfiles,
     getCompanyHouseDeadlines,
     searchCompaniesHouse,
     upsertCompanyProfile,
