@@ -1,7 +1,7 @@
 {
-  "version": "1.54.3",
+  "version": "1.54.4",
   "notes": [
-    "Add editor-only Delete Company action with typed confirmation.",
-    "Synchronise company deletion across devices while retaining a recovery-safe marker; property and expense records remain unchanged."
+    "Separate Company, Compliance, Investment and Appointment sections into accessible tabs.",
+    "Keep company deletion inside the Company section."
   ]
 }
