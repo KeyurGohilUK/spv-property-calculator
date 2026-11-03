@@ -12,6 +12,7 @@ const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/
 const editableTaskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 22 - Editable Task Discussions.sql', import.meta.url), 'utf8');
 const expensePayerMigration = fs.readFileSync(new URL('../database/migrations/Update 23 - Expense Payer Attribution.sql', import.meta.url), 'utf8');
 const companyMigration = fs.readFileSync(new URL('../database/migrations/Update 24 - Company Profile and Appointments.sql', import.meta.url), 'utf8');
+const multiCompanyMigration = fs.readFileSync(new URL('../database/migrations/Update 26 - Multiple Company Profiles.sql', import.meta.url), 'utf8');
 const appointmentPayerMigration = fs.readFileSync(new URL('../database/migrations/Update 25 - Appointment-based Expense Payers.sql', import.meta.url), 'utf8');
 const receiptWorker = fs.readFileSync(new URL('../workers/receipt/src/index.js', import.meta.url), 'utf8');
 const workerConfig = fs.readFileSync(new URL('../workers/receipt/wrangler.jsonc', import.meta.url), 'utf8');
@@ -22,6 +23,9 @@ const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'company_profiles', 'tasks', 'task_events', 'task_comments', 'push_subscriptions', 'policy_acceptances', 'viewing_reminder_deliveries']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
 }
+assert.match(multiCompanyMigration, /upsert_company_profile_by_id_if_current/, 'Multiple companies need revision-safe writes');
+assert.match(multiCompanyMigration, /drop constraint if exists company_profiles_id_check/, 'Legacy single-company restriction must be lifted');
+assert.match(bootstrap, /upsert_company_profile_by_id_if_current/, 'Fresh bootstrap must support multiple companies');
 assert.match(bootstrap, /enable row level security/g, 'Bootstrap must enable RLS');
 assert.match(bootstrap, /upsert_property_if_current/, 'Bootstrap must include conflict-safe property writes');
 assert.match(bootstrap, /upsert_expense_if_current/, 'Bootstrap must include conflict-safe expense writes');
