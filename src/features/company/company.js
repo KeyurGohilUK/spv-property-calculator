@@ -4,6 +4,7 @@ import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
   getCompanyProfile,
+  setActiveCompanyId,
   saveCompanyProfile,
   saveComplianceConfirmation,
   saveAppointment,
@@ -21,6 +22,13 @@ const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
 });
+const currentCompanyId = new URLSearchParams(window.location.search).get('company');
+if (!currentCompanyId) {
+  window.location.replace(new URL('./company/', document.baseURI).href);
+} else {
+  try { setActiveCompanyId(currentCompanyId); }
+  catch { window.location.replace(new URL('./company/', document.baseURI).href); }
+}
 let profile = getCompanyProfile();
 let editingAllowed = true;
 let companyHouseData = null;
@@ -514,6 +522,10 @@ window.addEventListener('online', async () => {
 });
 
 async function initialiseCompanyPage() {
+  if (!currentCompanyId || !profile.companyName) {
+    window.location.replace(new URL('./company/', document.baseURI).href);
+    return;
+  }
   renderProfile();
   try {
     const state = await window.SPVCloud?.init?.();
