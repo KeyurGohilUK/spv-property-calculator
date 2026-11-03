@@ -163,3 +163,10 @@
 .company-list-add:disabled { opacity: .6; cursor: not-allowed; }
 .company-list-plus { font-size: 2rem; line-height: 1; }
 .company-back-link { display: inline-flex; margin: 4px 0 16px; align-items: center; font-weight: 650; text-decoration: none; color: var(--text); }
+
+/* Company chooser: prominent navigation affordance and centred add-card content. */
+.company-list-card:not(.company-list-add) { position: relative; padding-right: 78px; }
+.company-list-card-chevron { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-raised, var(--surface)); }
+.company-list-card-chevron svg { width: 20px; height: 20px; }
+.company-list-add { align-items: center; text-align: center; }
+.company-list-add .company-list-plus { display: grid; place-items: center; width: 44px; height: 44px; }
