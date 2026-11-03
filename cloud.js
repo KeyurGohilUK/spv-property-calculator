@@ -404,6 +404,19 @@
     return (data || []).map(fromCloudTask);
   }
 
+  async function searchCompaniesHouse(query) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const { data, error } = await supabaseClient.functions.invoke('company-house-lookup', {
+      body: { action: 'search', query }
+    });
+    if (error) throw new Error('Could not search Companies House.');
+    if (!data || data.error || !Array.isArray(data.results)) {
+      throw new Error(data?.error || 'Company search returned no results.');
+    }
+    return data.results;
+  }
+
   async function getCompanyHouseDeadlines(companyNumber) {
     const supabaseClient = ensureClient();
     await requireUser();
@@ -875,6 +888,7 @@
     listTasks,
     getCompanyProfile,
     getCompanyHouseDeadlines,
+    searchCompaniesHouse,
     upsertCompanyProfile,
     isCompanyProfileConflict,
     upsertTask,
