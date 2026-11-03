@@ -27,7 +27,7 @@ for (const id of ['companySearchInput', 'companySearchBtn', 'companySearchStatus
 }
 assert.match(companyController, /selectCompanyParticulars/);
 assert.match(companyController, /detailsDialog\.dialog\.open/);
-assert.match(companyController, /Existing appointments, investments and compliance records/);
+assert.match(companyController, /Return to All companies and choose Add new company/);
 assert.match(companyController, /profile = saveCompanyProfile/);
 assert.match(companyController, /await syncAfterSave\(\)/);
 
