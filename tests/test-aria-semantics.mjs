@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const forecast = fs.readFileSync(new URL('../forecast/index.html', import.meta.url), 'utf8');
 const users = fs.readFileSync(new URL('../admin/users/index.html', import.meta.url), 'utf8');
-const company = fs.readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const company = fs.readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('../src/app/app.js', import.meta.url), 'utf8');
 const shell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 
