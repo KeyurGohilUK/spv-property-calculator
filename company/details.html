@@ -103,6 +103,11 @@
         </div>
         <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
       </section>
+      <section class="company-section company-danger-zone" aria-labelledby="deleteCompanyTitle">
+        <h2 id="deleteCompanyTitle">Delete company</h2>
+        <p class="muted">Remove this company from your workspace. Its directors, investments and compliance records will be hidden with it. Properties and expenses are not deleted.</p>
+        <button type="button" id="openDeleteCompanyBtn" class="secondary-btn danger-text" disabled>Delete company</button>
+      </section>
     </main>
   </div>
 
@@ -156,6 +161,17 @@
       <label class="field"><span>Funding reference / note</span><textarea id="investmentReferenceInput" rows="3" maxlength="500" placeholder="e.g. Initial director funding or bank transfer reference" data-plain-text></textarea><small>Add a short reference or note for this funding entry.</small></label>
       <p id="investmentMessage" class="save-message" aria-live="polite"></p>
       <div class="dialog-actions company-form-actions"><button id="deleteInvestmentBtn" class="text-btn danger-text hidden" type="button">Remove entry</button><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="deleteCompanyDialog" class="install-dialog company-dialog" aria-labelledby="deleteCompanyDialogTitle">
+    <form id="deleteCompanyForm">
+      <div class="company-dialog-header"><h2 id="deleteCompanyDialogTitle">Delete company?</h2><button id="closeDeleteCompanyDialog" class="dialog-close" type="button" aria-label="Close delete confirmation">×</button></div>
+      <p>Remove <strong id="deleteCompanyName"></strong> from Company Management on all synced devices?</p>
+      <p class="muted">The company's internal appointments, investments and compliance confirmations will be hidden. Existing property and expense records will remain unchanged. This does not dissolve the legal company at Companies House.</p>
+      <label class="field"><span>Type DELETE to confirm</span><input id="confirmDeleteCompanyInput" type="text" autocomplete="off" spellcheck="false" required></label>
+      <p id="deleteCompanyMessage" class="save-message" role="alert" aria-live="assertive"></p>
+      <div class="dialog-actions company-form-actions"><button id="cancelDeleteCompanyBtn" class="secondary-btn" type="button">Cancel</button><button id="confirmDeleteCompanyBtn" type="submit" class="secondary-btn danger-text">Delete company</button></div>
     </form>
   </dialog>
 

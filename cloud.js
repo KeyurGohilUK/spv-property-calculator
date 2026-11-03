@@ -478,7 +478,8 @@
       companyStatus: String(record?.companyStatus || '').trim(),
       appointments: Array.isArray(record?.appointments) ? record.appointments : [],
       investments: Array.isArray(record?.investments) ? record.investments : [],
-      complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {}
+      complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {},
+      deletedAt: record?.deletedAt ? String(record.deletedAt) : null
     };
     const { data, error } = await supabaseClient
       .rpc(record?.id && record.id !== 'default' ? 'upsert_company_profile_by_id_if_current' : 'upsert_company_profile_if_current',

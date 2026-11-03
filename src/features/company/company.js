@@ -6,6 +6,7 @@ import {
   getCompanyProfile,
   setActiveCompanyId,
   listStoredCompanyProfiles,
+  deleteCompanyProfile,
   saveCompanyProfile,
   saveComplianceConfirmation,
   saveAppointment,
@@ -32,6 +33,7 @@ if (!currentCompanyId) {
 }
 let profile = getCompanyProfile();
 let editingAllowed = true;
+let deleteAllowed = false;
 let companyHouseData = null;
 let companyHouseError = '';
 let lookupCompanyNumber = '';
@@ -45,6 +47,10 @@ const appointmentDialog = setupDialog($('appointmentDialog'), {
 });
 const investmentDialog = setupDialog($('investmentDialog'), {
   closeButtons: [$('closeInvestmentDialog'), $('cancelInvestmentBtn')]
+});
+
+const deleteCompanyDialog = setupDialog($('deleteCompanyDialog'), {
+  closeButtons: [$('closeDeleteCompanyDialog'), $('cancelDeleteCompanyBtn')]
 });
 
 function roleMark(appointment, role) {
@@ -266,6 +272,7 @@ function renderProfile() {
     : 'Not recorded';
   $('companyEmptyHint').classList.toggle('hidden', Boolean(profile.companyName));
   $('editCompanyDetailsBtn').disabled = !editingAllowed;
+  $('openDeleteCompanyBtn').disabled = !deleteAllowed || Boolean(profile.deletedAt);
   $('addAppointmentBtn').disabled = !editingAllowed;
   renderAppointments();
   renderInvestments();
@@ -420,6 +427,55 @@ async function syncAfterSave() {
   }
 }
 
+$('openDeleteCompanyBtn').addEventListener('click', () => {
+  if (!deleteAllowed || profile.deletedAt) return;
+  $('deleteCompanyName').textContent = profile.companyName;
+  $('confirmDeleteCompanyInput').value = '';
+  $('deleteCompanyMessage').textContent = '';
+  deleteCompanyDialog.open($('openDeleteCompanyBtn'));
+});
+
+$('deleteCompanyForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const message = $('deleteCompanyMessage');
+  if (!deleteAllowed) { message.textContent = 'Editor permission is required.'; return; }
+  if ($('confirmDeleteCompanyInput').value.trim() !== 'DELETE') {
+    message.textContent = 'Type DELETE exactly to confirm.';
+    return;
+  }
+  if (!navigator.onLine || !window.SPVCloud?.getCurrentUser?.()) {
+    message.textContent = 'Connect to the internet and sign in before deleting a company.';
+    return;
+  }
+  const button = $('confirmDeleteCompanyBtn');
+  button.disabled = true;
+  try {
+    const access = await window.SPVCloud.getWorkspaceAccess();
+    if (!access?.active || !['admin', 'editor'].includes(access.role)) {
+      throw new Error('Approved editor access is required.');
+    }
+    // Synchronise first: do not overwrite a newer remote company revision.
+    const initialSync = await syncCompanyProfile(window.SPVCloud);
+    if (initialSync.conflicts.length) throw new Error('Company records have a sync conflict. Resolve it before deleting.');
+    profile = getCompanyProfile();
+    if (profile.deletedAt) {
+      window.location.assign(new URL('./company/', document.baseURI).href);
+      return;
+    }
+    deleteCompanyProfile(profile.id);
+    const result = await syncCompanyProfile(window.SPVCloud);
+    if (result.conflicts.length || getCompanyProfile()._cloudDirty) {
+      throw new Error('Deletion saved on this device, but cloud sync is pending. Retry sync before using another device.');
+    }
+    deleteCompanyDialog.close();
+    window.location.assign(new URL('./company/', document.baseURI).href);
+  } catch (error) {
+    message.textContent = error.message || 'Could not delete this company.';
+  } finally {
+    button.disabled = false;
+  }
+});
+
 $('editCompanyDetailsBtn').addEventListener('click', showDetailsDialog);
 $('addAppointmentBtn').addEventListener('click', () => openAppointment());
 $('addInvestmentBtn').addEventListener('click', () => openInvestment());
@@ -555,7 +611,7 @@ window.addEventListener('online', async () => {
 });
 
 async function initialiseCompanyPage() {
-  if (!currentCompanyId || !profile.companyName) {
+  if (!currentCompanyId || !profile.companyName || profile.deletedAt) {
     window.location.replace(new URL('./company/', document.baseURI).href);
     return;
   }
@@ -564,6 +620,7 @@ async function initialiseCompanyPage() {
     const state = await window.SPVCloud?.init?.();
     if (!state?.user) return;
     const access = await window.SPVCloud.getWorkspaceAccess();
+    deleteAllowed = Boolean(access?.active && ['admin', 'editor'].includes(access.role));
     if (!access?.active || access.role === 'viewer') {
       editingAllowed = false;
       $('companySyncStatus').textContent = 'View-only · ask a workspace editor to make changes';
@@ -571,6 +628,10 @@ async function initialiseCompanyPage() {
       renderProfile();
     }
     await syncCompanyProfile(window.SPVCloud);
+    if (getCompanyProfile().deletedAt) {
+      window.location.replace(new URL('./company/', document.baseURI).href);
+      return;
+    }
     renderProfile();
     await refreshCompanyHouseDeadlines();
   } catch (error) {

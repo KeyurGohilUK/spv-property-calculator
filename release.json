@@ -1,7 +1,7 @@
 {
-  "version": "1.54.2",
+  "version": "1.54.3",
   "notes": [
-    "Make duplicate company, search failure and other validation messages clearly visible using theme-aware error styling.",
-    "Highlight important Companies House feedback in both Add Company and Edit Company dialogs."
+    "Add editor-only Delete Company action with typed confirmation.",
+    "Synchronise company deletion across devices while retaining a recovery-safe marker; property and expense records remain unchanged."
   ]
 }
