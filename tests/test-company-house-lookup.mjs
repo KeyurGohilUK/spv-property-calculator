@@ -28,6 +28,7 @@ assert.match(source, /items_per_page=10/);
 assert.match(cloud, /async function searchCompaniesHouse\(query\)/);
 assert.match(cloud, /action: 'search', query/);
 assert.match(ui, /searchCompanyParticulars/);
+assert.match(ui, /item\.companyStatus\.charAt\(0\)\.toUpperCase\(\)/, 'Company status should be capitalized in search results');
 assert.match(ui, /selectCompanyParticulars/);
 assert.match(ui, /official\.registeredOffice/);
 assert.match(ui, /official\.incorporationDate/);
