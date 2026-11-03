@@ -33,7 +33,14 @@
         <span id="companySyncStatus" class="sync-status" role="status">Saved on this device</span>
       </section>
 
-      <section class="company-section" aria-labelledby="companyParticularsTitle">
+            <div class="company-detail-tabs" role="tablist" aria-label="Company record sections">
+        <button id="companyTab" class="company-detail-tab" type="button" role="tab" aria-selected="true" aria-controls="companyTabPanel" tabindex="0" data-company-tab>Company</button>
+        <button id="complianceTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="complianceTabPanel" tabindex="-1" data-company-tab>Compliance</button>
+        <button id="investmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="investmentTabPanel" tabindex="-1" data-company-tab>Investment</button>
+        <button id="appointmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="appointmentTabPanel" tabindex="-1" data-company-tab>Appointment</button>
+      </div>
+      <div id="companyTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="companyTab" tabindex="0">
+<section class="company-section" aria-labelledby="companyParticularsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Company Overview</p><h2 id="companyParticularsTitle">Particulars</h2></div>
           <button id="editCompanyDetailsBtn" class="icon-btn company-edit-btn" type="button" aria-label="Edit company details" title="Edit company details"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
         </div>
@@ -46,8 +53,14 @@
         </dl>
         <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
       </section>
-
-      <section class="company-section" aria-labelledby="companyComplianceTitle">
+<section class="company-section company-danger-zone" aria-labelledby="deleteCompanyTitle">
+        <h2 id="deleteCompanyTitle">Delete company</h2>
+        <p class="muted">Remove this company from your workspace. Its directors, investments and compliance records will be hidden with it. Properties and expenses are not deleted.</p>
+        <button type="button" id="openDeleteCompanyBtn" class="secondary-btn danger-text" disabled>Delete company</button>
+      </section>
+      </div>
+      <div id="complianceTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="complianceTab" tabindex="0" hidden>
+<section class="company-section" aria-labelledby="companyComplianceTitle">
         <div class="company-section-heading">
           <div><p class="eyebrow">Legal obligations</p><h2 id="companyComplianceTitle">Company compliance</h2>
             <p class="muted">Mandatory company obligations, not property safety checks. Statuses are indicative until filings or evidence are verified.</p></div>
@@ -58,8 +71,9 @@
         <section class="company-filing-history" aria-labelledby="companyFilingHistoryTitle"><h3 id="companyFilingHistoryTitle">Official filing history</h3><p class="muted">Recent Companies House accounts and confirmation statement filings. Open the official register for full details and documents.</p><div id="companyFilingHistory" aria-live="polite"></div></section>
         <p class="muted company-compliance-disclaimer">Companies House filing deadlines are retrieved when the secure lookup is configured and you are online. Filing completion and HMRC obligations are not independently verified. Check official records before relying on these dates.</p>
       </section>
-
-      <section class="company-section" aria-labelledby="companyInvestmentsTitle">
+      </div>
+      <div id="investmentTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="investmentTab" tabindex="0" hidden>
+<section class="company-section" aria-labelledby="companyInvestmentsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Funding</p><h2 id="companyInvestmentsTitle">Member investments</h2><p class="muted">Track funding from company directors and shareholders. Contribution percentages are based on the total recorded investment.</p></div>
           <button id="addInvestmentBtn" class="primary-btn company-add-btn" type="button">＋ Add investment</button>
         </div>
@@ -88,7 +102,9 @@
           </div>
         </div>
       </section>
-      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
+      </div>
+      <div id="appointmentTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="appointmentTab" tabindex="0" hidden>
+<section class="company-section" aria-labelledby="companyAppointmentsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
           <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
         </div>
@@ -103,11 +119,7 @@
         </div>
         <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
       </section>
-      <section class="company-section company-danger-zone" aria-labelledby="deleteCompanyTitle">
-        <h2 id="deleteCompanyTitle">Delete company</h2>
-        <p class="muted">Remove this company from your workspace. Its directors, investments and compliance records will be hidden with it. Properties and expenses are not deleted.</p>
-        <button type="button" id="openDeleteCompanyBtn" class="secondary-btn danger-text" disabled>Delete company</button>
-      </section>
+      </div>
     </main>
   </div>
 

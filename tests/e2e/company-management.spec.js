@@ -72,6 +72,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await expect(page.locator('#companyNameValue')).toHaveText('Example Property SPV Ltd');
   await expect(page.locator('#companyNumberValue')).toHaveText('01234567');
 
+  await page.getByRole('tab', { name: 'Appointment' }).click();
   await page.getByRole('button', { name: 'Add person' }).click();
   await page.getByLabel('Full name').fill('Alex Director');
   await page.getByLabel('Director', { exact: true }).check();
@@ -93,6 +94,7 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   });
   await page.goto('/company/');
   await page.getByRole('link', { name: /Example SPV Ltd/ }).click();
+  await page.getByRole('tab', { name: 'Appointment' }).click();
   await expect(page.locator('#companyAppointmentsTitle')).toBeVisible();
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
   const dimensions = await page.locator('#companyAppointmentsTable').evaluate((element) => ({
@@ -116,6 +118,7 @@ test('workspace viewers can read but not edit company records', async ({ page })
   await page.getByRole('link', { name: /Read Only SPV Ltd/ }).click();
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
   await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
+  await page.getByRole('tab', { name: 'Appointment' }).click();
   await expect(page.getByRole('button', { name: 'Add person' })).toBeDisabled();
   await expect(page.locator('#openDeleteCompanyBtn')).toBeDisabled();
   await expect(page.getByText(/View-only/)).toBeVisible();
@@ -133,6 +136,7 @@ test('company chooser adds a second company without changing the first', async (
   await page.getByRole('button', { name: 'Add company', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Company Details' })).toBeVisible();
   await expect(page.locator('#companyNameValue')).toHaveText('Second SPV Ltd');
+  await page.getByRole('tab', { name: 'Appointment' }).click();
   await expect(page.locator('#companyAppointmentsEmpty')).toBeVisible();
   await page.getByRole('link', { name: /All companies/ }).click();
   await expect(page.getByRole('link', { name: /First SPV Ltd/ })).toBeVisible();

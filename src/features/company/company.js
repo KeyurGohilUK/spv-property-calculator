@@ -53,6 +53,34 @@ const deleteCompanyDialog = setupDialog($('deleteCompanyDialog'), {
   closeButtons: [$('closeDeleteCompanyDialog'), $('cancelDeleteCompanyBtn')]
 });
 
+const companyTabs = [...document.querySelectorAll('[data-company-tab]')];
+
+function activateCompanyTab(tab, focus = false) {
+  companyTabs.forEach((item) => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    const panel = document.getElementById(item.getAttribute('aria-controls'));
+    if (panel) panel.hidden = !selected;
+  });
+  if (focus) tab.focus();
+}
+
+companyTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => activateCompanyTab(tab));
+  tab.addEventListener('keydown', (event) => {
+    let nextIndex = index;
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % companyTabs.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + companyTabs.length) % companyTabs.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = companyTabs.length - 1;
+    else return;
+    event.preventDefault();
+    activateCompanyTab(companyTabs[nextIndex], true);
+  });
+});
+
+
 function roleMark(appointment, role) {
   return appointment.roles.includes(role)
     ? '<span class="company-role-mark" role="img" aria-label="Yes">✓</span>'
