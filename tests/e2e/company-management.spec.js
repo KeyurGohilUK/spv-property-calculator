@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 
 async function mockCompanyWorkspace(page, role = 'editor', initialProfile = null) {
   await page.addInitScript(({ workspaceRole, profile }) => {
-    if (profile) localStorage.setItem('spv-property-calculator.company-profile.v1', JSON.stringify(profile));
+    if (profile && !localStorage.getItem('spv-property-calculator.company-profile.v1')) {
+      localStorage.setItem('spv-property-calculator.company-profile.v1', JSON.stringify(profile));
+    }
     const user = { id: 'company-user', email: 'company@example.com' };
     window.SPVCloud = {
       init: async () => ({ configured: true, available: true, user }),
