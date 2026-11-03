@@ -43,6 +43,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 23 — expense payer attribution
 - Update 24 — company particulars and appointments
 - Update 25 — appointment-based expense payers
+- Update 26 — multiple independent company profiles (existing default record retained)
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -54,7 +55,7 @@ Before deploying, create a GitHub Actions environment named `production` and add
 
 Continue adding the next numbered migration and make it safe to rerun. The workflow detects newly added files, so edits to an already merged migration will not be deployed. A failed migration blocks the deployment job and stops later migration files in that push.
 
-To apply an already merged, safely rerunnable migration once, open **Actions → CI → Run workflow**, select `main`, and enter its exact filename in **migration_file** (for example, `Update 25 - Appointment-based Expense Payers.sql`). Leave the field blank to run checks without deploying an old migration.
+To apply an already merged, safely rerunnable migration once, open **Actions → CI → Run workflow**, select `main`, and enter its exact filename in **migration_file** (for example, `Update 26 - Multiple Company Profiles.sql`). Leave the field blank to run checks without deploying an old migration.
 
 ## Portability boundary
 
@@ -64,7 +65,7 @@ Receipt binaries live in a private Cloudflare R2 bucket. The database stores onl
 
 ## Rules for future changes
 
-The current schema is complete through **Update 25 - Appointment-based Expense Payers**.
+The current schema is complete through **Update 26 - Multiple Company Profiles**.
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.

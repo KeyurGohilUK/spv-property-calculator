@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const dialogHelper = fs.readFileSync(new URL('../src/components/dialog-helper.js', import.meta.url), 'utf8');
 const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.url), 'utf8');
 const policyAcceptance = fs.readFileSync(new URL('../src/services/policy-acceptance.js', import.meta.url), 'utf8');
-const companyPage = fs.readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const companyPage = fs.readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
 const expensesPage = fs.readFileSync(new URL('../expenses/index.html', import.meta.url), 'utf8');
 const tasksPage = fs.readFileSync(new URL('../tasks/index.html', import.meta.url), 'utf8');
 const accountDialog = fs.readFileSync(new URL('../src/components/secondary-page-header.js', import.meta.url), 'utf8');

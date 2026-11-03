@@ -4,6 +4,8 @@ import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
   getCompanyProfile,
+  setActiveCompanyId,
+  listStoredCompanyProfiles,
   saveCompanyProfile,
   saveComplianceConfirmation,
   saveAppointment,
@@ -21,6 +23,13 @@ const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
 });
+const currentCompanyId = new URLSearchParams(window.location.search).get('company');
+if (!currentCompanyId) {
+  window.location.replace(new URL('./company/', document.baseURI).href);
+} else {
+  try { setActiveCompanyId(currentCompanyId); }
+  catch { window.location.replace(new URL('./company/', document.baseURI).href); }
+}
 let profile = getCompanyProfile();
 let editingAllowed = true;
 let companyHouseData = null;
@@ -320,9 +329,17 @@ async function searchCompanyParticulars() {
 
 async function selectCompanyParticulars(companyNumber) {
   if (!editingAllowed || !/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) return;
+  const anotherCompany = listStoredCompanyProfiles().find((item) =>
+    item.id !== profile.id && item.companyNumber.trim().toUpperCase() === companyNumber);
+  if (anotherCompany) {
+    setCompanySearchStatus('This registered company already has a card. Return to All companies to open it.');
+    return;
+  }
   const previousNumber = String(profile.companyNumber || '').trim().toUpperCase();
-  if (previousNumber && previousNumber !== companyNumber &&
-      !window.confirm('This selects a different registered company. Existing appointments, investments and compliance records will remain attached to this workspace. Continue?')) return;
+  if (previousNumber && previousNumber !== companyNumber) {
+    setCompanySearchStatus('This is a different registered company. Return to All companies and choose Add new company.');
+    return;
+  }
   const requestId = ++companySearchSequence;
   $('companySearchBtn').disabled = true;
   setCompanySearchStatus('Retrieving official company particulars…');
@@ -431,6 +448,19 @@ $('companySearchResults').addEventListener('click', (event) => {
 $('companyDetailsForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
+  const originalNumber = String(profile.companyNumber || '').trim().toUpperCase();
+  const enteredNumber = $('companyNumberInput').value.trim().toUpperCase();
+  if (enteredNumber && listStoredCompanyProfiles().some((item) =>
+    item.id !== profile.id && item.companyNumber.trim().toUpperCase() === enteredNumber)) {
+    $('companyDetailsMessage').textContent = 'This company number is already recorded in another company card.';
+    return;
+  }
+
+  if (originalNumber && enteredNumber && enteredNumber !== originalNumber &&
+      (profile.appointments.length || profile.investments.length || Object.keys(profile.complianceConfirmations).length)) {
+    $('companyDetailsMessage').textContent = 'A different registration number may belong to another company. Use Add new company to keep existing records separate.';
+    return;
+  }
   try {
     profile = saveCompanyProfile({
       ...profile,
@@ -514,6 +544,10 @@ window.addEventListener('online', async () => {
 });
 
 async function initialiseCompanyPage() {
+  if (!currentCompanyId || !profile.companyName) {
+    window.location.replace(new URL('./company/', document.baseURI).href);
+    return;
+  }
   renderProfile();
   try {
     const state = await window.SPVCloud?.init?.();
@@ -525,6 +559,8 @@ async function initialiseCompanyPage() {
       $('companySyncStatus').classList.remove('error', 'synced');
       renderProfile();
     }
+    await syncCompanyProfile(window.SPVCloud);
+    renderProfile();
     await refreshCompanyHouseDeadlines();
   } catch (error) {
     if (navigator.onLine) console.warn('Company access could not be verified:', error);

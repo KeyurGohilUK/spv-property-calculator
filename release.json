@@ -1,6 +1,8 @@
 {
-  "version": "1.53.1",
+  "version": "1.54.0",
   "notes": [
-    "Display Companies House company status with an initial capital in search results (e.g. Active)."
+    "Manage multiple companies from a card-based Company Management overview.",
+    "Open each company in its own details page for particulars, filing compliance, investments and appointments.",
+    "Preserve the original company record and synchronise new companies independently."
   ]
 }

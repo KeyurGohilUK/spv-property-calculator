@@ -1,6 +1,36 @@
 import { COMPANY_COMPLIANCE_RULES, validDate, normalizeConfirmation } from './compliance-rules.js';
 const VALID_RULE_IDS = new Set(COMPANY_COMPLIANCE_RULES.map((rule) => rule.id));
 const COMPANY_STORAGE_KEY = 'spv-property-calculator.company-profile.v1';
+const COMPANY_INDEX_KEY = 'spv-property-calculator.company-ids.v1';
+const SELECTED_COMPANY_KEY = 'spv-property-calculator.selected-company.v1';
+const validCompanyId = (id) => id === 'default' || /^company-[A-Za-z0-9_-]{8,80}$/.test(String(id || ''));
+export function getActiveCompanyId() {
+  try {
+    const id = sessionStorage.getItem(SELECTED_COMPANY_KEY);
+    return validCompanyId(id) ? id : 'default';
+  } catch { return 'default'; }
+}
+export function setActiveCompanyId(id) {
+  if (!validCompanyId(id)) throw new Error('Invalid company selection.');
+  try { sessionStorage.setItem(SELECTED_COMPANY_KEY, id); } catch { /* session storage may be blocked */ }
+  return id;
+}
+export function newCompanyId() {
+  return 'company-' + (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+}
+function profileStorageKey(id) {
+  return id === 'default' ? COMPANY_STORAGE_KEY : `${COMPANY_STORAGE_KEY}:${id}`;
+}
+function storedCompanyIds() {
+  try {
+    const ids = JSON.parse(localStorage.getItem(COMPANY_INDEX_KEY) || '[]');
+    return Array.isArray(ids) ? [...new Set(['default', ...ids.filter(validCompanyId)])] : ['default'];
+  } catch { return ['default']; }
+}
+export function listStoredCompanyProfiles() {
+  return storedCompanyIds().map((id) => getStoredCompanyProfile(id)).filter((profile) => profile?.companyName);
+}
+
 const APPOINTMENT_ROLES = Object.freeze(['director', 'shareholder', 'secretary', 'psc']);
 const INVESTMENT_MEMBER_ROLES = Object.freeze(['director', 'shareholder']);
 
@@ -8,9 +38,9 @@ function makeId(prefix = 'appointment') {
   return globalThis.crypto?.randomUUID?.() || `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function emptyProfile() {
+function emptyProfile(id = 'default') {
   return {
-    id: 'default', companyName: '', companyNumber: '', registeredOffice: '',
+    id, companyName: '', companyNumber: '', registeredOffice: '',
     incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, _cloudRevision: 0, _cloudDirty: false
   };
 }
@@ -46,7 +76,7 @@ export function normalizeCompanyProfile(profile = {}) {
   return {
     ...emptyProfile(),
     ...profile,
-    id: 'default',
+    id: validCompanyId(profile.id) ? profile.id : 'default',
     companyName: String(profile.companyName || '').trim().slice(0, 160),
     companyNumber: String(profile.companyNumber || '').trim().slice(0, 32),
     registeredOffice: String(profile.registeredOffice || '').trim().slice(0, 500),
@@ -65,9 +95,9 @@ export function normalizeCompanyProfile(profile = {}) {
   };
 }
 
-export function getStoredCompanyProfile() {
+export function getStoredCompanyProfile(id = getActiveCompanyId()) {
   try {
-    const raw = localStorage.getItem(COMPANY_STORAGE_KEY);
+    const raw = localStorage.getItem(profileStorageKey(id));
     return raw ? normalizeCompanyProfile(JSON.parse(raw)) : null;
   } catch (error) {
     console.warn('Could not read company details:', error);
@@ -75,13 +105,18 @@ export function getStoredCompanyProfile() {
   }
 }
 
-export function getCompanyProfile() {
-  return getStoredCompanyProfile() || emptyProfile();
+export function getCompanyProfile(id = getActiveCompanyId()) {
+  return getStoredCompanyProfile(id) || emptyProfile(id);
 }
 
 function writeProfile(profile) {
   try {
-    localStorage.setItem(COMPANY_STORAGE_KEY, JSON.stringify(profile));
+    if (!validCompanyId(profile.id)) return false;
+    localStorage.setItem(profileStorageKey(profile.id), JSON.stringify(profile));
+    if (profile.id !== 'default') {
+      const ids = storedCompanyIds();
+      if (!ids.includes(profile.id)) localStorage.setItem(COMPANY_INDEX_KEY, JSON.stringify([...ids, profile.id]));
+    }
     return true;
   } catch (error) {
     console.error('Could not save company details:', error);
@@ -94,6 +129,7 @@ export function saveCompanyProfile(profile) {
   const next = normalizeCompanyProfile({
     ...existing,
     ...profile,
+    id: existing.id,
     _cloudRevision: existing._cloudRevision,
     _cloudDirty: true,
     updatedAt: new Date().toISOString()

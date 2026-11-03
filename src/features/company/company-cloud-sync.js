@@ -1,6 +1,7 @@
 import {
   getStoredCompanyProfile,
-  replaceCompanyProfile
+  replaceCompanyProfile,
+  listStoredCompanyProfiles
 } from './company-storage.js';
 
 let activeCompanySync = null;
@@ -76,9 +77,52 @@ export async function performCompanyProfileSync(cloud, adapters = {}) {
   }
 }
 
+/** Synchronise independent company records without changing the selected company. */
+export async function performCompanyProfilesSync(cloud, adapters = {}) {
+  if (!cloud?.listCompanyProfiles || !cloud?.upsertCompanyProfile) return performCompanyProfileSync(cloud, adapters);
+  const getLocals = adapters.listLocal || listStoredCompanyProfiles;
+  const saveLocal = adapters.replaceLocal || replaceCompanyProfile;
+  const remote = await cloud.listCompanyProfiles();
+  const remoteById = new Map(remote.map((profile) => [profile.id, profile]));
+  const local = getLocals();
+  const localById = new Map(local.map((profile) => [profile.id, profile]));
+  let changes = 0;
+  const conflicts = [];
+  for (const [id, item] of localById) {
+    const server = remoteById.get(id);
+    if (!server) {
+      if (item._cloudDirty) {
+        try { saveLocal(await cloud.upsertCompanyProfile(item)); changes++; }
+        catch (error) {
+          if (cloud.isCompanyProfileConflict?.(error)) conflicts.push(id);
+          else throw error;
+        }
+      }
+      continue;
+    }
+    const localRevision = Math.max(0, Number(item._cloudRevision) || 0);
+    const serverRevision = Math.max(0, Number(server._cloudRevision) || 0);
+    if (item._cloudDirty) {
+      if (localRevision !== serverRevision) { conflicts.push(id); continue; }
+      try { saveLocal(await cloud.upsertCompanyProfile(item)); changes++; }
+      catch (error) {
+        if (cloud.isCompanyProfileConflict?.(error)) conflicts.push(id);
+        else throw error;
+      }
+    } else if (serverRevision > localRevision || asTime(server.updatedAt) > asTime(item.updatedAt)) {
+      saveLocal(server);
+      changes++;
+    }
+  }
+  for (const server of remote) {
+    if (!localById.has(server.id)) { saveLocal(server); changes++; }
+  }
+  return { changes, conflicts };
+}
+
 export function syncCompanyProfile(cloud, adapters = {}) {
   if (activeCompanySync) return activeCompanySync;
-  activeCompanySync = performCompanyProfileSync(cloud, adapters).finally(() => {
+  activeCompanySync = (cloud?.listCompanyProfiles ? performCompanyProfilesSync(cloud, adapters) : performCompanyProfileSync(cloud, adapters)).finally(() => {
     activeCompanySync = null;
   });
   return activeCompanySync;

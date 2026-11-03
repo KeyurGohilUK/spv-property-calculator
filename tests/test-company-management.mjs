@@ -20,14 +20,14 @@ const {
 } = await import('../src/features/company/company-storage.js');
 const { performCompanyProfileSync } = await import('../src/features/company/company-cloud-sync.js');
 
-const companyEditor = readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const companyEditor = readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
 const companyController = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
 for (const id of ['companySearchInput', 'companySearchBtn', 'companySearchStatus', 'companySearchResults']) {
   assert.match(companyEditor, new RegExp(`id="${id}"`));
 }
 assert.match(companyController, /selectCompanyParticulars/);
 assert.match(companyController, /detailsDialog\.dialog\.open/);
-assert.match(companyController, /Existing appointments, investments and compliance records/);
+assert.match(companyController, /Return to All companies and choose Add new company/);
 assert.match(companyController, /profile = saveCompanyProfile/);
 assert.match(companyController, /await syncAfterSave\(\)/);
 

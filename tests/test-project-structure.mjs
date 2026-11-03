@@ -28,7 +28,7 @@ const organisedModules = {
   'src/app/': ['app.js', 'app-shell.js', 'primary-navigation.js'],
   'src/features/properties/': ['calculations.js', 'property-card.js', 'storage.js', 'calendar-invite.js'],
   'src/features/portfolio/': ['portfolio.js'],
-  'src/features/company/': ['company.js', 'company-storage.js', 'company-cloud-sync.js'],
+  'src/features/company/': ['company.js', 'company-list.js', 'company-storage.js', 'company-cloud-sync.js'],
   'src/features/expenses/': ['expenses.js', 'expense-storage.js', 'expense-cloud-sync.js'],
   'src/features/forecast/': ['forecast.js', 'forecast-property.js', 'forecast-advanced.js', 'forecast-brrr.js'],
   'src/features/tasks/': ['tasks.js', 'task-storage.js', 'task-cloud-sync.js'],

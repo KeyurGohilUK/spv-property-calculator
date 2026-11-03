@@ -33,10 +33,11 @@ async function mockCompanyWorkspace(page, role = 'editor', initialProfile = null
 }
 
 test('editor manages company particulars and appointment roles', async ({ page }) => {
-  await mockCompanyWorkspace(page);
+  await mockCompanyWorkspace(page, 'editor', { companyName: 'Initial SPV Ltd', companyNumber: '87654321', appointments: [] });
   await page.goto('/company/');
-
-  await expect(page.getByRole('heading', { name: 'Company Management' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
+  await page.getByRole('link', { name: /Initial SPV Ltd/ }).click();
+  await expect(page.getByRole('heading', { name: 'Company Details' })).toBeVisible();
   const editCompanyButton = page.getByRole('button', { name: 'Edit company details' });
   await expect(editCompanyButton.locator('svg')).toBeVisible();
   await editCompanyButton.click();
@@ -89,7 +90,8 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
     appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director', 'psc'] }]
   });
   await page.goto('/company/');
-  await expect(page.getByRole('heading', { name: 'Appointments' })).toBeVisible();
+  await page.getByRole('link', { name: /Example SPV Ltd/ }).click();
+  await expect(page.locator('#companyAppointmentsTitle')).toBeVisible();
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
   const dimensions = await page.locator('#companyAppointmentsTable').evaluate((element) => ({
     viewport: element.clientWidth,
@@ -108,8 +110,28 @@ test('workspace viewers can read but not edit company records', async ({ page })
     appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director'] }]
   });
   await page.goto('/company/');
+  await expect(page.getByRole('button', { name: /Add new company/ })).toBeDisabled();
+  await page.getByRole('link', { name: /Read Only SPV Ltd/ }).click();
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
   await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Add person' })).toBeDisabled();
   await expect(page.getByText(/View-only/)).toBeVisible();
+});
+
+test('company chooser adds a second company without changing the first', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'First SPV Ltd', companyNumber: '11111111',
+    appointments: [{ id: 'person-1', name: 'First Director', roles: ['director'] }]
+  });
+  await page.goto('/company/');
+  await expect(page.getByRole('link', { name: /First SPV Ltd/ })).toBeVisible();
+  await page.getByRole('button', { name: /Add new company/ }).click();
+  await page.getByLabel('Company name').fill('Second SPV Ltd');
+  await page.getByRole('button', { name: 'Add company', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Company Details' })).toBeVisible();
+  await expect(page.locator('#companyNameValue')).toHaveText('Second SPV Ltd');
+  await expect(page.locator('#companyAppointmentsEmpty')).toBeVisible();
+  await page.getByRole('link', { name: /All companies/ }).click();
+  await expect(page.getByRole('link', { name: /First SPV Ltd/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Second SPV Ltd/ })).toBeVisible();
 });

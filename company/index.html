@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <base href="../">
   <meta name="theme-color" content="#966540">
-  <meta name="description" content="Manage your SPV company particulars and appointments.">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="SPV Company">
+  <meta name="description" content="Manage multiple limited companies within your SPV workspace.">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -15,7 +13,7 @@
   <script type="module" src="./src/components/help-guide.js"></script>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./styles/features/company.css">
-  <title>Company Management · SPV Property Calculator</title>
+  <title>Manage Companies · SPV Property Calculator</title>
 </head>
 <body class="auth-pending">
   <div id="app">
@@ -28,140 +26,29 @@
     <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="company"></nav>
     <main class="main-shell company-shell">
       <section class="hero-card company-hero">
-        <div><p class="eyebrow">Company records</p><h1>Company Management</h1><p class="muted">Keep your company particulars and appointments together. This is a manually maintained workspace register, not a Companies House feed.</p></div>
-        <span id="companySyncStatus" class="sync-status" role="status">Saved on this device</span>
+        <div><p class="eyebrow">Company records</p><h1>Manage Companies</h1><p class="muted">Choose a company to manage its particulars, compliance, investments and appointments.</p></div>
+        <span id="companyListSyncStatus" class="sync-status" role="status">Saved on this device</span>
       </section>
-
-      <section class="company-section" aria-labelledby="companyParticularsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">Company Overview</p><h2 id="companyParticularsTitle">Particulars</h2></div>
-          <button id="editCompanyDetailsBtn" class="icon-btn company-edit-btn" type="button" aria-label="Edit company details" title="Edit company details"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
-        </div>
-        <dl class="company-particulars">
-          <div><dt>Name</dt><dd id="companyNameValue">Not added</dd></div>
-          <div><dt>Company number</dt><dd id="companyNumberValue">Not recorded</dd></div>
-          <div><dt>Registered office</dt><dd id="companyOfficeValue">Not recorded</dd></div>
-          <div><dt>Company status</dt><dd id="companyStatusValue">Not recorded</dd></div>
-          <div><dt>Incorporation date</dt><dd id="companyDateValue">Not recorded</dd></div>
-        </dl>
-        <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
-      </section>
-
-      <section class="company-section" aria-labelledby="companyComplianceTitle">
-        <div class="company-section-heading">
-          <div><p class="eyebrow">Legal obligations</p><h2 id="companyComplianceTitle">Company compliance</h2>
-            <p class="muted">Mandatory company obligations, not property safety checks. Statuses are indicative until filings or evidence are verified.</p></div>
-        </div>
-        <div id="companyComplianceSummary" class="company-compliance-summary" role="status" aria-live="polite"></div>
-        <div id="companyComplianceItems" class="company-compliance-list"></div>
-        <section class="company-official-people" aria-labelledby="companyOfficialPeopleTitle"><h3 id="companyOfficialPeopleTitle">Official director and PSC checks</h3><p class="muted">Read-only Companies House records. Public verification information may be incomplete; missing data does not mean verification failed. Internal appointments are never overwritten.</p><div id="companyOfficialPeople"></div></section>
-        <section class="company-filing-history" aria-labelledby="companyFilingHistoryTitle"><h3 id="companyFilingHistoryTitle">Official filing history</h3><p class="muted">Recent Companies House accounts and confirmation statement filings. Open the official register for full details and documents.</p><div id="companyFilingHistory" aria-live="polite"></div></section>
-        <p class="muted company-compliance-disclaimer">Companies House filing deadlines are retrieved when the secure lookup is configured and you are online. Filing completion and HMRC obligations are not independently verified. Check official records before relying on these dates.</p>
-      </section>
-
-      <section class="company-section" aria-labelledby="companyInvestmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">Funding</p><h2 id="companyInvestmentsTitle">Member investments</h2><p class="muted">Track funding from company directors and shareholders. Contribution percentages are based on the total recorded investment.</p></div>
-          <button id="addInvestmentBtn" class="primary-btn company-add-btn" type="button">＋ Add investment</button>
-        </div>
-        <div id="companyInvestmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">£</span><h3>No investments recorded</h3><p>Add a funding entry to see each member’s total contribution and percentage.</p>
-        </div>
-        <figure id="companyInvestmentChart" class="company-investment-chart hidden" aria-labelledby="companyInvestmentChartTitle">
-          <figcaption id="companyInvestmentChartTitle">Overall member investment split</figcaption>
-          <div class="company-investment-chart-content"><ul class="company-investment-chart-legend" aria-label="Contribution percentages"></ul><div class="company-investment-chart-plot"></div></div>
-        </figure>
-        <div id="companyInvestmentSummaryWrap" class="company-investment-table-wrap hidden" tabindex="0" aria-label="Member investment contributions">
-          <table class="company-investment-table">
-            <thead><tr><th scope="col">Member</th><th scope="col">Total invested</th><th scope="col">Contribution</th></tr></thead>
-            <tbody id="companyInvestmentSummaryRows"></tbody>
-            <tfoot><tr><th scope="row">Total contributions</th><td id="companyInvestmentTotal"></td><td>100%</td></tr></tfoot>
-          </table>
-        </div>
-        <div class="company-investment-entries">
-          <h3>Funding entries</h3>
-          <div id="companyInvestmentsEntriesEmpty" class="muted">Individual funding entries will appear here.</div>
-          <div id="companyInvestmentEntriesWrap" class="company-investment-table-wrap hidden" tabindex="0" aria-label="Recorded company funding entries">
-            <table class="company-investment-table company-investment-entry-table">
-              <thead><tr><th scope="col">Date</th><th scope="col">Member</th><th scope="col">Amount</th><th scope="col">Reference / note</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
-              <tbody id="companyInvestmentEntryRows"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <section class="company-section" aria-labelledby="companyAppointmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
-          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
-        </div>
-        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
-        </div>
-        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
-          <table class="company-appointments-table">
-            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
-            <tbody id="companyAppointmentsRows"></tbody>
-          </table>
-        </div>
-        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
+      <section class="company-section" aria-labelledby="companyListTitle">
+        <div class="company-section-heading"><div><p class="eyebrow">Your workspace</p><h2 id="companyListTitle">Companies</h2></div></div>
+        <p id="companyListMessage" class="muted" role="status" aria-live="polite"></p>
+        <div id="companyCards" class="company-cards"></div>
       </section>
     </main>
   </div>
-
-  <dialog id="companyDetailsDialog" class="install-dialog company-dialog">
-    <form id="companyDetailsForm" novalidate>
-      <div class="company-dialog-header"><div><p class="eyebrow">Company particulars</p><h2 id="companyDetailsDialogTitle">Edit company details</h2></div><button id="closeCompanyDetailsDialog" class="dialog-close" type="button" aria-label="Close company details">×</button></div>
-      <div class="company-official-search">
-        <label class="field"><span>Find company on Companies House</span><input id="companySearchInput" type="search" maxlength="100" autocomplete="off" placeholder="Company name or 8-character number"></label>
-        <button id="companySearchBtn" class="secondary-btn" type="button">Search Companies House</button>
-        <p id="companySearchStatus" class="muted" role="status" aria-live="polite"></p>
-        <div id="companySearchResults" class="company-search-results" role="group" aria-label="Companies House search results"></div>
-        <small class="muted">Select a result to populate the fields below; review and save to update the shared company record. Existing appointments are not changed.</small>
-      </div>
-      <label class="field"><span>Company name <strong aria-hidden="true">*</strong></span><input id="companyNameInput" type="text" maxlength="160" autocomplete="organization" required></label>
-      <label class="field"><span>Company number</span><input id="companyNumberInput" type="text" maxlength="32" autocomplete="off" aria-describedby="companyNumberHelp"><small id="companyNumberHelp">Enter manually, or select an official Companies House result above.</small></label>
-      <label class="field"><span>Registered office</span><textarea id="companyOfficeInput" rows="3" maxlength="500" autocomplete="street-address" data-plain-text></textarea></label>
-      <div class="company-form-columns">
-        <label class="field"><span>Company status</span><input id="companyStatusInput" type="text" maxlength="80" placeholder="e.g. Active"></label>
-        <label class="field"><span>Incorporation date</span><input id="companyDateInput" type="date"></label>
-      </div>
-      <p id="companyDetailsMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="cancelCompanyDetailsBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
+  <dialog id="addCompanyDialog" class="install-dialog company-dialog" aria-labelledby="addCompanyDialogTitle">
+    <form id="addCompanyForm">
+      <div class="company-dialog-header"><h2 id="addCompanyDialogTitle">Add company</h2><button id="closeAddCompanyDialog" type="button" class="dialog-close" aria-label="Close add company">×</button></div>
+      <label class="field"><span>Company name</span><input id="newCompanyName" type="text" maxlength="160" autocomplete="organization" required></label>
+      <p class="muted">Create the company, then use Companies House search on its details page to populate official particulars.</p>
+      <p id="addCompanyMessage" class="save-message" role="status"></p>
+      <div class="dialog-actions company-form-actions"><button id="cancelAddCompany" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Add company</button></div>
     </form>
   </dialog>
-
-  <dialog id="appointmentDialog" class="install-dialog company-dialog">
-    <form id="appointmentForm" novalidate>
-      <div class="company-dialog-header"><div><p class="eyebrow">Company appointments</p><h2 id="appointmentDialogTitle">Add person</h2></div><button id="closeAppointmentDialog" class="dialog-close" type="button" aria-label="Close appointment form">×</button></div>
-      <input id="appointmentIdInput" type="hidden">
-      <label class="field"><span>Full name <strong aria-hidden="true">*</strong></span><input id="appointmentNameInput" type="text" maxlength="160" autocomplete="name" required></label>
-      <fieldset class="company-role-fieldset"><legend>Appointments <strong aria-hidden="true">*</strong></legend>
-        <label><input type="checkbox" name="appointmentDirector" data-appointment-role value="director"> <span>Director</span></label>
-        <label><input type="checkbox" name="appointmentShareholder" data-appointment-role value="shareholder"> <span>Shareholder</span></label>
-        <label><input type="checkbox" name="appointmentSecretary" data-appointment-role value="secretary"> <span>Secretary</span></label>
-        <label><input type="checkbox" name="appointmentPsc" data-appointment-role value="psc"> <span>Person with significant control (PSC)</span></label>
-      </fieldset>
-      <p id="appointmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="deleteAppointmentBtn" class="text-btn danger-text hidden" type="button">Remove person</button><button id="cancelAppointmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="investmentDialog" class="install-dialog company-dialog">
-    <form id="investmentForm" novalidate>
-      <div class="company-dialog-header"><div><p class="eyebrow">Member investments</p><h2 id="investmentDialogTitle">Add investment</h2></div><button id="closeInvestmentDialog" class="dialog-close" type="button" aria-label="Close investment form">×</button></div>
-      <input id="investmentIdInput" type="hidden">
-      <label class="field"><span>Member <strong aria-hidden="true">*</strong></span><select id="investmentMemberInput" required></select></label>
-      <div class="company-form-columns">
-        <label class="field"><span>Amount (£) <strong aria-hidden="true">*</strong></span><input id="investmentAmountInput" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
-        <label class="field"><span>Investment date</span><input id="investmentDateInput" type="date"></label>
-      </div>
-      <label class="field"><span>Funding reference / note</span><textarea id="investmentReferenceInput" rows="3" maxlength="500" placeholder="e.g. Initial director funding or bank transfer reference" data-plain-text></textarea><small>Add a short reference or note for this funding entry.</small></label>
-      <p id="investmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="deleteInvestmentBtn" class="text-btn danger-text hidden" type="button">Remove entry</button><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
-    </form>
-  </dialog>
-
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>
   <script type="module" src="./src/components/secondary-page-header.js"></script>
   <script type="module" src="./src/components/admin-menu.js"></script>
-  <script type="module" src="./src/features/company/company.js"></script>
+  <script type="module" src="./src/features/company/company-list.js"></script>
 </body>
 </html>
