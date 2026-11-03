@@ -214,3 +214,9 @@
   color: var(--text);
   font-weight: 600;
 }
+
+/* Company deletion is intentionally separated from regular company edits. */
+.company-danger-zone { border: 1px solid var(--danger); }
+.company-danger-zone h2 { color: var(--danger); }
+.company-danger-zone .danger-text { border-color: var(--danger); }
+#deleteCompanyMessage:not(:empty) { color: var(--danger); font-weight: 700; }
