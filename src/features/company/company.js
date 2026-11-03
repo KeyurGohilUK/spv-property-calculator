@@ -329,8 +329,10 @@ async function searchCompanyParticulars() {
 async function selectCompanyParticulars(companyNumber) {
   if (!editingAllowed || !/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) return;
   const previousNumber = String(profile.companyNumber || '').trim().toUpperCase();
-  if (previousNumber && previousNumber !== companyNumber &&
-      !window.confirm('This selects a different registered company. Existing appointments, investments and compliance records will remain attached to this workspace. Continue?')) return;
+  if (previousNumber && previousNumber !== companyNumber) {
+    setCompanySearchStatus('This is a different registered company. Return to All companies and choose Add new company.');
+    return;
+  }
   const requestId = ++companySearchSequence;
   $('companySearchBtn').disabled = true;
   setCompanySearchStatus('Retrieving official company particulars…');
@@ -439,6 +441,13 @@ $('companySearchResults').addEventListener('click', (event) => {
 $('companyDetailsForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
+  const originalNumber = String(profile.companyNumber || '').trim().toUpperCase();
+  const enteredNumber = $('companyNumberInput').value.trim().toUpperCase();
+  if (originalNumber && enteredNumber && enteredNumber !== originalNumber &&
+      (profile.appointments.length || profile.investments.length || Object.keys(profile.complianceConfirmations).length)) {
+    $('companyDetailsMessage').textContent = 'A different registration number may belong to another company. Use Add new company to keep existing records separate.';
+    return;
+  }
   try {
     profile = saveCompanyProfile({
       ...profile,
