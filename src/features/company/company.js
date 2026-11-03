@@ -16,6 +16,7 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
+const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpperCase() + String(status).slice(1) : '';
 const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
@@ -250,7 +251,7 @@ function renderProfile() {
   $('companyNameValue').textContent = profile.companyName || 'Not added';
   $('companyNumberValue').textContent = profile.companyNumber || 'Not recorded';
   $('companyOfficeValue').textContent = profile.registeredOffice || 'Not recorded';
-  $('companyStatusValue').textContent = profile.companyStatus || 'Not recorded';
+  $('companyStatusValue').textContent = displayCompanyStatus(profile.companyStatus) || 'Not recorded';
   $('companyDateValue').textContent = profile.incorporationDate
     ? formatDate(`${profile.incorporationDate}T00:00:00`, { day: 'numeric', month: 'long', year: 'numeric' }, 'Not recorded')
     : 'Not recorded';
@@ -307,7 +308,7 @@ async function searchCompanyParticulars() {
     if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
     setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
     $('companySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
-      <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(item.companyStatus || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
+      <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(displayCompanyStatus(item.companyStatus) || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
       <button type="button" class="secondary-btn" data-company-lookup="${escapeHtml(item.companyNumber)}" aria-label="Select ${escapeHtml(item.companyName)}">Select</button>
     </div>`).join('');
   } catch (error) {
@@ -332,7 +333,7 @@ async function selectCompanyParticulars(companyNumber) {
     $('companyNameInput').value = official.companyName || '';
     $('companyNumberInput').value = official.companyNumber;
     $('companyOfficeInput').value = official.registeredOffice || '';
-    $('companyStatusInput').value = official.companyStatus || '';
+    $('companyStatusInput').value = displayCompanyStatus(official.companyStatus);
     $('companyDateInput').value = official.incorporationDate || '';
     setCompanySearchStatus('Official details populated. Review them and press Save to update the workspace.');
     $('companySearchResults').replaceChildren();

@@ -1,7 +1,6 @@
 {
-  "version": "1.53.0",
+  "version": "1.53.1",
   "notes": [
-    "Search Companies House by company name or registration number directly from Company Particulars.",
-    "Select a verified official company record to fill name, company number, full registered office address, company status and incorporation date before explicitly saving."
+    "Display Companies House company status with an initial capital in search results (e.g. Active)."
   ]
 }
