@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 const storage = new Map();
 globalThis.localStorage = {
@@ -18,6 +19,17 @@ const {
   replaceCompanyProfile
 } = await import('../src/features/company/company-storage.js');
 const { performCompanyProfileSync } = await import('../src/features/company/company-cloud-sync.js');
+
+const companyEditor = readFileSync(new URL('../company/index.html', import.meta.url), 'utf8');
+const companyController = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
+for (const id of ['companySearchInput', 'companySearchBtn', 'companySearchStatus', 'companySearchResults']) {
+  assert.match(companyEditor, new RegExp(`id="${id}"`));
+}
+assert.match(companyController, /selectCompanyParticulars/);
+assert.match(companyController, /detailsDialog\.dialog\.open/);
+assert.match(companyController, /Existing appointments, investments and compliance records/);
+assert.match(companyController, /profile = saveCompanyProfile/);
+assert.match(companyController, /await syncAfterSave\(\)/);
 
 assert.equal(getStoredCompanyProfile(), null, 'A new device must not invent a stored company profile');
 assert.equal(getCompanyProfile().companyName, '', 'The page must have an empty profile fallback');

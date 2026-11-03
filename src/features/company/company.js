@@ -25,6 +25,7 @@ let editingAllowed = true;
 let companyHouseData = null;
 let companyHouseError = '';
 let lookupCompanyNumber = '';
+let companySearchSequence = 0;
 
 const detailsDialog = setupDialog($('companyDetailsDialog'), {
   closeButtons: [$('closeCompanyDetailsDialog'), $('cancelCompanyDetailsBtn')]
@@ -264,6 +265,7 @@ function renderProfile() {
 async function refreshCompanyHouseDeadlines() {
   const companyNumber = String(profile.companyNumber || '').trim().toUpperCase();
   if (!companyNumber || !navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) return;
+  if (lookupCompanyNumber !== companyNumber) companyHouseData = null;
   lookupCompanyNumber = companyNumber;
   companyHouseError = 'Checking Companies House…';
   renderCompanyCompliance();
@@ -281,12 +283,77 @@ async function refreshCompanyHouseDeadlines() {
   renderCompanyCompliance();
 }
 
+function setCompanySearchStatus(message) {
+  $('companySearchStatus').textContent = message;
+}
+
+async function searchCompanyParticulars() {
+  if (!editingAllowed) return;
+  const query = $('companySearchInput').value.trim();
+  const requestId = ++companySearchSequence;
+  $('companySearchResults').replaceChildren();
+  if (query.length < 2) {
+    setCompanySearchStatus('Enter at least two characters to search.');
+    return;
+  }
+  if (!navigator.onLine || !window.SPVCloud?.searchCompaniesHouse) {
+    setCompanySearchStatus('Company search requires an internet connection and sign-in.');
+    return;
+  }
+  $('companySearchBtn').disabled = true;
+  setCompanySearchStatus('Searching Companies House…');
+  try {
+    const matches = await window.SPVCloud.searchCompaniesHouse(query);
+    if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
+    setCompanySearchStatus(matches.length ? `${matches.length} matching companies. Select the correct company.` : 'No matching companies found.');
+    $('companySearchResults').innerHTML = matches.map((item) => `<div class="company-search-result">
+      <span><strong>${escapeHtml(item.companyName)}</strong><small>${escapeHtml(item.companyNumber)} · ${escapeHtml(item.companyStatus || 'Status unknown')}${item.registeredOffice ? ' · ' + escapeHtml(item.registeredOffice) : ''}</small></span>
+      <button type="button" class="secondary-btn" data-company-lookup="${escapeHtml(item.companyNumber)}" aria-label="Select ${escapeHtml(item.companyName)}">Select</button>
+    </div>`).join('');
+  } catch (error) {
+    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company search failed.');
+  } finally {
+    if (requestId === companySearchSequence) $('companySearchBtn').disabled = !editingAllowed;
+  }
+}
+
+async function selectCompanyParticulars(companyNumber) {
+  if (!editingAllowed || !/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) return;
+  const previousNumber = String(profile.companyNumber || '').trim().toUpperCase();
+  if (previousNumber && previousNumber !== companyNumber &&
+      !window.confirm('This selects a different registered company. Existing appointments, investments and compliance records will remain attached to this workspace. Continue?')) return;
+  const requestId = ++companySearchSequence;
+  $('companySearchBtn').disabled = true;
+  setCompanySearchStatus('Retrieving official company particulars…');
+  try {
+    const official = await window.SPVCloud.getCompanyHouseDeadlines(companyNumber);
+    if (requestId !== companySearchSequence || !detailsDialog.dialog.open) return;
+    if (String(official.companyNumber).toUpperCase() !== companyNumber) throw new Error('Unexpected company number returned.');
+    $('companyNameInput').value = official.companyName || '';
+    $('companyNumberInput').value = official.companyNumber;
+    $('companyOfficeInput').value = official.registeredOffice || '';
+    $('companyStatusInput').value = official.companyStatus || '';
+    $('companyDateInput').value = official.incorporationDate || '';
+    setCompanySearchStatus('Official details populated. Review them and press Save to update the workspace.');
+    $('companySearchResults').replaceChildren();
+  } catch (error) {
+    if (requestId === companySearchSequence) setCompanySearchStatus(error.message || 'Company lookup failed.');
+  } finally {
+    if (requestId === companySearchSequence) $('companySearchBtn').disabled = !editingAllowed;
+  }
+}
+
 function showDetailsDialog() {
   $('companyNameInput').value = profile.companyName;
   $('companyNumberInput').value = profile.companyNumber;
   $('companyOfficeInput').value = profile.registeredOffice;
   $('companyStatusInput').value = profile.companyStatus;
   $('companyDateInput').value = profile.incorporationDate;
+  companySearchSequence += 1;
+  $('companySearchInput').value = '';
+  $('companySearchResults').replaceChildren();
+  setCompanySearchStatus('');
+  $('companySearchBtn').disabled = !editingAllowed;
   $('companyDetailsMessage').textContent = '';
   detailsDialog.open($('editCompanyDetailsBtn'));
 }
@@ -346,6 +413,18 @@ $('companyComplianceItems').addEventListener('click', async (event) => {
   } catch (error) {
     setSyncStatus(error.message || 'Could not save confirmation', 'error');
   }
+});
+
+$('companySearchBtn').addEventListener('click', searchCompanyParticulars);
+$('companySearchInput').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    searchCompanyParticulars();
+  }
+});
+$('companySearchResults').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-company-lookup]');
+  if (button) selectCompanyParticulars(button.dataset.companyLookup);
 });
 
 $('companyDetailsForm').addEventListener('submit', async (event) => {
