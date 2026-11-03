@@ -294,3 +294,31 @@
 .company-identity-person small { display:block; margin-top:5px; font-size:.8rem; color:var(--text-muted); }
 .company-identity-note { margin-top:14px; }
 @media (max-width:600px) { .company-identity-person { grid-template-columns:minmax(0,1fr); gap:8px; } }
+
+/* Full-width, native details accordions: all closed on initial render. */
+.compliance-authorities { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
+.compliance-authority { width:100%; padding:0; overflow:hidden; }
+.compliance-authority > summary, .compliance-subsection > summary, .company-compliance-item > summary { cursor:pointer; list-style:none; }
+.compliance-authority > summary::-webkit-details-marker, .compliance-subsection > summary::-webkit-details-marker, .company-compliance-item > summary::-webkit-details-marker { display:none; }
+.compliance-authority-heading { display:flex; align-items:center; gap:14px; padding:18px; border:0; }
+.compliance-authority-title { min-width:0; flex:1; display:grid; gap:5px; }
+.compliance-authority-title strong { color:var(--text); font-size:clamp(1.1rem,2.5vw,1.4rem); }
+.compliance-authority-title .muted { font-size:.88rem; }
+.compliance-authority-content { min-width:0; padding:0 clamp(14px,2vw,24px) clamp(16px,2vw,24px); border-top:1px solid var(--border); }
+.compliance-expand-icon { display:inline-block; flex:0 0 10px; width:10px; height:10px; margin-left:auto; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); transition:transform .15s ease; }
+details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
+.compliance-authority > summary:focus-visible, .compliance-subsection > summary:focus-visible, .company-compliance-item > summary:focus-visible { outline:3px solid var(--brand); outline-offset:-3px; border-radius:12px; }
+.compliance-authority .company-compliance-list { grid-template-columns:minmax(0,1fr); gap:10px; }
+.compliance-authority .company-compliance-item { padding:0; width:100%; }
+.company-compliance-item > summary { display:flex; align-items:center; flex-wrap:wrap; gap:10px; min-height:64px; padding:14px 16px; }
+.company-compliance-item > summary strong { flex:1 1 180px; font-size:1rem; }
+.company-compliance-item > summary .company-compliance-status { flex:0 0 auto; }
+.company-compliance-item-details { padding:0 16px 16px; border-top:1px solid var(--border); }
+.compliance-subsection { width:100%; padding:0; overflow:hidden; }
+.compliance-subsection > summary { display:flex; align-items:center; gap:14px; padding:16px; }
+.compliance-subsection-label { display:grid; gap:5px; min-width:0; flex:1; }
+.compliance-subsection-label strong { font-size:1rem; color:var(--text); }
+.compliance-subsection-label .muted { font-size:.86rem; }
+.compliance-subsection-content { padding:0 16px 16px; border-top:1px solid var(--border); }
+.company-identity-overview > summary, .company-filing-history > summary { min-height:70px; }
+@media (prefers-reduced-motion:reduce) { .compliance-expand-icon { transition:none; } }
