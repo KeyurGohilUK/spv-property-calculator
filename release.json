@@ -1,8 +1,7 @@
 {
-  "version": "1.54.0",
+  "version": "1.54.1",
   "notes": [
-    "Manage multiple companies from a card-based Company Management overview.",
-    "Open each company in its own details page for particulars, filing compliance, investments and appointments.",
-    "Preserve the original company record and synchronise new companies independently."
+    "Improve company cards with a centred chevron and a clearer Add new company card.",
+    "Search Companies House by name or number when adding a company, review official details and save to its own record."
   ]
 }
