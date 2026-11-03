@@ -1,5 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
-import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines } from './compliance-rules.js';
+import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
@@ -230,13 +230,16 @@ function openInvestment(id = '') {
 
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: profile.hmrc?.status === 'active' ? ['corporation-tax-payment'] : [] });
+  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: hmrcTaxPeriods(profile.hmrc).length ? ['corporation-tax-payment'] : [] });
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('hmrcTaxStatus').value = profile.hmrc?.status || 'unknown';
-  $('hmrcPeriodStart').value = profile.hmrc?.periodStart || '';
-  $('hmrcPeriodEnd').value = profile.hmrc?.periodEnd || '';
+  const taxPeriods = hmrcTaxPeriods(profile.hmrc);
+  $('hmrcPeriodHistory').innerHTML = taxPeriods.length
+    ? '<h4>Recorded Corporation Tax periods</h4><ul>' + taxPeriods.map((p) =>
+      `<li><strong>${escapeHtml(formatComplianceDateUK(p.periodStart))} – ${escapeHtml(formatComplianceDateUK(p.periodEnd))}</strong><span>HMRC dates manually entered</span></li>`).join('') + '</ul>'
+    : '<p class="muted">No confirmed HMRC tax periods added yet.</p>';
   const peopleRoot = $('companyOfficialPeople');
   if (peopleRoot) {
     const people = companyHouseData?.officialPeople;
@@ -279,6 +282,7 @@ function renderCompanyCompliance() {
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
         <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div>
+      ${item.taxPeriod ? `<p class="muted">Tax period: ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodStart))} – ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodEnd))}</p>` : ''}
       ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}</p>` : ''}
       ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(formatComplianceDateUK(item.officialFiling.lastPeriod))} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
       ${item.reminder ? `<p class="company-compliance-reminder">Filing reminder: ${escapeHtml(item.reminder.message)} · ${item.reminder.windowDays}-day reminder window</p>` : ''}
@@ -512,6 +516,21 @@ $('deleteCompanyForm').addEventListener('submit', async (event) => {
 $('editCompanyDetailsBtn').addEventListener('click', showDetailsDialog);
 $('addAppointmentBtn').addEventListener('click', () => openAppointment());
 $('addInvestmentBtn').addEventListener('click', () => openInvestment());
+$('suggestNextHmrcPeriod').addEventListener('click', () => {
+  const periods = hmrcTaxPeriods(profile.hmrc);
+  const mostRecent = periods.at(-1);
+  const start = mostRecent ? addMonthsClamped(mostRecent.periodEnd, 0, 1) : '';
+  if (!start) {
+    $('hmrcPeriodMessage').textContent = 'Record a confirmed tax period before preparing the next one.';
+    return;
+  }
+  $('hmrcTaxStatus').value = 'active';
+  $('hmrcPeriodStart').value = start;
+  // A twelve-month period ends on the day before the next anniversary.
+  $('hmrcPeriodEnd').value = addMonthsClamped(start, 12, -1);
+  $('hmrcPeriodMessage').textContent = 'Suggested dates only. Confirm the new period with HMRC or your accountant before saving.';
+});
+
 $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
@@ -519,17 +538,32 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   const periodStart = $('hmrcPeriodStart').value;
   const periodEnd = $('hmrcPeriodEnd').value;
   const message = $('hmrcPeriodMessage');
-  const hmrc = { status, periodStart, periodEnd };
-  if (status === 'active' && !Object.keys(hmrcDeadlines(hmrc)).length) {
-    message.textContent = 'Enter a valid tax period of no more than 12 months. Set status to Active to calculate deadlines.';
+  const period = { status: 'active', periodStart, periodEnd };
+  const existing = hmrcTaxPeriods(profile.hmrc);
+  if (status === 'active' && !Object.keys(hmrcDeadlines(period)).length) {
+    message.textContent = 'Enter an HMRC tax period no longer than 12 months.';
+    return;
+  }
+  if (status === 'active' && existing.some((p) =>
+      p.periodEnd !== periodEnd && periodStart <= p.periodEnd && periodEnd >= p.periodStart)) {
+    message.textContent = 'Tax periods must not overlap. Check dates against your HMRC account.';
     return;
   }
   try {
-    profile = saveCompanyProfile({ ...profile, hmrc });
+    const periods = status === 'active'
+      ? [...existing.filter((p) => p.periodEnd !== periodEnd), period]
+      : existing;
+    profile = saveCompanyProfile({ ...profile, hmrc: {
+      status, periodStart: '', periodEnd: '', periods
+    } });
     renderProfile();
-    $('hmrcPeriodMessage').textContent = 'Tax status and period saved.';
+    $('hmrcPeriodStart').value = '';
+    $('hmrcPeriodEnd').value = '';
+    $('hmrcPeriodMessage').textContent = status === 'active' ? 'HMRC period recorded. Filing and payment deadlines are estimates.' : 'Corporation Tax activity status saved. Existing tax history retained.';
     await syncAfterSave();
-  } catch (error) { message.textContent = error.message || 'Unable to save HMRC details.'; }
+  } catch (error) {
+    message.textContent = error.message || 'Unable to save HMRC details.';
+  }
 });
 
 $('complianceTabPanel').addEventListener('click', async (event) => {
