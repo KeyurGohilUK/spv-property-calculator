@@ -93,7 +93,7 @@ export function addMonthsClamped(date, months, days = 0) {
 export function hmrcDeadlines(hmrc = {}) {
   const { status, periodStart, periodEnd } = hmrc;
   if (status !== 'active' || !validDate(periodStart) || !validDate(periodEnd) ||
-      periodStart > periodEnd || periodEnd > addMonthsClamped(periodStart, 12)) return {};
+      periodStart > periodEnd || periodEnd >= addMonthsClamped(periodStart, 12)) return {};
   return {
     'corporation-tax-registration': addMonthsClamped(periodStart, 3),
     'corporation-tax-return': addMonthsClamped(periodEnd, 12),
