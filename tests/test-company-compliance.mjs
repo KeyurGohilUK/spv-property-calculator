@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   COMPANY_COMPLIANCE_RULES, validDate, daysUntil, companyHouseDeadlines,
-  buildCompanyCompliance, normalizeConfirmation, filingReminder, formatComplianceDateUK
+  buildCompanyCompliance, normalizeConfirmation, filingReminder, formatComplianceDateUK, hmrcDeadlines, addMonthsClamped
 } from '../src/features/company/compliance-rules.js';
 
 assert.equal(formatComplianceDateUK('2027-11-02'), '2 Nov 2027');
@@ -67,3 +67,21 @@ assert.equal(conditional.find((r) => r.id === 'ico-fee').status, 'not-applicable
 assert.equal(normalizeConfirmation({ status: 'confirmed', confirmedOn: 'not-date' }), null);
 assert.throws(() => buildCompanyCompliance({ today: 'yesterday' }), /valid current date/);
 console.log('Company compliance catalogue, date, applicability and evidence checks passed.');
+
+assert.equal(addMonthsClamped('2026-01-31', 1), '2026-02-28');
+assert.deepEqual(hmrcDeadlines({ status: 'unknown', periodStart: '2026-01-01', periodEnd: '2026-12-31' }), {});
+assert.deepEqual(hmrcDeadlines({ status: 'dormant', periodStart: '2026-01-01', periodEnd: '2026-12-31' }), {});
+assert.deepEqual(hmrcDeadlines({ status: 'active', periodStart: '', periodEnd: '' }), {});
+assert.deepEqual(hmrcDeadlines({ status: 'active', periodStart: '2026-12-31', periodEnd: '2026-01-01' }), {});
+assert.deepEqual(hmrcDeadlines({ status: 'active', periodStart: '2026-01-01', periodEnd: '2027-02-01' }), {});
+const hmrcDates = hmrcDeadlines({ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' });
+assert.equal(hmrcDates['corporation-tax-registration'], '2026-04-01');
+assert.equal(hmrcDates['corporation-tax-payment'], '2027-10-01');
+assert.equal(hmrcDates['corporation-tax-return'], '2027-12-31');
+const hmrcCycle = buildCompanyCompliance({
+  today: '2027-09-15', hmrc: { status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' },
+  enabledConditional: ['corporation-tax-payment']
+});
+assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-payment').status, 'due-soon');
+assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-return').period, '2026-12-31');
+assert.equal(hmrcCycle.find((item) => item.id === 'corporation-tax-return').dueDate, '2027-12-31');
