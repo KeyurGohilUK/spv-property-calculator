@@ -6,6 +6,7 @@
 export const COMPANY_COMPLIANCE_RULES = Object.freeze([
   { id: 'confirmation-statement', title: 'Confirmation statement', source: 'companies-house', recurring: true },
   { id: 'annual-accounts', title: 'Annual company accounts', source: 'companies-house', recurring: true },
+  { id: 'company-utr-received', title: 'Company UTR received', source: 'hmrc', recurring: false },
   { id: 'corporation-tax-registration', title: 'Corporation Tax registration', source: 'manual', recurring: false },
   { id: 'corporation-tax-return', title: 'Corporation Tax return', source: 'hmrc', recurring: true },
   { id: 'corporation-tax-payment', title: 'Corporation Tax payment (if due)', source: 'hmrc', recurring: true, conditional: true },
