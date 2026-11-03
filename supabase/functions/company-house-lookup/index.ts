@@ -18,10 +18,10 @@ function formatRegisteredOffice(address: Record<string, unknown> | undefined) {
 }
 
 function officialCompanyFields(record: Record<string, unknown>) {
-  const office = record.registered_office_address as Record<string, unknown> | undefined;
+  const office = (record.registered_office_address || record.address) as Record<string, unknown> | undefined;
   return {
     companyNumber: String(record.company_number || '').toUpperCase().slice(0, 8),
-    companyName: String(record.company_name || '').slice(0, 160),
+    companyName: String(record.company_name || record.title || '').slice(0, 160),
     registeredOffice: formatRegisteredOffice(office),
     companyStatus: String(record.company_status || '').slice(0, 80),
     incorporationDate: String(record.date_of_creation || '').slice(0, 10)
