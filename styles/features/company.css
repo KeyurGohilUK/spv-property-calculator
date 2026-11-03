@@ -322,3 +322,9 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .compliance-subsection-content { padding:0 16px 16px; border-top:1px solid var(--border); }
 .company-identity-overview > summary, .company-filing-history > summary { min-height:70px; }
 @media (prefers-reduced-motion:reduce) { .compliance-expand-icon { transition:none; } }
+
+/* Main authority panels stay visible; only their individual obligations collapse. */
+.compliance-authority { width:100%; padding:0; overflow:hidden; }
+.compliance-authority-heading { display:flex; align-items:center; gap:14px; padding:18px; border-bottom:1px solid var(--border); }
+.compliance-authority-title h3 { margin:0; font-size:clamp(1.1rem,2.5vw,1.4rem); }
+.compliance-authority-content { padding-top:16px; border-top:0; }

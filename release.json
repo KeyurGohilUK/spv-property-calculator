@@ -1,7 +1,7 @@
 {
-  "version": "1.54.8",
+  "version": "1.54.9",
   "notes": [
-    "Make Companies House and HMRC compliance sections full-width and collapsible.",
-    "Collapse individual obligations, identity records and filing history by default."
+    "Keep Companies House and HMRC panels expanded at full width.",
+    "Fix incorrectly nested compliance item accordions; preserve collapsed individual rows."
   ]
 }
