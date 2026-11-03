@@ -230,7 +230,7 @@ function openInvestment(id = '') {
 
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc });
+  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: profile.hmrc?.status === 'active' ? ['corporation-tax-payment'] : [] });
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
@@ -520,7 +520,7 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   const periodEnd = $('hmrcPeriodEnd').value;
   const message = $('hmrcPeriodMessage');
   const hmrc = { status, periodStart, periodEnd };
-  if ((periodStart || periodEnd || status === 'active') && !Object.keys(hmrcDeadlines(hmrc)).length) {
+  if (status === 'active' && !Object.keys(hmrcDeadlines(hmrc)).length) {
     message.textContent = 'Enter a valid tax period of no more than 12 months. Set status to Active to calculate deadlines.';
     return;
   }
@@ -538,7 +538,7 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
   const key = button.dataset.complianceKey;
   const current = buildCompanyCompliance({
     today: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
-    confirmations: profile.complianceConfirmations, hmrc: profile.hmrc
+    confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: profile.hmrc?.status === 'active' ? ['corporation-tax-payment'] : []
   }).find((item) => item.key === key);
   if (!current || current.source === 'companies-house') return;
   const alreadyConfirmed = current.status === 'user-confirmed';
