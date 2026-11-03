@@ -18,7 +18,7 @@ assert.match(html, /<details class="company-official-people company-identity-ove
 assert.match(html, /<details class="company-filing-history compliance-subsection">/);
 assert.doesNotMatch(html, /<details[^>]*\\sopen(?:\\s|>|=)/, 'Compliance sections must start collapsed');
 assert.match(script, /<details class="company-compliance-item">/, 'Individual obligations must be collapsible');
-assert.match(style, /grid-template-columns:minmax\\(0,1fr\\)/, 'Compliance sections should span available width');
+assert.ok(style.includes('grid-template-columns:minmax(0,1fr)'), 'Compliance sections should span available width');
 
 assert.match(html, /id="companyIdentitySummary"/);
 assert.match(html, /People &amp; identity verification/);
