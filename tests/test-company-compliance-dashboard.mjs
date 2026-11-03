@@ -13,11 +13,15 @@ assert.match(html, /Companies House compliance/);
 assert.match(html, /HMRC compliance/);
 assert.match(html, /companyComplianceSummary/);
 assert.match(html, /id="companyOfficialPeople"/);
-assert.match(html, /<details class="compliance-authority">/);
+assert.match(html, /<section class="compliance-authority" aria-labelledby="chComplianceHeading">/);
+assert.match(html, /<section class="compliance-authority" aria-labelledby="hmrcComplianceHeading">/);
+assert.doesNotMatch(html, /<details class="compliance-authority"/, 'Main compliance sections must never collapse');
 assert.match(html, /<details class="company-official-people company-identity-overview compliance-subsection">/);
 assert.match(html, /<details class="company-filing-history compliance-subsection">/);
 assert.doesNotMatch(html, /<details[^>]*\\sopen(?:\\s|>|=)/, 'Compliance sections must start collapsed');
 assert.match(script, /<details class="company-compliance-item">/, 'Individual obligations must be collapsible');
+assert.match(script, /<\/div><\/details>\x60\)\.join\(''\)/, 'Every generated compliance row must close its details element');
+assert.doesNotMatch(script, /<\/article>\x60\)\.join\(''\)/, 'Do not leave unmatched legacy article tags');
 assert.ok(style.includes('grid-template-columns:minmax(0,1fr)'), 'Compliance sections should span available width');
 
 assert.match(html, /id="companyIdentitySummary"/);
