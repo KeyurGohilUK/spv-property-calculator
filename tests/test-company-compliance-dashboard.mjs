@@ -23,5 +23,5 @@ assert.match(script, /escapeHtml\(item.title\)/);
 assert.match(script, /Needs verification/);
 assert.match(style, /\.company-compliance-list/);
 assert.ok(assets.assets.includes('./src/features/company/compliance-rules.js'), 'Offline PWA must cache compliance rules');
-assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 8);
+assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 9);
 console.log('Company compliance dashboard integration checks passed.');
