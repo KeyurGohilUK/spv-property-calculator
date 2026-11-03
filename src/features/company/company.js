@@ -1,5 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
-import { buildCompanyCompliance, formatComplianceDateUK } from './compliance-rules.js';
+import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import {
@@ -230,10 +230,13 @@ function openInvestment(id = '') {
 
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations });
+  const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc });
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
+  $('hmrcTaxStatus').value = profile.hmrc?.status || 'unknown';
+  $('hmrcPeriodStart').value = profile.hmrc?.periodStart || '';
+  $('hmrcPeriodEnd').value = profile.hmrc?.periodEnd || '';
   const peopleRoot = $('companyOfficialPeople');
   if (peopleRoot) {
     const people = companyHouseData?.officialPeople;
@@ -272,21 +275,23 @@ function renderCompanyCompliance() {
               return `<li><span><strong>${escapeHtml(label)}</strong><small>${escapeHtml(date)} · ${escapeHtml(record.type)}</small></span><a href="${escapeHtml(filingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="View ${escapeHtml(label)} filing on Companies House">View official record</a></li>`;
             }).join('')}</ul>`;
   }
-  $('companyComplianceItems').innerHTML = items.map((item) => `
+  const renderCards = (selected) => selected.map((item) => `
     <article class="company-compliance-item">
       <div class="company-compliance-item-heading"><h3>${escapeHtml(item.title)}</h3>
         <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div>
-      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · Companies House</p>` : ''}
+      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}</p>` : ''}
       ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(formatComplianceDateUK(item.officialFiling.lastPeriod))} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
       ${item.reminder ? `<p class="company-compliance-reminder">Filing reminder: ${escapeHtml(item.reminder.message)} · ${item.reminder.windowDays}-day reminder window</p>` : ''}
       <p class="muted">${item.source === 'companies-house'
         ? companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.'
         : item.source === 'hmrc'
-          ? 'Check your HMRC account or ask your accountant.'
+          ? 'This is a suggested deadline based on the HMRC period you entered; check your HMRC account or accountant.'
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
     </article>`).join('');
+  $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && item.id !== 'corporation-tax-registration'));
+  $('hmrcComplianceItems').innerHTML = renderCards(items.filter((item) => item.source === 'hmrc' || item.id === 'corporation-tax-registration'));
 }
 
 function renderProfile() {
@@ -507,13 +512,33 @@ $('deleteCompanyForm').addEventListener('submit', async (event) => {
 $('editCompanyDetailsBtn').addEventListener('click', showDetailsDialog);
 $('addAppointmentBtn').addEventListener('click', () => openAppointment());
 $('addInvestmentBtn').addEventListener('click', () => openInvestment());
-$('companyComplianceItems').addEventListener('click', async (event) => {
+$('hmrcPeriodForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!editingAllowed) return;
+  const status = $('hmrcTaxStatus').value;
+  const periodStart = $('hmrcPeriodStart').value;
+  const periodEnd = $('hmrcPeriodEnd').value;
+  const message = $('hmrcPeriodMessage');
+  const hmrc = { status, periodStart, periodEnd };
+  if ((periodStart || periodEnd || status === 'active') && !Object.keys(hmrcDeadlines(hmrc)).length) {
+    message.textContent = 'Enter a valid tax period of no more than 12 months. Set status to Active to calculate deadlines.';
+    return;
+  }
+  try {
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    renderProfile();
+    $('hmrcPeriodMessage').textContent = 'Tax status and period saved.';
+    await syncAfterSave();
+  } catch (error) { message.textContent = error.message || 'Unable to save HMRC details.'; }
+});
+
+$('complianceTabPanel').addEventListener('click', async (event) => {
   const button = event.target.closest('[data-compliance-key]');
   if (!button || !editingAllowed) return;
   const key = button.dataset.complianceKey;
   const current = buildCompanyCompliance({
     today: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
-    confirmations: profile.complianceConfirmations
+    confirmations: profile.complianceConfirmations, hmrc: profile.hmrc
   }).find((item) => item.key === key);
   if (!current || current.source === 'companies-house') return;
   const alreadyConfirmed = current.status === 'user-confirmed';
