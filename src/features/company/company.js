@@ -301,7 +301,7 @@ function renderCompanyCompliance() {
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
-    </article>`).join('');
+    </div></details>`).join('');
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
   $('hmrcComplianceItems').innerHTML = renderCards(items.filter((item) => item.source === 'hmrc' || item.id === 'corporation-tax-registration'));
 }
