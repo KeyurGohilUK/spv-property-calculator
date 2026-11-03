@@ -1,7 +1,8 @@
 import {
   getStoredCompanyProfile,
   replaceCompanyProfile,
-  listStoredCompanyProfiles
+  listStoredCompanyProfiles,
+  listAllStoredCompanyProfiles
 } from './company-storage.js';
 
 let activeCompanySync = null;
@@ -80,7 +81,7 @@ export async function performCompanyProfileSync(cloud, adapters = {}) {
 /** Synchronise independent company records without changing the selected company. */
 export async function performCompanyProfilesSync(cloud, adapters = {}) {
   if (!cloud?.listCompanyProfiles || !cloud?.upsertCompanyProfile) return performCompanyProfileSync(cloud, adapters);
-  const getLocals = adapters.listLocal || listStoredCompanyProfiles;
+  const getLocals = adapters.listLocal || listAllStoredCompanyProfiles;
   const saveLocal = adapters.replaceLocal || replaceCompanyProfile;
   const remote = await cloud.listCompanyProfiles();
   const remoteById = new Map(remote.map((profile) => [profile.id, profile]));
