@@ -1,5 +1,5 @@
 {
-  "version": "1.53.1",
+  "version": "1.54.0",
   "assets": [
     "./",
     "./index.html",
@@ -45,6 +45,8 @@
     "./portfolio/",
     "./src/features/portfolio/portfolio.js",
     "./company/",
+    "./company/details.html",
+    "./src/features/company/company-list.js",
     "./src/features/company/company.js",
     "./src/features/company/compliance-rules.js",
     "./src/features/company/company-storage.js",
