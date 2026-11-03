@@ -13,6 +13,13 @@ assert.match(html, /Companies House compliance/);
 assert.match(html, /HMRC compliance/);
 assert.match(html, /companyComplianceSummary/);
 assert.match(html, /id="companyOfficialPeople"/);
+assert.match(html, /<details class="compliance-authority">/);
+assert.match(html, /<details class="company-official-people company-identity-overview compliance-subsection">/);
+assert.match(html, /<details class="company-filing-history compliance-subsection">/);
+assert.doesNotMatch(html, /<details[^>]*\\sopen(?:\\s|>|=)/, 'Compliance sections must start collapsed');
+assert.match(script, /<details class="company-compliance-item">/, 'Individual obligations must be collapsible');
+assert.ok(style.includes('grid-template-columns:minmax(0,1fr)'), 'Compliance sections should span available width');
+
 assert.match(html, /id="companyIdentitySummary"/);
 assert.match(html, /People &amp; identity verification/);
 assert.match(script, /company-identity-chip--recorded/);
