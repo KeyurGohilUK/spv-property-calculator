@@ -108,8 +108,15 @@
   <dialog id="companyDetailsDialog" class="install-dialog company-dialog">
     <form id="companyDetailsForm" novalidate>
       <div class="company-dialog-header"><div><p class="eyebrow">Company particulars</p><h2 id="companyDetailsDialogTitle">Edit company details</h2></div><button id="closeCompanyDetailsDialog" class="dialog-close" type="button" aria-label="Close company details">×</button></div>
+      <div class="company-official-search">
+        <label class="field" for="companySearchInput"><span>Find company on Companies House</span><input id="companySearchInput" type="search" maxlength="100" autocomplete="off" placeholder="Company name or 8-character number"></label>
+        <button id="companySearchBtn" class="secondary-btn" type="button">Search Companies House</button>
+        <p id="companySearchStatus" class="muted" role="status" aria-live="polite"></p>
+        <div id="companySearchResults" class="company-search-results" aria-label="Companies House search results"></div>
+        <small class="muted">Select a result to populate the fields below; review and save to update the shared company record. Existing appointments are not changed.</small>
+      </div>
       <label class="field"><span>Company name <strong aria-hidden="true">*</strong></span><input id="companyNameInput" type="text" maxlength="160" autocomplete="organization" required></label>
-      <label class="field"><span>Company number</span><input id="companyNumberInput" type="text" maxlength="32" autocomplete="off" aria-describedby="companyNumberHelp"><small id="companyNumberHelp">As shown on Companies House. This register is managed manually.</small></label>
+      <label class="field"><span>Company number</span><input id="companyNumberInput" type="text" maxlength="32" autocomplete="off" aria-describedby="companyNumberHelp"><small id="companyNumberHelp">Enter manually, or select an official Companies House result above.</small></label>
       <label class="field"><span>Registered office</span><textarea id="companyOfficeInput" rows="3" maxlength="500" autocomplete="street-address" data-plain-text></textarea></label>
       <div class="company-form-columns">
         <label class="field"><span>Company status</span><input id="companyStatusInput" type="text" maxlength="80" placeholder="e.g. Active"></label>
