@@ -85,7 +85,7 @@ export function normalizeCompanyProfile(profile = {}) {
     registeredOffice: String(profile.registeredOffice || '').trim().slice(0, 500),
     incorporationDate: /^\d{4}-\d{2}-\d{2}$/.test(String(profile.incorporationDate || '')) ? profile.incorporationDate : '',
     companyStatus: String(profile.companyStatus || '').trim().slice(0, 80),
-    deletedAt: /^\\d{4}-\\d{2}-\\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
+    deletedAt: /^\d{4}-\d{2}-\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
     appointments,
     investments,
     complianceConfirmations: Object.fromEntries(
