@@ -220,3 +220,41 @@
 .company-danger-zone h2 { color: var(--danger); }
 .company-danger-zone .danger-text { border-color: var(--danger); }
 #deleteCompanyMessage:not(:empty) { color: var(--danger); font-weight: 700; }
+
+
+/* Accessible section navigation on the company details page. */
+.company-detail-tabs {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 0 18px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  scrollbar-color: var(--brand) var(--surface-2);
+}
+.company-detail-tab {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.company-detail-tab[aria-selected="true"] {
+  border-bottom-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  color: var(--text);
+}
+.company-detail-tab:hover { color: var(--text); background: var(--surface-2); }
+.company-detail-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+.company-tab-panel { min-width: 0; }
+.company-tab-panel[hidden] { display: none; }
+.company-tab-panel > .company-section + .company-section { margin-top: 18px; }
+@media (max-width: 480px) {
+  .company-detail-tab { min-height: 46px; padding-inline: 13px; }
+}
