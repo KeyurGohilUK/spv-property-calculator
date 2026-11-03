@@ -11,6 +11,23 @@ function respond(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers });
 }
 
+function formatRegisteredOffice(address: Record<string, unknown> | undefined) {
+  if (!address || typeof address !== 'object') return '';
+  const fields = ['care_of', 'po_box', 'premises', 'address_line_1', 'address_line_2', 'locality', 'region', 'postal_code', 'country'];
+  return fields.map((key) => String(address[key] || '').trim()).filter(Boolean).join(', ').slice(0, 500);
+}
+
+function officialCompanyFields(record: Record<string, unknown>) {
+  const office = record.registered_office_address as Record<string, unknown> | undefined;
+  return {
+    companyNumber: String(record.company_number || '').toUpperCase().slice(0, 8),
+    companyName: String(record.company_name || '').slice(0, 160),
+    registeredOffice: formatRegisteredOffice(office),
+    companyStatus: String(record.company_status || '').slice(0, 80),
+    incorporationDate: String(record.date_of_creation || '').slice(0, 10)
+  };
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   if (request.method !== 'POST') return respond({ error: 'Method not allowed' }, 405);
@@ -33,6 +50,30 @@ Deno.serve(async (request) => {
     if (memberError || !member?.active) return respond({ error: 'Workspace access denied' }, 403);
 
     const payload = await request.json().catch(() => null);
+    if (payload?.action === 'search') {
+      const query = String(payload?.query || '').trim();
+      if (query.length < 2 || query.length > 100) return respond({ error: 'Search using 2 to 100 characters' }, 400);
+      const authHeader = { Authorization: 'Basic ' + btoa(apiKey + ':'), Accept: 'application/json' };
+      const exactNumber = /^[A-Z0-9]{2}[0-9]{6}$/.test(query.toUpperCase());
+      const endpoint = exactNumber
+        ? `https://api.company-information.service.gov.uk/company/${encodeURIComponent(query.toUpperCase())}`
+        : `https://api.company-information.service.gov.uk/search/companies?q=${encodeURIComponent(query)}&items_per_page=10`;
+      const matchResponse = await fetch(endpoint, { headers: authHeader, signal: AbortSignal.timeout(8000) });
+      if (matchResponse.status === 404) return respond({ results: [] });
+      if (!matchResponse.ok) return respond({ error: 'Companies House search is temporarily unavailable' }, 502);
+      const matches = await matchResponse.json();
+      const records = exactNumber ? [matches] : Array.isArray(matches.items) ? matches.items : [];
+      return respond({
+        results: records.slice(0, 10).map((item: Record<string, unknown>) => {
+          const fields = officialCompanyFields(item);
+          return {
+            ...fields,
+            registeredOffice: fields.registeredOffice ||
+              String(item.address_snippet || '').slice(0, 500)
+          };
+        }).filter((item: { companyNumber: string; companyName: string }) => item.companyNumber && item.companyName)
+      });
+    }
     const companyNumber = String(payload?.companyNumber || '').trim().toUpperCase();
     if (!/^[A-Z0-9]{2}[0-9]{6}$/.test(companyNumber)) {
       return respond({ error: 'Enter a valid eight-character company number' }, 400);
@@ -109,8 +150,7 @@ Deno.serve(async (request) => {
       }));
     // Only return public fields needed by the app; never return the API key.
     return respond({
-      companyNumber,
-      companyName: String(record.company_name || '').slice(0, 160),
+      ...officialCompanyFields(record),
       accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null }, last_accounts: { period_end_on: record.accounts?.last_accounts?.period_end_on || null, made_up_to: record.accounts?.last_accounts?.made_up_to || null }, overdue: record.accounts?.overdue === true },
       confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
       filingHistory, filingHistoryAvailable,
