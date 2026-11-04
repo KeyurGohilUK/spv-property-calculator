@@ -451,7 +451,62 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; --hmrc-payme
 .hmrc-edit-dialog > p { margin:0 0 14px; }
 .hmrc-tracking-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .hmrc-tracking-form label { display:grid; gap:5px; min-width:0; font-weight:650; font-size:.87rem; }
-.hmrc-tracking-form input, .hmrc-tracking-form select { min-width:0; width:100%; }
+/* Match the standard app form controls in every HMRC dialog. */
+.hmrc-edit-dialog input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+.hmrc-edit-dialog select {
+  box-sizing:border-box;
+  display:block;
+  inline-size:100%;
+  min-inline-size:0;
+  max-inline-size:100%;
+  min-height:48px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:11px 13px;
+  background:var(--bg);
+  color:var(--text);
+  font:inherit;
+  font-size:16px;
+  line-height:1.4;
+}
+.hmrc-edit-dialog input[type="date"] {
+  color-scheme:light;
+  -webkit-appearance:auto;
+  appearance:auto;
+  overflow:visible;
+}
+html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark; }
+.hmrc-edit-dialog input[type="date"]::-webkit-date-and-time-value {
+  min-width:0;
+  width:100%;
+  text-align:left;
+}
+.hmrc-edit-dialog input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor:pointer;
+  opacity:.85;
+}
+.hmrc-edit-dialog select { cursor:pointer; }
+.hmrc-edit-dialog input:not([type="radio"]):not([type="checkbox"]):focus-visible,
+.hmrc-edit-dialog select:focus-visible,
+.hmrc-edit-dialog input[type="file"]:focus-visible {
+  outline:2px solid var(--brand);
+  outline-offset:2px;
+}
+.hmrc-edit-dialog input:disabled,
+.hmrc-edit-dialog select:disabled {
+  opacity:.6;
+  background:var(--surface-2);
+}
+.hmrc-edit-dialog input[type="radio"],
+.hmrc-edit-dialog input[type="checkbox"] {
+  accent-color:var(--brand);
+}
+.hmrc-edit-dialog input[type="file"] {
+  max-width:100%;
+  font-size:.9rem;
+  color:var(--text);
+}
+
 .hmrc-tracking-form label[hidden] { display:none; }
 .hmrc-span-all, .hmrc-tracking-form > p, .hmrc-dialog-actions { grid-column:1/-1; }
 .hmrc-dialog-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; padding-top:8px; }
