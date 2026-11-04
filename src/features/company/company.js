@@ -431,6 +431,8 @@ function fillHmrcFilingForm(periodEnd) {
   const selected = hmrcPeriodSummary(profile.hmrc, periodEnd);
   $('hmrcFiledOn').value = selected.filedOn;
   $('hmrcFilingReference').value = selected.filingReference;
+  $('hmrcLiabilityStatus').value = selected.liability === null ? 'unknown' : selected.liabilityStatus || 'recorded';
+  $('hmrcPeriodPaymentReference').value = selected.paymentReference || '';
   $('hmrcLiability').value = selected.liability === null ? '' : String(selected.liability);
   $('hmrcReviewedOn').value = selected.reviewedOn;
   $('hmrcReviewedBy').value = selected.reviewedBy;
@@ -443,30 +445,77 @@ function renderHmrcTracking() {
   $('hmrcRegistrationReference').value = setup.registrationReference;
   $('hmrcAccountantName').value = setup.accountantName;
   $('hmrcSetupForm').querySelectorAll('input,button').forEach((element) => { element.disabled = !editingAllowed; });
-  const previouslySelected = $('hmrcRecordPeriod').value;
-  const selectedPeriod = periods.some((p) => p.periodEnd === previouslySelected) ? previouslySelected : periods[0]?.periodEnd || '';
+  const selectedPeriod = periods.some((p) => p.periodEnd === $('hmrcRecordPeriod').value) ? $('hmrcRecordPeriod').value : periods[0]?.periodEnd || '';
+  const paymentPeriod = periods.some((p) => p.periodEnd === $('hmrcPaymentPeriod').value) ? $('hmrcPaymentPeriod').value : selectedPeriod;
   $('hmrcRecordPeriod').innerHTML = hmrcRecordPeriodOptions(selectedPeriod);
-  const paymentPreviouslySelected = $('hmrcPaymentPeriod').value;
-  const paymentPeriod = periods.some((p) => p.periodEnd === paymentPreviouslySelected) ? paymentPreviouslySelected : selectedPeriod;
   $('hmrcPaymentPeriod').innerHTML = hmrcRecordPeriodOptions(paymentPeriod);
   fillHmrcFilingForm(selectedPeriod);
   for (const form of [$('hmrcFilingForm'), $('hmrcPaymentForm')]) {
     form.querySelectorAll('input,select,button').forEach((element) => { element.disabled = !editingAllowed || !periods.length; });
   }
   $('hmrcPeriodHistory').innerHTML = periods.length
-    ? '<h4>Recorded Corporation Tax periods</h4><div class="hmrc-record-cards">' + periods.map((p) => {
-      const record = hmrcPeriodSummary(profile.hmrc, p.periodEnd);
-      return `<div class="hmrc-record-card"><strong>${escapeHtml(formatComplianceDateUK(p.periodStart))} – ${escapeHtml(formatComplianceDateUK(p.periodEnd))}</strong>
-        <p class="muted">CT600: ${record.filedOn ? 'Recorded submitted ' + escapeHtml(formatComplianceDateUK(record.filedOn)) : 'Not recorded as filed'}${record.filingReference ? ' · Reference: ' + escapeHtml(record.filingReference) : ''}</p>
-        <p class="muted">Accountant review: ${record.reviewedOn ? escapeHtml(formatComplianceDateUK(record.reviewedOn)) + (record.reviewedBy ? ' · ' + escapeHtml(record.reviewedBy) : '') : 'Not recorded'}</p>
-        <p><strong>Liability:</strong> ${record.liability === null ? 'Not recorded' : CURRENCY_FORMAT.format(record.liability)}
-        · <strong>Paid:</strong> ${CURRENCY_FORMAT.format(record.paid)}
-        · <strong>Outstanding:</strong> ${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</p>
-        ${record.overpayment ? `<p class="hmrc-record-warning">Recorded payments exceed the liability by ${CURRENCY_FORMAT.format(record.overpayment)}. Reconcile with HMRC.</p>` : ''}
-        ${record.payments.length ? `<ul class="hmrc-record-payments">${record.payments.map((payment) => `<li><span>${escapeHtml(formatComplianceDateUK(payment.date))} · ${CURRENCY_FORMAT.format(payment.amount)}${payment.reference ? ' · ' + escapeHtml(payment.reference) : ''}</span>${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(p.periodEnd)}">Remove</button>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No payments recorded.</p>'}
-      </div>`;
+    ? '<div class="hmrc-period-cards">' + [...periods].reverse().map((period) => {
+      const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
+      const due = hmrcDeadlines(period);
+      const liabilityKnown = record.liability !== null;
+      const filingDate = due['corporation-tax-return'];
+      const paymentDate = due['corporation-tax-payment'];
+      const isPaid = liabilityKnown && record.outstanding === 0 && record.overpayment === 0;
+      const recordedFiling = Boolean(record.filedOn);
+      return `<article class="hmrc-period-card">
+        <header class="hmrc-period-header">
+          <div class="hmrc-period-heading">
+            <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
+            <div class="hmrc-period-badges">
+              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not filed', recordedFiling ? 'success' : 'neutral')}
+              ${hmrcBadge(isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
+            </div>
+            <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
+          </div>
+          <div class="hmrc-period-actions">
+            <button type="button" class="secondary-btn" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Edit CT600</button>
+            <button type="button" class="primary-btn" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>+ Tax payment</button>
+          </div>
+        </header>
+        <div class="hmrc-period-grid">
+          <section class="hmrc-period-info"><h6>CT600 return</h6>
+            ${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'neutral')}
+            <dl><dt>Submitted</dt><dd>${hmrcDate(record.filedOn)}</dd>
+              <dt>Reference</dt><dd>${escapeHtml(record.filingReference) || '—'}</dd>
+              <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
+              <dt>Reviewed on</dt><dd>${hmrcDate(record.reviewedOn)}</dd></dl>
+          </section>
+          <section class="hmrc-period-info"><h6>Financial summary</h6>
+            <dl><dt>Tax liability</dt><dd>${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
+              <dt>Liability status</dt><dd>${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
+              <dt>Total paid</dt><dd class="hmrc-value-positive">${CURRENCY_FORMAT.format(record.paid)}</dd>
+              <dt>Outstanding</dt><dd>${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</dd></dl>
+            ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
+          </section>
+          <section class="hmrc-period-info"><h6>HMRC payment details</h6>
+            <p class="muted">Reference for this period</p>
+            <strong class="hmrc-ref">${hmrcDisplayReference(record.paymentReference)}</strong>
+            <p class="muted">Check your HMRC account before paying.</p>
+          </section>
+        </div>
+        <div class="hmrc-payments">
+          <h6>Recorded payments <span class="muted">(${record.payments.length})</span></h6>
+          ${record.payments.length ? `<div class="hmrc-payment-table-wrap"><table class="hmrc-payment-table">
+            <thead><tr><th scope="col">Paid on</th><th scope="col">Amount</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+            <tbody>${record.payments.map((payment) => `<tr>
+              <td>${hmrcDate(payment.date)}</td><td>${CURRENCY_FORMAT.format(payment.amount)}</td>
+              <td>${escapeHtml(payment.reference) || '—'}</td>
+              <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
+              <td>${editingAllowed ? `<button class="hmrc-remove-payment" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}">Remove</button>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
+          : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
+        </div>
+        <details class="hmrc-card-documents"><summary>Supporting documents</summary>
+          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}
+          ${hmrcEvidenceMarkup('corporation-tax-payment:' + period.periodEnd, 'Payment receipts')}</div>
+        </details>
+      </article>`;
     }).join('') + '</div>'
-    : '<p class="muted">No HMRC-confirmed tax accounting periods added yet.</p>';
+    : '<div class="hmrc-period-empty"><p>No tax periods recorded yet.</p><p class="muted">Add the dates confirmed by HMRC or your accountant.</p></div>';
 }
 
 function renderProfile() {
