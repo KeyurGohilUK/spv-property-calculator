@@ -203,6 +203,10 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('1 Oct 2027');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('+ Record CT600');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-pill--attention')).toContainText(['CT600 not recorded', 'Tax not assessed', 'Not recorded']);
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-summary-total')).toHaveCount(2);
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-value-attention').last()).toContainText('Unknown');
 
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeVisible();
@@ -216,6 +220,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcFilingForm button[type="submit"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('Edit CT600');
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('•••••34567');
   await page.locator('[data-hmrc-reveal-ref]').click();
@@ -231,6 +236,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcPaymentForm button[type="submit"]').click();
   await expect(page.locator('#hmrcPaymentDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-value-positive')).toContainText('£1,500.00');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('HMRC confirmed');
   await page.reload();
   await page.getByRole('tab', { name: 'Compliance' }).click();
