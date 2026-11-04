@@ -3,7 +3,7 @@ import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxP
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, removeHmrcPayment } from './hmrc-tracking.js';
-import { HMRC_STEPS, hmrcGuidedState } from './hmrc-guided.js';
+import { hmrcOverviewState } from './hmrc-guided.js';
 import { uploadComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
 import {
   getCompanyProfile,
@@ -318,7 +318,6 @@ function renderCompanyCompliance() {
 
 let hmrcGuideSelected = 'utr';
 let hmrcActiveView = hmrcTaxPeriods(profile.hmrc).length ? 'periods' : 'setup';
-let hmrcEditingPeriod = '';
 
 const hmrcDialogs = {
   setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
@@ -349,7 +348,7 @@ function hmrcEvidenceMarkup(ruleKey, label) {
 function renderHmrcDashboard() {
   const tracking = normalizeHmrcTracking(profile.hmrc);
   const setup = tracking.setup;
-  const state = hmrcGuidedState(profile.hmrc);
+  const state = hmrcOverviewState(profile.hmrc);
   const periods = hmrcTaxPeriods(profile.hmrc);
   const utrLabel = setup.utrReceivedOn ? 'Received ' + formatComplianceDateUK(setup.utrReceivedOn)
     : setup.utrStatus === 'pending' ? 'Waiting' : 'Not recorded';
@@ -710,11 +709,6 @@ async function requireEvidenceEditor() {
     throw new Error('Approved editor access is required.');
   }
 }
-function openEvidenceRequirement(key) {
-  const input = [...document.querySelectorAll('[data-evidence-upload]')].find((element) => element.dataset.evidenceUpload === key);
-  if (input) input.closest('details')?.setAttribute('open', '');
-}
-
 $('complianceTabPanel').addEventListener('change', async (event) => {
   const input = event.target.closest('[data-evidence-upload]');
   if (!input?.files?.length) return;
