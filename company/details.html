@@ -76,23 +76,41 @@
   <p class="muted company-identity-note">A recorded statement relates to the role shown; it does not guarantee all obligations are complete. New appointments may require new statements. Public data may be incomplete.</p></div></details>
 <details class="company-filing-history compliance-subsection"><summary><span class="compliance-subsection-label"><strong id="companyFilingHistoryTitle">Official filing history</strong><span class="muted">Check original records with Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary><div class="compliance-subsection-content"><div id="companyFilingHistory" aria-live="polite"></div></div></details></div></section>
 <section class="compliance-authority" aria-labelledby="hmrcComplianceHeading"><div class="compliance-authority-heading"><span class="compliance-authority-icon" aria-hidden="true">HM</span><div class="compliance-authority-title"><span class="eyebrow">Tax compliance</span><h3 id="hmrcComplianceHeading">HMRC compliance</h3><span class="muted">Corporation Tax registration, CT600 returns and payments.</span></div></div><div class="compliance-authority-content">
-<section class="hmrc-tracking-panel" aria-labelledby="hmrcSetupHeading">
-  <h4 id="hmrcSetupHeading">Company Tax Setup</h4>
-  <p class="muted">Record your HMRC letters and accountant's confirmations. Dates are user-entered and are not independently verified. Do not enter the ten-digit UTR here.</p>
+<div class="hmrc-guide">
+  <div class="hmrc-guide-top"><div><span class="eyebrow">One step at a time</span><h4 id="hmrcGuideTitle">Your next HMRC step</h4></div><span id="hmrcGuideProgress" class="muted"></span></div>
+  <nav id="hmrcGuideSteps" class="hmrc-guide-steps" aria-label="HMRC progress"></nav>
+  <p id="hmrcGuideHelp" class="muted"></p>
+  <p id="hmrcGuideAlerts" class="hmrc-guide-alerts" role="status" aria-live="polite"></p>
+</div>
+<section id="hmrcSetupStage" class="hmrc-guide-section" aria-labelledby="hmrcSetupHeading"><div class="hmrc-tracking-panel">
+  <h4 id="hmrcSetupHeading">UTR letter</h4>
+  <p class="muted">Enter the letter date. Keep your UTR number private.</p>
   <form id="hmrcSetupForm" class="hmrc-tracking-form">
-    <label>UTR letter received on<input id="hmrcUtrReceivedOn" type="date"></label>
-    <label>Corporation Tax registration confirmed on<input id="hmrcRegistrationConfirmedOn" type="date"></label>
-    <label>Registration acknowledgement reference<input id="hmrcRegistrationReference" type="text" maxlength="100" autocomplete="off" placeholder="Optional non-sensitive reference"></label>
-    <label>Accountant or firm<input id="hmrcAccountantName" type="text" maxlength="160" autocomplete="organization"></label>
-    <button class="secondary-btn" type="submit">Save tax setup</button>
+    <label data-hmrc-setup-field="utr">Letter received on<input id="hmrcUtrReceivedOn" type="date"></label>
+    <label data-hmrc-setup-field="registration">Corporation Tax registration confirmed on<input id="hmrcRegistrationConfirmedOn" type="date"></label>
+    <label data-hmrc-setup-field="registration">Registration acknowledgement reference<input id="hmrcRegistrationReference" type="text" maxlength="100" autocomplete="off" placeholder="Optional non-sensitive reference"></label>
+    <label data-hmrc-setup-field="registration">Accountant or firm<input id="hmrcAccountantName" type="text" maxlength="160" autocomplete="organization"></label>
+    <button id="hmrcSetupSaveBtn" class="secondary-btn" type="submit">Save and continue</button><button id="hmrcPendingBtn" class="secondary-btn" type="button">Still waiting</button>
     <p id="hmrcSetupMessage" class="hmrc-record-message" role="status" aria-live="polite"></p>
-  </form>
-</section>
-<form id="hmrcPeriodForm" class="hmrc-period-form"><label>Corporation Tax status<select id="hmrcTaxStatus"><option value="unknown">Awaiting confirmation</option><option value="active">Active</option><option value="dormant">Dormant</option></select></label><label>Tax period start<input id="hmrcPeriodStart" type="date"></label><label>Tax period end<input id="hmrcPeriodEnd" type="date"></label><p class="muted">Add each HMRC-confirmed tax accounting period separately. First-year accounts can require two returns. Upcoming dates are indicative, not independently verified.</p><button id="saveHmrcPeriod" type="submit" class="secondary-btn">Add tax period</button><button id="suggestNextHmrcPeriod" type="button" class="secondary-btn">Prepare next period</button><span id="hmrcPeriodMessage" role="status" aria-live="polite"></span></form>
-<div id="hmrcPeriodHistory" class="hmrc-period-history" aria-live="polite"></div><section class="hmrc-tracking-panel" aria-labelledby="hmrcRecordsHeading">
-  <h4 id="hmrcRecordsHeading">Filing and Payment Records</h4>
-  <p class="muted">Choose an HMRC-confirmed tax period. Record CT600 filing details and individual tax payments. Attaching documents to the corresponding compliance obligation is available below.</p>
-  <form id="hmrcFilingForm" class="hmrc-tracking-form">
+  </form></div></section>
+<section id="hmrcActivityStage" class="hmrc-tracking-panel hmrc-guide-section" aria-labelledby="hmrcActivityHeading" hidden>
+<h4 id="hmrcActivityHeading">Company activity</h4>
+<p class="muted">Which describes your company?</p>
+<form id="hmrcActivityForm" class="hmrc-activity-form">
+<label><input type="radio" name="hmrcActivity" value="preparing"> Preparing to buy property</label>
+<label><input type="radio" name="hmrcActivity" value="active"> Business activity started</label>
+<label><input type="radio" name="hmrcActivity" value="dormant"> Dormant (confirmed by HMRC)</label>
+<button class="secondary-btn" type="submit">Save and continue</button>
+<p id="hmrcActivityMessage" class="hmrc-record-message" role="status" aria-live="polite"></p>
+</form><p id="hmrcActivityGuidance" class="muted"></p></section>
+<section id="hmrcPeriodStage" class="hmrc-tracking-panel hmrc-guide-section" hidden>
+<h4>Tax accounting period</h4>
+<p class="muted">Enter dates confirmed by HMRC or your accountant.</p>
+<form id="hmrcPeriodForm" class="hmrc-period-form"><label>Corporation Tax status<select id="hmrcTaxStatus"><option value="unknown">Awaiting confirmation</option><option value="active">Active</option><option value="dormant">Dormant</option></select></label><label>Tax period start<input id="hmrcPeriodStart" type="date"></label><label>Tax period end<input id="hmrcPeriodEnd" type="date"></label><p class="muted">First-year accounts may need two returns. Check these dates with HMRC or your accountant.</p><button id="saveHmrcPeriod" type="submit" class="secondary-btn">Add tax period</button><button id="suggestNextHmrcPeriod" type="button" class="secondary-btn">Prepare next period</button><span id="hmrcPeriodMessage" role="status" aria-live="polite"></span></form>
+</section><section id="hmrcRecordsStage" class="hmrc-guide-section" hidden><div id="hmrcPeriodHistory" class="hmrc-period-history" aria-live="polite"></div><section class="hmrc-tracking-panel" aria-labelledby="hmrcRecordsHeading">
+  <h4 id="hmrcRecordsHeading">Returns and payments</h4>
+  <p class="muted">Record the return and payment separately. Tax payment can be due before the CT600 return.</p>
+  <details class="hmrc-guide-disclosure"><summary>Record CT600 return and tax due</summary><form id="hmrcFilingForm" class="hmrc-tracking-form">
     <label>Tax accounting period<select id="hmrcRecordPeriod" required></select></label>
     <label>CT600 submitted on<input id="hmrcFiledOn" type="date"></label>
     <label>CT600 acknowledgement reference<input id="hmrcFilingReference" maxlength="120" type="text" autocomplete="off"></label>
@@ -102,7 +120,7 @@
     <button type="submit" class="secondary-btn">Save filing record</button>
     <p id="hmrcFilingMessage" class="hmrc-record-message" role="status" aria-live="polite"></p>
   </form>
-  <form id="hmrcPaymentForm" class="hmrc-tracking-form">
+  </details><details class="hmrc-guide-disclosure"><summary>Record a tax payment</summary><form id="hmrcPaymentForm" class="hmrc-tracking-form">
     <h4>Add a Corporation Tax payment</h4>
     <label>Tax accounting period<select id="hmrcPaymentPeriod" required></select></label>
     <label>Payment date<input id="hmrcPaymentDate" type="date" required></label>
@@ -110,8 +128,7 @@
     <label>Payment reference<input id="hmrcPaymentReference" type="text" maxlength="160" autocomplete="off" placeholder="Optional reference"></label>
     <button class="secondary-btn" type="submit">Add payment</button>
     <p id="hmrcPaymentMessage" class="hmrc-record-message" role="status" aria-live="polite"></p>
-  </form>
-</section><div id="hmrcComplianceItems" class="company-compliance-list"></div></div></section>
+  </form></details></section></section><details class="hmrc-guide-disclosure hmrc-guide-all"><summary>All HMRC requirements and evidence</summary><div id="hmrcComplianceItems" class="company-compliance-list"></div></details></div></section>
 </div>
         <p class="muted company-compliance-disclaimer">Companies House filing deadlines are retrieved when the secure lookup is configured and you are online. Filing completion and HMRC obligations are not independently verified. Check official records before relying on these dates.</p>
       </section>

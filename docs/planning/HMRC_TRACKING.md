@@ -19,3 +19,19 @@ The feature does not submit CT600 returns, pay taxes, validate UTR identifiers, 
 ## Verification
 
 Run `node tests/test-hmrc-tracking.mjs`, `npm test`, `npm run test:html` and `npm run test:e2e`. Test both editing and viewer access, multiple tax periods, partial payments, record persistence after refresh, and R2 evidence attachment to a chosen period.
+
+## Guided HMRC interface (v1.59.1)
+
+Only the current step is shown. Completed steps appear as small editable navigation items rather than expanding all tax forms at once.
+
+1. **UTR letter** — record the received date or choose *Still waiting*. A pending letter is saved as pending, not complete.
+2. **Company activity** — preparing to buy, business activity started, or HMRC-confirmed dormant. Preparing/dormant stops the wizard here until the status changes; this does not remove any Companies House obligations.
+3. **Corporation Tax registration** — record HMRC confirmation or choose *Not yet confirmed*. Pending registration is flagged, and period recording remains available when activity has started.
+4. **Tax accounting period** — record dates checked with HMRC or the accountant.
+5. **Returns and payments** — separately expandable CT600 and payment forms; no filing-first requirement, since Corporation Tax payment may be due earlier.
+
+All HMRC compliance obligations and their R2 attachments remain available in the collapsed **All HMRC requirements and evidence** section. Due-soon/past-due HMRC notices appear above the wizard even if earlier documents are pending. A recorded answer is not treated as official verification. The user can return to previous steps to correct dates/status.
+
+No database migration, R2 change or new recurring charge is required. Existing `company_profiles.details.hmrc.setup` stores the two additional guide answers and stays covered by versioned company sync. Test with `node tests/test-hmrc-guided.mjs`, CI and the browser HMRC journey.
+
+Note for reviewers: a queued GitHub Actions run means tests have not executed. Only mark this PR ready after both unit and browser jobs complete successfully.
