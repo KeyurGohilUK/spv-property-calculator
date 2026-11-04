@@ -7,14 +7,16 @@ const style = readFileSync(new URL('../styles/features/company.css', import.meta
 const assets = JSON.parse(readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8'));
 assert.match(html, /id="companyComplianceTitle"/);
 assert.match(html, /id="companiesHouseComplianceItems"/);
-assert.match(html, /id="hmrcComplianceItems"/);
+assert.match(html, /id="hmrcSetupCards"/);
+assert.match(html, /id="hmrcPeriodHistory"/);
+assert.doesNotMatch(html, /id="hmrcComplianceItems"/, 'Do not render duplicate HMRC checklist');
 assert.match(html, /id="hmrcPeriodForm"/);
 assert.match(html, /Companies House compliance/);
 assert.match(html, /HMRC compliance/);
 assert.match(html, /companyComplianceSummary/);
 assert.match(html, /id="companyOfficialPeople"/);
 assert.match(html, /<section class="compliance-authority" aria-labelledby="chComplianceHeading">/);
-assert.match(html, /<section class="compliance-authority" aria-labelledby="hmrcComplianceHeading">/);
+assert.match(html, /<section class="compliance-authority hmrc-dashboard" aria-labelledby="hmrcComplianceHeading">/);
 assert.doesNotMatch(html, /<details class="compliance-authority"/, 'Main compliance sections must never collapse');
 assert.match(html, /<details class="company-official-people company-identity-overview compliance-subsection">/);
 assert.match(html, /<details class="company-filing-history compliance-subsection">/);
