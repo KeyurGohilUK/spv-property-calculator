@@ -325,7 +325,8 @@ const hmrcDialogs = {
   activity: setupDialog($('hmrcActivityDialog'), { closeButtons: [...$('hmrcActivityDialog').querySelectorAll('[data-hmrc-close]')] }),
   period: setupDialog($('hmrcPeriodDialog'), { closeButtons: [...$('hmrcPeriodDialog').querySelectorAll('[data-hmrc-close]')] }),
   filing: setupDialog($('hmrcFilingDialog'), { closeButtons: [...$('hmrcFilingDialog').querySelectorAll('[data-hmrc-close]')] }),
-  payment: setupDialog($('hmrcPaymentDialog'), { closeButtons: [...$('hmrcPaymentDialog').querySelectorAll('[data-hmrc-close]')] })
+  payment: setupDialog($('hmrcPaymentDialog'), { closeButtons: [...$('hmrcPaymentDialog').querySelectorAll('[data-hmrc-close]')] }),
+  evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] })
 };
 
 const hmrcBadge = (label, kind = 'neutral') =>
@@ -341,7 +342,7 @@ function hmrcEvidenceMarkup(ruleKey, label) {
       <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
       ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}
     </li>`).join('') || '<li class="muted">No documents</li>'}</ul>
-    ${editingAllowed ? `<label class="hmrc-upload-label">Attach PDF or image (max 5 MB)<input type="file" data-evidence-upload="${escapeHtml(ruleKey)}" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>` : ''}
+    ${editingAllowed ? `<button type="button" class="secondary-btn" data-hmrc-attach="${escapeHtml(ruleKey)}">Attach document</button>` : ''}
   </div>`;
 }
 
@@ -404,6 +405,14 @@ $('hmrcOpenPeriodDialog').addEventListener('click', (event) => {
   hmrcDialogs.period.open(event.currentTarget);
 });
 $('hmrcSetupCards').addEventListener('click', (event) => {
+  const attach = event.target.closest('[data-hmrc-attach]');
+  if (attach && editingAllowed) {
+    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
+    $('hmrcEvidenceInput').value = '';
+    $('hmrcEvidenceMessage').textContent = '';
+    hmrcDialogs.evidence.open(attach);
+    return;
+  }
   const button = event.target.closest('[data-hmrc-open]');
   if (!button || !editingAllowed) return;
   const step = button.dataset.hmrcOpen;
@@ -734,10 +743,11 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderCompanyCompliance();
     renderHmrcTracking();
     renderHmrcDashboard();
-    openEvidenceRequirement(ruleKey);
+    hmrcDialogs.evidence.close();
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
+    $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
   } finally {
     input.disabled = !editingAllowed;
     input.value = '';
@@ -961,6 +971,14 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
 });
 
 $('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const attach = event.target.closest('[data-hmrc-attach]');
+  if (attach && editingAllowed) {
+    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
+    $('hmrcEvidenceInput').value = '';
+    $('hmrcEvidenceMessage').textContent = '';
+    hmrcDialogs.evidence.open(attach);
+    return;
+  }
   const action = event.target.closest('[data-hmrc-open][data-hmrc-period]');
   if (action && editingAllowed) {
     const periodEnd = action.dataset.hmrcPeriod;
