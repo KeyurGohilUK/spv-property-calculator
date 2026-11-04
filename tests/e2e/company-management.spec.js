@@ -183,6 +183,8 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
   await expect(page.locator('#hmrcSetupDialog')).toBeHidden();
   await expect(page.locator('#hmrcSetupCards')).toContainText('Received 4 Feb 2026');
+  await expect(page.locator('#hmrcSetupCards [data-hmrc-open="utr"]')).toBeFocused();
+  await expect(page.locator('#complianceTabPanel')).not.toBeFocused();
 
   await page.locator('#hmrcSetupCards [data-hmrc-open="activity"]').click();
   await page.locator('input[name="hmrcActivity"][value="active"]').check();
@@ -201,6 +203,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcPeriodEnd').fill('2026-12-31');
   await page.locator('#hmrcPeriodForm button[type="submit"]').click();
   await expect(page.locator('#hmrcPeriodDialog')).toBeHidden();
+  await expect(page.locator('#hmrcOpenPeriodDialog')).toBeFocused();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('1 Oct 2027');
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('+ Record CT600');
@@ -219,6 +222,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcReviewedBy').fill('Example Accountants');
   await page.locator('#hmrcFilingForm button[type="submit"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeHidden();
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeFocused();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('Edit CT600');
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
@@ -235,6 +239,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcPaymentConfirmed').check();
   await page.locator('#hmrcPaymentForm button[type="submit"]').click();
   await expect(page.locator('#hmrcPaymentDialog')).toBeHidden();
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]')).toBeFocused();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
   await expect(page.locator('#hmrcPeriodHistory .hmrc-value-positive')).toContainText('£1,500.00');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('HMRC confirmed');
