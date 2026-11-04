@@ -203,6 +203,10 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('1 Oct 2027');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('+ Record CT600');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-pill--attention')).toContainText(['CT600 not recorded', 'Tax not assessed', 'Not recorded']);
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-summary-total')).toHaveCount(2);
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-value-attention').last()).toContainText('Unknown');
 
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeVisible();
@@ -216,6 +220,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcFilingForm button[type="submit"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('Edit CT600');
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('•••••34567');
   await page.locator('[data-hmrc-reveal-ref]').click();
@@ -231,6 +236,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcPaymentForm button[type="submit"]').click();
   await expect(page.locator('#hmrcPaymentDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-value-positive')).toContainText('£1,500.00');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('HMRC confirmed');
   await page.reload();
   await page.getByRole('tab', { name: 'Compliance' }).click();
@@ -292,4 +298,63 @@ test('viewer cannot change HMRC tax records', async ({ page }) => {
   await expect(page.locator('#hmrcOpenPeriodDialog')).toBeDisabled();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeDisabled();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]')).toBeDisabled();
+});
+
+test('@mobile HMRC dialogs use themed, full-size date and form controls', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'HMRC Styling SPV',
+    hmrc: {
+      status: 'active',
+      setup: { utrReceivedOn: '2026-02-04', activityStage: 'active', registrationConfirmedOn: '2026-02-06' },
+      periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }]
+    }
+  });
+  await page.goto('/company/details.html?company=default');
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcSetupViewTab').click();
+  await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
+
+  const checkControls = async (dialogId, controls) => {
+    const dialog = page.locator('#' + dialogId);
+    await expect(dialog).toBeVisible();
+    for (const id of controls) {
+      const field = page.locator('#' + id);
+      await expect(field).toBeVisible();
+      const style = await field.evaluate((element) => {
+        const css = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return {
+          height: rect.height, width: rect.width, parentWidth: element.parentElement.getBoundingClientRect().width,
+          radius: parseFloat(css.borderTopLeftRadius), background: css.backgroundColor, borderWidth: parseFloat(css.borderTopWidth),
+          fontSize: parseFloat(css.fontSize)
+        };
+      });
+      expect(style.height, id + ' height').toBeGreaterThanOrEqual(46);
+      expect(style.radius, id + ' radius').toBeGreaterThanOrEqual(10);
+      expect(style.borderWidth, id + ' border').toBeGreaterThanOrEqual(1);
+      expect(style.fontSize, id + ' font').toBeGreaterThanOrEqual(16);
+      expect(style.width, id + ' width').toBeGreaterThan(100);
+      expect(style.width, id + ' width containment').toBeLessThanOrEqual(style.parentWidth + 2);
+      expect(style.background, id + ' background').not.toBe('rgba(0, 0, 0, 0)');
+    }
+    await dialog.locator('[data-hmrc-close]').click();
+    await expect(dialog).toBeHidden();
+  };
+
+  await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
+  await checkControls('hmrcSetupDialog', ['hmrcUtrReceivedOn']);
+  await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
+  await checkControls('hmrcSetupDialog', ['hmrcRegistrationConfirmedOn', 'hmrcRegistrationReference']);
+
+  await page.locator('#hmrcRecurringViewTab').click();
+  await page.locator('#hmrcOpenPeriodDialog').click();
+  await checkControls('hmrcPeriodDialog', ['hmrcPeriodStart', 'hmrcPeriodEnd']);
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
+  await checkControls('hmrcFilingDialog', ['hmrcFiledOn', 'hmrcReviewedOn', 'hmrcLiability', 'hmrcLiabilityStatus']);
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await checkControls('hmrcPaymentDialog', ['hmrcPaymentDate', 'hmrcPaymentAmount', 'hmrcPaymentMethod']);
+
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await checkControls('hmrcPaymentDialog', ['hmrcPaymentDate', 'hmrcPaymentAmount']);
 });

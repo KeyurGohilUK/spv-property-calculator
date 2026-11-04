@@ -1,8 +1,8 @@
 {
-  "version": "1.60.0",
+  "version": "1.60.1",
   "notes": [
-    "Replace the duplicate HMRC wizard and checklist with one-time company setup and recurring Corporation Tax period cards.",
-    "Manage tax dates, CT600 entries, liabilities and payments through compact dialogs, using green/amber statuses and R2 evidence attachments.",
-    "Show period-specific payment references privately and display unknown tax as not assessed instead of £0."
+    "Show Record CT600 until a submission is recorded, then change to Edit CT600.",
+    "Use high-contrast red for outstanding filing/tax details and stronger green for recorded payments.",
+    "Separate total paid and outstanding balance with a clear divider."
   ]
 }
