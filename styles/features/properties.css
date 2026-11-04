@@ -165,10 +165,10 @@
 .properties-tab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .properties-tab[aria-selected="true"] {
   background: color-mix(in srgb, var(--brand) 11%, var(--surface));
-  color: var(--brand);
+  color: var(--text);
 }
 .properties-tab:hover { background: var(--surface-2); color: var(--text); }
-.properties-tab[aria-selected="true"]:hover { background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--brand); }
+.properties-tab[aria-selected="true"]:hover { background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--text); }
 .properties-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 #portfolioView[hidden] { display: none; }
 #homeView[hidden] { display: none; }
