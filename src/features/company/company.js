@@ -475,29 +475,29 @@ function renderHmrcTracking() {
           <div class="hmrc-period-heading">
             <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
             <div class="hmrc-period-badges">
-              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'neutral')}
-              ${hmrcBadge(noTaxDue ? 'No tax due (recorded)' : isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', noTaxDue || isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
+              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'attention')}
+              ${hmrcBadge(noTaxDue ? 'No tax due (recorded)' : isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment outstanding' : 'Tax not assessed', noTaxDue || isPaid ? 'success' : 'attention')}
             </div>
             <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
           </div>
           <div class="hmrc-period-actions">
-            <button type="button" class="secondary-btn" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Edit CT600</button>
+            <button type="button" class="secondary-btn" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>${recordedFiling ? 'Edit CT600' : '+ Record CT600'}</button>
             <button type="button" class="primary-btn" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>+ Tax payment</button>
           </div>
         </header>
         <div class="hmrc-period-grid">
           <section class="hmrc-period-info"><h6>CT600 return</h6>
-            ${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'neutral')}
+            ${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'attention')}
             <dl><dt>Submitted</dt><dd>${hmrcDate(record.filedOn)}</dd>
               <dt>Reference</dt><dd>${escapeHtml(record.filingReference) || '—'}</dd>
               <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
               <dt>Reviewed on</dt><dd>${hmrcDate(record.reviewedOn)}</dd></dl>
           </section>
           <section class="hmrc-period-info"><h6>Financial summary</h6>
-            <dl><dt>Tax liability</dt><dd>${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
-              <dt>Liability status</dt><dd>${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
+            <dl><dt>Tax liability</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
+              <dt>Liability status</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
               <dt>Total paid</dt><dd class="hmrc-value-positive">${CURRENCY_FORMAT.format(record.paid)}</dd>
-              <dt>Outstanding</dt><dd>${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</dd></dl>
+              <dt class="hmrc-summary-total">Outstanding</dt><dd class="hmrc-summary-total ${record.outstanding === null || record.outstanding > 0 ? 'hmrc-value-attention' : 'hmrc-value-positive'}">${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</dd></dl>
             ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
           </section>
           <section class="hmrc-period-info"><h6>HMRC payment details</h6>
