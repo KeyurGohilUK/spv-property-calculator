@@ -305,9 +305,9 @@ function renderCompanyCompliance() {
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
       <div class="company-evidence">
-        <strong>Supporting evidence</strong>
+        <strong>Supporting evidence</strong><small class="muted">Files do not independently verify that a filing or payment was completed.</small>
         <ul class="company-evidence-files">${(profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key).map((file) => `
-          <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(file.uploadedAt?.slice(0, 10) || 'Date unknown')}</small></span>
+          <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown')}</small></span>
           <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
           ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
         ${editingAllowed ? `<label class="company-evidence-upload">Attach PDF or image (maximum 5 MB)<input type="file" data-evidence-upload="${escapeHtml(item.key)}" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>` : ''}
