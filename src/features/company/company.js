@@ -709,6 +709,12 @@ async function requireEvidenceEditor() {
     throw new Error('Approved editor access is required.');
   }
 }
+function restoreEvidenceDisclosure(ruleKey) {
+  const upload = [...document.querySelectorAll('[data-evidence-upload]')].find((element) => element.dataset.evidenceUpload === ruleKey && element.closest('details'));
+  const attach = [...document.querySelectorAll('[data-hmrc-attach]')].find((element) => element.dataset.hmrcAttach === ruleKey);
+  (upload || attach)?.closest('details')?.setAttribute('open', '');
+}
+
 $('complianceTabPanel').addEventListener('change', async (event) => {
   const input = event.target.closest('[data-evidence-upload]');
   if (!input?.files?.length) return;
@@ -738,6 +744,7 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderHmrcTracking();
     renderHmrcDashboard();
     hmrcDialogs.evidence.close();
+    restoreEvidenceDisclosure(ruleKey);
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
@@ -776,7 +783,9 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
       await deleteComplianceEvidence(profile.id, existing);
       profile = getCompanyProfile();
       renderCompanyCompliance();
-      openEvidenceRequirement(entry.ruleKey);
+      renderHmrcTracking();
+      renderHmrcDashboard();
+      restoreEvidenceDisclosure(entry.ruleKey);
       setEvidenceMessage('Evidence removed.');
     }
   } catch (error) {
