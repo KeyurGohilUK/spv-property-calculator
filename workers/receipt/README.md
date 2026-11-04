@@ -49,6 +49,8 @@ npx wrangler login
 npx wrangler deploy
 ```
 
+The Wrangler configuration sets `keep_vars: true` so existing dashboard-managed `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and `ALLOWED_ORIGINS` variables are preserved during deployment. Verify these bindings and the receipt upload/download flow immediately after deployment.
+
 Use the existing Cloudflare account and Worker, not a new storage service. The `RECEIPTS` binding must still point to `spv-property-receipts`. No extra Supabase database migration, R2 bucket or API key is required. Do not commit Cloudflare credentials. Check `GET /health` afterwards and test one small document end to end in the app. Without this Worker deployment the new evidence controls will return 404.
 
 ### Estimated incremental storage cost
