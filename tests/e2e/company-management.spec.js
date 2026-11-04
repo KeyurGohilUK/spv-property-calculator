@@ -311,6 +311,8 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcSetupViewTab').click();
+  await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
 
   const checkControls = async (dialogId, controls) => {
     const dialog = page.locator('#' + dialogId);
