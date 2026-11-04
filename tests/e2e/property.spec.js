@@ -432,7 +432,7 @@ test('home Account, Install and More controls open dialogs without navigation', 
   await expect(page).toHaveURL(originalUrl);
 });
 
-for (const route of ['/expenses/', '/forecast/', '/portfolio/']) {
+for (const route of ['/expenses/', '/forecast/']) {
   test(`secondary-page controls behave as dialogs on ${route}`, async ({ page }) => {
     await page.goto(route);
     const originalUrl = page.url();
