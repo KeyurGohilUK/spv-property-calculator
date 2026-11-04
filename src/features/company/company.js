@@ -391,12 +391,13 @@ function renderHmrcDashboard() {
     : setup.utrStatus === 'pending' ? 'Waiting' : 'Not recorded';
   const activityLabel = ({ preparing: 'Preparing to buy', active: 'Business started', dormant: 'Dormant' })[state.activity] || 'Not recorded';
   const complete = state.setupRecorded;
+  const total = state.setupTotal;
   const activityActive = state.activity === 'active';
   const registrationVisible = activityActive;
   const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
   const registrationDone = Boolean(setup.registrationConfirmedOn);
-  $('hmrcSetupTabStatus').textContent = complete === 2 ? '(Steps 1–2 · 2/2 Done)' : '(Steps 1–2 · ' + complete + '/2 Complete)';
-  $('hmrcSetupTabIcon').classList.toggle('is-complete', complete === 2);
+  $('hmrcSetupTabStatus').textContent = complete === total ? '(' + total + '/' + total + ' Done)' : '(' + complete + '/' + total + ' Complete)';
+  $('hmrcSetupTabIcon').classList.toggle('is-complete', complete === total);
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
       <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
