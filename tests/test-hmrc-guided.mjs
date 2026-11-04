@@ -28,9 +28,14 @@ for (const id of ['hmrcSetupViewTab','hmrcRecurringViewTab','hmrcSetupCards','hm
   assert.match(html, new RegExp('id="' + id + '"'));
 }
 assert.doesNotMatch(html, /id="hmrcEvidenceDialog"|id="hmrcEvidenceInput"/, 'Standalone HMRC evidence dialog removed');
-assert.match(html, /<form id="hmrcSetupForm"[\\s\\S]*?id="hmrcSetupEvidenceInput"/, 'Setup uploads belong to the setup record dialog');
-assert.match(html, /<form id="hmrcFilingForm"[\\s\\S]*?id="hmrcFilingEvidenceInput"/, 'CT600 uploads belong to the CT600 record dialog');
-assert.match(html, /<form id="hmrcPaymentForm"[\\s\\S]*?id="hmrcPaymentEvidenceInput"/, 'Payment receipts belong to the payment record dialog');
+function assertUploadInputInsideForm(formId, inputId, message) {
+  const start = html.indexOf(`<form id="${formId}"`);
+  const end = html.indexOf('</form>', start);
+  assert.ok(start >= 0 && end > start && html.slice(start, end).includes(`id="${inputId}"`), message);
+}
+assertUploadInputInsideForm('hmrcSetupForm', 'hmrcSetupEvidenceInput', 'Setup upload belongs to the setup record dialog');
+assertUploadInputInsideForm('hmrcFilingForm', 'hmrcFilingEvidenceInput', 'CT600 upload belongs to the filing record dialog');
+assertUploadInputInsideForm('hmrcPaymentForm', 'hmrcPaymentEvidenceInput', 'Payment receipt belongs to the payment record dialog');
 assert.doesNotMatch(script, /hmrcEvidenceDialog|hmrcEvidenceInput|hmrcDialogs[.]evidence/, 'No standalone HMRC evidence dialog behavior remains');
 assert.ok(script.includes('function openHmrcEvidenceRecord('), 'Document actions open the matching record dialog');
 assert.doesNotMatch(html, /id="hmrcComplianceItems"/, 'Duplicate HMRC checklist removed');
