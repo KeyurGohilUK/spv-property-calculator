@@ -33,3 +33,5 @@ Only the current step is shown. Completed steps appear as small editable navigat
 All HMRC compliance obligations and their R2 attachments remain available in the collapsed **All HMRC requirements and evidence** section. Due-soon/past-due HMRC notices appear above the wizard even if earlier documents are pending. A recorded answer is not treated as official verification. The user can return to previous steps to correct dates/status.
 
 No database migration, R2 change or new recurring charge is required. Existing `company_profiles.details.hmrc.setup` stores the two additional guide answers and stays covered by versioned company sync. Test with `node tests/test-hmrc-guided.mjs`, CI and the browser HMRC journey.
+
+Note for reviewers: a queued GitHub Actions run means tests have not executed. Only mark this PR ready after both unit and browser jobs complete successfully.
