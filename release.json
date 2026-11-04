@@ -1,7 +1,7 @@
 {
-  "version": "1.60.3",
+  "version": "1.60.4",
   "notes": [
-    "Show HMRC tax record fields in two columns on wider screens and one column on narrow screens.",
-    "Remove blank space below the Save button when the dialog has no status message."
+    "Attach HMRC supporting documents from the matching setup, CT600 or payment record dialog.",
+    "Keep HMRC document uploads in the selected record dialog while retaining private evidence storage."
   ]
 }
