@@ -365,7 +365,7 @@ test('property card cost amounts use the full totals panel width', async ({ page
   alignment.forEach((rightInset) => expect(rightInset).toBeLessThanOrEqual(16));
 });
 
-test('@mobile Opportunities label stays on one line and fits the navigation button @mobile', async ({ page }) => {
+test('@mobile Properties label stays on one line and fits the navigation button @mobile', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/');
   const link = page.locator('#propertiesNavLink');
@@ -613,10 +613,10 @@ test('tracks an accepted offer through exchange into the completed Portfolio', a
   await page.locator('#backBtn').click();
   card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
   await expect(card).toContainText('Under offer · Sold STC');
-  await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
+  await page.getByRole('tab', { name: 'Portfolio', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'No completed properties yet' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Opportunities', exact: true }).click();
+  await page.getByRole('tab', { name: 'Opportunities', exact: true }).click();
   card = page.locator('.property-card').filter({ hasText: 'Portfolio Lifecycle' });
   await card.getByRole('button', { name: 'Open Portfolio Lifecycle for editing' }).click();
   await openContainingSection(page, '#purchaseStage');
@@ -626,7 +626,7 @@ test('tracks an accepted offer through exchange into the completed Portfolio', a
   await page.locator('#savePropertyBtn').click();
   await page.locator('#backBtn').click();
   await expect(page.locator('#emptyState')).toBeVisible();
-  await page.getByRole('link', { name: 'Portfolio', exact: true }).click();
+  await page.getByRole('tab', { name: 'Portfolio', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Portfolio Lifecycle' })).toBeVisible();
   await expect(page.locator('.portfolio-card')).toContainText('Completed 21 Oct 2026');
   await expect(page.locator('.portfolio-card')).toContainText('£240,000');
