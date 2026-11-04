@@ -318,6 +318,17 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   await page.getByRole('tab', { name: 'Compliance' }).click();
   await page.locator('#hmrcSetupViewTab').click();
   await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
+  // Use the same accessible pencil icon as the rest of the Company page.
+  for (const [step, label] of [
+    ['utr', 'Edit UTR letter'],
+    ['activity', 'Edit company activity'],
+    ['registration', 'Edit Corporation Tax registration']
+  ]) {
+    const edit = page.locator('#hmrcSetupCards [data-hmrc-open="' + step + '"]');
+    await expect(edit).toHaveAttribute('aria-label', label);
+    await expect(edit.locator('svg')).toHaveCount(1);
+    await expect(edit).not.toContainText('Edit');
+  }
 
   const checkControls = async (dialogId, controls) => {
     const dialog = page.locator('#' + dialogId);
