@@ -134,3 +134,45 @@
 .section-heading h2 { font-size: 25px; }
 .section-heading h3 { font-size: 19px; }
 .section-total { flex: 0 0 auto; color: var(--brand); font-size: 20px; white-space: nowrap; }
+
+
+/* Property section tabs match the app's warm, compact navigation style. */
+.properties-dashboard { display: grid; gap: 18px; }
+.properties-tabs {
+  display: flex;
+  gap: 8px;
+  max-width: 100%;
+  padding: 0 0 4px;
+  overflow-x: auto;
+  scrollbar-color: var(--brand) var(--surface-2);
+}
+.properties-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.properties-tab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.properties-tab[aria-selected="true"] {
+  background: color-mix(in srgb, var(--brand) 11%, var(--surface));
+  color: var(--brand);
+}
+.properties-tab:hover { background: var(--surface-2); color: var(--text); }
+.properties-tab[aria-selected="true"]:hover { background: color-mix(in srgb, var(--brand) 14%, var(--surface)); color: var(--brand); }
+.properties-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+#portfolioView[hidden] { display: none; }
+#homeView[hidden] { display: none; }
+@media (max-width: 480px) {
+  .properties-tabs { gap: 4px; }
+  .properties-tab { padding-inline: 13px; }
+}
