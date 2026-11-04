@@ -329,9 +329,15 @@ function renderHmrcGuide() {
   const currentStep = HMRC_STEPS.find((step) => step.id === state.current);
   $('hmrcGuideTitle').textContent = currentStep.title;
   $('hmrcGuideProgress').textContent = 'Step ' + (HMRC_STEPS.findIndex((step) => step.id === state.current) + 1) + ' of 5';
+  const setup = normalizeHmrcTracking(profile.hmrc).setup;
   $('hmrcGuideSteps').innerHTML = state.allowed.map((id) => {
     const step = HMRC_STEPS.find((item) => item.id === id);
-    return `<button type="button" data-hmrc-go="${escapeHtml(id)}" ${id === state.current ? 'aria-current="step"' : ''}>${escapeHtml(step.title)}${id !== state.next ? ' ✓' : ''}</button>`;
+    const done = id === 'utr' ? Boolean(setup.utrReceivedOn)
+      : id === 'registration' ? Boolean(setup.registrationConfirmedOn)
+        : id === 'activity' ? state.activity === 'active'
+          : id === 'period' ? state.hasPeriods : false;
+    const label = id !== state.next ? (done ? ' ✓' : ' · Waiting') : '';
+    return `<button type="button" data-hmrc-go="${escapeHtml(id)}" ${id === state.current ? 'aria-current="step"' : ''}>${escapeHtml(step.title)}${label}</button>`;
   }).join('');
   for (const [id, section] of [['utr', 'hmrcSetupStage'], ['registration', 'hmrcSetupStage'],
     ['activity', 'hmrcActivityStage'], ['period', 'hmrcPeriodStage'], ['records', 'hmrcRecordsStage']]) {
