@@ -98,7 +98,8 @@ assert.match(primaryNavigation, /href: '\.\/expenses\/'/, 'Shared navigation mus
 assert.match(primaryNavigation, /href: '\.\/forecast\/'/, 'Shared navigation must link to the clean Forecast route');
 assert.match(primaryNavigation, /id: 'properties', label: 'Properties', href: '\.\/'/, 'Shared navigation must link to the Properties page');
 assert.doesNotMatch(primaryNavigation, /href: '\.\/portfolio\/'/, 'Portfolio must not be a separate top-level navigation link');
-assert.match(appShell, /href="\.\/company\/"[\s\S]*<strong>Manage Company<\/strong>/, 'App Menu must link to Company Management');
+assert.match(primaryNavigation, /id: 'company', label: 'Company', href: '\.\/company\/'/, 'Primary navigation must include Company');
+assert.doesNotMatch(appShell, /Manage Company/, 'Company must not remain in the More menu');
 assert.doesNotMatch(primaryNavigation, /\.html/, 'Primary navigation must not expose implementation filenames');
 assert.match(appShell, /href="\.\/admin\/users\/"/, 'App Menu must link to the clean user-management route');
 assert.match(expenses, /data-active-page="expenses"/, 'Expenses navigation must declare its active page');
