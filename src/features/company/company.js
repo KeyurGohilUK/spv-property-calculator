@@ -341,6 +341,7 @@ function renderHmrcGuide() {
   $('hmrcSetupStage').hidden = !['utr', 'registration'].includes(state.current);
   const isUtr = state.current === 'utr';
   $('hmrcSetupHeading').textContent = isUtr ? 'UTR letter' : 'Corporation Tax registration';
+  $('hmrcSetupStage').querySelector('.hmrc-tracking-panel > p').textContent = isUtr ? 'Enter the date on your letter. Keep the UTR number private.' : 'Enter the confirmation date from HMRC. Not confirmed yet? Record that you are waiting.';
   $('hmrcSetupSaveBtn').textContent = isUtr ? 'Save letter date' : 'Save registration date';
   $('hmrcPendingBtn').textContent = isUtr ? 'Still waiting for letter' : 'Registration not yet confirmed';
   $('hmrcSetupStage').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => {
@@ -368,6 +369,7 @@ function renderHmrcGuide() {
   const notes = [...state.pending, ...(urgent.length ? [urgent.length + ' HMRC deadline(s) need checking. Open all requirements below.'] : [])];
   $('hmrcGuideAlerts').textContent = notes.join(' · ');
   $('hmrcGuideAlerts').hidden = !notes.length;
+  $('hmrcTaxStatus').closest('label').hidden = true;
   $('hmrcPeriodForm').querySelectorAll('input,select,button').forEach((el) => { el.disabled = !editingAllowed; });
 }
 $('hmrcGuideSteps').addEventListener('click', (event) => {
