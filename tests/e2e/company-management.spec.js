@@ -289,7 +289,7 @@ test('HMRC setup remains compact while company is preparing to buy', async ({ pa
   await expect(page.locator('#hmrcSetupCards')).toContainText('Preparing to buy');
   await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
   await expect(page.locator('#hmrcSetupCards [data-hmrc-open="registration"]')).toHaveCount(0);
-  await expect(page.locator('#hmrcSetupCount')).toHaveText('1 of 2 recorded');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('(1/2 Complete)');
 });
 
 test('@mobile HMRC summary does not overflow a phone viewport', async ({ page }) => {
