@@ -52,7 +52,7 @@ for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses'
 }
 assert.match(index, /data-properties-tab="opportunities"[\s\S]*data-properties-tab="portfolio"/, 'Properties must provide Opportunities and Portfolio tabs');
 assert.match(portfolio, /window\.location\.replace[\s\S]*view=portfolio/, 'The legacy Portfolio route must open the Portfolio tab');
-assert.match(primaryNavigation, /label: 'Properties'[\s\S]*label: 'Expenses'[\s\S]*label: 'Tasks'[\s\S]*label: 'Forecast'[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.match(primaryNavigation, /label: 'Properties'[\s\S]*label: 'Company'[\s\S]*label: 'Expenses'[\s\S]*label: 'Tasks'[\s\S]*label: 'Forecast'[\s\S]*More/, 'Shared navigation items must keep their priority order');
 assert.doesNotMatch(primaryNavigation, /label: 'Portfolio'/, 'Portfolio must be nested under Properties rather than a top-level item');
 assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Properties must stay on one line on every mobile page');
 assert.doesNotMatch(styles, /#editorView \.editor-topbar::after/, 'Editor toolbar must not add a backdrop beneath the bar');
