@@ -30,11 +30,15 @@ export function normalizeHmrcTracking(hmrc = {}) {
         filedOn: date(record.filedOn),
         filingReference: clean(record.filingReference, 120),
         liability: money(record.liability),
+        liabilityStatus: ['estimated', 'confirmed'].includes(record.liabilityStatus) ? record.liabilityStatus : record.liability == null ? 'unknown' : 'recorded',
+        paymentReference: /^[A-Za-z0-9]{17}$/.test(String(record.paymentReference || '')) ? String(record.paymentReference).toUpperCase() : '',
         reviewedOn: date(record.reviewedOn),
         reviewedBy: clean(record.reviewedBy),
         payments: Array.isArray(record.payments) ? record.payments.filter((payment) => PAYMENT_ID.test(String(payment?.id || '')) && validDate(payment.date) && Number(payment.amount) > 0 && money(payment.amount) !== null).slice(0, 200).map((payment) => ({
           id: payment.id, date: payment.date, amount: money(payment.amount),
-          reference: clean(payment.reference, 160)
+          reference: clean(payment.reference, 160),
+          method: ['bank-transfer', 'direct-debit', 'card', 'other'].includes(payment.method) ? payment.method : 'other',
+          status: payment.status === 'hmrc-confirmed' ? 'hmrc-confirmed' : 'recorded'
         })) : []
       }))
   };
@@ -42,7 +46,7 @@ export function normalizeHmrcTracking(hmrc = {}) {
 
 export function hmrcPeriodSummary(hmrc, periodEnd) {
   const record = normalizeHmrcTracking(hmrc).records.find((item) => item.periodEnd === periodEnd) || {
-    periodEnd, filedOn: '', filingReference: '', liability: null, reviewedOn: '', reviewedBy: '', payments: []
+    periodEnd, filedOn: '', filingReference: '', liability: null, liabilityStatus: 'unknown', paymentReference: '', reviewedOn: '', reviewedBy: '', payments: []
   };
   const paid = Math.round(record.payments.reduce((sum, payment) => sum + payment.amount, 0) * 100) / 100;
   return { ...record, paid, outstanding: record.liability === null ? null : Math.max(0, Math.round((record.liability - paid) * 100) / 100), overpayment: record.liability === null ? null : Math.max(0, Math.round((paid - record.liability) * 100) / 100) };
@@ -68,7 +72,9 @@ export function recordHmrcPayment(hmrc, periodEnd, payment) {
   const record = hmrcPeriodSummary(hmrc, periodEnd);
   if (record.payments.some((p) => p.id === payment.id)) throw new Error('Payment already recorded.');
   return saveHmrcPeriodRecord(hmrc, periodEnd, {
-    payments: [...record.payments, { id: payment.id, date: payment.date, amount, reference: clean(payment.reference) }]
+    payments: [...record.payments, { id: payment.id, date: payment.date, amount, reference: clean(payment.reference),
+      method: ['bank-transfer', 'direct-debit', 'card', 'other'].includes(payment.method) ? payment.method : 'other',
+      status: payment.status === 'hmrc-confirmed' ? 'hmrc-confirmed' : 'recorded' }]
   });
 }
 
