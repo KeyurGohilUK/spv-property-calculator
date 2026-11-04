@@ -1,7 +1,6 @@
 {
-  "version": "1.57.0",
+  "version": "1.57.1",
   "notes": [
-    "Keep Companies House search input and icon button aligned on one responsive row.",
-    "Tighten spacing in the Add Company search panel."
+    "Move the New Company action into the page header beside the sync status."
   ]
 }

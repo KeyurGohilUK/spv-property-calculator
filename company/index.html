@@ -27,7 +27,10 @@
     <main class="main-shell company-shell">
       <section class="hero-card company-hero">
         <div><p class="eyebrow">Company records</p><h1>Manage Companies</h1><p class="muted">Choose a company to manage its particulars, compliance, investments and appointments.</p></div>
-        <span id="companyListSyncStatus" class="sync-status" role="status">Saved on this device</span>
+        <div class="property-hero-actions" role="group" aria-label="Company actions">
+          <span id="companyListSyncStatus" class="sync-status" role="status">Saved on this device</span>
+          <button id="newCompanyBtn" class="primary-btn" type="button">＋ New Company</button>
+        </div>
       </section>
       <section class="company-section" aria-labelledby="companyListTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Your workspace</p><h2 id="companyListTitle">Companies</h2></div></div>
