@@ -325,6 +325,10 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
         const rect = element.getBoundingClientRect();
         return {
           height: rect.height, width: rect.width, parentWidth: element.parentElement.getBoundingClientRect().width,
+          left: rect.left, right: rect.right,
+          parentLeft: element.parentElement.getBoundingClientRect().left,
+          parentRight: element.parentElement.getBoundingClientRect().right,
+          dialogRight: element.closest('dialog').getBoundingClientRect().right,
           radius: parseFloat(css.borderTopLeftRadius), background: css.backgroundColor, borderWidth: parseFloat(css.borderTopWidth),
           fontSize: parseFloat(css.fontSize)
         };
@@ -335,6 +339,9 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
       expect(style.fontSize, id + ' font').toBeGreaterThanOrEqual(16);
       expect(style.width, id + ' width').toBeGreaterThan(100);
       expect(style.width, id + ' width containment').toBeLessThanOrEqual(style.parentWidth + 2);
+      expect(style.left, id + ' left containment').toBeGreaterThanOrEqual(style.parentLeft - 1);
+      expect(style.right, id + ' right containment').toBeLessThanOrEqual(style.parentRight + 1);
+      expect(style.right, id + ' dialog containment').toBeLessThanOrEqual(style.dialogRight - 12);
       expect(style.background, id + ' background').not.toBe('rgba(0, 0, 0, 0)');
     }
     await dialog.locator('[data-hmrc-close]').click();
@@ -351,6 +358,8 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   await checkControls('hmrcPeriodDialog', ['hmrcPeriodStart', 'hmrcPeriodEnd']);
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
   await checkControls('hmrcFilingDialog', ['hmrcFiledOn', 'hmrcReviewedOn', 'hmrcLiability', 'hmrcLiabilityStatus']);
+  const filingFields = await page.locator('#hmrcFilingForm label:has(input[type="date"])').count();
+  expect(filingFields).toBe(2);
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
   await checkControls('hmrcPaymentDialog', ['hmrcPaymentDate', 'hmrcPaymentAmount', 'hmrcPaymentMethod']);
 
