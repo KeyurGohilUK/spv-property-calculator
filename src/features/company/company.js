@@ -346,14 +346,13 @@ function hmrcEvidenceMarkup(ruleKey, label) {
 }
 
 function renderHmrcDashboard() {
-  const tracking = normalizeHmrcTracking(profile.hmrc);
-  const setup = tracking.setup;
+  const setup = normalizeHmrcTracking(profile.hmrc).setup;
   const state = hmrcOverviewState(profile.hmrc);
   const periods = hmrcTaxPeriods(profile.hmrc);
   const utrLabel = setup.utrReceivedOn ? 'Received ' + formatComplianceDateUK(setup.utrReceivedOn)
     : setup.utrStatus === 'pending' ? 'Waiting' : 'Not recorded';
   const activityLabel = ({ preparing: 'Preparing to buy', active: 'Business started', dormant: 'Dormant' })[state.activity] || 'Not recorded';
-  const complete = Number(Boolean(setup.utrReceivedOn)) + Number(Boolean(state.activity));
+  const complete = state.setupRecorded;
   const activityActive = state.activity === 'active';
   const registrationVisible = activityActive;
   const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
@@ -475,7 +474,7 @@ function renderHmrcTracking() {
           <div class="hmrc-period-heading">
             <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
             <div class="hmrc-period-badges">
-              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not filed', recordedFiling ? 'success' : 'neutral')}
+              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'neutral')}
               ${hmrcBadge(isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
             </div>
             <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
