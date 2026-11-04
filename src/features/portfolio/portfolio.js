@@ -30,6 +30,7 @@ function renderPortfolio() {
 
 renderPortfolio();
 window.addEventListener('spv-workspace-synced', renderPortfolio);
+window.addEventListener('spv-properties-updated', renderPortfolio);
 window.addEventListener('storage', (event) => {
   if (!event.key || event.key === 'spv-property-calculator.properties.v1') renderPortfolio();
 });
