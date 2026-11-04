@@ -1,7 +1,6 @@
 {
-  "version": "1.54.9",
+  "version": "1.55.0",
   "notes": [
-    "Keep Companies House and HMRC panels expanded at full width.",
-    "Fix incorrectly nested compliance item accordions; preserve collapsed individual rows."
+    "Bring Opportunities and Portfolio together under one Properties menu with tabs for each view."
   ]
 }
