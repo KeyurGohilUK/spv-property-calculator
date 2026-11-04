@@ -1,7 +1,7 @@
 {
-  "version": "1.59.0",
+  "version": "1.59.1",
   "notes": [
-    "Track HMRC Corporation Tax setup and UTR receipt confirmation without storing the sensitive UTR number.",
-    "Record CT600 submissions, accountant reviews and individual Corporation Tax payments for each tax period, with outstanding balances and evidence attachments."
+    "Guide company HMRC setup one step at a time with shorter explanations and editable completed steps.",
+    "Keep pending letters, dormant activity and tax deadlines visible without blocking necessary period records; simplify CT600 and payment forms."
   ]
 }
