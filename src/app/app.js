@@ -93,6 +93,7 @@ function setPropertiesTab(tabName = 'opportunities', focus = false) {
     }
   });
   if (focus) selectedTab?.focus();
+  window.dispatchEvent(new CustomEvent('spv-properties-updated'));
 }
 
 propertyTabs.forEach((tab, index) => {
@@ -1351,7 +1352,7 @@ function init() {
     if ($('moreMenuDialog').open) $('moreMenuDialog').close();
     showArchive();
   });
-  $('backBtn').addEventListener('click', showHome);
+  $('backBtn').addEventListener('click', () => showHome());
   $('propertiesNavLink').addEventListener('click', (event) => {
     event.preventDefault();
     showHome();
