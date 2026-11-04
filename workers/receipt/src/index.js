@@ -134,6 +134,65 @@ async function deleteReceipt(request, env, url, expenseId) {
   return new Response(null, { status: 204, headers: corsHeaders(request, env) });
 }
 
+// Company compliance evidence uses the same private R2 bucket and workspace ACL.
+// A random file UUID prevents guessing object references; paths are always scoped
+// to a specific company. Receipt routes and their 2 MB cap remain unchanged.
+const MAX_EVIDENCE_SIZE = 5 * 1024 * 1024;
+function evidenceRoute(url) {
+  const match = /^\/compliance\/(default|company-[A-Za-z0-9_-]{8,80})\/([0-9a-f]{8}-[0-9a-f-]{27,40})$/.exec(url.pathname);
+  return match ? { companyId: match[1], fileId: match[2] } : null;
+}
+function evidenceObjectKey(url, companyId, fileId) {
+  const key = url.searchParams.get('key') || '';
+  return /^compliance\/(?:default|company-[A-Za-z0-9_-]{8,80})\/[0-9a-f-]+\.(?:pdf|jpg|png|webp|heic|heif)$/.test(key)
+    && key.startsWith('compliance/' + companyId + '/' + fileId + '.') ? key : '';
+}
+async function uploadEvidence(request, env, route) {
+  const user = await requireWorkspaceAccess(request, env, true);
+  const type = String(request.headers.get('Content-Type') || '').toLowerCase().split(';')[0];
+  const ext = RECEIPT_TYPES.get(type);
+  if (!ext) return json(request, env, { error: 'Upload a PDF or supported image.' }, 415);
+  if (Number(request.headers.get('Content-Length')) > MAX_EVIDENCE_SIZE) {
+    return json(request, env, { error: 'Evidence files must not exceed 5 MB.' }, 413);
+  }
+  const bytes = await request.arrayBuffer();
+  if (!bytes.byteLength || bytes.byteLength > MAX_EVIDENCE_SIZE) {
+    return json(request, env, { error: 'Evidence files must be between 1 byte and 5 MB.' }, 413);
+  }
+  const objectPath = 'compliance/' + route.companyId + '/' + route.fileId + '.' + ext;
+  // Do not overwrite an existing evidence object by reusing its UUID.
+  if (await env.RECEIPTS.head(objectPath)) return json(request, env, { error: 'Evidence reference already exists.' }, 409);
+  const originalName = decodeReceiptName(request.headers.get('X-Receipt-Name'));
+  await env.RECEIPTS.put(objectPath, bytes, {
+    httpMetadata: { contentType: type },
+    customMetadata: { companyId: route.companyId, fileId: route.fileId, uploadedBy: String(user.id || ''), originalName }
+  });
+  return json(request, env, {
+    objectPath, name: originalName, type, size: bytes.byteLength,
+    uploadedAt: new Date().toISOString(), uploadedBy: String(user.id || '')
+  }, 201);
+}
+async function downloadEvidence(request, env, url, route) {
+  await requireWorkspaceAccess(request, env, false);
+  const objectPath = evidenceObjectKey(url, route.companyId, route.fileId);
+  if (!objectPath) return json(request, env, { error: 'Invalid evidence object reference.' }, 400);
+  const object = await env.RECEIPTS.get(objectPath);
+  if (!object) return json(request, env, { error: 'Evidence file not found.' }, 404);
+  const headers = corsHeaders(request, env);
+  headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(object.customMetadata?.originalName || 'evidence'));
+  headers.set('Cache-Control', 'private, no-store');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  return new Response(object.body, { headers });
+}
+async function deleteEvidence(request, env, url, route) {
+  await requireWorkspaceAccess(request, env, true);
+  const objectPath = evidenceObjectKey(url, route.companyId, route.fileId);
+  if (!objectPath) return json(request, env, { error: 'Invalid evidence object reference.' }, 400);
+  await env.RECEIPTS.delete(objectPath);
+  return new Response(null, { status: 204, headers: corsHeaders(request, env) });
+}
+
 export default {
   async fetch(request, env) {
     if (!isOriginAllowed(request, env)) return json(request, env, { error: 'Origin not allowed.' }, 403);
@@ -141,6 +200,17 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/health' && request.method === 'GET') {
       return json(request, env, { ok: true, service: 'spv-receipt-service' });
+    }
+    const evidence = evidenceRoute(url);
+    if (evidence) {
+      try {
+        if (request.method === 'PUT') return await uploadEvidence(request, env, evidence);
+        if (request.method === 'GET') return await downloadEvidence(request, env, url, evidence);
+        if (request.method === 'DELETE') return await deleteEvidence(request, env, url, evidence);
+        return json(request, env, { error: 'Method not allowed.' }, 405);
+      } catch (error) {
+        return json(request, env, { error: error.message || 'Evidence service unavailable.' }, Number(error.status) || 500);
+      }
     }
     const expenseId = expenseIdFrom(url);
     if (!expenseId) return json(request, env, { error: 'Not found.' }, 404);
