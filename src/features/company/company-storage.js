@@ -1,4 +1,5 @@
 import { COMPANY_COMPLIANCE_RULES, validDate, normalizeConfirmation, hmrcTaxPeriods } from './compliance-rules.js';
+import { normalizeHmrcTracking } from './hmrc-tracking.js';
 const VALID_RULE_IDS = new Set(COMPANY_COMPLIANCE_RULES.map((rule) => rule.id));
 const COMPANY_STORAGE_KEY = 'spv-property-calculator.company-profile.v1';
 const COMPANY_INDEX_KEY = 'spv-property-calculator.company-ids.v1';
@@ -108,7 +109,8 @@ export function normalizeCompanyProfile(profile = {}) {
       periodStart: validDate(profile.hmrc?.periodStart) ? profile.hmrc.periodStart : '',
       periodEnd: validDate(profile.hmrc?.periodEnd) ? profile.hmrc.periodEnd : '',
       periods: hmrcTaxPeriods(profile.hmrc).filter((period, i, periods) =>
-        !periods.slice(0, i).some((earlier) => earlier.periodEnd === period.periodEnd))
+        !periods.slice(0, i).some((earlier) => earlier.periodEnd === period.periodEnd)),
+      ...normalizeHmrcTracking(profile.hmrc)
     },
     deletedAt: /^\d{4}-\d{2}-\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
     appointments,
