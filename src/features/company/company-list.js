@@ -15,6 +15,7 @@ const addDialog = setupDialog($('addCompanyDialog'), {
 
 function renderCompanies() {
   const records = listStoredCompanyProfiles().sort((a, b) => a.companyName.localeCompare(b.companyName));
+  $('newCompanyBtn').disabled = !editingAllowed;
   $('companyCards').innerHTML = records.map((company) => `
     <a class="company-list-card" href="./company/details.html?company=${encodeURIComponent(company.id)}">
       <span class="company-list-card-icon" aria-hidden="true">⌂</span>
@@ -22,20 +23,15 @@ function renderCompanies() {
       <small>${escapeHtml(company.companyNumber || 'Company number not recorded')}</small>
       <span class="company-list-card-status">${escapeHtml(company.companyStatus ? company.companyStatus.charAt(0).toUpperCase() + company.companyStatus.slice(1) : 'Details needed')}</span>
       <span class="company-list-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
-    </a>`).join('') + `
-    <button id="addCompanyCard" class="company-list-card company-list-add" type="button" ${editingAllowed ? '' : 'disabled'}>
-      <span class="company-list-plus" aria-hidden="true">+</span>
-      <strong>Add new company</strong>
-      <small>Create a separate company record</small>
-    </button>`;
+    </a>`).join('');
   $('companyListMessage').textContent = records.length
     ? `${records.length} compan${records.length === 1 ? 'y' : 'ies'} in this workspace`
     : 'No company records yet. Add your first company.';
 }
 
-$('companyCards').addEventListener('click', (event) => {
-  const add = event.target.closest('#addCompanyCard');
-  if (!add || !editingAllowed) return;
+$('newCompanyBtn').addEventListener('click', (event) => {
+  const add = event.currentTarget;
+  if (!editingAllowed) return;
   companySearchSequence++;
   $('addCompanyForm').reset();
   $('newCompanySearchResults').replaceChildren();
