@@ -218,6 +218,10 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('•••••34567');
+  await page.locator('[data-hmrc-reveal-ref]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('12345678901234567');
+  await page.locator('[data-hmrc-reveal-ref]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
 
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
   await page.locator('#hmrcPaymentDate').fill('2027-06-12');
