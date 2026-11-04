@@ -331,7 +331,7 @@ function renderHmrcGuide() {
   $('hmrcGuideProgress').textContent = 'Step ' + (HMRC_STEPS.findIndex((step) => step.id === state.current) + 1) + ' of 5';
   $('hmrcGuideSteps').innerHTML = state.allowed.map((id) => {
     const step = HMRC_STEPS.find((item) => item.id === id);
-    return `<button type="button" data-hmrc-go="${escapeHtml(id)}" ${!editingAllowed && id !== state.current ? '' : ''} ${id === state.current ? 'aria-current="step"' : ''}>${escapeHtml(step.title)}${id !== state.next ? ' ✓' : ''}</button>`;
+    return `<button type="button" data-hmrc-go="${escapeHtml(id)}" ${id === state.current ? 'aria-current="step"' : ''}>${escapeHtml(step.title)}${id !== state.next ? ' ✓' : ''}</button>`;
   }).join('');
   for (const [id, section] of [['utr', 'hmrcSetupStage'], ['registration', 'hmrcSetupStage'],
     ['activity', 'hmrcActivityStage'], ['period', 'hmrcPeriodStage'], ['records', 'hmrcRecordsStage']]) {
@@ -741,19 +741,64 @@ $('addInvestmentBtn').addEventListener('click', () => openInvestment());
 $('hmrcSetupForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
+  const isUtr = hmrcGuideSelected === 'utr';
+  const field = $(isUtr ? 'hmrcUtrReceivedOn' : 'hmrcRegistrationConfirmedOn');
+  if (!field.value) {
+    $('hmrcSetupMessage').textContent = 'Enter the confirmed date, or choose Still waiting.';
+    return;
+  }
   try {
-    const setup = {
-      utrReceivedOn: $('hmrcUtrReceivedOn').value,
-      registrationConfirmedOn: $('hmrcRegistrationConfirmedOn').value,
-      registrationReference: $('hmrcRegistrationReference').value,
-      accountantName: $('hmrcAccountantName').value
-    };
-    profile = saveCompanyProfile({ ...profile, hmrc: saveHmrcSetup(profile.hmrc, setup) });
+    const changes = isUtr
+      ? { utrReceivedOn: field.value, utrStatus: 'received' }
+      : {
+        registrationConfirmedOn: field.value, registrationStatus: 'confirmed',
+        registrationReference: $('hmrcRegistrationReference').value,
+        accountantName: $('hmrcAccountantName').value
+      };
+    profile = saveCompanyProfile({ ...profile, hmrc: saveHmrcSetup(profile.hmrc, changes) });
+    hmrcGuideSelected = '';
     renderProfile();
-    $('hmrcSetupMessage').textContent = 'Company tax setup saved as your own record.';
+    $('hmrcSetupMessage').textContent = 'Saved.';
     await syncAfterSave();
   } catch (error) {
-    $('hmrcSetupMessage').textContent = error.message || 'Unable to save tax setup.';
+    $('hmrcSetupMessage').textContent = error.message || 'Unable to save HMRC details.';
+  }
+});
+
+$('hmrcPendingBtn').addEventListener('click', async () => {
+  if (!editingAllowed) return;
+  const isUtr = hmrcGuideSelected === 'utr';
+  try {
+    profile = saveCompanyProfile({
+      ...profile, hmrc: saveHmrcSetup(profile.hmrc,
+        isUtr ? { utrReceivedOn: '', utrStatus: 'pending' } : { registrationConfirmedOn: '', registrationStatus: 'pending' })
+    });
+    hmrcGuideSelected = '';
+    renderProfile();
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcSetupMessage').textContent = error.message || 'Unable to record waiting status.';
+  }
+});
+
+$('hmrcActivityForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!editingAllowed) return;
+  const selected = $('hmrcActivityForm').querySelector('input[name="hmrcActivity"]:checked')?.value;
+  if (!selected) { $('hmrcActivityMessage').textContent = 'Choose a company activity status.'; return; }
+  try {
+    profile = saveCompanyProfile({
+      ...profile, hmrc: {
+        ...saveHmrcSetup(profile.hmrc, { activityStage: selected }),
+        status: selected === 'preparing' ? 'unknown' : selected
+      }
+    });
+    hmrcGuideSelected = '';
+    renderProfile();
+    $('hmrcActivityMessage').textContent = selected === 'active' ? 'Status saved.' : 'Status saved. Review the guidance above.';
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcActivityMessage').textContent = error.message || 'Unable to save activity.';
   }
 });
 
@@ -868,6 +913,7 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
     profile = saveCompanyProfile({ ...profile, hmrc: {
       ...profile.hmrc, status, periodStart: '', periodEnd: '', periods
     } });
+    hmrcGuideSelected = '';
     renderProfile();
     $('hmrcPeriodStart').value = '';
     $('hmrcPeriodEnd').value = '';
