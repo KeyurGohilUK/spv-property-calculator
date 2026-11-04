@@ -451,7 +451,7 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; --hmrc-payme
 .hmrc-edit-dialog > p { margin:0 0 14px; }
 /* Date controls in iPadOS have a native minimum size that can exceed a half-width grid cell.
    Keep HMRC edit dialogs one column so dates and all other inputs share a stable width. */
-.hmrc-edit-dialog .hmrc-tracking-form { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+.hmrc-edit-dialog .hmrc-tracking-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .hmrc-edit-dialog .hmrc-tracking-form > label { min-width:0; max-width:100%; overflow-wrap:anywhere; }
 .hmrc-tracking-form label { display:grid; gap:5px; min-width:0; font-weight:650; font-size:.87rem; }
 /* Match the standard app form controls in every HMRC dialog. */
@@ -530,6 +530,12 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-period-empty { border:1px dashed var(--border); border-radius:12px; padding:20px; text-align:center; background:var(--surface); }
 .hmrc-period-empty p { margin:5px 0; }
 @media(max-width:850px) { .hmrc-period-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:680px) {
+  .hmrc-edit-dialog .hmrc-tracking-form { grid-template-columns:minmax(0,1fr); }
+}
+.hmrc-tracking-form > p[role="status"] { margin:0; }
+.hmrc-tracking-form > p[role="status"]:empty { display:none; }
+
 @media(max-width:600px) {
   .hmrc-dashboard .compliance-authority-content { padding:12px; }
   .hmrc-setup-card,.hmrc-period-card { padding:12px; }
