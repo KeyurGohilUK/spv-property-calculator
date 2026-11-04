@@ -164,7 +164,7 @@
     width: 100%;
     max-width: none;
     margin: 0;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     padding: 7px 8px calc(7px + var(--safe-bottom));
     gap: 2px;
     border-top: 1px solid var(--border);
