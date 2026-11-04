@@ -49,11 +49,20 @@
     <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="properties" data-home="true"></nav>
 
     <main class="main-shell">
-      <section id="homeView" class="view" aria-labelledby="homeTitle">
+      <div id="propertiesDashboard" class="properties-dashboard">
+        <div class="properties-tabs" role="tablist" aria-label="Property pages">
+          <button id="opportunitiesTab" class="properties-tab" type="button" role="tab" aria-selected="true" aria-controls="homeView" tabindex="0" data-properties-tab="opportunities">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path></svg><span>Opportunities</span>
+          </button>
+          <button id="portfolioTab" class="properties-tab" type="button" role="tab" aria-selected="false" aria-controls="portfolioView" tabindex="-1" data-properties-tab="portfolio">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path><path d="M7 10h.01M17 10h.01"></path></svg><span>Portfolio</span>
+          </button>
+        </div>
+      <section id="homeView" class="view" role="tabpanel" aria-labelledby="opportunitiesTab" tabindex="0">
         <div class="hero-card">
           <div>
             <p class="eyebrow">Purchase-cost planning</p>
-            <h2 id="homeTitle">Your properties</h2>
+            <h2 id="homeTitle">Opportunities</h2>
             <p class="muted">Estimate deposit, SDLT, fees and total cash needed.</p>
           </div>
           <div class="property-hero-actions" role="group" aria-label="Property actions">
@@ -74,6 +83,23 @@
           <p>Create your first purchase-cost calculation. It will be stored locally and available offline.</p>
         </div>
       </section>
+      <section id="portfolioView" class="view portfolio-shell" role="tabpanel" aria-labelledby="portfolioTab" tabindex="0" hidden>
+        <section class="hero-card portfolio-hero">
+          <div><p class="eyebrow">Completed acquisitions</p><h2 id="portfolioTitle">Portfolio</h2><p class="muted">Properties move here when their purchase completes.</p></div>
+        </section>
+        <section class="portfolio-summary" aria-label="Portfolio summary">
+          <article><span>Properties owned</span><strong id="portfolioCount">0</strong></article>
+          <article><span>Total purchase price</span><strong id="portfolioPurchaseTotal">£0</strong></article>
+          <article><span>Estimated mortgage</span><strong id="portfolioMortgageTotal">£0</strong></article>
+        </section>
+        <div id="portfolioList" class="portfolio-list" aria-live="polite"></div>
+        <section id="portfolioEmpty" class="empty-state">
+          <div class="empty-icon" aria-hidden="true">⌂</div><h2>No completed properties yet</h2>
+          <p>When a purchase completes, edit its opportunity and change the stage to “Completed · add to Portfolio”.</p>
+          <button class="primary-btn" type="button" data-properties-tab-link="opportunities">Go to opportunities</button>
+        </section>
+      </section>
+      </div>
 
       <section id="archiveView" class="view hidden" aria-labelledby="archiveTitle">
         <div class="hero-card archive-hero">
@@ -474,6 +500,7 @@
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>
   <script type="module" src="./src/components/admin-menu.js"></script>
-  <script type="module" src="./src/app/app.js"></script>
+  <script type="module" src="./src/features/portfolio/portfolio.js"></script>
+<script type="module" src="./src/app/app.js"></script>
 </body>
 </html>
