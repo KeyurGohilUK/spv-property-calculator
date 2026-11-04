@@ -33,4 +33,7 @@ assert.doesNotMatch(script, /renderHmrcGuide|hmrcEditingPeriod|openEvidenceRequi
 assert.match(styles, /\.hmrc-pill--success/);
 assert.match(styles, /\.hmrc-pill--warning/);
 assert.match(script, /renderHmrcDashboard\(\)/);
+assert.match(html, /Active &amp; Recurring/);
+assert.match(html, /One-Time Setup/);
+assert.ok(script.includes('hmrcSetupTabStatus'), 'One-time setup tab shows its completion state');
 console.log('HMRC setup and recurring period layout checks passed.');
