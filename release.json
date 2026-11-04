@@ -1,8 +1,7 @@
 {
-  "version": "1.60.1",
+  "version": "1.60.2",
   "notes": [
-    "Show Record CT600 until a submission is recorded, then change to Edit CT600.",
-    "Use high-contrast red for outstanding filing/tax details and stronger green for recorded payments.",
-    "Separate total paid and outstanding balance with a clear divider."
+    "Fix oversized date inputs in every HMRC dialog on iPad and iPhone.",
+    "Use matching full-width, themed form fields without overlap or horizontal overflow."
   ]
 }
