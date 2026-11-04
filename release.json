@@ -1,7 +1,7 @@
 {
-  "version": "1.58.0",
+  "version": "1.59.0",
   "notes": [
-    "Attach PDF and image evidence up to 5 MB to individual company compliance requirements using existing private Cloudflare R2.",
-    "Keep file metadata in versioned company profiles through Supabase sync; allow authorised downloads and removals."
+    "Track HMRC Corporation Tax setup and UTR receipt confirmation without storing the sensitive UTR number.",
+    "Record CT600 submissions, accountant reviews and individual Corporation Tax payments for each tax period, with outstanding balances and evidence attachments."
   ]
 }

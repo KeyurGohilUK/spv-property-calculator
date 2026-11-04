@@ -170,3 +170,48 @@ test('editor confirms company deletion and keeps other workspace data', async ({
   await page.goto('/company/details.html?company=default');
   await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
 });
+
+test('editor tracks HMRC filing and individual Corporation Tax payments', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Tax Test SPV Ltd',
+    hmrc: { status: 'active', periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }] }
+  });
+  await page.goto('/company/details.html?company=default');
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcUtrReceivedOn').fill('2026-02-04');
+  await page.locator('#hmrcAccountantName').fill('Example Accountants');
+  await page.locator('#hmrcSetupForm button[type="submit"]').click();
+  await expect(page.locator('#hmrcSetupMessage')).toContainText('saved');
+  await page.locator('#hmrcFiledOn').fill('2027-06-10');
+  await page.locator('#hmrcFilingReference').fill('CT600-ACK');
+  await page.locator('#hmrcLiability').fill('2400');
+  await page.locator('#hmrcReviewedOn').fill('2027-06-09');
+  await page.locator('#hmrcReviewedBy').fill('Example Accountants');
+  await page.locator('#hmrcFilingForm button[type="submit"]').click();
+  await expect(page.locator('#hmrcFilingMessage')).toContainText('recorded');
+  await page.locator('#hmrcPaymentDate').fill('2027-06-12');
+  await page.locator('#hmrcPaymentAmount').fill('1500');
+  await page.locator('#hmrcPaymentReference').fill('Payment 1');
+  await page.locator('#hmrcPaymentForm button[type="submit"]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
+  await page.reload();
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+  await expect(page.locator('#hmrcUtrReceivedOn')).toHaveValue('2026-02-04');
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.locator('[data-hmrc-payment-remove]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('£2,400.00');
+});
+
+test('viewer cannot change HMRC tax records', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'viewer', {
+    companyName: 'Read Only HMRC Ltd',
+    hmrc: { status: 'active', periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }] }
+  });
+  await page.goto('/company/details.html?company=default');
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+  await expect(page.locator('#hmrcSetupForm button[type="submit"]')).toBeDisabled();
+  await expect(page.locator('#hmrcFilingForm button[type="submit"]')).toBeDisabled();
+  await expect(page.locator('#hmrcPaymentForm button[type="submit"]')).toBeDisabled();
+});
