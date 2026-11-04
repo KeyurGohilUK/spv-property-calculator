@@ -1,7 +1,7 @@
 {
-  "version": "1.60.6",
+  "version": "1.60.7",
   "notes": [
-    "Use an attachment icon and text for HMRC document attachments, with icon-only download and remove actions.",
-    "Update HMRC navigation to a segmented Active & Recurring and One-Time Setup switch with setup completion status."
+    "Show HMRC one-time setup progress using confirmed completion rules and a visible green check icon.",
+    "Count Corporation Tax registration as a separate setup step when business activity has started."
   ]
 }
