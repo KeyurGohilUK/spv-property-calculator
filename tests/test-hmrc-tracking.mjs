@@ -12,15 +12,20 @@ assert.equal(hmrc.setup.utrReceivedOn, '2026-02-04');
 assert.equal(hmrc.setup.accountantName, 'Example Accountants');
 hmrc = saveHmrcPeriodRecord(hmrc, period.periodEnd, {
   filedOn: '2027-06-10', filingReference: 'CT600-A', liability: 2400,
+  liabilityStatus: 'estimated', paymentReference: '12345678901234567',
   reviewedOn: '2027-06-09', reviewedBy: 'Accountant One'
 });
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).liability, 2400);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paid, 0);
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).liabilityStatus, 'estimated');
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paymentReference, '12345678901234567');
 hmrc = recordHmrcPayment(hmrc, period.periodEnd, { id: 'payment-12345678', date: '2027-06-11', amount: 1000.55, reference: 'First instalment' });
-hmrc = recordHmrcPayment(hmrc, period.periodEnd, { id: 'payment-87654321', date: '2027-08-11', amount: 999.45, reference: 'Final instalment' });
+hmrc = recordHmrcPayment(hmrc, period.periodEnd, { id: 'payment-87654321', date: '2027-08-11', amount: 999.45, reference: 'Final instalment', method: 'bank-transfer', status: 'hmrc-confirmed' });
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paid, 2000);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).outstanding, 400);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments.length, 2);
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].status, 'recorded');
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[1].status, 'hmrc-confirmed');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).filedOn, '2027-06-10');
 assert.equal(hmrc.setup.utrReceivedOn, '2026-02-04');
 assert.throws(() => recordHmrcPayment(hmrc, period.periodEnd, { id: 'payment-12345678', date: '2027-08-12', amount: 15 }), /already recorded/);
@@ -32,9 +37,15 @@ assert.throws(() => removeHmrcPayment(hmrc, period.periodEnd, 'payment-12345678'
 const second = { status: 'active', periodStart: '2027-01-01', periodEnd: '2027-12-31' };
 hmrc = { ...hmrc, periods: [period, second] };
 assert.equal(hmrcPeriodSummary(hmrc, second.periodEnd).payments.length, 0);
+assert.equal(hmrcPeriodSummary(hmrc, second.periodEnd).liability, null, 'Unknown is not zero tax');
+assert.equal(hmrcPeriodSummary(hmrc, second.periodEnd).outstanding, null);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments.length, 1);
 assert.equal(normalizeHmrcTracking({ ...hmrc, periods: [second] }).records.length, 0);
 
+const { hmrcDeadlines } = await import('../src/features/company/compliance-rules.js');
+assert.equal(hmrcDeadlines({ status: 'active', periodStart: '2025-11-04', periodEnd: '2026-11-03' })['corporation-tax-payment'], '2027-08-04');
+assert.equal(hmrcDeadlines({ status: 'active', periodStart: '2025-11-04', periodEnd: '2026-11-03' })['corporation-tax-return'], '2027-11-03');
+assert.equal(normalizeHmrcTracking({ ...hmrc, records: [{ periodEnd: second.periodEnd, paymentReference: 'bad' }] }).records[0].paymentReference, '');
 const data = new Map();
 globalThis.localStorage = { getItem: (key) => data.get(key) || null, setItem: (key, value) => data.set(key, String(value)) };
 globalThis.sessionStorage = { getItem: () => null, setItem: () => {} };
@@ -53,6 +64,8 @@ assert.match(script, /saveHmrcPeriodRecord/);
 assert.match(script, /recordHmrcPayment/);
 assert.match(script, /removeHmrcPayment/);
 assert.match(script, /formatComplianceDateUK/);
+assert.match(script, /hmrcDisplayReference/, 'Sensitive HMRC payment references must be masked');
+assert.match(script, /hmrcEvidenceMarkup/, 'Evidence should be on the period cards');
 assert.match(cloud, /hmrc: record\?\.hmrc/);
 assert.ok(assets.assets.includes('./src/features/company/hmrc-tracking.js'));
 console.log('HMRC tax setup, CT600 and payment ledger checks passed.');
