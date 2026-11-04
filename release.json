@@ -1,7 +1,6 @@
 {
-  "version": "1.60.4",
+  "version": "1.60.5",
   "notes": [
-    "Attach HMRC supporting documents from the matching setup, CT600 or payment record dialog.",
-    "Keep HMRC document uploads in the selected record dialog while retaining private evidence storage."
+    "Restore the separate HMRC document upload dialog."
   ]
 }
