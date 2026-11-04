@@ -364,3 +364,16 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
   .company-official-search { grid-template-columns: minmax(0, 1fr) 44px; column-gap: 6px; }
   .company-official-search > .company-search-icon-btn { width: 44px; height: 44px; min-height: 44px; padding: 10px; }
 }
+
+/* Private compliance evidence per statutory / HMRC obligation */
+.company-evidence { margin-top: 14px; padding: 12px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+.company-evidence > strong { font-size: .95rem; }
+.company-evidence-files { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.company-evidence-files li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.company-evidence-files li > span { flex: 1 1 175px; min-width: 0; overflow-wrap: anywhere; }
+.company-evidence-files li > span small { display: block; color: var(--muted); }
+.company-evidence-files li.muted { border: none; padding: 0; }
+.company-evidence-upload { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; font-weight: 600; font-size: .87rem; }
+.company-evidence-upload input { width: min(100%, 380px); max-width: 100%; }
+.company-evidence-message:not(:empty) { padding: 12px 14px; border-left: 4px solid var(--brand); background: var(--surface); border-radius: 8px; font-weight: 600; overflow-wrap: anywhere; }
+.company-evidence-message.is-error { border-left-color: var(--danger); color: var(--danger); }
