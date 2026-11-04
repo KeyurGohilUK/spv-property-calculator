@@ -22,9 +22,24 @@ Every request validates the Supabase access token. Downloads require `is_workspa
 
 Uploads accept PDF, JPEG, PNG, WebP, HEIC and HEIF up to 2 MB.
 
-## Deploy
+## Automatic GitHub Actions deployment
 
-Run `npx wrangler deploy` from this directory, or paste `src/index.js` into the existing Worker dashboard editor and deploy.
+Workflow: [Deploy Cloudflare R2 Worker](../../.github/workflows/deploy-cloudflare-worker.yml).
+
+After a push/merge to `main`, GitHub's **CI** workflow runs unit tests and Playwright. When CI succeeds, the Cloudflare deployment workflow checks whether `workers/receipt/` changed in that commit and deploys the existing `spv-receipt-service` Worker automatically. A CI failure prevents deployment; older runs cannot overwrite a newer `main` revision. The workflow also supports **Actions → Deploy Cloudflare R2 Worker → Run workflow**, including manual redeployment of the existing Worker.
+
+**One-time configuration:** In GitHub → Settings → Environments → `production`, configure the following environment secrets (do not commit values):
+
+- `CLOUDFLARE_API_TOKEN`: create a Cloudflare API token restricted to the intended account and Workers deployment permissions. It needs access to deploy this Worker and its existing R2 binding; use the least privileges supported by Cloudflare.
+- `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID containing `spv-receipt-service`.
+
+The workflow uses `cloudflare/wrangler-action@v4` from `workers/receipt/` and verifies `https://spv-receipt-service.keyurgohil-uk.workers.dev/health`. Existing Cloudflare dashboard-managed variables (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `ALLOWED_ORIGINS`) remain configured in Cloudflare; `keep_vars: true` in `wrangler.jsonc` preserves them. **Do not copy Supabase credentials into GitHub or change the R2 bucket binding.** The `RECEIPTS` binding must continue pointing to `spv-property-receipts`.
+
+The health check only confirms that the Worker responds; after initial automation setup, verify an authenticated receipt and compliance evidence upload/download and check GitHub Actions job logs (without exposing secrets). If secrets are not configured, the deployment job fails with setup instructions, rather than publishing anonymously.
+
+### Manual fallback
+
+If GitHub Actions is unavailable, you can still deploy manually from this directory with `npx wrangler deploy` after `npx wrangler login`.
 
 ## Company compliance evidence (v1.58)
 
@@ -41,7 +56,7 @@ This does not change the `receipts/` storage contract.
 
 ### Deploy this Worker version
 
-**Important:** Supabase Edge Function CI/CD does not deploy Cloudflare Workers. Merge and deploy this Worker to enable the new `/compliance/` routes:
+**Cloudflare Worker deployment now runs automatically after successful main CI when Worker files change**, once its GitHub `production` secrets are set. For an immediate redeployment, use the workflow's manual Run workflow option. A local fallback is:
 
 ```powershell
 cd workers/receipt
