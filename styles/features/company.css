@@ -449,7 +449,10 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; --hmrc-payme
 .hmrc-edit-dialog { width:min(92vw,620px); max-width:100%; max-height:86dvh; overflow:auto; padding:20px; }
 .hmrc-edit-dialog .company-dialog-header { margin-bottom:12px; }
 .hmrc-edit-dialog > p { margin:0 0 14px; }
-.hmrc-tracking-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+/* Date controls in iPadOS have a native minimum size that can exceed a half-width grid cell.
+   Keep HMRC edit dialogs one column so dates and all other inputs share a stable width. */
+.hmrc-edit-dialog .hmrc-tracking-form { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+.hmrc-edit-dialog .hmrc-tracking-form > label { min-width:0; max-width:100%; overflow-wrap:anywhere; }
 .hmrc-tracking-form label { display:grid; gap:5px; min-width:0; font-weight:650; font-size:.87rem; }
 /* Match the standard app form controls in every HMRC dialog. */
 .hmrc-edit-dialog input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
@@ -471,15 +474,23 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; --hmrc-payme
 }
 .hmrc-edit-dialog input[type="date"] {
   color-scheme:light;
-  -webkit-appearance:auto;
-  appearance:auto;
-  overflow:visible;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  -webkit-appearance:none;
+  appearance:none;
 }
 html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark; }
 .hmrc-edit-dialog input[type="date"]::-webkit-date-and-time-value {
   min-width:0;
   width:100%;
   text-align:left;
+}
+.hmrc-edit-dialog input[type="date"]::-webkit-datetime-edit {
+  min-width:0;
+  overflow:hidden;
 }
 .hmrc-edit-dialog input[type="date"]::-webkit-calendar-picker-indicator {
   cursor:pointer;
