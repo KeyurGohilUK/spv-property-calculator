@@ -328,6 +328,37 @@ const hmrcDialogs = {
   evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] })
 };
 
+// HMRC cards are rebuilt when saved. The native dialog otherwise tries to return
+// focus to a removed button, which can focus/outline the entire Compliance panel.
+for (const controller of Object.values(hmrcDialogs)) {
+  const originalOpen = controller.open;
+  let returnSelector = '';
+  controller.open = (trigger) => {
+    if (trigger?.dataset?.hmrcOpen) {
+      const kind = trigger.dataset.hmrcOpen;
+      const period = trigger.dataset.hmrcPeriod;
+      returnSelector = period
+        ? `[data-hmrc-open="${kind}"][data-hmrc-period="${period}"]`
+        : `[data-hmrc-open="${kind}"]`;
+    } else if (trigger?.dataset?.hmrcAttach) {
+      returnSelector = `[data-hmrc-attach="${trigger.dataset.hmrcAttach}"]`;
+    } else {
+      returnSelector = trigger?.id ? `#${trigger.id}` : '';
+    }
+    originalOpen(trigger);
+  };
+  controller.dialog.addEventListener('close', () => {
+    const selector = returnSelector;
+    returnSelector = '';
+    if (!selector) return;
+    window.requestAnimationFrame(() => {
+      const target = [...document.querySelectorAll(selector)].find((element) =>
+        !element.hidden && !element.disabled && element.getClientRects().length);
+      target?.focus({ preventScroll: true });
+    });
+  });
+}
+
 const hmrcBadge = (label, kind = 'neutral') =>
   `<span class="hmrc-pill hmrc-pill--${kind}">${escapeHtml(label)}</span>`;
 const hmrcDate = (date) => date ? escapeHtml(formatComplianceDateUK(date)) : 'Not recorded';
