@@ -175,6 +175,7 @@ export function addCompanyEvidence(evidence) {
   const item = normalizeEvidence(evidence, profile.id);
   if (!item) throw new Error('Invalid evidence reference.');
   if (profile.complianceEvidence.some((file) => file.id === item.id)) throw new Error('Evidence already attached.');
+  if (profile.complianceEvidence.length >= 500) throw new Error('This company has reached its 500-document evidence limit.');
   return saveCompanyProfile({ complianceEvidence: [...profile.complianceEvidence, item] });
 }
 
