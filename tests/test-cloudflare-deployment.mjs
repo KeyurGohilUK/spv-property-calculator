@@ -7,6 +7,7 @@ const guide = readFileSync(new URL('../workers/receipt/README.md', import.meta.u
 
 assert.match(workflow, /workflow_run:[\s\S]*workflows: \['CI'\]/, 'Deploy must depend on successful CI');
 assert.match(workflow, /workflow_dispatch:/, 'Allow authorised manual redeployment');
+assert.match(workflow, /github\.ref == 'refs\/heads\/main'/, 'Manual deployments must run from main');
 assert.match(workflow, /workflow_run\.conclusion == 'success'/, 'Do not deploy on failed CI');
 assert.match(workflow, /workflow_run\.head_branch == 'main'/, 'Deploy only main commits');
 assert.match(workflow, /head_repository\.full_name == github\.repository/, 'Reject forked workflow runs');
