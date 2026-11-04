@@ -1,7 +1,7 @@
 {
-  "version": "1.56.0",
+  "version": "1.57.0",
   "notes": [
-    "Move Company into the primary navigation.",
-    "Use the full mobile width for navigation and Properties tabs."
+    "Keep Companies House search input and icon button aligned on one responsive row.",
+    "Tighten spacing in the Add Company search panel."
   ]
 }

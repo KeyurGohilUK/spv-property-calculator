@@ -328,3 +328,39 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .compliance-authority-heading { display:flex; align-items:center; gap:14px; padding:18px; border-bottom:1px solid var(--border); }
 .compliance-authority-title h3 { margin:0; font-size:clamp(1.1rem,2.5vw,1.4rem); }
 .compliance-authority-content { padding-top:16px; border-top:0; }
+
+
+/* Keep Companies House search compact and usable at every dialog width. */
+.company-official-search {
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: end;
+  column-gap: 8px;
+  row-gap: 8px;
+}
+.company-official-search > .field { grid-column: 1; min-width: 0; }
+.company-official-search > .company-search-icon-btn {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 11px;
+  place-items: center;
+}
+.company-search-icon-btn svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#newCompanySearchStatus,
+.company-official-search > .company-search-results,
+.company-official-search > small { grid-column: 1 / -1; margin: 0; }
+.company-official-search > small { line-height: 1.45; }
+@media (max-width: 360px) {
+  .company-official-search { grid-template-columns: minmax(0, 1fr) 44px; column-gap: 6px; }
+  .company-official-search > .company-search-icon-btn { width: 44px; height: 44px; min-height: 44px; padding: 10px; }
+}
