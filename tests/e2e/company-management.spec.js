@@ -299,3 +299,60 @@ test('viewer cannot change HMRC tax records', async ({ page }) => {
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeDisabled();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]')).toBeDisabled();
 });
+
+test('@mobile HMRC dialogs use themed, full-size date and form controls', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'HMRC Styling SPV',
+    hmrc: {
+      status: 'active',
+      setup: { utrReceivedOn: '2026-02-04', activityStage: 'active', registrationConfirmedOn: '2026-02-06' },
+      periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }]
+    }
+  });
+  await page.goto('/company/details.html?company=default');
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+
+  const checkControls = async (dialogId, controls) => {
+    const dialog = page.locator('#' + dialogId);
+    await expect(dialog).toBeVisible();
+    for (const id of controls) {
+      const field = page.locator('#' + id);
+      await expect(field).toBeVisible();
+      const style = await field.evaluate((element) => {
+        const css = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return {
+          height: rect.height, width: rect.width, parentWidth: element.parentElement.getBoundingClientRect().width,
+          radius: parseFloat(css.borderTopLeftRadius), background: css.backgroundColor, borderWidth: parseFloat(css.borderTopWidth),
+          fontSize: parseFloat(css.fontSize)
+        };
+      });
+      expect(style.height, id + ' height').toBeGreaterThanOrEqual(46);
+      expect(style.radius, id + ' radius').toBeGreaterThanOrEqual(10);
+      expect(style.borderWidth, id + ' border').toBeGreaterThanOrEqual(1);
+      expect(style.fontSize, id + ' font').toBeGreaterThanOrEqual(16);
+      expect(style.width, id + ' width').toBeGreaterThan(100);
+      expect(style.width, id + ' width containment').toBeLessThanOrEqual(style.parentWidth + 2);
+      expect(style.background, id + ' background').not.toBe('rgba(0, 0, 0, 0)');
+    }
+    await dialog.locator('[data-hmrc-close]').click();
+    await expect(dialog).toBeHidden();
+  };
+
+  await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
+  await checkControls('hmrcSetupDialog', ['hmrcUtrReceivedOn']);
+  await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
+  await checkControls('hmrcSetupDialog', ['hmrcRegistrationConfirmedOn', 'hmrcRegistrationReference']);
+
+  await page.locator('#hmrcRecurringViewTab').click();
+  await page.locator('#hmrcOpenPeriodDialog').click();
+  await checkControls('hmrcPeriodDialog', ['hmrcPeriodStart', 'hmrcPeriodEnd']);
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
+  await checkControls('hmrcFilingDialog', ['hmrcFiledOn', 'hmrcReviewedOn', 'hmrcLiability', 'hmrcLiabilityStatus']);
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await checkControls('hmrcPaymentDialog', ['hmrcPaymentDate', 'hmrcPaymentAmount', 'hmrcPaymentMethod']);
+
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await checkControls('hmrcPaymentDialog', ['hmrcPaymentDate', 'hmrcPaymentAmount']);
+});
