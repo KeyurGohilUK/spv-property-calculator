@@ -1,6 +1,7 @@
 {
-  "version": "1.55.0",
+  "version": "1.56.0",
   "notes": [
-    "Bring Opportunities and Portfolio together under one Properties menu with tabs for each view."
+    "Move Company into the primary navigation.",
+    "Use the full mobile width for navigation and Properties tabs."
   ]
 }

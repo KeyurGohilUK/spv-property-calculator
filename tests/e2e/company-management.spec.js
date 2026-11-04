@@ -82,8 +82,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await expect(page.locator('#companyAppointmentsRows')).toContainText('✓');
   await expect.poll(() => page.evaluate(() => window.savedCompanyProfile?.appointments?.length)).toBe(1);
 
-  await page.locator('[data-more-menu]').click();
-  await expect(page.getByRole('link', { name: /Manage Company/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Company', exact: true })).toBeVisible();
 });
 
 test('@mobile company appointment table remains usable in a horizontally scrollable panel', async ({ page }) => {
