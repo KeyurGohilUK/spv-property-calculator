@@ -1,7 +1,7 @@
 {
-  "version": "1.60.2",
+  "version": "1.60.3",
   "notes": [
-    "Fix oversized date inputs in every HMRC dialog on iPad and iPhone.",
-    "Use matching full-width, themed form fields without overlap or horizontal overflow."
+    "Show HMRC tax record fields in two columns on wider screens and one column on narrow screens.",
+    "Remove blank space below the Save button when the dialog has no status message."
   ]
 }
