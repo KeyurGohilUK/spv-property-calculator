@@ -44,7 +44,7 @@ function makeId(prefix = 'appointment') {
 function emptyProfile(id = 'default') {
   return {
     id, companyName: '', companyNumber: '', registeredOffice: '',
-    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, hmrc: { status: 'unknown', periodStart: '', periodEnd: '' }, deletedAt: null, _cloudRevision: 0, _cloudDirty: false
+    incorporationDate: '', companyStatus: '', appointments: [], investments: [], complianceConfirmations: {}, hmrc: { status: 'unknown', periodStart: '', periodEnd: '' }, complianceEvidence: [], deletedAt: null, _cloudRevision: 0, _cloudDirty: false
   };
 }
 
@@ -66,6 +66,24 @@ function normalizeInvestment(item = {}) {
     amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')) ? item.date : '',
     reference: String(item.reference || '').trim().slice(0, 500)
+  };
+}
+
+const VALID_EVIDENCE_ID = /^[0-9a-f]{8}-[0-9a-f-]{27,40}$/;
+function normalizeEvidence(item, companyId) {
+  if (!item || typeof item !== 'object' || !VALID_EVIDENCE_ID.test(String(item.id || ''))) return null;
+  const ruleKey = String(item.ruleKey || '');
+  if (!VALID_RULE_IDS.has(ruleKey.split(':')[0]) || ruleKey.length > 100) return null;
+  const objectPath = String(item.objectPath || '');
+  const prefix = 'compliance/' + companyId + '/' + item.id + '.';
+  if (!objectPath.startsWith(prefix) || !['pdf', 'jpg', 'png', 'webp', 'heic', 'heif'].includes(objectPath.slice(prefix.length))) return null;
+  return {
+    id: String(item.id), ruleKey, objectPath,
+    name: String(item.name || 'Evidence').slice(0, 180),
+    type: String(item.type || '').slice(0, 80),
+    size: Math.max(0, Math.min(5 * 1024 * 1024, Number(item.size) || 0)),
+    uploadedAt: String(item.uploadedAt || '').slice(0, 32),
+    uploadedBy: String(item.uploadedBy || '').slice(0, 100)
   };
 }
 
@@ -95,6 +113,7 @@ export function normalizeCompanyProfile(profile = {}) {
     deletedAt: /^\d{4}-\d{2}-\d{2}T/.test(String(profile.deletedAt || '')) ? String(profile.deletedAt) : null,
     appointments,
     investments,
+    complianceEvidence: Array.isArray(profile.complianceEvidence) ? profile.complianceEvidence.slice(0, 500).map((item) => normalizeEvidence(item, validCompanyId(profile.id) ? profile.id : 'default')).filter(Boolean) : [],
     complianceConfirmations: Object.fromEntries(
       Object.entries(profile.complianceConfirmations && typeof profile.complianceConfirmations === 'object' && !Array.isArray(profile.complianceConfirmations)
         ? profile.complianceConfirmations : {})
@@ -149,6 +168,22 @@ export function saveCompanyProfile(profile) {
   if (!next.companyName) throw new Error('Enter the company name.');
   if (!writeProfile(next)) throw new Error('Unable to save company details on this device.');
   return next;
+}
+
+export function addCompanyEvidence(evidence) {
+  const profile = getCompanyProfile();
+  const item = normalizeEvidence(evidence, profile.id);
+  if (!item) throw new Error('Invalid evidence reference.');
+  if (profile.complianceEvidence.some((file) => file.id === item.id)) throw new Error('Evidence already attached.');
+  if (profile.complianceEvidence.length >= 500) throw new Error('This company has reached its 500-document evidence limit.');
+  return saveCompanyProfile({ complianceEvidence: [...profile.complianceEvidence, item] });
+}
+
+export function removeCompanyEvidence(evidenceId) {
+  const profile = getCompanyProfile();
+  const remaining = profile.complianceEvidence.filter((file) => file.id !== evidenceId);
+  if (remaining.length === profile.complianceEvidence.length) throw new Error('Evidence not found.');
+  return saveCompanyProfile({ complianceEvidence: remaining });
 }
 
 /** Mark a company deleted while retaining a versioned tombstone for cross-device sync. */

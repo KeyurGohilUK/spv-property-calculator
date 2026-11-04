@@ -1,5 +1,5 @@
 {
-  "version": "1.57.1",
+  "version": "1.58.0",
   "assets": [
     "./",
     "./index.html",
@@ -81,6 +81,7 @@
     "./src/components/dialog-helper.js",
     "./src/components/update-notifier.js",
     "./src/services/receipt-cloud.js",
+    "./src/services/compliance-evidence.js",
     "./tasks/",
     "./styles/features/tasks.css",
     "./src/features/tasks/tasks.js",

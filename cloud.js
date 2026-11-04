@@ -480,6 +480,7 @@
       investments: Array.isArray(record?.investments) ? record.investments : [],
       hmrc: record?.hmrc && typeof record.hmrc === 'object' ? record.hmrc : { status: 'unknown', periodStart: '', periodEnd: '' },
       complianceConfirmations: record?.complianceConfirmations && typeof record.complianceConfirmations === 'object' && !Array.isArray(record.complianceConfirmations) ? record.complianceConfirmations : {},
+      complianceEvidence: Array.isArray(record?.complianceEvidence) ? record.complianceEvidence : [],
       deletedAt: record?.deletedAt ? String(record.deletedAt) : null
     };
     const { data, error } = await supabaseClient
