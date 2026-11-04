@@ -17,6 +17,9 @@ export function normalizeHmrcTracking(hmrc = {}) {
   return {
     setup: {
       utrReceivedOn: date(hmrc.setup?.utrReceivedOn),
+      utrStatus: hmrc.setup?.utrStatus === 'pending' ? 'pending' : 'received',
+      activityStage: ['preparing', 'active', 'dormant'].includes(hmrc.setup?.activityStage) ? hmrc.setup.activityStage : '',
+      registrationStatus: hmrc.setup?.registrationStatus === 'pending' ? 'pending' : 'confirmed',
       registrationConfirmedOn: date(hmrc.setup?.registrationConfirmedOn),
       registrationReference: clean(hmrc.setup?.registrationReference, 100),
       accountantName: clean(hmrc.setup?.accountantName)
