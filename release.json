@@ -1,7 +1,8 @@
 {
-  "version": "1.59.1",
+  "version": "1.60.0",
   "notes": [
-    "Guide company HMRC setup one step at a time with shorter explanations and editable completed steps.",
-    "Keep pending letters, dormant activity and tax deadlines visible without blocking necessary period records; simplify CT600 and payment forms."
+    "Replace the duplicate HMRC wizard and checklist with one-time company setup and recurring Corporation Tax period cards.",
+    "Manage tax dates, CT600 entries, liabilities and payments through compact dialogs, using green/amber statuses and R2 evidence attachments.",
+    "Show period-specific payment references privately and display unknown tax as not assessed instead of £0."
   ]
 }

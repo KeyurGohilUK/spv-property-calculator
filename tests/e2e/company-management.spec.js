@@ -171,75 +171,125 @@ test('editor confirms company deletion and keeps other workspace data', async ({
   await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
 });
 
-test('editor follows one HMRC step at a time and records tax payments', async ({ page }) => {
+test('editor tracks HMRC periods, tax liability and payments through dialogs', async ({ page }) => {
   await mockCompanyWorkspace(page, 'editor', { companyName: 'Guided SPV Ltd' });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('UTR letter');
-  await expect(page.locator('#hmrcActivityStage')).toBeHidden();
-  await expect(page.locator('#hmrcRecordsStage')).toBeHidden();
+  await expect(page.locator('#hmrcSetupCards')).toContainText('UTR letter');
+  await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
+  await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
+  await expect(page.locator('#hmrcSetupDialog')).toBeVisible();
   await page.locator('#hmrcUtrReceivedOn').fill('2026-02-04');
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Company activity');
+  await expect(page.locator('#hmrcSetupDialog')).toBeHidden();
+  await expect(page.locator('#hmrcSetupCards')).toContainText('Received 4 Feb 2026');
+
+  await page.locator('#hmrcSetupCards [data-hmrc-open="activity"]').click();
   await page.locator('input[name="hmrcActivity"][value="active"]').check();
   await page.locator('#hmrcActivityForm button[type="submit"]').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Corporation Tax registration');
+  await expect(page.locator('#hmrcSetupCards')).toContainText('Corporation Tax registration');
+  await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
   await page.locator('#hmrcRegistrationConfirmedOn').fill('2026-02-06');
   await page.locator('#hmrcAccountantName').fill('Example Accountants');
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Tax accounting period');
+
+  await expect(page.locator('#hmrcRecurringViewTab')).toBeVisible();
+  await page.locator('#hmrcRecurringViewTab').click();
+  await page.locator('#hmrcOpenPeriodDialog').click();
+  await expect(page.locator('#hmrcPeriodDialog')).toBeVisible();
   await page.locator('#hmrcPeriodStart').fill('2026-01-01');
   await page.locator('#hmrcPeriodEnd').fill('2026-12-31');
   await page.locator('#hmrcPeriodForm button[type="submit"]').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Returns and payments');
+  await expect(page.locator('#hmrcPeriodDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
-  await page.getByText('Record CT600 return and tax due', { exact: true }).click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('1 Oct 2027');
+
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
+  await expect(page.locator('#hmrcFilingDialog')).toBeVisible();
   await page.locator('#hmrcFiledOn').fill('2027-06-10');
   await page.locator('#hmrcFilingReference').fill('CT600-ACK');
   await page.locator('#hmrcLiability').fill('2400');
+  await page.locator('#hmrcLiabilityStatus').selectOption('confirmed');
+  await page.locator('#hmrcPeriodPaymentReference').fill('12345678901234567');
   await page.locator('#hmrcReviewedOn').fill('2027-06-09');
   await page.locator('#hmrcReviewedBy').fill('Example Accountants');
   await page.locator('#hmrcFilingForm button[type="submit"]').click();
-  await expect(page.locator('#hmrcFilingMessage')).toContainText('recorded');
-  await page.getByText('Record a tax payment', { exact: true }).click();
+  await expect(page.locator('#hmrcFilingDialog')).toBeHidden();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
+  await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('•••••34567');
+  await page.locator('[data-hmrc-reveal-ref]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('12345678901234567');
+  await page.locator('[data-hmrc-reveal-ref]').click();
+  await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
+
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
   await page.locator('#hmrcPaymentDate').fill('2027-06-12');
   await page.locator('#hmrcPaymentAmount').fill('1500');
   await page.locator('#hmrcPaymentReference').fill('Payment 1');
+  await page.locator('#hmrcPaymentConfirmed').check();
   await page.locator('#hmrcPaymentForm button[type="submit"]').click();
+  await expect(page.locator('#hmrcPaymentDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
-  await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('HMRC confirmed');
   await page.reload();
   await page.getByRole('tab', { name: 'Compliance' }).click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Returns and payments');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
   page.once('dialog', (dialog) => dialog.accept());
   await page.locator('[data-hmrc-payment-remove]').click();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£2,400.00');
 });
 
-test('HMRC pending UTR and registration do not hide later obligations', async ({ page }) => {
+test('HMRC setup remains compact while company is preparing to buy', async ({ page }) => {
   await mockCompanyWorkspace(page, 'editor', { companyName: 'Waiting SPV Ltd' });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
   await page.locator('#hmrcPendingBtn').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Company activity');
-  await expect(page.locator('#hmrcGuideAlerts')).toContainText('UTR letter pending');
-  await page.locator('input[name="hmrcActivity"][value="active"]').check();
+  await expect(page.locator('#hmrcSetupCards')).toContainText('Waiting');
+  await expect(page.locator('#hmrcStatusNote')).toBeHidden();
+  await page.locator('#hmrcSetupCards [data-hmrc-open="activity"]').click();
+  await page.locator('input[name="hmrcActivity"][value="preparing"]').check();
   await page.locator('#hmrcActivityForm button[type="submit"]').click();
-  await page.locator('#hmrcPendingBtn').click();
-  await expect(page.locator('#hmrcGuideTitle')).toHaveText('Tax accounting period');
-  await expect(page.locator('#hmrcGuideAlerts')).toContainText('registration pending');
-  await expect(page.locator('#hmrcRecordsStage')).toBeHidden();
+  await expect(page.locator('#hmrcSetupCards')).toContainText('Preparing to buy');
+  await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
+  await expect(page.locator('#hmrcSetupCards [data-hmrc-open="registration"]')).toHaveCount(0);
+  await expect(page.locator('#hmrcSetupCount')).toHaveText('1 of 2 recorded');
+});
+
+test('@mobile HMRC summary does not overflow a phone viewport', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Mobile SPV Ltd',
+    hmrc: {
+      status: 'active', setup: { activityStage: 'active', registrationConfirmedOn: '2026-02-04' },
+      periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }],
+      records: [{ periodEnd: '2026-12-31', liability: 2400, paymentReference: '12345678901234567',
+        payments: [{ id: 'payment-12345678', date: '2027-02-02', amount: 500, reference: 'Bank' }] }]
+    }
+  });
+  await page.goto('/company/details.html?company=default');
+  await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcRecurringViewTab').click();
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('£1,900.00');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
+  expect(overflow).toBe(false);
+  await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await expect(page.locator('#hmrcPaymentDialog')).toBeVisible();
 });
 
 test('viewer cannot change HMRC tax records', async ({ page }) => {
   await mockCompanyWorkspace(page, 'viewer', {
     companyName: 'Read Only HMRC Ltd',
-    hmrc: { status: 'active', periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }] }
+    hmrc: {
+      status: 'active', setup: { activityStage: 'active', registrationConfirmedOn: '2026-03-04' },
+      periods: [{ status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' }]
+    }
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
-  await expect(page.locator('#hmrcSetupForm button[type="submit"]')).toBeDisabled();
-  await expect(page.locator('#hmrcPendingBtn')).toBeDisabled();
-  await expect(page.locator('#hmrcRecordsStage')).toBeHidden();
+  await expect(page.locator('#hmrcSetupCards [data-hmrc-open="utr"]')).toBeDisabled();
+  await page.locator('#hmrcRecurringViewTab').click();
+  await expect(page.locator('#hmrcOpenPeriodDialog')).toBeDisabled();
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeDisabled();
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]')).toBeDisabled();
 });

@@ -3,7 +3,7 @@ import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxP
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, removeHmrcPayment } from './hmrc-tracking.js';
-import { HMRC_STEPS, hmrcGuidedState } from './hmrc-guided.js';
+import { hmrcOverviewState } from './hmrc-guided.js';
 import { uploadComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
 import {
   getCompanyProfile,
@@ -243,11 +243,6 @@ function renderCompanyCompliance() {
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('hmrcTaxStatus').value = profile.hmrc?.status || 'unknown';
-  const taxPeriods = hmrcTaxPeriods(profile.hmrc);
-  $('hmrcPeriodHistory').innerHTML = taxPeriods.length
-    ? '<h4>Recorded Corporation Tax periods</h4><ul>' + taxPeriods.map((p) =>
-      `<li><strong>${escapeHtml(formatComplianceDateUK(p.periodStart))} – ${escapeHtml(formatComplianceDateUK(p.periodEnd))}</strong><span>HMRC dates manually entered</span></li>`).join('') + '</ul>'
-    : '<p class="muted">No confirmed HMRC tax periods added yet.</p>';
   const peopleRoot = $('companyOfficialPeople');
   if (peopleRoot) {
     const people = companyHouseData?.officialPeople;
@@ -319,72 +314,122 @@ function renderCompanyCompliance() {
       </div>
     </div></details>`).join('');
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
-  $('hmrcComplianceItems').innerHTML = renderCards(items.filter((item) => item.source === 'hmrc' || item.id === 'corporation-tax-registration'));
 }
 
-let hmrcGuideSelected = '';
-function renderHmrcGuide() {
-  const state = hmrcGuidedState(profile.hmrc, hmrcGuideSelected);
-  hmrcGuideSelected = state.current;
-  const currentStep = HMRC_STEPS.find((step) => step.id === state.current);
-  $('hmrcGuideTitle').textContent = currentStep.title;
-  $('hmrcGuideProgress').textContent = 'Step ' + (HMRC_STEPS.findIndex((step) => step.id === state.current) + 1) + ' of 5';
+let hmrcGuideSelected = 'utr';
+let hmrcActiveView = hmrcTaxPeriods(profile.hmrc).length ? 'periods' : 'setup';
+
+const hmrcDialogs = {
+  setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
+  activity: setupDialog($('hmrcActivityDialog'), { closeButtons: [...$('hmrcActivityDialog').querySelectorAll('[data-hmrc-close]')] }),
+  period: setupDialog($('hmrcPeriodDialog'), { closeButtons: [...$('hmrcPeriodDialog').querySelectorAll('[data-hmrc-close]')] }),
+  filing: setupDialog($('hmrcFilingDialog'), { closeButtons: [...$('hmrcFilingDialog').querySelectorAll('[data-hmrc-close]')] }),
+  payment: setupDialog($('hmrcPaymentDialog'), { closeButtons: [...$('hmrcPaymentDialog').querySelectorAll('[data-hmrc-close]')] }),
+  evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] })
+};
+
+const hmrcBadge = (label, kind = 'neutral') =>
+  `<span class="hmrc-pill hmrc-pill--${kind}">${escapeHtml(label)}</span>`;
+const hmrcDate = (date) => date ? escapeHtml(formatComplianceDateUK(date)) : 'Not recorded';
+const hmrcDisplayReference = (reference) => reference ? '••••••••••••' + escapeHtml(reference.slice(-5)) : 'Not recorded';
+
+function hmrcEvidenceMarkup(ruleKey, label) {
+  const files = (profile.complianceEvidence || []).filter((file) => file.ruleKey === ruleKey);
+  return `<div class="hmrc-evidence-section"><strong>${escapeHtml(label)}</strong>
+    <ul class="hmrc-evidence-list">${files.map((file) => `<li>
+      <span>${escapeHtml(file.name)}</span>
+      <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
+      ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}
+    </li>`).join('') || '<li class="muted">No documents</li>'}</ul>
+    ${editingAllowed ? `<button type="button" class="secondary-btn" data-hmrc-attach="${escapeHtml(ruleKey)}">Attach document</button>` : ''}
+  </div>`;
+}
+
+function renderHmrcDashboard() {
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
-  $('hmrcGuideSteps').innerHTML = state.allowed.map((id) => {
-    const step = HMRC_STEPS.find((item) => item.id === id);
-    const done = id === 'utr' ? Boolean(setup.utrReceivedOn)
-      : id === 'registration' ? Boolean(setup.registrationConfirmedOn)
-        : id === 'activity' ? state.activity === 'active'
-          : id === 'period' ? state.hasPeriods : false;
-    const label = id !== state.next ? (done ? ' ✓' : ' · Waiting') : '';
-    return `<button type="button" data-hmrc-go="${escapeHtml(id)}" ${id === state.current ? 'aria-current="step"' : ''}>${escapeHtml(step.title)}${label}</button>`;
-  }).join('');
-  for (const [id, section] of [['utr', 'hmrcSetupStage'], ['registration', 'hmrcSetupStage'],
-    ['activity', 'hmrcActivityStage'], ['period', 'hmrcPeriodStage'], ['records', 'hmrcRecordsStage']]) {
-    if (id === 'utr' || id === 'registration') continue;
-    $(section).hidden = state.current !== id;
-  }
-  $('hmrcSetupStage').hidden = !['utr', 'registration'].includes(state.current);
-  const isUtr = state.current === 'utr';
-  $('hmrcSetupHeading').textContent = isUtr ? 'UTR letter' : 'Corporation Tax registration';
-  $('hmrcSetupStage').querySelector('.hmrc-tracking-panel > p').textContent = isUtr ? 'Enter the date on your letter. Keep the UTR number private.' : 'Enter the confirmation date from HMRC. Not confirmed yet? Record that you are waiting.';
-  $('hmrcSetupSaveBtn').textContent = isUtr ? 'Save letter date' : 'Save registration date';
-  $('hmrcPendingBtn').textContent = isUtr ? 'Still waiting for letter' : 'Registration not yet confirmed';
-  $('hmrcSetupStage').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => {
-    label.hidden = label.dataset.hmrcSetupField !== state.current;
-  });
-  $('hmrcGuideHelp').textContent = ({
-    utr: 'Have you received your Corporation Tax UTR letter?',
-    activity: 'Choose your current company activity status.',
-    registration: 'Has HMRC confirmed your Corporation Tax registration?',
-    period: 'Add your HMRC-confirmed period dates.',
-    records: 'Track tax payments and CT600 submissions separately.'
-  })[state.current];
-  const activityGuidance = state.activity === 'preparing'
-    ? 'Check with your accountant when your property activity starts. Update this step when it changes.'
-    : state.activity === 'dormant'
-      ? 'Check HMRC dormancy status and any outstanding notices. Companies House filings still apply.'
-      : '';
-  $('hmrcActivityGuidance').textContent = activityGuidance;
-  $('hmrcActivityStage').querySelectorAll('input,button').forEach((element) => { element.disabled = !editingAllowed; });
-  const activity = $('hmrcActivityForm').querySelector('input[value="' + state.activity + '"]');
-  if (activity) activity.checked = true;
+  const state = hmrcOverviewState(profile.hmrc);
+  const periods = hmrcTaxPeriods(profile.hmrc);
+  const utrLabel = setup.utrReceivedOn ? 'Received ' + formatComplianceDateUK(setup.utrReceivedOn)
+    : setup.utrStatus === 'pending' ? 'Waiting' : 'Not recorded';
+  const activityLabel = ({ preparing: 'Preparing to buy', active: 'Business started', dormant: 'Dormant' })[state.activity] || 'Not recorded';
+  const complete = state.setupRecorded;
+  const activityActive = state.activity === 'active';
+  const registrationVisible = activityActive;
+  const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
+  const registrationDone = Boolean(setup.registrationConfirmedOn);
+  $('hmrcSetupCount').textContent = complete + ' of 2 recorded';
+  $('hmrcSetupCards').innerHTML = `
+    <article class="hmrc-setup-card">
+      <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
+      <button class="secondary-btn" type="button" data-hmrc-open="utr" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+      <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('company-utr-received:once', 'UTR letter')}</details>
+    </article>
+    <article class="hmrc-setup-card">
+      <div><h5>Company activity</h5>${hmrcBadge(activityLabel, activityActive ? 'success' : state.activity === 'preparing' ? 'warning' : 'neutral')}</div>
+      <button class="secondary-btn" type="button" data-hmrc-open="activity" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+    </article>
+    ${registrationVisible ? `<article class="hmrc-setup-card">
+      <div><h5>Corporation Tax registration</h5>${hmrcBadge(registrationDone ? 'Confirmed' : setup.registrationStatus === 'pending' ? 'Awaiting confirmation' : 'Not recorded', registrationDone ? 'success' : 'warning')}</div>
+      <button class="secondary-btn" type="button" data-hmrc-open="registration" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+      <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('corporation-tax-registration:once', 'Registration proof')}</details>
+    </article>` : ''}`;
+  $('hmrcRecurringViewTab').hidden = !canSeePeriods;
+  if (!canSeePeriods) hmrcActiveView = 'setup';
+  $('hmrcSetupViewTab').setAttribute('aria-selected', String(hmrcActiveView === 'setup'));
+  $('hmrcRecurringViewTab').setAttribute('aria-selected', String(hmrcActiveView === 'periods'));
+  $('hmrcSetupOverview').hidden = hmrcActiveView !== 'setup';
+  $('hmrcRecurringOverview').hidden = hmrcActiveView !== 'periods';
+  $('hmrcOpenPeriodDialog').disabled = !editingAllowed || !activityActive || !state.registrationAnswered;
+  const notes = [];
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const urgent = buildCompanyCompliance({ today, hmrc: profile.hmrc, confirmations: profile.complianceConfirmations })
-    .filter((item) => item.source === 'hmrc' && ['due-soon', 'past-deadline-unverified'].includes(item.status));
-  const notes = [...state.pending, ...(urgent.length ? [urgent.length + ' HMRC deadline(s) need checking. Open all requirements below.'] : [])];
-  $('hmrcGuideAlerts').textContent = notes.join(' · ');
-  $('hmrcGuideAlerts').hidden = !notes.length;
-  $('hmrcTaxStatus').closest('label').hidden = true;
-  $('hmrcPeriodForm').querySelectorAll('input,select,button').forEach((el) => { el.disabled = !editingAllowed; });
+  if (periods.some((period) => {
+    const due = hmrcDeadlines(period);
+    const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
+    return (due['corporation-tax-payment'] < today && (record.outstanding === null || record.outstanding > 0))
+      || (due['corporation-tax-return'] < today && !record.filedOn);
+  })) notes.push('Check overdue HMRC deadlines');
+  $('hmrcStatusNote').textContent = notes.join(' · ');
+  $('hmrcStatusNote').hidden = !notes.length;
 }
-$('hmrcGuideSteps').addEventListener('click', (event) => {
-  const button = event.target.closest('[data-hmrc-go]');
-  if (!button) return;
-  hmrcGuideSelected = button.dataset.hmrcGo;
-  renderHmrcGuide();
-});
 
+$('hmrcSetupViewTab').addEventListener('click', () => { hmrcActiveView = 'setup'; renderHmrcDashboard(); });
+$('hmrcRecurringViewTab').addEventListener('click', () => { hmrcActiveView = 'periods'; renderHmrcDashboard(); });
+$('hmrcOpenPeriodDialog').addEventListener('click', (event) => {
+  if (!editingAllowed) return;
+  $('hmrcPeriodMessage').textContent = '';
+  $('hmrcPeriodStart').value = '';
+  $('hmrcPeriodEnd').value = '';
+  $('hmrcTaxStatus').value = 'active';
+  hmrcDialogs.period.open(event.currentTarget);
+});
+$('hmrcSetupCards').addEventListener('click', (event) => {
+  const attach = event.target.closest('[data-hmrc-attach]');
+  if (attach && editingAllowed) {
+    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
+    $('hmrcEvidenceInput').value = '';
+    $('hmrcEvidenceMessage').textContent = '';
+    hmrcDialogs.evidence.open(attach);
+    return;
+  }
+  const button = event.target.closest('[data-hmrc-open]');
+  if (!button || !editingAllowed) return;
+  const step = button.dataset.hmrcOpen;
+  hmrcGuideSelected = step;
+  if (step === 'activity') {
+    const selected = $('hmrcActivityForm').querySelector('input[value="' + (normalizeHmrcTracking(profile.hmrc).setup.activityStage || '') + '"]');
+    if (selected) selected.checked = true;
+    $('hmrcActivityMessage').textContent = '';
+    hmrcDialogs.activity.open(button);
+    return;
+  }
+  const isUtr = step === 'utr';
+  $('hmrcSetupDialogTitle').textContent = isUtr ? 'UTR letter' : 'Corporation Tax registration';
+  $('hmrcSetupSaveBtn').textContent = isUtr ? 'Save date' : 'Save registration';
+  $('hmrcPendingBtn').textContent = isUtr ? 'Still waiting' : 'Not yet confirmed';
+  $('hmrcSetupForm').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => { label.hidden = label.dataset.hmrcSetupField !== step; });
+  $('hmrcSetupMessage').textContent = '';
+  hmrcDialogs.setup.open(button);
+});
 function hmrcRecordPeriodOptions(selectedId) {
   const periods = hmrcTaxPeriods(profile.hmrc);
   return periods.map((period) => `<option value="${escapeHtml(period.periodEnd)}" ${selectedId === period.periodEnd ? 'selected' : ''}>${escapeHtml(formatComplianceDateUK(period.periodStart))} – ${escapeHtml(formatComplianceDateUK(period.periodEnd))}</option>`).join('');
@@ -393,6 +438,8 @@ function fillHmrcFilingForm(periodEnd) {
   const selected = hmrcPeriodSummary(profile.hmrc, periodEnd);
   $('hmrcFiledOn').value = selected.filedOn;
   $('hmrcFilingReference').value = selected.filingReference;
+  $('hmrcLiabilityStatus').value = selected.liability === null ? 'unknown' : selected.liabilityStatus || 'recorded';
+  $('hmrcPeriodPaymentReference').value = selected.paymentReference || '';
   $('hmrcLiability').value = selected.liability === null ? '' : String(selected.liability);
   $('hmrcReviewedOn').value = selected.reviewedOn;
   $('hmrcReviewedBy').value = selected.reviewedBy;
@@ -405,30 +452,79 @@ function renderHmrcTracking() {
   $('hmrcRegistrationReference').value = setup.registrationReference;
   $('hmrcAccountantName').value = setup.accountantName;
   $('hmrcSetupForm').querySelectorAll('input,button').forEach((element) => { element.disabled = !editingAllowed; });
-  const previouslySelected = $('hmrcRecordPeriod').value;
-  const selectedPeriod = periods.some((p) => p.periodEnd === previouslySelected) ? previouslySelected : periods[0]?.periodEnd || '';
+  const selectedPeriod = periods.some((p) => p.periodEnd === $('hmrcRecordPeriod').value) ? $('hmrcRecordPeriod').value : periods[0]?.periodEnd || '';
+  const paymentPeriod = periods.some((p) => p.periodEnd === $('hmrcPaymentPeriod').value) ? $('hmrcPaymentPeriod').value : selectedPeriod;
   $('hmrcRecordPeriod').innerHTML = hmrcRecordPeriodOptions(selectedPeriod);
-  const paymentPreviouslySelected = $('hmrcPaymentPeriod').value;
-  const paymentPeriod = periods.some((p) => p.periodEnd === paymentPreviouslySelected) ? paymentPreviouslySelected : selectedPeriod;
   $('hmrcPaymentPeriod').innerHTML = hmrcRecordPeriodOptions(paymentPeriod);
   fillHmrcFilingForm(selectedPeriod);
   for (const form of [$('hmrcFilingForm'), $('hmrcPaymentForm')]) {
     form.querySelectorAll('input,select,button').forEach((element) => { element.disabled = !editingAllowed || !periods.length; });
   }
   $('hmrcPeriodHistory').innerHTML = periods.length
-    ? '<h4>Recorded Corporation Tax periods</h4><div class="hmrc-record-cards">' + periods.map((p) => {
-      const record = hmrcPeriodSummary(profile.hmrc, p.periodEnd);
-      return `<div class="hmrc-record-card"><strong>${escapeHtml(formatComplianceDateUK(p.periodStart))} – ${escapeHtml(formatComplianceDateUK(p.periodEnd))}</strong>
-        <p class="muted">CT600: ${record.filedOn ? 'Recorded submitted ' + escapeHtml(formatComplianceDateUK(record.filedOn)) : 'Not recorded as filed'}${record.filingReference ? ' · Reference: ' + escapeHtml(record.filingReference) : ''}</p>
-        <p class="muted">Accountant review: ${record.reviewedOn ? escapeHtml(formatComplianceDateUK(record.reviewedOn)) + (record.reviewedBy ? ' · ' + escapeHtml(record.reviewedBy) : '') : 'Not recorded'}</p>
-        <p><strong>Liability:</strong> ${record.liability === null ? 'Not recorded' : CURRENCY_FORMAT.format(record.liability)}
-        · <strong>Paid:</strong> ${CURRENCY_FORMAT.format(record.paid)}
-        · <strong>Outstanding:</strong> ${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</p>
-        ${record.overpayment ? `<p class="hmrc-record-warning">Recorded payments exceed the liability by ${CURRENCY_FORMAT.format(record.overpayment)}. Reconcile with HMRC.</p>` : ''}
-        ${record.payments.length ? `<ul class="hmrc-record-payments">${record.payments.map((payment) => `<li><span>${escapeHtml(formatComplianceDateUK(payment.date))} · ${CURRENCY_FORMAT.format(payment.amount)}${payment.reference ? ' · ' + escapeHtml(payment.reference) : ''}</span>${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(p.periodEnd)}">Remove</button>` : ''}</li>`).join('')}</ul>` : '<p class="muted">No payments recorded.</p>'}
-      </div>`;
+    ? '<div class="hmrc-period-cards">' + [...periods].reverse().map((period) => {
+      const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
+      const due = hmrcDeadlines(period);
+      const liabilityKnown = record.liability !== null;
+      const filingDate = due['corporation-tax-return'];
+      const paymentDate = due['corporation-tax-payment'];
+      const noTaxDue = liabilityKnown && record.liability === 0;
+      const isPaid = liabilityKnown && record.liability > 0 && record.outstanding === 0 && record.overpayment === 0;
+      const recordedFiling = Boolean(record.filedOn);
+      return `<article class="hmrc-period-card">
+        <header class="hmrc-period-header">
+          <div class="hmrc-period-heading">
+            <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
+            <div class="hmrc-period-badges">
+              ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'neutral')}
+              ${hmrcBadge(noTaxDue ? 'No tax due (recorded)' : isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', noTaxDue || isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
+            </div>
+            <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
+          </div>
+          <div class="hmrc-period-actions">
+            <button type="button" class="secondary-btn" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Edit CT600</button>
+            <button type="button" class="primary-btn" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>+ Tax payment</button>
+          </div>
+        </header>
+        <div class="hmrc-period-grid">
+          <section class="hmrc-period-info"><h6>CT600 return</h6>
+            ${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'neutral')}
+            <dl><dt>Submitted</dt><dd>${hmrcDate(record.filedOn)}</dd>
+              <dt>Reference</dt><dd>${escapeHtml(record.filingReference) || '—'}</dd>
+              <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
+              <dt>Reviewed on</dt><dd>${hmrcDate(record.reviewedOn)}</dd></dl>
+          </section>
+          <section class="hmrc-period-info"><h6>Financial summary</h6>
+            <dl><dt>Tax liability</dt><dd>${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
+              <dt>Liability status</dt><dd>${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
+              <dt>Total paid</dt><dd class="hmrc-value-positive">${CURRENCY_FORMAT.format(record.paid)}</dd>
+              <dt>Outstanding</dt><dd>${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</dd></dl>
+            ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
+          </section>
+          <section class="hmrc-period-info"><h6>HMRC payment details</h6>
+            <p class="muted">Reference for this period</p>
+            <div class="hmrc-reference-row"><strong class="hmrc-ref" data-hmrc-ref-value="${escapeHtml(period.periodEnd)}">${hmrcDisplayReference(record.paymentReference)}</strong>
+            ${record.paymentReference ? `<button class="secondary-btn hmrc-ref-toggle" data-hmrc-reveal-ref="${escapeHtml(period.periodEnd)}" type="button" aria-label="Show payment reference for period ending ${escapeHtml(formatComplianceDateUK(period.periodEnd))}">Show</button>` : ''}</div>
+            <p class="muted">Check your HMRC account before paying.</p>
+          </section>
+        </div>
+        <div class="hmrc-payments">
+          <h6>Recorded payments <span class="muted">(${record.payments.length})</span></h6>
+          ${record.payments.length ? `<div class="hmrc-payment-table-wrap"><table class="hmrc-payment-table">
+            <thead><tr><th scope="col">Paid on</th><th scope="col">Amount</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+            <tbody>${record.payments.map((payment) => `<tr>
+              <td>${hmrcDate(payment.date)}</td><td>${CURRENCY_FORMAT.format(payment.amount)}</td>
+              <td>${escapeHtml(payment.reference) || '—'}</td>
+              <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
+              <td>${editingAllowed ? `<button class="hmrc-remove-payment" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}">Remove</button>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
+          : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
+        </div>
+        <details class="hmrc-card-documents"><summary>Supporting documents</summary>
+          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}
+          ${hmrcEvidenceMarkup('corporation-tax-payment:' + period.periodEnd, 'Payment receipts')}</div>
+        </details>
+      </article>`;
     }).join('') + '</div>'
-    : '<p class="muted">No HMRC-confirmed tax accounting periods added yet.</p>';
+    : '<div class="hmrc-period-empty"><p>No tax periods recorded yet.</p><p class="muted">Add the dates confirmed by HMRC or your accountant.</p></div>';
 }
 
 function renderProfile() {
@@ -448,7 +544,7 @@ function renderProfile() {
   renderInvestments();
   renderCompanyCompliance();
   renderHmrcTracking();
-  renderHmrcGuide();
+  renderHmrcDashboard();
 }
 
 async function refreshCompanyHouseDeadlines() {
@@ -614,9 +710,10 @@ async function requireEvidenceEditor() {
     throw new Error('Approved editor access is required.');
   }
 }
-function openEvidenceRequirement(key) {
-  const input = [...document.querySelectorAll('[data-evidence-upload]')].find((element) => element.dataset.evidenceUpload === key);
-  if (input) input.closest('details')?.setAttribute('open', '');
+function restoreEvidenceDisclosure(ruleKey) {
+  const upload = [...document.querySelectorAll('[data-evidence-upload]')].find((element) => element.dataset.evidenceUpload === ruleKey && element.closest('details'));
+  const attach = [...document.querySelectorAll('[data-hmrc-attach]')].find((element) => element.dataset.hmrcAttach === ruleKey);
+  (upload || attach)?.closest('details')?.setAttribute('open', '');
 }
 
 $('complianceTabPanel').addEventListener('change', async (event) => {
@@ -645,10 +742,14 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     }
     profile = getCompanyProfile();
     renderCompanyCompliance();
-    openEvidenceRequirement(ruleKey);
+    renderHmrcTracking();
+    renderHmrcDashboard();
+    hmrcDialogs.evidence.close();
+    restoreEvidenceDisclosure(ruleKey);
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
+    $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
   } finally {
     input.disabled = !editingAllowed;
     input.value = '';
@@ -683,7 +784,9 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
       await deleteComplianceEvidence(profile.id, existing);
       profile = getCompanyProfile();
       renderCompanyCompliance();
-      openEvidenceRequirement(entry.ruleKey);
+      renderHmrcTracking();
+      renderHmrcDashboard();
+      restoreEvidenceDisclosure(entry.ruleKey);
       setEvidenceMessage('Evidence removed.');
     }
   } catch (error) {
@@ -766,7 +869,7 @@ $('hmrcSetupForm').addEventListener('submit', async (event) => {
     profile = saveCompanyProfile({ ...profile, hmrc: saveHmrcSetup(profile.hmrc, changes) });
     hmrcGuideSelected = '';
     renderProfile();
-    $('hmrcSetupMessage').textContent = 'Saved.';
+    hmrcDialogs.setup.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcSetupMessage').textContent = error.message || 'Unable to save HMRC details.';
@@ -783,6 +886,7 @@ $('hmrcPendingBtn').addEventListener('click', async () => {
     });
     hmrcGuideSelected = '';
     renderProfile();
+    hmrcDialogs.setup.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcSetupMessage').textContent = error.message || 'Unable to record waiting status.';
@@ -803,7 +907,7 @@ $('hmrcActivityForm').addEventListener('submit', async (event) => {
     });
     hmrcGuideSelected = '';
     renderProfile();
-    $('hmrcActivityMessage').textContent = selected === 'active' ? 'Status saved.' : 'Status saved. Review the guidance above.';
+    hmrcDialogs.activity.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcActivityMessage').textContent = error.message || 'Unable to save activity.';
@@ -828,6 +932,8 @@ $('hmrcFilingForm').addEventListener('submit', async (event) => {
       filedOn: $('hmrcFiledOn').value,
       filingReference: $('hmrcFilingReference').value,
       liability: liabilityText === '' ? null : Number(liabilityText),
+      liabilityStatus: liabilityText === '' ? 'unknown' : $('hmrcLiabilityStatus').value === 'unknown' ? 'recorded' : $('hmrcLiabilityStatus').value,
+      paymentReference: $('hmrcPeriodPaymentReference').value.trim().toUpperCase(),
       reviewedOn: $('hmrcReviewedOn').value,
       reviewedBy: $('hmrcReviewedBy').value
     });
@@ -835,7 +941,7 @@ $('hmrcFilingForm').addEventListener('submit', async (event) => {
     renderProfile();
     $('hmrcRecordPeriod').value = periodEnd;
     fillHmrcFilingForm(periodEnd);
-    $('hmrcFilingMessage').textContent = 'CT600 filing and accountant review recorded. Verify against HMRC or your accountant.';
+    hmrcDialogs.filing.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcFilingMessage').textContent = error.message || 'Unable to save filing details.';
@@ -851,7 +957,9 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
       id: globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now(),
       date: $('hmrcPaymentDate').value,
       amount: $('hmrcPaymentAmount').value,
-      reference: $('hmrcPaymentReference').value
+      reference: $('hmrcPaymentReference').value,
+      method: $('hmrcPaymentMethod').value,
+      status: $('hmrcPaymentConfirmed').checked ? 'hmrc-confirmed' : 'recorded'
     });
     profile = saveCompanyProfile({ ...profile, hmrc });
     renderProfile();
@@ -859,7 +967,7 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
     $('hmrcPaymentDate').value = '';
     $('hmrcPaymentAmount').value = '';
     $('hmrcPaymentReference').value = '';
-    $('hmrcPaymentMessage').textContent = 'Corporation Tax payment recorded.';
+    hmrcDialogs.payment.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcPaymentMessage').textContent = error.message || 'Unable to record payment.';
@@ -867,6 +975,48 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
 });
 
 $('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const reveal = event.target.closest('[data-hmrc-reveal-ref]');
+  if (reveal) {
+    const periodEnd = reveal.dataset.hmrcRevealRef;
+    const value = hmrcPeriodSummary(profile.hmrc, periodEnd).paymentReference;
+    const target = [...$('hmrcPeriodHistory').querySelectorAll('[data-hmrc-ref-value]')].find((element) => element.dataset.hmrcRefValue === periodEnd);
+    if (!target || !value) return;
+    const showing = reveal.textContent === 'Hide';
+    target.textContent = showing ? hmrcDisplayReference(value) : value;
+    reveal.textContent = showing ? 'Show' : 'Hide';
+    reveal.setAttribute('aria-label', (showing ? 'Show' : 'Hide') + ' payment reference for period ending ' + formatComplianceDateUK(periodEnd));
+    return;
+  }
+  const attach = event.target.closest('[data-hmrc-attach]');
+  if (attach && editingAllowed) {
+    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
+    $('hmrcEvidenceInput').value = '';
+    $('hmrcEvidenceMessage').textContent = '';
+    hmrcDialogs.evidence.open(attach);
+    return;
+  }
+  const action = event.target.closest('[data-hmrc-open][data-hmrc-period]');
+  if (action && editingAllowed) {
+    const periodEnd = action.dataset.hmrcPeriod;
+    const isFiling = action.dataset.hmrcOpen === 'filing';
+    if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) return;
+    const select = $(isFiling ? 'hmrcRecordPeriod' : 'hmrcPaymentPeriod');
+    select.value = periodEnd;
+    if (isFiling) {
+      fillHmrcFilingForm(periodEnd);
+      $('hmrcFilingMessage').textContent = '';
+      hmrcDialogs.filing.open(action);
+    } else {
+      $('hmrcPaymentDate').value = '';
+      $('hmrcPaymentAmount').value = '';
+      $('hmrcPaymentReference').value = '';
+      $('hmrcPaymentMethod').value = 'bank-transfer';
+      $('hmrcPaymentConfirmed').checked = false;
+      $('hmrcPaymentMessage').textContent = '';
+      hmrcDialogs.payment.open(action);
+    }
+    return;
+  }
   const button = event.target.closest('[data-hmrc-payment-remove]');
   if (!button || !editingAllowed) return;
   if (!window.confirm('Remove this recorded Corporation Tax payment?')) return;
@@ -925,7 +1075,9 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
     renderProfile();
     $('hmrcPeriodStart').value = '';
     $('hmrcPeriodEnd').value = '';
-    $('hmrcPeriodMessage').textContent = status === 'active' ? 'HMRC period recorded. Filing and payment deadlines are estimates.' : 'Corporation Tax activity status saved. Existing tax history retained.';
+    hmrcActiveView = 'periods';
+    renderHmrcDashboard();
+    hmrcDialogs.period.close();
     await syncAfterSave();
   } catch (error) {
     message.textContent = error.message || 'Unable to save HMRC details.';
