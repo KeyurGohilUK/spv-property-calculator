@@ -192,7 +192,7 @@ test('editor follows one HMRC step at a time and records tax payments', async ({
   await page.locator('#hmrcPeriodEnd').fill('2026-12-31');
   await page.locator('#hmrcPeriodForm button[type="submit"]').click();
   await expect(page.locator('#hmrcGuideTitle')).toHaveText('Returns and payments');
-  await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 December 2026');
+  await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
   await page.getByText('Record CT600 return and tax due', { exact: true }).click();
   await page.locator('#hmrcFiledOn').fill('2027-06-10');
   await page.locator('#hmrcFilingReference').fill('CT600-ACK');
