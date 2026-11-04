@@ -467,7 +467,8 @@ function renderHmrcTracking() {
       const liabilityKnown = record.liability !== null;
       const filingDate = due['corporation-tax-return'];
       const paymentDate = due['corporation-tax-payment'];
-      const isPaid = liabilityKnown && record.outstanding === 0 && record.overpayment === 0;
+      const noTaxDue = liabilityKnown && record.liability === 0;
+      const isPaid = liabilityKnown && record.liability > 0 && record.outstanding === 0 && record.overpayment === 0;
       const recordedFiling = Boolean(record.filedOn);
       return `<article class="hmrc-period-card">
         <header class="hmrc-period-header">
@@ -475,7 +476,7 @@ function renderHmrcTracking() {
             <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
             <div class="hmrc-period-badges">
               ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'neutral')}
-              ${hmrcBadge(isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
+              ${hmrcBadge(noTaxDue ? 'No tax due (recorded)' : isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment due' : 'Tax not assessed', noTaxDue || isPaid ? 'success' : liabilityKnown && record.outstanding > 0 ? 'warning' : 'neutral')}
             </div>
             <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
           </div>
@@ -501,7 +502,8 @@ function renderHmrcTracking() {
           </section>
           <section class="hmrc-period-info"><h6>HMRC payment details</h6>
             <p class="muted">Reference for this period</p>
-            <strong class="hmrc-ref">${hmrcDisplayReference(record.paymentReference)}</strong>
+            <div class="hmrc-reference-row"><strong class="hmrc-ref" data-hmrc-ref-value="${escapeHtml(period.periodEnd)}">${hmrcDisplayReference(record.paymentReference)}</strong>
+            ${record.paymentReference ? `<button class="secondary-btn hmrc-ref-toggle" data-hmrc-reveal-ref="${escapeHtml(period.periodEnd)}" type="button" aria-label="Show payment reference for period ending ${escapeHtml(formatComplianceDateUK(period.periodEnd))}">Show</button>` : ''}</div>
             <p class="muted">Check your HMRC account before paying.</p>
           </section>
         </div>
@@ -973,6 +975,18 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
 });
 
 $('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const reveal = event.target.closest('[data-hmrc-reveal-ref]');
+  if (reveal) {
+    const periodEnd = reveal.dataset.hmrcRevealRef;
+    const value = hmrcPeriodSummary(profile.hmrc, periodEnd).paymentReference;
+    const target = [...$('hmrcPeriodHistory').querySelectorAll('[data-hmrc-ref-value]')].find((element) => element.dataset.hmrcRefValue === periodEnd);
+    if (!target || !value) return;
+    const showing = reveal.textContent === 'Hide';
+    target.textContent = showing ? hmrcDisplayReference(value) : value;
+    reveal.textContent = showing ? 'Show' : 'Hide';
+    reveal.setAttribute('aria-label', (showing ? 'Show' : 'Hide') + ' payment reference for period ending ' + formatComplianceDateUK(periodEnd));
+    return;
+  }
   const attach = event.target.closest('[data-hmrc-attach]');
   if (attach && editingAllowed) {
     $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
