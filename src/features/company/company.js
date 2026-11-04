@@ -395,7 +395,7 @@ function renderHmrcDashboard() {
   const registrationVisible = activityActive;
   const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
   const registrationDone = Boolean(setup.registrationConfirmedOn);
-  $('hmrcSetupTabStatus').textContent = complete === 2 ? '(2/2 Done)' : '(' + complete + '/2 Complete)';
+  $('hmrcSetupTabStatus').textContent = complete === 2 ? '(Steps 1–2 · 2/2 Done)' : '(Steps 1–2 · ' + complete + '/2 Complete)';
   $('hmrcSetupTabIcon').classList.toggle('is-complete', complete === 2);
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
