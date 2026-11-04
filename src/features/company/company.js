@@ -2,12 +2,15 @@ import { setupDialog } from '../../components/dialog-helper.js';
 import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
+import { uploadComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
 import {
   getCompanyProfile,
   setActiveCompanyId,
   listStoredCompanyProfiles,
   deleteCompanyProfile,
   saveCompanyProfile,
+  addCompanyEvidence,
+  removeCompanyEvidence,
   saveComplianceConfirmation,
   saveAppointment,
   deleteAppointment,
@@ -301,6 +304,14 @@ function renderCompanyCompliance() {
           : 'Confirm this requirement and keep appropriate evidence.'}</p>
       ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
       ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
+      <div class="company-evidence">
+        <strong>Supporting evidence</strong>
+        <ul class="company-evidence-files">${(profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key).map((file) => `
+          <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(file.uploadedAt?.slice(0, 10) || 'Date unknown')}</small></span>
+          <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
+          ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
+        ${editingAllowed ? `<label class="company-evidence-upload">Attach PDF or image (maximum 5 MB)<input type="file" data-evidence-upload="${escapeHtml(item.key)}" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>` : ''}
+      </div>
     </div></details>`).join('');
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
   $('hmrcComplianceItems').innerHTML = renderCards(items.filter((item) => item.source === 'hmrc' || item.id === 'corporation-tax-registration'));
@@ -471,6 +482,100 @@ async function syncAfterSave() {
     setSyncStatus('Saved on this device · sync pending', 'error');
   }
 }
+
+
+function setEvidenceMessage(message, isError = false) {
+  const el = $('companyEvidenceStatus');
+  el.textContent = message;
+  el.classList.toggle('is-error', isError);
+  el.setAttribute('role', isError ? 'alert' : 'status');
+}
+
+async function requireEvidenceEditor() {
+  if (!navigator.onLine) throw new Error('An internet connection is required for evidence changes.');
+  const access = await window.SPVCloud?.getWorkspaceAccess?.();
+  if (!editingAllowed || !access?.active || !['admin', 'editor'].includes(access.role)) {
+    throw new Error('Approved editor access is required.');
+  }
+}
+function openEvidenceRequirement(key) {
+  const input = [...document.querySelectorAll('[data-evidence-upload]')].find((element) => element.dataset.evidenceUpload === key);
+  if (input) input.closest('details')?.setAttribute('open', '');
+}
+
+$('complianceTabPanel').addEventListener('change', async (event) => {
+  const input = event.target.closest('[data-evidence-upload]');
+  if (!input?.files?.length) return;
+  const ruleKey = input.dataset.evidenceUpload;
+  const file = input.files[0];
+  input.disabled = true;
+  setEvidenceMessage('Uploading compliance evidence…');
+  try {
+    validateEvidenceFile(file);
+    await requireEvidenceEditor();
+    const before = await syncCompanyProfile(window.SPVCloud);
+    if (before.conflicts.length || getCompanyProfile()._cloudDirty) throw new Error('Resolve company sync before uploading evidence.');
+    profile = getCompanyProfile();
+    const uploaded = await uploadComplianceEvidence(profile.id, file);
+    try {
+      addCompanyEvidence({ ...uploaded, ruleKey });
+    } catch (error) {
+      await deleteComplianceEvidence(profile.id, uploaded).catch(() => {});
+      throw error;
+    }
+    const saved = await syncCompanyProfile(window.SPVCloud);
+    if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+      throw new Error('Evidence uploaded, but metadata sync is pending. Retry company sync; do not upload it again.');
+    }
+    profile = getCompanyProfile();
+    renderCompanyCompliance();
+    openEvidenceRequirement(ruleKey);
+    setEvidenceMessage('Evidence uploaded and saved.');
+  } catch (error) {
+    setEvidenceMessage(error.message || 'Evidence upload failed.', true);
+  } finally {
+    input.disabled = !editingAllowed;
+    input.value = '';
+  }
+});
+
+$('complianceTabPanel').addEventListener('click', async (event) => {
+  const download = event.target.closest('[data-evidence-download]');
+  const remove = event.target.closest('[data-evidence-remove]');
+  if (!download && !remove) return;
+  const id = (download || remove).dataset[download ? 'evidenceDownload' : 'evidenceRemove'];
+  const entry = getCompanyProfile().complianceEvidence.find((item) => item.id === id);
+  if (!entry) { setEvidenceMessage('This document is no longer attached. Refresh the page.', true); return; }
+  const button = download || remove;
+  button.disabled = true;
+  try {
+    if (download) {
+      await downloadComplianceEvidence(profile.id, entry);
+      setEvidenceMessage('Document downloaded.');
+    } else {
+      await requireEvidenceEditor();
+      if (!window.confirm('Remove ' + entry.name + ' from this compliance requirement?')) return;
+      const before = await syncCompanyProfile(window.SPVCloud);
+      if (before.conflicts.length || getCompanyProfile()._cloudDirty) throw new Error('Resolve company sync before removing evidence.');
+      const existing = getCompanyProfile().complianceEvidence.find((item) => item.id === id);
+      if (!existing) throw new Error('Document was changed on another device. Refresh first.');
+      removeCompanyEvidence(id);
+      const saved = await syncCompanyProfile(window.SPVCloud);
+      if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Removal saved locally, but cloud sync is pending. Retry before deleting the stored file.');
+      }
+      await deleteComplianceEvidence(profile.id, existing);
+      profile = getCompanyProfile();
+      renderCompanyCompliance();
+      openEvidenceRequirement(entry.ruleKey);
+      setEvidenceMessage('Evidence removed.');
+    }
+  } catch (error) {
+    setEvidenceMessage(error.message || 'Evidence action failed.', true);
+  } finally {
+    button.disabled = false;
+  }
+});
 
 $('openDeleteCompanyBtn').addEventListener('click', () => {
   if (!deleteAllowed || profile.deletedAt) return;
