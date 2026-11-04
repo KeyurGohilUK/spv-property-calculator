@@ -47,11 +47,14 @@ assert.match(styles, /\.sync-status \{[^}]*color: var\(--muted\)[^}]*text-align:
 assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.property-hero-actions \{[^}]*grid-template-columns: 1fr;[^}]*width: 100%; \}/, 'Property hero actions must stack on mobile');
 
 const portfolio = fs.readFileSync(new URL('../portfolio/index.html', import.meta.url), 'utf8');
-for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses], ['portfolio', portfolio]]) {
+for (const [name, page] of [['home', index], ['forecast', forecast], ['expenses', expenses]]) {
   assert.match(page, /class="primary-app-nav"[^>]*data-primary-navigation[^>]*data-active-page=/, `${name} page is missing the shared primary navigation mount`);
 }
-assert.match(primaryNavigation, /Opportunities[\s\S]*Portfolio[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Shared navigation items must keep their priority order');
-assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Opportunities must stay on one line on every mobile page');
+assert.match(index, /data-properties-tab="opportunities"[\s\S]*data-properties-tab="portfolio"/, 'Properties must provide Opportunities and Portfolio tabs');
+assert.match(portfolio, /window\.location\.replace\(new URL\('\.\.\/?view=portfolio'/, 'The legacy Portfolio route must open the Portfolio tab');
+assert.match(primaryNavigation, /label: 'Properties'[\s\S]*label: 'Expenses'[\s\S]*label: 'Tasks'[\s\S]*label: 'Forecast'[\s\S]*More/, 'Shared navigation items must keep their priority order');
+assert.doesNotMatch(primaryNavigation, /label: 'Portfolio'/, 'Portfolio must be nested under Properties rather than a top-level item');
+assert.match(styles, /@media \(max-width: 700px\)[\s\S]*\.primary-app-nav \.primary-nav-item:first-child span \{[^}]*white-space: nowrap;[^}]*font-size: clamp\(6px, 1\.8vw, 9px\);/, 'Properties must stay on one line on every mobile page');
 assert.doesNotMatch(styles, /#editorView \.editor-topbar::after/, 'Editor toolbar must not add a backdrop beneath the bar');
 assert.match(styles, /\.editor-topbar \{[^}]*box-shadow: none;/, 'Editor toolbar must not cast a shadow over the content below');
 assert.doesNotMatch(primaryNavigation, /id: 'tasks'[^\n]*badge:/, 'Shared navigation must not label Tasks as Beta');
