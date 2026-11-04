@@ -234,6 +234,9 @@ function openInvestment(id = '') {
 function renderCompanyCompliance() {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const items = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: hmrcTaxPeriods(profile.hmrc).length ? ['corporation-tax-payment'] : [] });
+  const evidenceFiles = profile.complianceEvidence || [];
+  const evidenceBytes = evidenceFiles.reduce((sum, item) => sum + Number(item.size || 0), 0);
+  $('companyEvidenceUsage').textContent = `${evidenceFiles.length} attached document${evidenceFiles.length === 1 ? '' : 's'} · ${(evidenceBytes / 1024 / 1024).toFixed(2)} MB (this company only)`;
   $('companyComplianceSummary').textContent = profile.companyNumber
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
