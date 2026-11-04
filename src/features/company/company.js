@@ -392,16 +392,16 @@ function renderHmrcDashboard() {
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
       <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
-      <button class="secondary-btn" type="button" data-hmrc-open="utr" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+      <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="utr" aria-label="Edit UTR letter" title="Edit UTR letter" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
       <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('company-utr-received:once', 'UTR letter')}</details>
     </article>
     <article class="hmrc-setup-card">
       <div><h5>Company activity</h5>${hmrcBadge(activityLabel, activityActive ? 'success' : state.activity === 'preparing' ? 'warning' : 'neutral')}</div>
-      <button class="secondary-btn" type="button" data-hmrc-open="activity" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+      <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="activity" aria-label="Edit company activity" title="Edit company activity" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
     </article>
     ${registrationVisible ? `<article class="hmrc-setup-card">
       <div><h5>Corporation Tax registration</h5>${hmrcBadge(registrationDone ? 'Confirmed' : setup.registrationStatus === 'pending' ? 'Awaiting confirmation' : 'Not recorded', registrationDone ? 'success' : 'warning')}</div>
-      <button class="secondary-btn" type="button" data-hmrc-open="registration" ${editingAllowed ? '' : 'disabled'}>Edit</button>
+      <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="registration" aria-label="Edit Corporation Tax registration" title="Edit Corporation Tax registration" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
       <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('corporation-tax-registration:once', 'Registration proof')}</details>
     </article>` : ''}`;
   $('hmrcRecurringViewTab').hidden = !canSeePeriods;
