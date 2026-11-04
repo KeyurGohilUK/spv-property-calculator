@@ -325,7 +325,7 @@ const hmrcDialogs = {
   period: setupDialog($('hmrcPeriodDialog'), { closeButtons: [...$('hmrcPeriodDialog').querySelectorAll('[data-hmrc-close]')] }),
   filing: setupDialog($('hmrcFilingDialog'), { closeButtons: [...$('hmrcFilingDialog').querySelectorAll('[data-hmrc-close]')] }),
   payment: setupDialog($('hmrcPaymentDialog'), { closeButtons: [...$('hmrcPaymentDialog').querySelectorAll('[data-hmrc-close]')] }),
-  evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] })
+  
 };
 
 // HMRC cards are rebuilt when saved. The native dialog otherwise tries to return
@@ -436,16 +436,12 @@ $('hmrcOpenPeriodDialog').addEventListener('click', (event) => {
 $('hmrcSetupCards').addEventListener('click', (event) => {
   const attach = event.target.closest('[data-hmrc-attach]');
   if (attach && editingAllowed) {
-    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
-    $('hmrcEvidenceInput').value = '';
-    $('hmrcEvidenceMessage').textContent = '';
-    hmrcDialogs.evidence.open(attach);
+    openHmrcEvidenceRecord(attach.dataset.hmrcAttach, attach);
     return;
   }
   const button = event.target.closest('[data-hmrc-open]');
   if (!button || !editingAllowed) return;
   const step = button.dataset.hmrcOpen;
-  hmrcGuideSelected = step;
   if (step === 'activity') {
     const selected = $('hmrcActivityForm').querySelector('input[value="' + (normalizeHmrcTracking(profile.hmrc).setup.activityStage || '') + '"]');
     if (selected) selected.checked = true;
@@ -453,13 +449,7 @@ $('hmrcSetupCards').addEventListener('click', (event) => {
     hmrcDialogs.activity.open(button);
     return;
   }
-  const isUtr = step === 'utr';
-  $('hmrcSetupDialogTitle').textContent = isUtr ? 'UTR letter' : 'Corporation Tax registration';
-  $('hmrcSetupSaveBtn').textContent = isUtr ? 'Save date' : 'Save registration';
-  $('hmrcPendingBtn').textContent = isUtr ? 'Still waiting' : 'Not yet confirmed';
-  $('hmrcSetupForm').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => { label.hidden = label.dataset.hmrcSetupField !== step; });
-  $('hmrcSetupMessage').textContent = '';
-  hmrcDialogs.setup.open(button);
+  openHmrcSetupRecord(step, button);
 });
 function hmrcRecordPeriodOptions(selectedId) {
   const periods = hmrcTaxPeriods(profile.hmrc);
@@ -475,6 +465,64 @@ function fillHmrcFilingForm(periodEnd) {
   $('hmrcReviewedOn').value = selected.reviewedOn;
   $('hmrcReviewedBy').value = selected.reviewedBy;
 }
+function configureHmrcEvidenceInput(id, ruleKey, clear = false) {
+  const input = $(id);
+  input.dataset.evidenceUpload = ruleKey || '';
+  if (clear) {
+    input.value = '';
+    input.closest('form')?.querySelector('[data-hmrc-evidence-message]')?.replaceChildren();
+  }
+}
+function openHmrcSetupRecord(step, trigger) {
+  hmrcGuideSelected = step;
+  const isUtr = step === 'utr';
+  $('hmrcSetupDialogTitle').textContent = isUtr ? 'UTR letter' : 'Corporation Tax registration';
+  $('hmrcSetupSaveBtn').textContent = isUtr ? 'Save date' : 'Save registration';
+  $('hmrcPendingBtn').textContent = isUtr ? 'Still waiting' : 'Not yet confirmed';
+  $('hmrcSetupForm').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => { label.hidden = label.dataset.hmrcSetupField !== step; });
+  configureHmrcEvidenceInput('hmrcSetupEvidenceInput', isUtr ? 'company-utr-received:once' : 'corporation-tax-registration:once', true);
+  $('hmrcSetupMessage').textContent = '';
+  hmrcDialogs.setup.open(trigger);
+}
+function openHmrcEvidenceRecord(ruleKey, trigger) {
+  if (ruleKey === 'company-utr-received:once') {
+    openHmrcSetupRecord('utr', trigger);
+    return;
+  }
+  if (ruleKey === 'corporation-tax-registration:once') {
+    openHmrcSetupRecord('registration', trigger);
+    return;
+  }
+  const separator = ruleKey.lastIndexOf(':');
+  const requirement = ruleKey.slice(0, separator);
+  const periodEnd = ruleKey.slice(separator + 1);
+  if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) return;
+  if (requirement === 'corporation-tax-return') {
+    $('hmrcRecordPeriod').value = periodEnd;
+    fillHmrcFilingForm(periodEnd);
+    configureHmrcEvidenceInput('hmrcFilingEvidenceInput', ruleKey, true);
+    $('hmrcFilingMessage').textContent = '';
+    hmrcDialogs.filing.open(trigger);
+    return;
+  }
+  if (requirement === 'corporation-tax-payment') {
+    $('hmrcPaymentPeriod').value = periodEnd;
+    $('hmrcPaymentDate').value = '';
+    $('hmrcPaymentAmount').value = '';
+    $('hmrcPaymentReference').value = '';
+    $('hmrcPaymentMethod').value = 'bank-transfer';
+    $('hmrcPaymentConfirmed').checked = false;
+    configureHmrcEvidenceInput('hmrcPaymentEvidenceInput', ruleKey, true);
+    $('hmrcPaymentMessage').textContent = '';
+    hmrcDialogs.payment.open(trigger);
+  }
+}
+$('hmrcRecordPeriod').addEventListener('change', () => {
+  configureHmrcEvidenceInput('hmrcFilingEvidenceInput', $('hmrcRecordPeriod').value ? 'corporation-tax-return:' + $('hmrcRecordPeriod').value : '');
+});
+$('hmrcPaymentPeriod').addEventListener('change', () => {
+  configureHmrcEvidenceInput('hmrcPaymentEvidenceInput', $('hmrcPaymentPeriod').value ? 'corporation-tax-payment:' + $('hmrcPaymentPeriod').value : '');
+});
 function renderHmrcTracking() {
   const periods = hmrcTaxPeriods(profile.hmrc);
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
@@ -487,6 +535,8 @@ function renderHmrcTracking() {
   const paymentPeriod = periods.some((p) => p.periodEnd === $('hmrcPaymentPeriod').value) ? $('hmrcPaymentPeriod').value : selectedPeriod;
   $('hmrcRecordPeriod').innerHTML = hmrcRecordPeriodOptions(selectedPeriod);
   $('hmrcPaymentPeriod').innerHTML = hmrcRecordPeriodOptions(paymentPeriod);
+  configureHmrcEvidenceInput('hmrcFilingEvidenceInput', selectedPeriod ? 'corporation-tax-return:' + selectedPeriod : '');
+  configureHmrcEvidenceInput('hmrcPaymentEvidenceInput', paymentPeriod ? 'corporation-tax-payment:' + paymentPeriod : '');
   fillHmrcFilingForm(selectedPeriod);
   for (const form of [$('hmrcFilingForm'), $('hmrcPaymentForm')]) {
     form.querySelectorAll('input,select,button').forEach((element) => { element.disabled = !editingAllowed || !periods.length; });
@@ -727,8 +777,8 @@ async function syncAfterSave() {
 }
 
 
-function setEvidenceMessage(message, isError = false) {
-  const el = $('companyEvidenceStatus');
+function setEvidenceMessage(message, isError = false, target = null) {
+  const el = target || $('companyEvidenceStatus');
   el.textContent = message;
   el.classList.toggle('is-error', isError);
   el.setAttribute('role', isError ? 'alert' : 'status');
@@ -752,8 +802,13 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   if (!input?.files?.length) return;
   const ruleKey = input.dataset.evidenceUpload;
   const file = input.files[0];
+  const dialogForm = input.closest('form');
+  const submitButton = dialogForm?.querySelector('button[type="submit"]');
+  const submitWasDisabled = Boolean(submitButton?.disabled);
+  const localMessage = dialogForm?.querySelector('[data-hmrc-evidence-message]') || null;
   input.disabled = true;
-  setEvidenceMessage('Uploading compliance evidence…');
+  if (submitButton) submitButton.disabled = true;
+  setEvidenceMessage('Uploading compliance evidence…', false, localMessage);
   try {
     validateEvidenceFile(file);
     await requireEvidenceEditor();
@@ -775,14 +830,13 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderCompanyCompliance();
     renderHmrcTracking();
     renderHmrcDashboard();
-    hmrcDialogs.evidence.close();
     restoreEvidenceDisclosure(ruleKey);
-    setEvidenceMessage('Evidence uploaded and saved.');
+    setEvidenceMessage('Evidence uploaded and saved.', false, localMessage);
   } catch (error) {
-    setEvidenceMessage(error.message || 'Evidence upload failed.', true);
-    $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
+    setEvidenceMessage(error.message || 'Evidence upload failed.', true, localMessage);
   } finally {
     input.disabled = !editingAllowed;
+    if (submitButton) submitButton.disabled = submitWasDisabled;
     input.value = '';
   }
 });
@@ -1020,10 +1074,7 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
   }
   const attach = event.target.closest('[data-hmrc-attach]');
   if (attach && editingAllowed) {
-    $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
-    $('hmrcEvidenceInput').value = '';
-    $('hmrcEvidenceMessage').textContent = '';
-    hmrcDialogs.evidence.open(attach);
+    openHmrcEvidenceRecord(attach.dataset.hmrcAttach, attach);
     return;
   }
   const action = event.target.closest('[data-hmrc-open][data-hmrc-period]');
@@ -1035,6 +1086,7 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
     select.value = periodEnd;
     if (isFiling) {
       fillHmrcFilingForm(periodEnd);
+      configureHmrcEvidenceInput('hmrcFilingEvidenceInput', 'corporation-tax-return:' + periodEnd, true);
       $('hmrcFilingMessage').textContent = '';
       hmrcDialogs.filing.open(action);
     } else {
@@ -1043,6 +1095,7 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       $('hmrcPaymentReference').value = '';
       $('hmrcPaymentMethod').value = 'bank-transfer';
       $('hmrcPaymentConfirmed').checked = false;
+      configureHmrcEvidenceInput('hmrcPaymentEvidenceInput', 'corporation-tax-payment:' + periodEnd, true);
       $('hmrcPaymentMessage').textContent = '';
       hmrcDialogs.payment.open(action);
     }

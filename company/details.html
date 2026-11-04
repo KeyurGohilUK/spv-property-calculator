@@ -104,6 +104,8 @@
 <label data-hmrc-setup-field="registration">Confirmed on<input id="hmrcRegistrationConfirmedOn" type="date"></label>
 <label data-hmrc-setup-field="registration">Acknowledgement reference<input id="hmrcRegistrationReference" type="text" maxlength="100" autocomplete="off"></label>
 <label data-hmrc-setup-field="registration">Accountant or firm<input id="hmrcAccountantName" type="text" maxlength="160" autocomplete="organization"></label>
+<label class="hmrc-upload-label hmrc-span-all">Supporting document (PDF or image, max 5 MB)<input id="hmrcSetupEvidenceInput" type="file" data-evidence-upload="" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>
+<p class="muted hmrc-span-all" data-hmrc-evidence-message role="status" aria-live="polite"></p>
 <div class="hmrc-dialog-actions"><button id="hmrcPendingBtn" type="button" class="secondary-btn">Still waiting</button><button id="hmrcSetupSaveBtn" class="primary-btn" type="submit">Save</button></div>
 <p id="hmrcSetupMessage" role="status" aria-live="polite"></p></form>
 </dialog>
@@ -140,14 +142,10 @@
 <label>17-character HMRC payment reference<input id="hmrcPeriodPaymentReference" type="text" maxlength="17" minlength="17" pattern="[A-Za-z0-9]{17}" autocomplete="off" placeholder="From HMRC for this period"></label>
 <label>Accountant reviewed on<input id="hmrcReviewedOn" type="date"></label>
 <label>Reviewed by<input id="hmrcReviewedBy" type="text" maxlength="160" autocomplete="name"></label>
+<label class="hmrc-upload-label hmrc-span-all">CT600 or accountant evidence (PDF or image, max 5 MB)<input id="hmrcFilingEvidenceInput" type="file" data-evidence-upload="" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>
+<p class="muted hmrc-span-all" data-hmrc-evidence-message role="status" aria-live="polite"></p>
 <p class="muted hmrc-span-all">Your entry is not HMRC verification.</p>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save record</button></div><p id="hmrcFilingMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-  <dialog id="hmrcEvidenceDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcEvidenceDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcEvidenceDialogTitle">Attach document</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcEvidenceDialog" aria-label="Close document upload">×</button></div>
-  <p class="muted">PDF or image · Maximum 5 MB</p>
-  <label class="hmrc-upload-label">Select document<input id="hmrcEvidenceInput" type="file" data-evidence-upload="" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>
-  <p id="hmrcEvidenceMessage" role="status" aria-live="polite"></p>
 </dialog>
   <dialog id="hmrcPaymentDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPaymentDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcPaymentDialogTitle">Record tax payment</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPaymentDialog" aria-label="Close Record tax payment">×</button></div>
@@ -159,6 +157,8 @@
 <label>Method<select id="hmrcPaymentMethod"><option value="bank-transfer">Bank transfer</option><option value="direct-debit">Direct Debit</option><option value="card">Card</option><option value="other">Other</option></select></label>
 <label>Transaction reference<input id="hmrcPaymentReference" type="text" maxlength="160" autocomplete="off"></label>
 <label class="hmrc-confirm-label"><input id="hmrcPaymentConfirmed" type="checkbox"> HMRC has confirmed this payment</label>
+<label class="hmrc-upload-label hmrc-span-all">Payment receipt (PDF or image, max 5 MB)<input id="hmrcPaymentEvidenceInput" type="file" data-evidence-upload="" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>
+<p class="muted hmrc-span-all" data-hmrc-evidence-message role="status" aria-live="polite"></p>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save payment</button></div>
 <p id="hmrcPaymentMessage" role="status" aria-live="polite"></p></form>
 </dialog>

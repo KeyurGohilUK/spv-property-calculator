@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.60.3-hmrc-dialog-layout';
+const CACHE_NAME = 'spv-property-calculator-v1.60.4-hmrc-evidence-inline';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;

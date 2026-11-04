@@ -179,6 +179,8 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
   await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
   await expect(page.locator('#hmrcSetupDialog')).toBeVisible();
+  await expect(page.locator('#hmrcSetupEvidenceInput')).toBeVisible();
+  await expect(page.locator('#hmrcSetupEvidenceInput')).toHaveAttribute('data-evidence-upload', 'company-utr-received:once');
   await page.locator('#hmrcUtrReceivedOn').fill('2026-02-04');
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
   await expect(page.locator('#hmrcSetupDialog')).toBeHidden();
@@ -213,6 +215,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
 
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
   await expect(page.locator('#hmrcFilingDialog')).toBeVisible();
+  await expect(page.locator('#hmrcFilingEvidenceInput')).toHaveAttribute('data-evidence-upload', /corporation-tax-return:/);
   await page.locator('#hmrcFiledOn').fill('2027-06-10');
   await page.locator('#hmrcFilingReference').fill('CT600-ACK');
   await page.locator('#hmrcLiability').fill('2400');
@@ -233,6 +236,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
 
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]').click();
+  await expect(page.locator('#hmrcPaymentEvidenceInput')).toHaveAttribute('data-evidence-upload', /corporation-tax-payment:/);
   await page.locator('#hmrcPaymentDate').fill('2027-06-12');
   await page.locator('#hmrcPaymentAmount').fill('1500');
   await page.locator('#hmrcPaymentReference').fill('Payment 1');
