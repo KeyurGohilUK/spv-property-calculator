@@ -377,3 +377,21 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .company-evidence-upload input { width: min(100%, 380px); max-width: 100%; }
 .company-evidence-message:not(:empty) { padding: 12px 14px; border-left: 4px solid var(--brand); background: var(--surface); border-radius: 8px; font-weight: 600; overflow-wrap: anywhere; }
 .company-evidence-message.is-error { border-left-color: var(--danger); color: var(--danger); }
+
+/* HMRC tax setup, CT600 submissions and payment ledger */
+.hmrc-tracking-panel { padding:16px; margin:12px 0; border:1px solid var(--border); border-radius:14px; background:var(--surface); min-width:0; }
+.hmrc-tracking-panel > h4 { margin:0 0 10px; color:var(--text); }
+.hmrc-tracking-panel > p { margin:0 0 12px; }
+.hmrc-tracking-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:12px; }
+.hmrc-tracking-form > h4 { grid-column:1/-1; margin:8px 0 0; font-size:1rem; }
+.hmrc-tracking-form label { display:grid; gap:6px; min-width:0; font-weight:600; font-size:.88rem; }
+.hmrc-tracking-form input, .hmrc-tracking-form select { min-width:0; width:100%; max-width:100%; }
+.hmrc-tracking-form > button { justify-self:start; align-self:end; }
+.hmrc-record-message { grid-column:1/-1; margin:0; min-height:1.3em; color:var(--text); overflow-wrap:anywhere; }
+.hmrc-record-cards { display:grid; gap:12px; margin:10px 0; }
+.hmrc-record-card { min-width:0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface); overflow-wrap:anywhere; }
+.hmrc-record-card p { margin:8px 0; }
+.hmrc-record-payments { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:8px; }
+.hmrc-record-payments li { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-top:1px solid var(--border); padding-top:8px; }
+.hmrc-record-warning { color:var(--danger); font-weight:650; }
+@media(max-width:600px) { .hmrc-tracking-form { grid-template-columns:minmax(0,1fr); } .hmrc-tracking-panel { padding:12px; } }
