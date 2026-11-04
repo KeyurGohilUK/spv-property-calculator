@@ -186,9 +186,10 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.getByRole('tab', { name: 'Compliance' }).click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('UTR letter');
   await expect(page.locator('#hmrcSetupViewTab')).toContainText('One-Time Setup');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('Steps 1–2');
   await expect(page.locator('#hmrcSetupViewTab')).toContainText('(0/2 Complete)');
   await expect(page.locator('#hmrcRecurringViewTab')).toContainText('Active & Recurring');
-  await expect(page.locator('#hmrcRecurringViewTab')).toContainText('(Steps 3–5)');
+  await expect(page.locator('#hmrcRecurringViewTab')).not.toContainText('Steps');
   await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
   await page.locator('#hmrcSetupCards .hmrc-card-documents summary').first().click();
   const downloadEvidence = page.getByRole('button', { name: 'Download UTR letter.pdf' });
