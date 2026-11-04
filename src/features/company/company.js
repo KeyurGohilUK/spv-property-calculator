@@ -680,6 +680,97 @@ $('deleteCompanyForm').addEventListener('submit', async (event) => {
 $('editCompanyDetailsBtn').addEventListener('click', showDetailsDialog);
 $('addAppointmentBtn').addEventListener('click', () => openAppointment());
 $('addInvestmentBtn').addEventListener('click', () => openInvestment());
+// These are manually maintained records, never an assertion of HMRC verification.
+$('hmrcSetupForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!editingAllowed) return;
+  try {
+    const setup = {
+      utrReceivedOn: $('hmrcUtrReceivedOn').value,
+      registrationConfirmedOn: $('hmrcRegistrationConfirmedOn').value,
+      registrationReference: $('hmrcRegistrationReference').value,
+      accountantName: $('hmrcAccountantName').value
+    };
+    profile = saveCompanyProfile({ ...profile, hmrc: saveHmrcSetup(profile.hmrc, setup) });
+    renderProfile();
+    $('hmrcSetupMessage').textContent = 'Company tax setup saved as your own record.';
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcSetupMessage').textContent = error.message || 'Unable to save tax setup.';
+  }
+});
+
+$('hmrcRecordPeriod').addEventListener('change', (event) => {
+  fillHmrcFilingForm(event.target.value);
+});
+
+$('hmrcFilingForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!editingAllowed) return;
+  const periodEnd = $('hmrcRecordPeriod').value;
+  const liabilityText = $('hmrcLiability').value.trim();
+  if (liabilityText && (!Number.isFinite(Number(liabilityText)) || Number(liabilityText) < 0 || Number(liabilityText) > 1000000000)) {
+    $('hmrcFilingMessage').textContent = 'Enter a valid non-negative Corporation Tax liability.';
+    return;
+  }
+  try {
+    const hmrc = saveHmrcPeriodRecord(profile.hmrc, periodEnd, {
+      filedOn: $('hmrcFiledOn').value,
+      filingReference: $('hmrcFilingReference').value,
+      liability: liabilityText === '' ? null : Number(liabilityText),
+      reviewedOn: $('hmrcReviewedOn').value,
+      reviewedBy: $('hmrcReviewedBy').value
+    });
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    renderProfile();
+    $('hmrcRecordPeriod').value = periodEnd;
+    fillHmrcFilingForm(periodEnd);
+    $('hmrcFilingMessage').textContent = 'CT600 filing and accountant review recorded. Verify against HMRC or your accountant.';
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcFilingMessage').textContent = error.message || 'Unable to save filing details.';
+  }
+});
+
+$('hmrcPaymentForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!editingAllowed) return;
+  const periodEnd = $('hmrcPaymentPeriod').value;
+  try {
+    const hmrc = recordHmrcPayment(profile.hmrc, periodEnd, {
+      id: globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now(),
+      date: $('hmrcPaymentDate').value,
+      amount: $('hmrcPaymentAmount').value,
+      reference: $('hmrcPaymentReference').value
+    });
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    renderProfile();
+    $('hmrcPaymentPeriod').value = periodEnd;
+    $('hmrcPaymentDate').value = '';
+    $('hmrcPaymentAmount').value = '';
+    $('hmrcPaymentReference').value = '';
+    $('hmrcPaymentMessage').textContent = 'Corporation Tax payment recorded.';
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcPaymentMessage').textContent = error.message || 'Unable to record payment.';
+  }
+});
+
+$('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-hmrc-payment-remove]');
+  if (!button || !editingAllowed) return;
+  if (!window.confirm('Remove this recorded Corporation Tax payment?')) return;
+  try {
+    const hmrc = removeHmrcPayment(profile.hmrc, button.dataset.hmrcPaymentPeriod, button.dataset.hmrcPaymentRemove);
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    renderProfile();
+    $('hmrcPaymentMessage').textContent = 'Recorded payment removed.';
+    await syncAfterSave();
+  } catch (error) {
+    $('hmrcPaymentMessage').textContent = error.message || 'Unable to remove payment.';
+  }
+});
+
 $('suggestNextHmrcPeriod').addEventListener('click', () => {
   const periods = hmrcTaxPeriods(profile.hmrc);
   const mostRecent = periods.at(-1);
