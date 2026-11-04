@@ -143,6 +143,12 @@
 <p class="muted hmrc-span-all">Your entry is not HMRC verification.</p>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save record</button></div><p id="hmrcFilingMessage" role="status" aria-live="polite"></p></form>
 </dialog>
+  <dialog id="hmrcEvidenceDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcEvidenceDialogTitle">
+  <div class="company-dialog-header"><h2 id="hmrcEvidenceDialogTitle">Attach document</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcEvidenceDialog" aria-label="Close document upload">×</button></div>
+  <p class="muted">PDF or image · Maximum 5 MB</p>
+  <label class="hmrc-upload-label">Select document<input id="hmrcEvidenceInput" type="file" data-evidence-upload="" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>
+  <p id="hmrcEvidenceMessage" role="status" aria-live="polite"></p>
+</dialog>
   <dialog id="hmrcPaymentDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPaymentDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcPaymentDialogTitle">Record tax payment</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPaymentDialog" aria-label="Close Record tax payment">×</button></div>
   
