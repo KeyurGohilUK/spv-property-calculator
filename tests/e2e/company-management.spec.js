@@ -113,7 +113,7 @@ test('workspace viewers can read but not edit company records', async ({ page })
     appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director'] }]
   });
   await page.goto('/company/');
-  await expect(page.getByRole('button', { name: /Add new company/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: /New Company/ })).toBeDisabled();
   await page.getByRole('link', { name: /Read Only SPV Ltd/ }).click();
   await expect(page.locator('#companyNameValue')).toHaveText('Read Only SPV Ltd');
   await expect(page.getByRole('button', { name: 'Edit company details' })).toBeDisabled();
@@ -130,7 +130,7 @@ test('company chooser adds a second company without changing the first', async (
   });
   await page.goto('/company/');
   await expect(page.getByRole('link', { name: /First SPV Ltd/ })).toBeVisible();
-  await page.getByRole('button', { name: /Add new company/ }).click();
+  await page.getByRole('button', { name: /New Company/ }).click();
   await page.getByLabel('Company name').fill('Second SPV Ltd');
   await page.getByRole('button', { name: 'Add company', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Company Details' })).toBeVisible();
