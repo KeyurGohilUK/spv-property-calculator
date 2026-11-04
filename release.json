@@ -1,6 +1,7 @@
 {
-  "version": "1.60.5",
+  "version": "1.60.6",
   "notes": [
-    "Restore the separate HMRC document upload dialog."
+    "Use an attachment icon and text for HMRC document attachments, with icon-only download and remove actions.",
+    "Update HMRC navigation to a segmented Active & Recurring and One-Time Setup switch with setup completion status."
   ]
 }

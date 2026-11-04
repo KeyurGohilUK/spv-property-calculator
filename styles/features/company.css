@@ -370,6 +370,10 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .company-evidence > strong { font-size: .95rem; }
 .company-evidence-files { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .company-evidence-files li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.company-evidence-action { display: inline-grid; flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; padding: 10px; place-items: center; }
+.company-evidence-action svg, .company-attach-document-btn svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+.company-evidence-action--remove { color: var(--danger); }
+.company-attach-document-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; }
 .company-evidence-files li > span { flex: 1 1 175px; min-width: 0; overflow-wrap: anywhere; }
 .company-evidence-files li > span small { display: block; color: var(--muted); }
 .company-evidence-files li.muted { border: none; padding: 0; }
@@ -381,9 +385,17 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 /* HMRC dashboard: concise records, modal editing, accessible status contrast. */
 .hmrc-dashboard { background:var(--surface-2); }
 .hmrc-dashboard .compliance-authority-content { padding:16px; }
-.hmrc-view-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-.hmrc-view-tabs button { font:inherit; font-weight:650; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 16px; min-height:44px; cursor:pointer; }
+.hmrc-view-tabs { display:flex; gap:4px; padding:5px; margin-bottom:14px; border:1px solid var(--border); border-radius:18px; background:var(--surface); }
+.hmrc-view-tabs button { display:flex; flex:1 1 0; align-items:center; justify-content:center; gap:10px; min-width:0; min-height:56px; padding:10px 14px; border:1px solid transparent; border-radius:14px; background:transparent; color:var(--text); font:inherit; font-weight:650; text-align:left; cursor:pointer; }
 .hmrc-view-tabs button[aria-selected="true"] { background:var(--brand-strong); border-color:var(--brand-strong); color:var(--on-brand); }
+.hmrc-view-tab-icon { flex:0 0 22px; width:22px; height:22px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; }
+.hmrc-view-tab-label { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px; min-width:0; }
+.hmrc-view-tab-label small { font-size:.82em; font-weight:550; }
+.hmrc-view-tab-setup-icon { color:var(--muted); }
+.hmrc-view-tab-setup-icon.is-complete { color:var(--positive); }
+.hmrc-setup-tab-check { display:none; }
+.hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-check { display:block; }
+.hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-pending { display:none; }
 .hmrc-view-tabs button:focus-visible, .hmrc-dashboard button:focus-visible { outline:3px solid var(--brand); outline-offset:3px; }
 .hmrc-view-tabs button[hidden], .hmrc-overview[hidden], .hmrc-status-note[hidden] { display:none; }
 .hmrc-status-note:not([hidden]) { padding:10px 14px; margin-bottom:14px; background:var(--surface); border-left:4px solid var(--warning); border-radius:10px; font-weight:650; }
@@ -537,6 +549,9 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-tracking-form > p[role="status"]:empty { display:none; }
 
 @media(max-width:600px) {
+  .hmrc-view-tabs button { align-items:flex-start; gap:7px; min-height:58px; padding:9px 8px; font-size:.88rem; }
+  .hmrc-view-tab-icon { flex-basis:19px; width:19px; height:19px; }
+  .hmrc-view-tab-label { display:grid; gap:2px; justify-items:start; }
   .hmrc-dashboard .compliance-authority-content { padding:12px; }
   .hmrc-setup-card,.hmrc-period-card { padding:12px; }
   .hmrc-tracking-form,.hmrc-doc-grid { grid-template-columns:minmax(0,1fr); }

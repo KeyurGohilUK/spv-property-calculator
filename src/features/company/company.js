@@ -26,6 +26,15 @@ const $ = (id) => document.getElementById(id);
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpperCase() + String(status).slice(1) : '';
 const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+const ATTACHMENT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
+const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
+const REMOVE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+function evidenceActionMarkup(file, allowRemove) {
+  const id = escapeHtml(file.id);
+  const label = escapeHtml(file.name);
+  return `<button type="button" class="icon-btn company-evidence-action" data-evidence-download="${id}" aria-label="Download ${label}" title="Download ${label}">${DOWNLOAD_ICON}</button>
+    ${allowRemove ? `<button type="button" class="icon-btn company-evidence-action company-evidence-action--remove" data-evidence-remove="${id}" aria-label="Remove ${label}" title="Remove ${label}">${REMOVE_ICON}</button>` : ''}`;
+}
 const ROLE_LABELS = Object.freeze({
   director: 'Director', shareholder: 'Shareholder', secretary: 'Secretary', psc: 'PSC'
 });
@@ -308,8 +317,7 @@ function renderCompanyCompliance() {
         <strong>Supporting evidence</strong><small class="muted">Files do not independently verify that a filing or payment was completed.</small>
         <ul class="company-evidence-files">${(profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key).map((file) => `
           <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown')}</small></span>
-          <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
-          ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
+          ${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
         ${editingAllowed ? `<label class="company-evidence-upload">Attach PDF or image (maximum 5 MB)<input type="file" data-evidence-upload="${escapeHtml(item.key)}" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>` : ''}
       </div>
     </div></details>`).join('');
@@ -369,10 +377,9 @@ function hmrcEvidenceMarkup(ruleKey, label) {
   return `<div class="hmrc-evidence-section"><strong>${escapeHtml(label)}</strong>
     <ul class="hmrc-evidence-list">${files.map((file) => `<li>
       <span>${escapeHtml(file.name)}</span>
-      <button type="button" class="secondary-btn" data-evidence-download="${escapeHtml(file.id)}">Download</button>
-      ${editingAllowed ? `<button type="button" class="secondary-btn danger-text" data-evidence-remove="${escapeHtml(file.id)}">Remove</button>` : ''}
+      ${evidenceActionMarkup(file, editingAllowed)}
     </li>`).join('') || '<li class="muted">No documents</li>'}</ul>
-    ${editingAllowed ? `<button type="button" class="secondary-btn" data-hmrc-attach="${escapeHtml(ruleKey)}">Attach document</button>` : ''}
+    ${editingAllowed ? `<button type="button" class="secondary-btn company-attach-document-btn" data-hmrc-attach="${escapeHtml(ruleKey)}">${ATTACHMENT_ICON}<span>Attach document</span></button>` : ''}
   </div>`;
 }
 
@@ -388,7 +395,8 @@ function renderHmrcDashboard() {
   const registrationVisible = activityActive;
   const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
   const registrationDone = Boolean(setup.registrationConfirmedOn);
-  $('hmrcSetupCount').textContent = complete + ' of 2 recorded';
+  $('hmrcSetupTabStatus').textContent = complete === 2 ? '(Steps 1–2 · 2/2 Done)' : '(Steps 1–2 · ' + complete + '/2 Complete)';
+  $('hmrcSetupTabIcon').classList.toggle('is-complete', complete === 2);
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
       <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>

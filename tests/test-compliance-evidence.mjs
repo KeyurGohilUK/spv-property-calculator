@@ -100,5 +100,8 @@ assert.match(cloud, /complianceEvidence: Array\.isArray/);
 assert.match(ui, /data-evidence-upload/);
 assert.match(ui, /downloadComplianceEvidence/);
 assert.match(ui, /deleteComplianceEvidence/);
+assert.ok(ui.includes('aria-label="Download ${label}"'), 'Download action has an accessible icon label');
+assert.ok(ui.includes('aria-label="Remove ${label}"'), 'Remove action has an accessible icon label');
+assert.ok(ui.includes('Attach document</span>'), 'HMRC attachment button keeps its text beside the icon');
 assert.match(html, /id="companyEvidenceStatus"/);
 console.log('Private compliance evidence Worker and metadata checks passed.');

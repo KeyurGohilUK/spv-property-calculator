@@ -172,11 +172,35 @@ test('editor confirms company deletion and keeps other workspace data', async ({
 });
 
 test('editor tracks HMRC periods, tax liability and payments through dialogs', async ({ page }) => {
-  await mockCompanyWorkspace(page, 'editor', { companyName: 'Guided SPV Ltd' });
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Guided SPV Ltd',
+    complianceEvidence: [{
+      id: '12345678-1234-4123-8123-123456789abc',
+      ruleKey: 'company-utr-received:once',
+      objectPath: 'compliance/default/12345678-1234-4123-8123-123456789abc.pdf',
+      name: 'UTR letter.pdf', type: 'application/pdf', size: 1024,
+      uploadedAt: '2026-02-03T12:00:00Z', uploadedBy: 'company-user'
+    }]
+  });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('UTR letter');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('One-Time Setup');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('Steps 1–2');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('0/2 Complete');
+  await expect(page.locator('#hmrcRecurringViewTab')).toContainText('Active & Recurring');
+  await expect(page.locator('#hmrcRecurringViewTab')).not.toContainText('Steps');
   await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
+  await page.locator('#hmrcSetupCards .hmrc-card-documents summary').first().click();
+  const downloadEvidence = page.getByRole('button', { name: 'Download UTR letter.pdf' });
+  const removeEvidence = page.getByRole('button', { name: 'Remove UTR letter.pdf' });
+  const attachEvidence = page.locator('#hmrcSetupCards [data-hmrc-attach="company-utr-received:once"]');
+  await expect(downloadEvidence).toBeVisible();
+  await expect(downloadEvidence.locator('svg')).toBeVisible();
+  await expect(removeEvidence).toBeVisible();
+  await expect(removeEvidence.locator('svg')).toBeVisible();
+  await expect(attachEvidence).toContainText('Attach document');
+  await expect(attachEvidence.locator('svg')).toBeVisible();
   await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
   await expect(page.locator('#hmrcSetupDialog')).toBeVisible();
   await page.locator('#hmrcUtrReceivedOn').fill('2026-02-04');
@@ -195,6 +219,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcAccountantName').fill('Example Accountants');
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
 
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('2/2 Done');
   await expect(page.locator('#hmrcRecurringViewTab')).toBeVisible();
   await page.locator('#hmrcRecurringViewTab').click();
   await page.locator('#hmrcOpenPeriodDialog').click();
@@ -265,7 +290,7 @@ test('HMRC setup remains compact while company is preparing to buy', async ({ pa
   await expect(page.locator('#hmrcSetupCards')).toContainText('Preparing to buy');
   await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
   await expect(page.locator('#hmrcSetupCards [data-hmrc-open="registration"]')).toHaveCount(0);
-  await expect(page.locator('#hmrcSetupCount')).toHaveText('1 of 2 recorded');
+  await expect(page.locator('#hmrcSetupViewTab')).toContainText('1/2 Complete');
 });
 
 test('@mobile HMRC summary does not overflow a phone viewport', async ({ page }) => {
