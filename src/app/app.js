@@ -78,6 +78,42 @@ function makeId() {
 
 const $ = (id) => document.getElementById(id);
 
+const propertyTabs = [...document.querySelectorAll('[data-properties-tab]')];
+
+function setPropertiesTab(tabName = 'opportunities', focus = false) {
+  const selectedTab = propertyTabs.find((tab) => tab.dataset.propertiesTab === tabName) || propertyTabs[0];
+  propertyTabs.forEach((tab) => {
+    const selected = tab === selectedTab;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    const panel = document.getElementById(tab.getAttribute('aria-controls'));
+    if (panel) {
+      panel.hidden = !selected;
+      panel.classList.toggle('hidden', !selected);
+    }
+  });
+  if (focus) selectedTab?.focus();
+}
+
+propertyTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => setPropertiesTab(tab.dataset.propertiesTab));
+  tab.addEventListener('keydown', (event) => {
+    let nextIndex = index;
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % propertyTabs.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + propertyTabs.length) % propertyTabs.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = propertyTabs.length - 1;
+    else return;
+    event.preventDefault();
+    setPropertiesTab(propertyTabs[nextIndex].dataset.propertiesTab, true);
+  });
+});
+
+document.querySelectorAll('[data-properties-tab-link]').forEach((button) => {
+  button.addEventListener('click', () => setPropertiesTab(button.dataset.propertiesTabLink));
+});
+
+
 function getManagedCompanies() {
   const profile = getCompanyProfile();
   const records = Array.isArray(profile.companies)
@@ -938,23 +974,24 @@ function setPrimaryNavigation(activeItem = 'properties') {
   else more?.removeAttribute('aria-current');
 }
 
-function showHome() {
+function showHome(tabName = 'opportunities') {
   setPrimaryNavigation('properties');
+  $('propertiesDashboard').classList.remove('hidden');
   $('editorView').classList.add('hidden');
   $('archiveView').classList.add('hidden');
-  $('homeView').classList.remove('hidden');
+  setPropertiesTab(tabName);
   editingId = null;
   renderPropertyList(); renderArchiveList();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showArchive() {
   setPrimaryNavigation('more');
-  $('homeView').classList.add('hidden'); $('editorView').classList.add('hidden'); $('archiveView').classList.remove('hidden');
+  $('propertiesDashboard').classList.add('hidden'); $('editorView').classList.add('hidden'); $('archiveView').classList.remove('hidden');
   editingId = null; renderArchiveList(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showEditor(id = null) {
   setPrimaryNavigation('properties');
-  $('homeView').classList.add('hidden'); $('archiveView').classList.add('hidden'); $('editorView').classList.remove('hidden');
+  $('propertiesDashboard').classList.add('hidden'); $('archiveView').classList.add('hidden'); $('editorView').classList.remove('hidden');
   resetEditorSectionState();
   if (id) { const property=getProperty(id); if (property && !property.deletedAt) loadIntoForm(property); else resetForm(); } else resetForm();
   renderNotes();
@@ -1420,6 +1457,10 @@ function init() {
     initialMenuUrl.searchParams.delete('view');
     window.history.replaceState({}, '', initialMenuUrl);
     window.setTimeout(showArchive, 0);
+  } else if (initialMenuUrl.searchParams.get('view') === 'portfolio' && !pendingPropertyId) {
+    initialMenuUrl.searchParams.delete('view');
+    window.history.replaceState({}, '', initialMenuUrl);
+    window.setTimeout(() => showHome('portfolio'), 0);
   }
   if (initialMenuUrl.searchParams.get('menu') === 'more') {
     initialMenuUrl.searchParams.delete('menu');
