@@ -1,0 +1,115 @@
+name: Deploy Cloudflare R2 Worker
+
+# The CI workflow runs on every main push. Deploy only after its unit and
+# Playwright browser jobs have succeeded; a manual deployment is also available.
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-receipt-worker-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy private receipt and compliance evidence Worker
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+
+      # An older CI run may complete after a newer push. Never replace the
+      # current production Worker with an older revision.
+      - name: Ensure this is the current main commit
+        id: current
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          latest="$(git rev-parse origin/main)"
+          tested="$(git rev-parse HEAD)"
+          if [[ "$tested" != "$latest" ]]; then
+            echo "Skipping stale CI run: newer code is on main."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check whether Worker deployment is required
+        id: changed
+        if: steps.current.outputs.deploy == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet HEAD^ HEAD -- workers/receipt/; then
+            echo "Worker directory unchanged; deployment not needed."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check Cloudflare production credentials
+        if: steps.changed.outputs.deploy == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$CLOUDFLARE_API_TOKEN" || -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "::error::Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the GitHub production environment."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        if: steps.changed.outputs.deploy == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Manual runs must pass the same repository unit checks before deployment.
+      # Automated runs only execute after the full CI workflow has passed.
+      - name: Run unit and integration tests for manual deployment
+        if: steps.changed.outputs.deploy == 'true' && github.event_name == 'workflow_dispatch'
+        run: npm test
+
+      - name: Deploy Worker to Cloudflare
+        if: steps.changed.outputs.deploy == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/receipt
+          command: deploy
+
+      - name: Verify public health endpoint
+        if: steps.changed.outputs.deploy == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors \
+            https://spv-receipt-service.keyurgohil-uk.workers.dev/health)"
+          if [[ "$response" != *'"ok":true'* ]]; then
+            echo "::error::Worker health check returned an unexpected response."
+            exit 1
+          fi
+          echo "Cloudflare Worker is responding successfully."
