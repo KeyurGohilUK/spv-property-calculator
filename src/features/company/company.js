@@ -317,7 +317,7 @@ function renderCompanyCompliance() {
 }
 
 let hmrcGuideSelected = 'utr';
-let hmrcActiveView = 'setup';
+let hmrcActiveView = hmrcTaxPeriods(profile.hmrc).length ? 'periods' : 'setup';
 let hmrcEditingPeriod = '';
 
 const hmrcDialogs = {
@@ -732,6 +732,8 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     }
     profile = getCompanyProfile();
     renderCompanyCompliance();
+    renderHmrcTracking();
+    renderHmrcDashboard();
     openEvidenceRequirement(ruleKey);
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
@@ -853,7 +855,7 @@ $('hmrcSetupForm').addEventListener('submit', async (event) => {
     profile = saveCompanyProfile({ ...profile, hmrc: saveHmrcSetup(profile.hmrc, changes) });
     hmrcGuideSelected = '';
     renderProfile();
-    $('hmrcSetupMessage').textContent = 'Saved.';
+    hmrcDialogs.setup.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcSetupMessage').textContent = error.message || 'Unable to save HMRC details.';
@@ -870,6 +872,7 @@ $('hmrcPendingBtn').addEventListener('click', async () => {
     });
     hmrcGuideSelected = '';
     renderProfile();
+    hmrcDialogs.setup.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcSetupMessage').textContent = error.message || 'Unable to record waiting status.';
@@ -890,7 +893,7 @@ $('hmrcActivityForm').addEventListener('submit', async (event) => {
     });
     hmrcGuideSelected = '';
     renderProfile();
-    $('hmrcActivityMessage').textContent = selected === 'active' ? 'Status saved.' : 'Status saved. Review the guidance above.';
+    hmrcDialogs.activity.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcActivityMessage').textContent = error.message || 'Unable to save activity.';
@@ -915,6 +918,8 @@ $('hmrcFilingForm').addEventListener('submit', async (event) => {
       filedOn: $('hmrcFiledOn').value,
       filingReference: $('hmrcFilingReference').value,
       liability: liabilityText === '' ? null : Number(liabilityText),
+      liabilityStatus: liabilityText === '' ? 'unknown' : $('hmrcLiabilityStatus').value === 'unknown' ? 'recorded' : $('hmrcLiabilityStatus').value,
+      paymentReference: $('hmrcPeriodPaymentReference').value.trim().toUpperCase(),
       reviewedOn: $('hmrcReviewedOn').value,
       reviewedBy: $('hmrcReviewedBy').value
     });
@@ -922,7 +927,7 @@ $('hmrcFilingForm').addEventListener('submit', async (event) => {
     renderProfile();
     $('hmrcRecordPeriod').value = periodEnd;
     fillHmrcFilingForm(periodEnd);
-    $('hmrcFilingMessage').textContent = 'CT600 filing and accountant review recorded. Verify against HMRC or your accountant.';
+    hmrcDialogs.filing.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcFilingMessage').textContent = error.message || 'Unable to save filing details.';
@@ -938,7 +943,9 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
       id: globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now(),
       date: $('hmrcPaymentDate').value,
       amount: $('hmrcPaymentAmount').value,
-      reference: $('hmrcPaymentReference').value
+      reference: $('hmrcPaymentReference').value,
+      method: $('hmrcPaymentMethod').value,
+      status: $('hmrcPaymentConfirmed').checked ? 'hmrc-confirmed' : 'recorded'
     });
     profile = saveCompanyProfile({ ...profile, hmrc });
     renderProfile();
@@ -946,7 +953,7 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
     $('hmrcPaymentDate').value = '';
     $('hmrcPaymentAmount').value = '';
     $('hmrcPaymentReference').value = '';
-    $('hmrcPaymentMessage').textContent = 'Corporation Tax payment recorded.';
+    hmrcDialogs.payment.close();
     await syncAfterSave();
   } catch (error) {
     $('hmrcPaymentMessage').textContent = error.message || 'Unable to record payment.';
@@ -954,6 +961,28 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
 });
 
 $('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const action = event.target.closest('[data-hmrc-open][data-hmrc-period]');
+  if (action && editingAllowed) {
+    const periodEnd = action.dataset.hmrcPeriod;
+    const isFiling = action.dataset.hmrcOpen === 'filing';
+    if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) return;
+    const select = $(isFiling ? 'hmrcRecordPeriod' : 'hmrcPaymentPeriod');
+    select.value = periodEnd;
+    if (isFiling) {
+      fillHmrcFilingForm(periodEnd);
+      $('hmrcFilingMessage').textContent = '';
+      hmrcDialogs.filing.open(action);
+    } else {
+      $('hmrcPaymentDate').value = '';
+      $('hmrcPaymentAmount').value = '';
+      $('hmrcPaymentReference').value = '';
+      $('hmrcPaymentMethod').value = 'bank-transfer';
+      $('hmrcPaymentConfirmed').checked = false;
+      $('hmrcPaymentMessage').textContent = '';
+      hmrcDialogs.payment.open(action);
+    }
+    return;
+  }
   const button = event.target.closest('[data-hmrc-payment-remove]');
   if (!button || !editingAllowed) return;
   if (!window.confirm('Remove this recorded Corporation Tax payment?')) return;
@@ -1012,7 +1041,9 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
     renderProfile();
     $('hmrcPeriodStart').value = '';
     $('hmrcPeriodEnd').value = '';
-    $('hmrcPeriodMessage').textContent = status === 'active' ? 'HMRC period recorded. Filing and payment deadlines are estimates.' : 'Corporation Tax activity status saved. Existing tax history retained.';
+    hmrcActiveView = 'periods';
+    renderHmrcDashboard();
+    hmrcDialogs.period.close();
     await syncAfterSave();
   } catch (error) {
     message.textContent = error.message || 'Unable to save HMRC details.';
