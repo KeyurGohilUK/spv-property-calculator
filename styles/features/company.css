@@ -732,3 +732,16 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
     min-height:42px;
   }
 }
+
+/* Keep filing status beside its title, with row actions aligned at the edge. */
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading {
+  justify-content:flex-start;
+  align-items:center;
+  gap:8px 12px;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading strong {
+  flex:0 1 auto;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading .company-compliance-status {
+  margin:0;
+}
