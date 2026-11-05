@@ -60,48 +60,73 @@
       </section>
       </div>
       <div id="complianceTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="complianceTab" tabindex="0" hidden>
-<section class="company-section" aria-labelledby="companyComplianceTitle">
+<section class="company-section company-compliance-hub" aria-labelledby="companyComplianceTitle">
         <div class="company-section-heading">
-          <div><p class="eyebrow">Legal obligations</p><h2 id="companyComplianceTitle">Company compliance</h2>
-            <p class="muted">Mandatory company obligations, not property safety checks. Statuses are indicative until filings or evidence are verified.</p></div>
+          <div><p class="eyebrow">Legal obligations</p><h2 id="companyComplianceTitle">Company Compliance Hub</h2>
+            <p class="muted">Company filings and tax records in one place. Deadlines are indicative until confirmed with official records.</p></div>
         </div>
-        <div id="companyComplianceSummary" class="company-compliance-summary" role="status" aria-live="polite"></div>
-        <p id="companyEvidenceUsage" class="muted" aria-label="Attached compliance evidence storage"></p>
+        <div class="company-compliance-summarybar">
+          <div id="companyComplianceSummary" class="company-compliance-summary" role="status" aria-live="polite"></div>
+          <span id="companyEvidenceUsage" class="company-compliance-evidence-summary" aria-label="Attached compliance evidence storage"></span>
+        </div>
         <p id="companyEvidenceStatus" class="company-evidence-message" role="status" aria-live="polite"></p>
-        <div class="compliance-authorities">
-<section class="compliance-authority" aria-labelledby="chComplianceHeading"><div class="compliance-authority-heading"><span class="compliance-authority-icon" aria-hidden="true">CH</span><div class="compliance-authority-title"><span class="eyebrow">Company register</span><h3 id="chComplianceHeading">Companies House compliance</h3><span class="muted">Annual filings, company records and director verification.</span></div></div><div class="compliance-authority-content"><div id="companiesHouseComplianceItems" class="company-compliance-list"></div>
-<details class="company-official-people company-identity-overview compliance-subsection"><summary><span class="compliance-subsection-label"><span class="eyebrow">One-time identity check · per appointment</span><strong id="companyOfficialPeopleTitle">People &amp; identity verification</strong><span class="muted">Director and PSC verification statements from Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary><div class="compliance-subsection-content">
-  <div id="companyIdentitySummary" class="company-identity-summary" role="status" aria-live="polite"></div>
-  <div id="companyOfficialPeople"></div>
-  <p class="muted company-identity-note">A recorded statement relates to the role shown; it does not guarantee all obligations are complete. New appointments may require new statements. Public data may be incomplete.</p></div></details>
-<details class="company-filing-history compliance-subsection"><summary><span class="compliance-subsection-label"><strong id="companyFilingHistoryTitle">Official filing history</strong><span class="muted">Check original records with Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary><div class="compliance-subsection-content"><div id="companyFilingHistory" aria-live="polite"></div></div></details></div></section>
-<section class="compliance-authority hmrc-dashboard" aria-labelledby="hmrcComplianceHeading">
-  <div class="compliance-authority-heading">
-    <span class="compliance-authority-icon" aria-hidden="true">HM</span>
-    <div class="compliance-authority-title"><span class="eyebrow">Tax compliance</span><h3 id="hmrcComplianceHeading">HMRC compliance</h3><span class="muted">Company tax records and deadlines</span></div>
-  </div>
-  <div class="compliance-authority-content">
-    <div class="hmrc-view-tabs" role="tablist" aria-label="HMRC compliance views">
-      <button id="hmrcRecurringViewTab" type="button" role="tab" aria-controls="hmrcRecurringOverview" aria-selected="false">
-        <svg class="hmrc-view-tab-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 0 0-14.9-3L3 11"/><path d="M3 5v6h6"/><path d="M4 13a8 8 0 0 0 14.9 3L21 13"/><path d="M21 19v-6h-6"/></svg>
-        <span class="hmrc-view-tab-label">Active &amp; Recurring</span>
-      </button>
-      <button id="hmrcSetupViewTab" type="button" role="tab" aria-controls="hmrcSetupOverview" aria-selected="true">
-        <svg id="hmrcSetupTabIcon" class="hmrc-view-tab-icon hmrc-view-tab-setup-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path class="hmrc-setup-tab-check" d="m8 12 2.5 2.5L16 9"/><path class="hmrc-setup-tab-pending" d="M8 12h8"/></svg>
-        <span class="hmrc-view-tab-label">One-Time Setup <small id="hmrcSetupTabStatus">(0/2 Complete)</small></span>
-      </button>
-    </div>
-    <div id="hmrcStatusNote" class="hmrc-status-note" role="status" aria-live="polite"></div>
-    <section id="hmrcSetupOverview" role="tabpanel" aria-labelledby="hmrcSetupViewTab" class="hmrc-overview">
-      <div class="hmrc-section-heading"><h4>Company setup</h4></div>
-      <div id="hmrcSetupCards" class="hmrc-setup-cards"></div>
-    </section>
-    <section id="hmrcRecurringOverview" role="tabpanel" aria-labelledby="hmrcRecurringViewTab" class="hmrc-overview" hidden>
-      <div class="hmrc-section-heading"><h4>Corporation Tax periods</h4><button id="hmrcOpenPeriodDialog" class="primary-btn" type="button">+ New period</button></div>
-      <p class="muted hmrc-short-hint">Payment and CT600 filing have separate deadlines.</p>
-      <div id="hmrcPeriodHistory" class="hmrc-period-history" aria-live="polite"></div>
-    </section>
-  </div>
+        <div class="compliance-authority-switcher" role="tablist" aria-label="Compliance authorities">
+          <button id="companyHouseAuthorityTab" class="compliance-authority-option" type="button" role="tab" aria-controls="companyHouseAuthorityPanel" aria-selected="true" data-compliance-authority="companies-house">
+            <span class="compliance-authority-icon" aria-hidden="true">CH</span>
+            <span class="compliance-authority-option-body">
+              <span class="compliance-authority-option-title"><strong>Companies House</strong><span id="companyHouseAuthorityStatus" class="company-identity-chip company-identity-chip--neutral">Checking</span></span>
+              <span class="muted">Annual filings, company records and director verification.</span>
+              <span id="companyHouseAuthoritySummary" class="compliance-authority-option-meta">Deadlines and identity records</span>
+            </span>
+            <span id="companyHouseAuthorityAction" class="compliance-authority-option-action">Viewing this authority</span>
+          </button>
+          <button id="hmrcAuthorityTab" class="compliance-authority-option" type="button" role="tab" aria-controls="hmrcAuthorityPanel" aria-selected="false" data-compliance-authority="hmrc">
+            <span class="compliance-authority-icon" aria-hidden="true">HM</span>
+            <span class="compliance-authority-option-body">
+              <span class="compliance-authority-option-title"><strong>HMRC Corporation Tax</strong><span class="company-identity-chip company-identity-chip--neutral">Manual tracking</span></span>
+              <span class="muted">CT600 returns, accounting periods and liabilities.</span>
+              <span id="hmrcAuthoritySummary" class="compliance-authority-option-meta">Setup records and tax periods</span>
+            </span>
+            <span id="hmrcAuthorityAction" class="compliance-authority-option-action">Switch to view</span>
+          </button>
+        </div>
+        <section id="companyHouseAuthorityPanel" class="compliance-authority-panel" role="tabpanel" aria-labelledby="companyHouseAuthorityTab">
+          <div class="authority-details-bar">
+            <span class="eyebrow">Authority details</span><span class="authority-details-divider" aria-hidden="true"></span>
+            <span>Official registry: <strong>Companies House England &amp; Wales</strong></span>
+            <span class="authority-details-number">CRN: <strong id="companyAuthorityNumber">Not recorded</strong></span>
+          </div>
+          <div id="companiesHouseComplianceItems" class="company-compliance-list"></div>
+          <details class="company-official-people company-identity-overview compliance-subsection" open>
+            <summary><span class="compliance-subsection-label"><span class="eyebrow">One-time identity check · per appointment</span><strong id="companyOfficialPeopleTitle">People &amp; identity verification</strong><span class="muted">Director and PSC verification statements from Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary>
+            <div class="compliance-subsection-content">
+              <div id="companyIdentitySummary" class="company-identity-summary" role="status" aria-live="polite"></div>
+              <div id="companyOfficialPeople"></div>
+              <p class="muted company-identity-note">A recorded statement relates to the role shown; it does not guarantee all obligations are complete. New appointments may require new statements. Public data may be incomplete.</p>
+            </div>
+          </details>
+          <details class="company-filing-history compliance-subsection">
+            <summary><span class="compliance-subsection-label"><strong id="companyFilingHistoryTitle">Official filing history</strong><span class="muted">Check original records with Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary>
+            <div class="compliance-subsection-content"><div id="companyFilingHistory" aria-live="polite"></div></div>
+          </details>
+        </section>
+        <section id="hmrcAuthorityPanel" class="compliance-authority-panel hmrc-authority-panel" role="tabpanel" aria-labelledby="hmrcAuthorityTab" hidden>
+          <div class="authority-details-bar">
+            <span class="eyebrow">Authority details</span><span class="authority-details-divider" aria-hidden="true"></span>
+            <span>Official authority: <strong>HM Revenue &amp; Customs</strong></span>
+            <span class="authority-details-number">Corporation Tax · manual records</span>
+          </div>
+          <div id="hmrcStatusNote" class="hmrc-status-note" role="status" aria-live="polite" hidden></div>
+          <section id="hmrcSetupOverview" class="hmrc-overview" aria-labelledby="hmrcSetupHeading">
+            <div class="hmrc-section-heading"><div><h3 id="hmrcSetupHeading">Company inception setup</h3><p class="muted">One-time records for Corporation Tax.</p></div><span id="hmrcAuthorityProgress" class="company-identity-chip company-identity-chip--neutral"></span></div>
+            <div id="hmrcSetupCards" class="hmrc-setup-cards"></div>
+          </section>
+          <section id="hmrcRecurringOverview" class="hmrc-overview" aria-labelledby="hmrcPeriodsHeading">
+            <div class="hmrc-section-heading"><div><h3 id="hmrcPeriodsHeading">Recorded Corporation Tax periods</h3><p class="muted hmrc-short-hint">Payment and CT600 filing have separate deadlines.</p></div><button id="hmrcOpenPeriodDialog" class="primary-btn" type="button">＋ New period</button></div>
+            <div id="hmrcPeriodHistory" class="hmrc-period-history" aria-live="polite"></div>
+          </section>
+        </section>
+      </section>
   <dialog id="hmrcSetupDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcSetupDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcSetupDialogTitle">UTR letter</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupDialog" aria-label="Close UTR letter">×</button></div>
   <p class="muted">Record the date, not your UTR number.</p>
