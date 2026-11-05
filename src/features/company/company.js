@@ -336,13 +336,21 @@ function renderCompanyCompliance() {
         : item.status === 'upcoming' ? 'Upcoming'
           : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified'
             : 'Needs verification';
-    const summary = item.dueDate
-      ? `Due ${formatComplianceDateUK(item.dueDate)} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}`
-      : item.id === 'statutory-registers'
-        ? 'Keep registers of directors, shareholders and PSCs at the registered office.'
-        : item.id === 'accounting-records'
-          ? 'Keep invoices, receipts and property tenancy records for at least 6 years.'
-          : 'Review this company obligation and keep appropriate records.';
+    const displayTitle = item.id === 'confirmation-statement' ? 'Confirmation Statement (CS01)' : item.id === 'annual-accounts' ? 'Annual Company Accounts' : item.id === 'statutory-registers' ? 'Company Statutory Records' : item.id === 'accounting-records' ? 'Accounting Records Preservation' : item.title;
+    const due = item.dueDate ? escapeHtml(formatComplianceDateUK(item.dueDate)) : '';
+    const nextStatementDate = companyHouseData?.confirmation_statement?.next_made_up_to
+      ? escapeHtml(formatComplianceDateUK(companyHouseData.confirmation_statement.next_made_up_to)) : '';
+    const summary = item.id === 'confirmation-statement'
+      ? `Next statement date: <strong>${nextStatementDate || 'Not available'}</strong> · Due by <strong>${due || 'Not available'}</strong>`
+      : item.id === 'annual-accounts'
+        ? `Micro-entity or small company balance sheet · Due by <strong>${due || 'Not available'}</strong>`
+        : item.id === 'statutory-registers'
+          ? 'Register of Directors, Shareholders, and PSC registers must be maintained at registered office.'
+          : item.id === 'accounting-records'
+            ? 'Statutory 6-year retention compliance for invoices, receipts, and property tenancy records.'
+            : item.dueDate
+              ? `Due by <strong>${due}</strong> · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}`
+              : 'Review this company obligation and keep appropriate records.';
     const icon = item.status === 'needs-verification' || item.status === 'past-deadline-unverified'
       ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2.1h16a1.4 1.4 0 0 0 1.2-2.1L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>'
       : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h8l4 4V20a1.25 1.25 0 0 1-1.25 1.25h-10.5A1.25 1.25 0 0 1 5 20V5a1.25 1.25 0 0 1 1-1.25Z"/><path d="M14 4v4h4M8 13h8m-8 4h8"/></svg>';
@@ -350,8 +358,8 @@ function renderCompanyCompliance() {
       <article class="company-compliance-item">
         <span class="company-compliance-item-icon ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}" aria-hidden="true">${icon}</span>
         <div class="company-compliance-item-copy">
-          <div class="company-compliance-item-heading"><strong>${escapeHtml(item.title)}</strong><span class="company-compliance-status ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}">${statusLabel}</span></div>
-          <p class="muted">${escapeHtml(summary)}</p>
+          <div class="company-compliance-item-heading"><strong>${escapeHtml(displayTitle)}</strong><span class="company-compliance-status ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}">${statusLabel}</span></div>
+          <p class="muted">${summary}</p>
         </div>
         <button type="button" class="secondary-btn company-compliance-open" data-open-company-compliance="${escapeHtml(item.key)}">${item.source === 'companies-house' ? 'Review filing' : 'Update record'}</button>
       </article>`;
