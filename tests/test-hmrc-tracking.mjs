@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, removeHmrcPayment } from '../src/features/company/hmrc-tracking.js';
+import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, updateHmrcPayment, removeHmrcPayment } from '../src/features/company/hmrc-tracking.js';
 
 const period = { status: 'active', periodStart: '2026-01-01', periodEnd: '2026-12-31' };
 let hmrc = { status: 'active', periods: [period] };
@@ -24,6 +24,10 @@ hmrc = recordHmrcPayment(hmrc, period.periodEnd, { id: 'payment-87654321', date:
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paid, 2000);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).outstanding, 400);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments.length, 2);
+hmrc = updateHmrcPayment(hmrc, period.periodEnd, { id: 'payment-12345678', date: '2027-06-12', amount: 1000.55, reference: 'Updated instalment', method: 'card', status: 'hmrc-confirmed' });
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].reference, 'Updated instalment');
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].method, 'card');
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paid, 2000);
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].status, 'recorded');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[1].status, 'hmrc-confirmed');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).filedOn, '2027-06-10');
