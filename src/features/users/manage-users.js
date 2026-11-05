@@ -35,40 +35,74 @@ async function withTimeout(promise, message, timeoutMs = 12_000) {
   }
 }
 
+function isPolicyCurrent(user) {
+  return user.terms_version === '2026-08-26'
+    && user.privacy_version === '2026-08-26'
+    && user.disclaimer_version === '2026-08-26';
+}
+
+function updateCardSaveState(card) {
+  if (!card) return;
+  const role = card.querySelector('[data-user-role]');
+  const active = card.querySelector('[data-user-active]');
+  const button = card.querySelector('[data-save-user]');
+  const dirty = role.value !== role.dataset.original || String(active.checked) !== active.dataset.original;
+  card.classList.toggle('has-unsaved', dirty);
+  button.disabled = button.dataset.saving === 'true' || !dirty || card.dataset.currentUser === 'true';
+}
+
 function renderUsers() {
+  const activeCount = users.filter((user) => user.active).length;
+  const approvalCount = users.length - activeCount;
+  const policyPendingCount = users.filter((user) => !isPolicyCurrent(user)).length;
+  $('userOverview').innerHTML = [
+    ['Total users', users.length, 'Registered workspace accounts'],
+    ['Active', activeCount, 'Can access the workspace'],
+    ['Access pending', approvalCount, 'Awaiting administrator approval'],
+    ['Policies pending', policyPendingCount, 'Need to accept current policies']
+  ].map(([label, value, detail], index) => '<div class="user-overview-card ' + (index > 1 && value ? 'attention' : '') + '"><strong>' + value + '</strong><span>' + label + '</span><span>' + detail + '</span></div>').join('');
+
   $('userListEmpty').classList.toggle('hidden', users.length !== 0);
-  $('userList').innerHTML = users.map((user) => {
+  const filteredUsers = users.filter((user) => userFilter !== 'attention' || !user.active || !isPolicyCurrent(user));
+  $('userList').innerHTML = filteredUsers.map((user) => {
     const isCurrentUser = user.user_id === currentUserId;
     const role = ['viewer', 'editor', 'admin'].includes(user.role) ? user.role : 'viewer';
     const displayName = user.display_name || 'Unnamed user';
-    const policyCurrent = user.terms_version === '2026-08-26'
-      && user.privacy_version === '2026-08-26'
-      && user.disclaimer_version === '2026-08-26';
+    const policyCurrent = isPolicyCurrent(user);
+    const needsAttention = !user.active || !policyCurrent;
     const policyStatus = policyCurrent
-      ? `Policies accepted ${formatDate(user.policy_accepted_at)}`
+      ? 'Policies accepted ' + formatDate(user.policy_accepted_at)
       : 'Policy acceptance pending';
-    return `<article class="user-card" data-user-id="${escapeHtml(user.user_id)}">
-      <div class="user-identity">
-        <strong>${escapeHtml(displayName)}${isCurrentUser ? ' (You)' : ''}</strong>
-        <small>${escapeHtml(user.email || 'No email address')}</small>
-        <span class="user-status-badge ${user.active ? 'active' : ''}">${user.active ? 'Active member' : 'Access not approved'} · Last sign-in ${escapeHtml(formatDate(user.last_sign_in_at))}</span>
-        <span class="user-policy-badge ${policyCurrent ? 'accepted' : ''}">${escapeHtml(policyStatus)}</span>
-      </div>
-      <label class="field user-role-field"><span>Role</span>
-        <select data-user-role ${isCurrentUser ? 'disabled' : ''}>
-          <option value="viewer" ${role === 'viewer' ? 'selected' : ''}>Viewer</option>
-          <option value="editor" ${role === 'editor' ? 'selected' : ''}>Editor</option>
-          <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
-        </select>
-      </label>
-      <label class="switch-row compact-switch user-active-control">
-        <span><span class="switch-title">Active</span></span>
-        <input data-user-active type="checkbox" role="switch" ${user.active ? 'checked' : ''} ${isCurrentUser ? 'disabled' : ''}>
-      </label>
-      <button class="primary-btn user-save-btn" data-save-user type="button" ${isCurrentUser ? 'disabled' : ''}>Save</button>
-    </article>`;
-  }).join('');
+    const accessStatus = user.active
+      ? 'Active · Last sign-in ' + formatDate(user.last_sign_in_at)
+      : 'Access pending approval';
+    return '<article class="user-card ' + (needsAttention ? 'needs-attention ' : '') + (isCurrentUser ? 'user-card-current' : '') + '" data-user-id="' + escapeHtml(user.user_id) + '" data-current-user="' + isCurrentUser + '">' +
+      '<div class="user-identity"><strong>' + escapeHtml(displayName) + (isCurrentUser ? ' (You)' : '') + '</strong>' +
+      '<small>' + escapeHtml(user.email || 'No email address') + '</small>' +
+      '<div class="user-meta"><span class="user-status-badge ' + (user.active ? 'active' : 'inactive') + '">' + escapeHtml(accessStatus) + '</span>' +
+      '<span class="user-policy-badge ' + (policyCurrent ? 'accepted' : 'pending') + '">' + escapeHtml(policyStatus) + '</span></div></div>' +
+      '<label class="field user-role-field"><span>Role</span><select data-user-role data-original="' + role + '" ' + (isCurrentUser ? 'disabled' : '') + '>' +
+      '<option value="viewer" ' + (role === 'viewer' ? 'selected' : '') + '>Viewer</option>' +
+      '<option value="editor" ' + (role === 'editor' ? 'selected' : '') + '>Editor</option>' +
+      '<option value="admin" ' + (role === 'admin' ? 'selected' : '') + '>Admin</option></select></label>' +
+      '<div class="user-access-controls"><label class="switch-row compact-switch user-active-control"><span><span class="switch-title">Active</span></span>' +
+      '<input data-user-active data-original="' + String(Boolean(user.active)) + '" type="checkbox" role="switch" ' + (user.active ? 'checked' : '') + ' ' + (isCurrentUser ? 'disabled' : '') + '></label>' +
+      '<button class="primary-btn user-save-btn" data-save-user type="button" ' + (isCurrentUser ? 'disabled' : '') + '>Save</button></div>' +
+      '<span class="user-unsaved-note">Unsaved access changes</span></article>';
+  }).join('') || (users.length ? '<div class="user-empty-filter">No users need attention.</div>' : '');
 
+  document.querySelectorAll('[data-user-filter]').forEach((button) => {
+    const selected = button.dataset.userFilter === userFilter;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+    button.onclick = () => {
+      userFilter = button.dataset.userFilter;
+      renderUsers();
+    };
+  });
+  $('userList').querySelectorAll('[data-user-role], [data-user-active]').forEach((input) => {
+    input.addEventListener('change', () => updateCardSaveState(input.closest('[data-user-id]')));
+  });
   $('userList').querySelectorAll('[data-save-user]').forEach((button) => {
     button.addEventListener('click', () => saveUser(button.closest('[data-user-id]')));
   });
@@ -101,6 +135,7 @@ async function saveUser(card) {
   const role = card.querySelector('[data-user-role]').value;
   const active = card.querySelector('[data-user-active]').checked;
   button.disabled = true;
+  button.dataset.saving = 'true';
   button.textContent = 'Saving…';
   setSyncStatus('Saving changes…');
   setMessage('');
@@ -113,8 +148,9 @@ async function saveUser(card) {
     setSyncStatus('User sync failed', 'error');
     setMessage(error.message || 'Could not update user access.', true);
   } finally {
-    button.disabled = false;
+    button.dataset.saving = 'false';
     button.textContent = 'Save';
+    updateCardSaveState(card);
   }
 }
 
