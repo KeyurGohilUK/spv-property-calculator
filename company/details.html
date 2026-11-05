@@ -165,6 +165,15 @@
 <label>Method<select id="hmrcPaymentMethod"><option value="bank-transfer">Bank transfer</option><option value="direct-debit">Direct Debit</option><option value="card">Card</option><option value="other">Other</option></select></label>
 <label>Transaction reference<input id="hmrcPaymentReference" type="text" maxlength="160" autocomplete="off"></label>
 <label class="hmrc-confirm-label"><input id="hmrcPaymentConfirmed" type="checkbox"> HMRC has confirmed this payment</label>
+<section id="hmrcPaymentEvidencePanel" class="hmrc-payment-evidence" aria-labelledby="hmrcPaymentEvidenceTitle">
+  <div class="hmrc-payment-evidence-heading"><strong id="hmrcPaymentEvidenceTitle">Payment receipts</strong><span class="muted">Optional · for the selected tax period</span></div>
+  <label class="company-evidence-upload hmrc-payment-receipt-upload">Attach receipt (PDF or image, maximum 5 MB)
+    <input id="hmrcPaymentEvidenceInput" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif">
+    <span id="hmrcPaymentEvidenceSelection" class="receipt-file-size">No receipt selected</span>
+  </label>
+  <p id="hmrcPaymentEvidenceMessage" role="status" aria-live="polite"></p>
+  <ul id="hmrcPaymentEvidenceFiles" class="company-evidence-files"></ul>
+</section>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save payment</button></div>
 <p id="hmrcPaymentMessage" role="status" aria-live="polite"></p></form>
 </dialog>
