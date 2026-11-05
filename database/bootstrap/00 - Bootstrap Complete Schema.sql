@@ -170,7 +170,7 @@ create table if not exists public.tasks (
   user_id uuid not null default auth.uid() references auth.users(id) on delete restrict,
   title text not null default '',
   description text not null default '',
-  status text not null default 'todo' check (status in ('todo', 'in-progress', 'done')),
+  status text not null default 'todo' check (status in ('todo', 'in-progress', 'resolved', 'done')),
   created_by uuid null references auth.users(id) on delete set null,
   assigned_to uuid null references auth.users(id) on delete set null,
   due_date date null,
@@ -196,8 +196,8 @@ create table if not exists public.task_events (
   task_id text not null references public.tasks(id) on delete cascade,
   user_id uuid null references auth.users(id) on delete set null,
   display_name text not null default '',
-  from_status text null check (from_status in ('todo', 'in-progress', 'done')),
-  to_status text null check (to_status in ('todo', 'in-progress', 'done')),
+  from_status text null check (from_status in ('todo', 'in-progress', 'resolved', 'done')),
+  to_status text null check (to_status in ('todo', 'in-progress', 'resolved', 'done')),
   created_at timestamptz not null default now()
 );
 create index if not exists task_events_task_idx on public.task_events(task_id);
@@ -379,7 +379,7 @@ begin
  if auth.uid() is null or not public.is_workspace_editor() then raise exception 'Approved editor access is required'; end if;
  if nullif(btrim(p_id),'') is null then raise exception 'Task ID is required'; end if;
  if nullif(btrim(p_title),'') is null then raise exception 'Task title is required'; end if;
- if p_status not in ('todo','in-progress','done') then raise exception 'Invalid task status'; end if;
+ if p_status not in ('todo','in-progress','resolved','done') then raise exception 'Invalid task status'; end if;
  if p_scope not in ('company','property') then raise exception 'Invalid task scope'; end if;
  if (p_scope='company' and p_property_id is not null)
     or (p_scope='property' and nullif(btrim(p_property_id),'') is null) then
