@@ -95,6 +95,19 @@ export function updateHmrcPayment(hmrc, periodEnd, payment) {
   });
 }
 
+export function removeHmrcPeriod(hmrc, periodEnd) {
+  const periods = hmrcTaxPeriods(hmrc);
+  if (!periods.some((period) => period.periodEnd === periodEnd)) throw new Error('Tax period not found.');
+  const records = normalizeHmrcTracking(hmrc).records.filter((record) => record.periodEnd !== periodEnd);
+  return {
+    ...hmrc,
+    periodStart: '',
+    periodEnd: '',
+    periods: periods.filter((period) => period.periodEnd !== periodEnd),
+    records
+  };
+}
+
 export function removeHmrcPayment(hmrc, periodEnd, paymentId) {
   const record = hmrcPeriodSummary(hmrc, periodEnd);
   if (!record.payments.some((p) => p.id === paymentId)) throw new Error('Payment not found.');
