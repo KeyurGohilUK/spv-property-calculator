@@ -1,6 +1,7 @@
 {
-  "version": "1.60.16",
+  "version": "1.60.17",
   "notes": [
+    "Fix nested Companies House compliance obligation rows.",
     "Switch Companies House and HMRC directly within a single compliance hub.",
     "Delete a Corporation Tax period together with its records and attached files.",
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
