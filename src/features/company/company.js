@@ -1102,6 +1102,60 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
   }
 });
 
+$('deleteHmrcPeriodForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const message = $('deleteHmrcPeriodMessage');
+  if (!editingAllowed) { message.textContent = 'Editor permission is required.'; return; }
+  if ($('confirmDeleteHmrcPeriodInput').value.trim() !== 'DELETE') {
+    message.textContent = 'Type DELETE exactly to confirm.';
+    return;
+  }
+  const periodEnd = hmrcPeriodToDelete;
+  if (!periodEnd) { message.textContent = 'Select a tax period to delete.'; return; }
+  const button = $('confirmDeleteHmrcPeriodBtn');
+  button.disabled = true;
+  try {
+    if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) {
+      throw new Error('This tax period no longer exists. Refresh the company records.');
+    }
+    if (navigator.onLine && window.SPVCloud?.getCurrentUser?.()) {
+      const before = await syncCompanyProfile(window.SPVCloud);
+      if (before.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Resolve company sync before deleting a tax period.');
+      }
+      profile = getCompanyProfile();
+    }
+    const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
+    if (!period) throw new Error('This tax period changed during sync. Refresh and try again.');
+    const paymentPrefix = 'corporation-tax-payment:' + periodEnd;
+    const files = (profile.complianceEvidence || []).filter((file) =>
+      file.ruleKey === 'corporation-tax-return:' + periodEnd
+      || file.ruleKey === paymentPrefix
+      || String(file.ruleKey || '').startsWith(paymentPrefix + ':')
+    );
+    if (files.length) await requireEvidenceEditor();
+    const hmrc = removeHmrcPeriod(profile.hmrc, periodEnd);
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    for (const file of files) removeCompanyEvidence(file.id);
+    if (files.length) {
+      const saved = await syncCompanyProfile(window.SPVCloud);
+      if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Tax period was deleted locally, but document removal is pending sync. Retry company sync before removing stored files.');
+      }
+      for (const file of files) await deleteComplianceEvidence(profile.id, file);
+    }
+    hmrcPeriodToDelete = '';
+    hmrcDialogs.deletePeriod.close();
+    renderProfile();
+    await syncAfterSave();
+    setEvidenceMessage('Tax period and its records deleted.');
+  } catch (error) {
+    message.textContent = error.message || 'Unable to delete the tax period.';
+  } finally {
+    button.disabled = false;
+  }
+});
+
 $('openDeleteCompanyBtn').addEventListener('click', () => {
   if (!deleteAllowed || profile.deletedAt) return;
   $('deleteCompanyName').textContent = profile.companyName;
