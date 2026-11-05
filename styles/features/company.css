@@ -735,6 +735,6 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-filing-evidence { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
 .hmrc-filing-evidence-heading { flex-wrap: wrap; }
 .hmrc-filing-evidence-status { color: var(--muted); font-size: 13px; font-weight: 700; }
-.hmrc-filing-evidence-status:not(:empty) { color: var(--positive); }
+.hmrc-filing-evidence-status.is-attached { color: var(--positive); }
 .hmrc-filing-evidence .hmrc-evidence-list { margin: 0; }
 .hmrc-filing-evidence > p { margin: 0; }
