@@ -50,7 +50,7 @@ assert.match(style, /\.company-compliance-list/);
 assert.match(style, /\.company-compliance-hub #companyHouseAuthorityPanel \.company-compliance-list/);
 assert.match(script, /Next statement date:/);
 assert.match(script, /Due by <strong>/);
-assert.match(script, /Accounting records preservation/);
+assert.match(script, /Accounting Records Preservation/);
 assert.ok(assets.assets.includes('./src/features/company/compliance-rules.js'), 'Offline PWA must cache compliance rules');
 assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 9);
 console.log('Company compliance dashboard integration checks passed.');
