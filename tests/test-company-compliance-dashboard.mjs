@@ -9,7 +9,7 @@ assert.match(html, /id="companyComplianceTitle"/);
 assert.match(html, /id="companiesHouseComplianceItems"/);
 assert.match(html, /id="hmrcSetupCards"/);
 assert.match(html, /id="hmrcSetupOverview" class="hmrc-overview hmrc-setup-overview"/);
-assert.doesNotMatch(html, /One-time records for Corporation Tax\\./, "Setup header stays compact");
+assert.ok(!html.includes("One-time records for Corporation Tax."), "Setup header stays compact");
 assert.ok(style.includes(".hmrc-authority-panel .hmrc-setup-overview { padding:0; border:0; border-radius:0; background:transparent; }"), "Setup cards sit directly on the page surface");
 assert.match(html, /id="hmrcPeriodHistory"/);
 assert.match(html, /id="hmrcRecurringOverview" class="hmrc-overview hmrc-recurring-overview"/);
