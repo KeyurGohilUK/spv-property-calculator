@@ -767,6 +767,73 @@ const templateDialogController = setupDialog($('templateDialog'), {
 });
 $('templateDialog').addEventListener('close', () => { selectedTemplateId = null; });
 
+const taskSettingsDialogController = setupDialog($('taskSettingsDialog'), {
+  closeButtons: [$('closeTaskSettingsBtn')]
+});
+
+function renderTaskMemberColours() {
+  const list = $('taskMemberColours');
+  list.replaceChildren();
+  workspaceMembers.forEach((member) => {
+    const row = document.createElement('div');
+    row.className = 'task-member-colour-row';
+    const name = document.createElement('strong');
+    name.textContent = member.displayName || 'Workspace member';
+    const picker = document.createElement('div');
+    picker.className = 'task-member-colour-picker';
+    const swatch = document.createElement('span');
+    swatch.className = 'task-member-colour-swatch';
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', 'Task colour for ' + name.textContent);
+    [['', 'No colour'], ...MEMBER_COLORS.map((color) => [color, color[0].toUpperCase() + color.slice(1)])]
+      .forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+      });
+    select.value = member.taskColor || '';
+    swatch.dataset.memberColour = select.value || 'none';
+    select.addEventListener('change', async () => {
+      const previous = member.taskColor || '';
+      const next = select.value;
+      select.disabled = true;
+      $('taskSettingsMessage').textContent = 'Saving colour…';
+      try {
+        if (userRole !== 'admin' || !navigator.onLine) throw new Error('Sign in as an administrator and connect to update colours.');
+        await window.SPVCloud.setTaskMemberColor(member.userId, next);
+        member.taskColor = next || null;
+        swatch.dataset.memberColour = next || 'none';
+        localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(workspaceMembers));
+        render();
+        $('taskSettingsMessage').textContent = 'Colour saved for ' + name.textContent;
+      } catch (error) {
+        select.value = previous;
+        $('taskSettingsMessage').textContent = error.message || 'Could not save colour.';
+      } finally {
+        select.disabled = false;
+      }
+    });
+    picker.append(swatch, select);
+    row.append(name, picker);
+    list.appendChild(row);
+  });
+  if (!workspaceMembers.length) {
+    const empty = document.createElement('p');
+    empty.className = 'muted';
+    empty.textContent = 'No active members found. Connect to load workspace members.';
+    list.appendChild(empty);
+  }
+}
+
+$('openTaskSettingsBtn').addEventListener('click', async () => {
+  if (userRole !== 'admin') return;
+  $('taskSettingsMessage').textContent = '';
+  renderTaskMemberColours();
+  taskSettingsDialogController.open();
+  await loadWorkspaceMembers();
+});
+
 function openForm(task = null, { preset = null } = {}) {
   if (!task && !canEdit) return;
   const readOnly = !!task && !canEditTask(task);
