@@ -1,5 +1,5 @@
 {
-  "version": "1.60.35",
+  "version": "1.60.36",
   "assets": [
     "./",
     "./index.html",
@@ -12,6 +12,7 @@
     "./styles/components/rich-textarea.css",
     "./styles/components/interactive-card-hover.css",
     "./styles/components/icon-action-feedback.css",
+    "./styles/components/action-button-feedback.css",
     "./styles/forms.css",
     "./styles/dialogs.css",
     "./styles/dialogs-updates.css",
