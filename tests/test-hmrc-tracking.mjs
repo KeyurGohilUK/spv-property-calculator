@@ -28,7 +28,7 @@ hmrc = updateHmrcPayment(hmrc, period.periodEnd, { id: 'payment-12345678', date:
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].reference, 'Updated instalment');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].method, 'card');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).paid, 2000);
-assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].status, 'recorded');
+assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[0].status, 'hmrc-confirmed');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).payments[1].status, 'hmrc-confirmed');
 assert.equal(hmrcPeriodSummary(hmrc, period.periodEnd).filedOn, '2027-06-10');
 assert.equal(hmrc.setup.utrReceivedOn, '2026-02-04');
