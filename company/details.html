@@ -165,12 +165,12 @@
 <label>Transaction reference<input id="hmrcPaymentReference" type="text" maxlength="160" autocomplete="off"></label>
 <label class="hmrc-confirm-label"><input id="hmrcPaymentConfirmed" type="checkbox"> HMRC has confirmed this payment</label>
 <section id="hmrcPaymentEvidencePanel" class="hmrc-payment-evidence" aria-labelledby="hmrcPaymentEvidenceTitle">
-  <div class="hmrc-payment-evidence-heading"><strong id="hmrcPaymentEvidenceTitle">Payment receipts</strong><span class="muted">Optional · for the selected tax period</span></div>
-  <file-upload-field input-id="hmrcPaymentEvidenceInput" label="Receipt" optional accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcPaymentEvidenceSelection" help-id="hmrcPaymentEvidenceHelp" help="PDF or image · maximum 5 MB · stored securely for this tax period." data-evidence-upload=""></file-upload-field>
+  <div class="hmrc-payment-evidence-heading"><strong id="hmrcPaymentEvidenceTitle">Payment receipt</strong></div>
+  <file-upload-field input-id="hmrcPaymentEvidenceInput" label="Choose receipt file" optional empty-label="No receipt selected" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcPaymentEvidenceSelection" help-id="hmrcPaymentEvidenceHelp" help="PDF or image · maximum 5 MB · stored securely for this tax period." data-evidence-upload=""></file-upload-field>
   <p id="hmrcPaymentEvidenceMessage" role="status" aria-live="polite"></p>
   <ul id="hmrcPaymentEvidenceFiles" class="company-evidence-files"></ul>
 </section>
-<div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save payment</button></div>
+<div class="hmrc-dialog-actions"><button id="hmrcPaymentSaveBtn" class="primary-btn" type="submit">Save payment</button></div>
 <p id="hmrcPaymentMessage" role="status" aria-live="polite"></p></form>
 </dialog>
 </section>
