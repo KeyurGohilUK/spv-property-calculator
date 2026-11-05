@@ -1,6 +1,8 @@
 {
-  "version": "1.60.31",
+  "version": "1.60.32",
   "notes": [
+    "Refresh company cards with status, incorporation and assigned property details.",
+    "Highlight pending Corporation Tax period statuses.",
     "Remove the separate Supporting documents section from Corporation Tax period cards.",
     "Make Manage Users easier to scan with live access summaries, attention filtering and unsaved-change feedback.",
     "Place the payment action in Financial Summary and require typed confirmation before deleting a Corporation Tax period.",
