@@ -1,5 +1,5 @@
 {
-  "version": "1.60.9",
+  "version": "1.60.10",
   "assets": [
     "./",
     "./index.html",
@@ -112,6 +112,8 @@
     "./icons/icon-maskable-192.png",
     "./icons/icon-maskable-512.png",
     "./icons/apple-touch-icon.png",
-    "./icons/favicon-32.png"
+    "./icons/favicon-32.png",
+    "./styles/components/file-upload.css",
+    "./src/components/file-upload-field.js"
   ]
 }
