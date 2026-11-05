@@ -1,6 +1,6 @@
 {
-  "version": "1.60.34",
+  "version": "1.60.35",
   "notes": [
-    "Use one consistent hover and keyboard focus treatment for interactive cards across the app."
+    "Use consistent hover colors and tooltips for icon-only actions throughout the app."
   ]
 }
