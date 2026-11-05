@@ -1,6 +1,7 @@
 {
-  "version": "1.60.17",
+  "version": "1.60.18",
   "notes": [
+    "Show company compliance details and evidence in a focused dialog.",
     "Fix nested Companies House compliance obligation rows.",
     "Switch Companies House and HMRC directly within a single compliance hub.",
     "Delete a Corporation Tax period together with its records and attached files.",

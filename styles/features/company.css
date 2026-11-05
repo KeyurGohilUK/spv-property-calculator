@@ -608,3 +608,53 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .company-compliance-evidence-summary { text-align:left; }
   .authority-details-number { margin-left:0; }
 }
+
+/* Compact compliance rows keep details and upload controls inside a focused dialog. */
+.compliance-authority .company-compliance-list { grid-template-columns:minmax(0,1fr); gap:10px; }
+.company-compliance-item {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+  padding:16px 18px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface);
+}
+.company-compliance-item-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--text-muted);
+  background:var(--surface-2);
+}
+.company-compliance-item-icon svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.company-compliance-item-icon.is-attention { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 40%,var(--border)); background:color-mix(in srgb,var(--warning) 8%,var(--surface)); }
+.company-compliance-item-copy { flex:1 1 auto; min-width:0; }
+.company-compliance-item-heading { display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; }
+.company-compliance-item-heading strong { font-size:1rem; }
+.company-compliance-item-copy p { margin:4px 0 0; font-size:.88rem; line-height:1.4; }
+.company-compliance-status.is-attention { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 40%,var(--border)); background:color-mix(in srgb,var(--warning) 8%,var(--surface)); }
+.company-compliance-open { flex:0 0 auto; }
+.company-compliance-dialog { width:min(660px,calc(100% - 32px)); max-height:min(90dvh,900px); overflow:auto; }
+.company-compliance-dialog-status { display:inline-flex; margin:0 0 10px; padding:5px 10px; border:1px solid var(--border); border-radius:999px; color:var(--text-muted); font-size:.84rem; font-weight:650; }
+.company-compliance-dialog-status.is-attention { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 40%,var(--border)); background:color-mix(in srgb,var(--warning) 8%,var(--surface)); }
+.company-compliance-dialog-details { padding:4px 0 12px; border-bottom:1px solid var(--border); }
+.company-compliance-dialog-details p { margin:7px 0; color:var(--text-muted); }
+.company-compliance-dialog-evidence { margin-top:16px; }
+.company-compliance-dialog-evidence h3 { margin:0 0 5px; font-size:1rem; }
+.company-compliance-dialog-evidence > p { margin:0 0 12px; }
+.company-compliance-dialog-evidence .company-evidence-files { margin-bottom:14px; }
+.company-compliance-dialog-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+#companyComplianceDialogMessage:not(:empty) { margin:10px 0 0; }
+@media (max-width:600px) {
+  .company-compliance-item { align-items:flex-start; flex-wrap:wrap; padding:14px; }
+  .company-compliance-item-copy { flex:1 1 calc(100% - 58px); }
+  .company-compliance-open { width:100%; margin-left:56px; }
+  .company-compliance-dialog-actions { justify-content:stretch; }
+  .company-compliance-dialog-actions button { flex:1 1 100%; }
+}

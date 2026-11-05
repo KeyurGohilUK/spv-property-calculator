@@ -24,8 +24,13 @@ assert.match(html, /<details class="company-official-people company-identity-ove
 assert.match(html, /<details class="company-filing-history compliance-subsection">/);
 assert.doesNotMatch(html, /<details class="company-filing-history compliance-subsection" open>/, 'Filing history remains a compact disclosure');
 assert.match(script, /<article class="company-compliance-item">/, 'Company obligations render as direct rows');
-assert.match(script, /<\/div><\/article>\x60\)\.join\(''\)/, 'Every generated compliance row must close its article');
+assert.match(script, /<\/article>\x60;/, 'Every generated compliance row closes as a sibling article');
 assert.doesNotMatch(script, /<details class="company-compliance-item">/, 'Company obligations do not add nested expanders');
+assert.match(html, /id="companyComplianceDialog"/);
+assert.match(html, /id="companyComplianceEvidenceUpload"/);
+assert.match(script, /renderCompanyComplianceDialog/);
+assert.match(script, /data-open-company-compliance/);
+assert.doesNotMatch(script.slice(script.indexOf('const renderCards'), script.indexOf("$('companyAuthorityNumber')")), /file-upload-field/, 'Evidence inputs are shown in the dialog only');
 assert.ok(style.includes('.compliance-authority-switcher'), 'Authority cards should present one direct view selector');
 
 assert.match(html, /id="companyIdentitySummary"/);
