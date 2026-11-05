@@ -27,11 +27,20 @@ assert.equal(task.status, 'todo');
 assert.equal(task._cloudDirty, true, 'New task must be marked cloud dirty');
 assert.equal(task.deletedAt, null);
 
-// Newly created tasks always default to Todo.\nassert.equal(saveTask({ title: 'Default task', scope: 'company' }).status, 'todo');\n\n// Storage: update status\nconst updated = updateTaskStatus(task.id, 'in-progress');
+// Newly created tasks always default to Todo.
+assert.equal(saveTask({ title: 'Default task', scope: 'company' }).status, 'todo');
+
+// Storage: update status
+const updated = updateTaskStatus(task.id, 'in-progress');
 assert.equal(updated.status, 'in-progress');
 assert.equal(updated._cloudDirty, true);
 
-// Storage: task can move directly between any statuses, including Resolved.\nassert.equal(updateTaskStatus(task.id, 'resolved').status, 'resolved');\nassert.equal(updateTaskStatus(task.id, 'todo').status, 'todo');\nassert.throws(() => updateTaskStatus(task.id, 'invalid'), /Invalid task status/);\n\n// Storage: next status cycling
+// Storage: task can move directly between any statuses, including Resolved.
+assert.equal(updateTaskStatus(task.id, 'resolved').status, 'resolved');
+assert.equal(updateTaskStatus(task.id, 'todo').status, 'todo');
+assert.throws(() => updateTaskStatus(task.id, 'invalid'), /Invalid task status/);
+
+// Storage: next status cycling
 assert.equal(nextStatus('todo'), 'in-progress');
 assert.equal(nextStatus('in-progress'), 'resolved');
 assert.equal(nextStatus('resolved'), 'done');
