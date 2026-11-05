@@ -1,5 +1,5 @@
 {
-  "version": "1.60.20",
+  "version": "1.60.21",
   "notes": [
     "Align compliance status badges and restore focus when dialogs close.",
     "Show the next Companies House statement date in compliance rows.",
@@ -10,6 +10,7 @@
     "Delete a Corporation Tax period together with its records and attached files.",
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
     "Hide the empty receipt message while a receipt is selected.",
-    "Refresh payment receipt status immediately after file selection."
+    "Refresh payment receipt status immediately after file selection.",
+    "Reduce excess spacing between compliance titles and filing details."
   ]
 }
