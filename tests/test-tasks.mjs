@@ -154,7 +154,15 @@ const savedWithAssignee = saveTask({ title: 'Check assignee', status: 'todo', sc
 const updated2 = saveTask({ id: savedWithAssignee.id, title: 'Check assignee updated', status: 'in-progress', scope: 'company' });
 assert.equal(updated2.assignedTo, 'user-xyz', 'Updating a task without passing assignedTo must preserve existing value');
 
-// HTML checks\nassert.match(taskHtml, /vendor\\/sortable\\.min\\.js/, 'Offline SortableJS must be included');\nassert.match(taskHtml, /value="resolved"/g, 'Resolved must be available in status controls');\nassert.match(taskPage, /Sortable\\.create\\(column/, 'Task columns should support drag and drop');\nassert.match(taskPage, /canEditTask\\(task\\)/, 'Permission check required for status changes');\nassert.match(taskPage, /changeTaskStatus\\(task, destination\\)/, 'Dropping a card must update status');\nassert.match(taskPage, /task-card-status-select/, 'Accessible status select fallback must be provided');\nassert.match(taskPage, /status: newStatus/, 'Task status must be saved from the task form');\nassert.match(taskHtml, /id="taskSyncStatus" class="sync-status"/, 'Task page must include sync status');
+// HTML checks
+assert.ok(taskHtml.includes('vendor/sortable.min.js'), 'Offline SortableJS must be included');
+assert.ok(taskHtml.includes('value="resolved"'), 'Resolved must be available in status controls');
+assert.ok(taskPage.includes('Sortable.create(column'), 'Task columns should support drag and drop');
+assert.ok(taskPage.includes('canEditTask(task)'), 'Permission check required for status changes');
+assert.ok(taskPage.includes('changeTaskStatus(task, destination)'), 'Dropping a card must update status');
+assert.ok(taskPage.includes('task-card-status-select'), 'Accessible status select fallback must be provided');
+assert.ok(taskPage.includes('status: newStatus'), 'Task status must be saved from the task form');
+assert.match(taskHtml, /id="taskSyncStatus" class="sync-status"/, 'Task page must include sync status');
 assert.match(taskHtml, /id="taskList"/, 'Task page must include task list container');
 assert.match(taskHtml, /id="taskEmpty"/, 'Task page must include empty state');
 assert.match(taskHtml, /id="taskDialog"/, 'Task page must include task dialog');
