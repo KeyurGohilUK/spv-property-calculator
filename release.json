@@ -1,5 +1,5 @@
 {
-  "version": "1.60.21",
+  "version": "1.60.22",
   "notes": [
     "Align compliance status badges and restore focus when dialogs close.",
     "Show the next Companies House statement date in compliance rows.",
@@ -11,6 +11,7 @@
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
     "Hide the empty receipt message while a receipt is selected.",
     "Refresh payment receipt status immediately after file selection.",
-    "Reduce excess spacing between compliance titles and filing details."
+    "Reduce excess spacing between compliance titles and filing details.",
+    "Remove redundant helper text from compliance evidence dialogs."
   ]
 }
