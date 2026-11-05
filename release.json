@@ -1,6 +1,6 @@
 {
-  "version": "1.60.9",
+  "version": "1.60.10",
   "notes": [
-    "Attach and view Corporation Tax payment receipts in the payment dialog."
+    "Use a shared file upload field across Expenses and HMRC evidence forms."
   ]
 }
