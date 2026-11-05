@@ -1396,7 +1396,7 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
   }
 });
 
-$('hmrcPeriodHistory').addEventListener('click', (event) => {
+$('hmrcPeriodHistory').addEventListener('click', async (event) => {
   const deletePeriodButton = event.target.closest('[data-hmrc-period-remove]');
   if (deletePeriodButton && editingAllowed) {
     const periodEnd = deletePeriodButton.dataset.hmrcPeriodRemove;
