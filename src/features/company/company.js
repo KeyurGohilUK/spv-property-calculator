@@ -378,6 +378,9 @@ function renderCompanyCompliance() {
 
 }
 
+let companyComplianceDialogTriggerKey = '';
+let companyComplianceDialogOpenedByPointer = false;
+
 function renderCompanyComplianceDialog(ruleKey, open = true) {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const item = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: hmrcTaxPeriods(profile.hmrc).length ? ['corporation-tax-payment'] : [] }).find((entry) => entry.key === ruleKey);
@@ -1436,9 +1439,27 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
 });
 
 $('companyComplianceDialogClose').addEventListener('click', () => $('companyComplianceDialog').close());
+$('companyComplianceDialog').addEventListener('close', () => {
+  const key = companyComplianceDialogTriggerKey;
+  if (!key) return;
+  const pointerActivation = companyComplianceDialogOpenedByPointer;
+  window.requestAnimationFrame(() => {
+    const trigger = [...document.querySelectorAll('[data-open-company-compliance]')]
+      .find((element) => element.dataset.openCompanyCompliance === key && element.getClientRects().length);
+    trigger?.focus({ preventScroll: true });
+    if (pointerActivation) trigger?.blur();
+    companyComplianceDialogTriggerKey = '';
+    companyComplianceDialogOpenedByPointer = false;
+  });
+});
 $('complianceTabPanel').addEventListener('click', async (event) => {
   const openDetails = event.target.closest('[data-open-company-compliance]');
-  if (openDetails) { renderCompanyComplianceDialog(openDetails.dataset.openCompanyCompliance); return; }
+  if (openDetails) {
+    companyComplianceDialogTriggerKey = openDetails.dataset.openCompanyCompliance;
+    companyComplianceDialogOpenedByPointer = event.detail > 0;
+    renderCompanyComplianceDialog(companyComplianceDialogTriggerKey);
+    return;
+  }
   const button = event.target.closest('[data-compliance-key]');
   if (!button || !editingAllowed) return;
   const key = button.dataset.complianceKey;
