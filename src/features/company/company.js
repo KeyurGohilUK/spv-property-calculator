@@ -811,6 +811,7 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     } catch (error) {
       $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Select a valid receipt.';
     }
+    renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value, hmrcPaymentEditingId);
     return;
   }
   input.disabled = true;

@@ -1,7 +1,8 @@
 {
-  "version": "1.60.13",
+  "version": "1.60.14",
   "notes": [
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
-    "Hide the empty receipt message while a receipt is selected."
+    "Hide the empty receipt message while a receipt is selected.",
+    "Refresh payment receipt status immediately after file selection."
   ]
 }
