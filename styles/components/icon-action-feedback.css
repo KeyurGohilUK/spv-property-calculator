@@ -24,7 +24,7 @@
   button.dialog-close,
   button.chat-send-btn
 )[aria-label]:not([data-tooltip])::after {
-  content: attr(aria-label);
+  content: attr(title);
   position: absolute;
   top: calc(100% + 7px);
   right: 0;
@@ -45,6 +45,17 @@
   transform: translateY(-2px);
   transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
   pointer-events: none;
+}
+
+.main-shell :is(
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([title]):not([data-tooltip])::after {
+  content: attr(aria-label);
 }
 
 @media (hover: hover) and (pointer: fine) {
