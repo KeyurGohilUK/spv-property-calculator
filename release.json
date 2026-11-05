@@ -1,7 +1,7 @@
 {
-  "version": "1.60.26",
+  "version": "1.60.27",
   "notes": [
-    "Expand the shared page width and halve mobile side gutters across the app.",
+    "Keep visible page gutters while reducing the wide-screen gutters by half.",
     "Remove the tinted outer frame from Corporation Tax setup cards.",
     "Simplify the Corporation Tax period list by removing its enclosing tinted panel.",
     "Align compliance status badges and restore focus when dialogs close.",

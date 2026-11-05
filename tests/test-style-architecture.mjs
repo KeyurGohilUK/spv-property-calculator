@@ -23,9 +23,11 @@ assert.match(fs.readFileSync(new URL('../styles/app-shell-navigation.css', impor
 const shellCore = fs.readFileSync(new URL('../styles/app-shell-core.css', import.meta.url), 'utf8');
 const dialogStyles = fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8');
 const navigationStyles = fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8');
-assert.match(shellCore, /\.main-shell \{ max-width: 1400px;/, 'Shared pages use the expanded desktop content width');
-assert.match(dialogStyles, /\.main-shell \{ padding-inline: 6px; \}/, 'Mobile page gutters are reduced by half');
-assert.match(navigationStyles, /calc\(\(100vw - 1400px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
+assert.match(shellCore, /\.main-shell \{ max-width: 1328px;/, 'Shared pages use the expanded desktop content width');
+assert.match(dialogStyles, /\.main-shell \{ padding-inline: 8px; \}/, 'Mobile page gutters stay visible while remaining reduced');
+assert.match(navigationStyles, /calc\(\(100vw - 1328px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
+const companyStyles = fs.readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
+assert.match(companyStyles, /\.company-tab-panel:not\(\[hidden\]\) > \.company-section \{ width: 100%; max-width: 100%; box-sizing: border-box; \}/, 'Company investment and appointment panels stay within the page gutters');
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 assert.match(fs.readFileSync(new URL('../styles/components/linked-content.css', import.meta.url), 'utf8'), /\.inline-text-link[\s\S]*\.property-map-link/);
 assert.match(fs.readFileSync(new URL('../styles/components/rich-textarea.css', import.meta.url), 'utf8'), /\.rich-textbox-toolbar[\s\S]*\.rich-textbox-editor/);

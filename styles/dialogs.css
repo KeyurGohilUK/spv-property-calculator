@@ -55,7 +55,7 @@
 @media (min-width: 620px) { .install-platforms { grid-template-columns: 1fr 1fr; } }
 
 @media (max-width: 620px) {
-  .main-shell { padding-inline: 6px; }
+  .main-shell { padding-inline: 8px; }
   .header-inner { padding-inline: 7px; }
   .header-inner .eyebrow { display: none; }
   .status-pill { display: none; }
