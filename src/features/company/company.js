@@ -352,6 +352,8 @@ for (const controller of Object.values(hmrcDialogs)) {
       returnSelector = period
         ? `[data-hmrc-open="${kind}"][data-hmrc-period="${period}"]`
         : `[data-hmrc-open="${kind}"]`;
+    } else if (trigger?.dataset?.hmrcPaymentEdit) {
+      returnSelector = `[data-hmrc-payment-edit="${trigger.dataset.hmrcPaymentEdit}"]`;
     } else if (trigger?.dataset?.hmrcAttach) {
       returnSelector = `[data-hmrc-attach="${trigger.dataset.hmrcAttach}"]`;
     } else {
@@ -597,7 +599,7 @@ function renderHmrcTracking() {
               <td>${hmrcDate(payment.date)}</td><td>${CURRENCY_FORMAT.format(payment.amount)}</td>
               <td>${escapeHtml(payment.reference) || '—'}</td>
               <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
-              <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
+              <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
         </div>
         <details class="hmrc-card-documents"><summary>Supporting documents</summary>
