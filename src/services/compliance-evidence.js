@@ -66,3 +66,15 @@ export async function downloadComplianceEvidence(companyId, record) {
 export async function deleteComplianceEvidence(companyId, record) {
   await evidenceRequest(companyId, record.id, { method: 'DELETE' }, record.objectPath);
 }
+
+export async function viewComplianceEvidence(companyId, record, previewWindow) {
+  const response = await evidenceRequest(companyId, record.id, {}, record.objectPath);
+  const bytes = await response.blob();
+  const url = URL.createObjectURL(bytes);
+  if (!previewWindow || previewWindow.closed) {
+    URL.revokeObjectURL(url);
+    throw new Error('Allow pop-ups to view this receipt.');
+  }
+  previewWindow.location.href = url;
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
