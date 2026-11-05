@@ -1,6 +1,4 @@
 {
-  "version": "1.60.38",
-  "notes": [
-    "Introduce four-column task board with offline drag-and-drop and Resolved status."
-  ]
+  "version": "1.60.39",
+  "notes": ["Add auto-claim for tasks and admin-managed assignee card colours."]
 }
