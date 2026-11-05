@@ -26,6 +26,8 @@ const navigationStyles = fs.readFileSync(new URL('../styles/app-shell-navigation
 assert.match(shellCore, /\.main-shell \{ max-width: 1328px;/, 'Shared pages use the expanded desktop content width');
 assert.match(dialogStyles, /\.main-shell \{ padding-inline: 8px; \}/, 'Mobile page gutters stay visible while remaining reduced');
 assert.match(navigationStyles, /calc\(\(100vw - 1328px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
+const companyStyles = fs.readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
+assert.match(companyStyles, /\.company-tab-panel:not\(\[hidden\]\) > \.company-section \{ width: 100%; max-width: 100%; box-sizing: border-box; \}/, 'Company investment and appointment panels stay within the page gutters');
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 assert.match(fs.readFileSync(new URL('../styles/components/linked-content.css', import.meta.url), 'utf8'), /\.inline-text-link[\s\S]*\.property-map-link/);
 assert.match(fs.readFileSync(new URL('../styles/components/rich-textarea.css', import.meta.url), 'utf8'), /\.rich-textbox-toolbar[\s\S]*\.rich-textbox-editor/);
