@@ -534,7 +534,7 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-activity-form { display:grid; gap:12px; }
 .hmrc-activity-form label { display:flex; gap:10px; align-items:center; min-height:44px; }
 .hmrc-activity-form input[type="radio"] { width:auto; }
-.hmrc-confirm-label { display:flex !important; align-items:center; gap:8px; grid-column:1/-1; }
+.hmrc-confirm-label { display:flex !important; align-items:center; gap:8px; align-self:center; min-height:48px; }
 .hmrc-confirm-label input[type="checkbox"] { width:auto; }
 .hmrc-period-empty { border:1px dashed var(--border); border-radius:12px; padding:20px; text-align:center; background:var(--surface); }
 .hmrc-period-empty p { margin:5px 0; }
@@ -559,7 +559,7 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .hmrc-period-actions button { flex:1 1 145px; }
 }
 
-.hmrc-payment-evidence { display:grid; gap:10px; margin:4px 0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); }
+.hmrc-payment-evidence { display:grid; grid-column:1/-1; gap:10px; width:100%; min-width:0; box-sizing:border-box; margin:4px 0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); }
 .hmrc-payment-evidence-heading { display:grid; gap:3px; }
 .hmrc-payment-evidence-heading .muted { font-size:.85rem; }
 .hmrc-payment-receipt-upload { margin:0; }
