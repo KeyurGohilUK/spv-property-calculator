@@ -1,6 +1,6 @@
 {
-  "version": "1.60.36",
+  "version": "1.60.37",
   "notes": [
-    "Add consistent hover colors and keyboard focus styles to action buttons throughout the app."
+    "Apply shared hover, pressed, and keyboard-focus feedback to buttons throughout the app."
   ]
 }
