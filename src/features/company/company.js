@@ -27,6 +27,7 @@ const $ = (id) => document.getElementById(id);
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpperCase() + String(status).slice(1) : '';
 const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+const PLUS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
 const ATTACHMENT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
 const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
 const VIEW_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -553,6 +554,17 @@ function hmrcEvidenceMarkup(ruleKey, label) {
   </div>`;
 }
 
+function renderHmrcFilingEvidence(periodEnd = $('hmrcRecordPeriod').value) {
+  const ruleKey = periodEnd ? 'corporation-tax-return:' + periodEnd : '';
+  const files = (profile.complianceEvidence || []).filter((file) => file.ruleKey === ruleKey);
+  const input = $('hmrcFilingEvidenceInput');
+  input.dataset.evidenceUpload = ruleKey;
+  input.disabled = !editingAllowed || !periodEnd;
+  $('hmrcFilingEvidenceStatus').textContent = files.length ? `Evidence attached (${files.length})` : 'No evidence attached';
+  $('hmrcFilingEvidenceFiles').innerHTML = files.map((file) => `<li><span>${escapeHtml(file.name)}</span>${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No documents attached.</li>';
+  $('hmrcFilingEvidenceMessage').textContent = '';
+}
+
 function hmrcPaymentEvidenceRuleKey(periodEnd, paymentId) {
   return periodEnd && paymentId ? 'corporation-tax-payment:' + periodEnd + ':' + paymentId : '';
 }
@@ -697,6 +709,7 @@ function renderHmrcTracking() {
   $('hmrcRecordPeriod').innerHTML = hmrcRecordPeriodOptions(selectedPeriod);
   $('hmrcPaymentPeriod').innerHTML = hmrcRecordPeriodOptions(paymentPeriod);
   fillHmrcFilingForm(selectedPeriod);
+  renderHmrcFilingEvidence(selectedPeriod);
   for (const form of [$('hmrcFilingForm'), $('hmrcPaymentForm')]) {
     form.querySelectorAll('input,select,button').forEach((element) => {
       const receiptReadAction = form.id === 'hmrcPaymentForm' && element.matches('[data-evidence-view], [data-evidence-download]');
@@ -714,6 +727,7 @@ function renderHmrcTracking() {
       const noTaxDue = liabilityKnown && record.liability === 0;
       const isPaid = liabilityKnown && record.liability > 0 && record.outstanding === 0 && record.overpayment === 0;
       const recordedFiling = Boolean(record.filedOn);
+      const filingEvidence = (profile.complianceEvidence || []).filter((file) => file.ruleKey === 'corporation-tax-return:' + period.periodEnd);
       return `<article class="hmrc-period-card">
         <header class="hmrc-period-header">
           <div class="hmrc-period-heading">
@@ -725,13 +739,15 @@ function renderHmrcTracking() {
             <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
           </div>
           <div class="hmrc-period-actions">
-            <button type="button" class="secondary-btn" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>${recordedFiling ? 'Edit CT600' : '+ Record CT600'}</button>
-            <button type="button" class="primary-btn" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>+ Tax payment</button>\n            <button type="button" class="secondary-btn danger-text" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Delete period</button>
+            <button type="button" class="secondary-btn danger-text" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Delete period</button>
           </div>
         </header>
         <div class="hmrc-period-grid">
-          <section class="hmrc-period-info"><h6>CT600 return</h6>
-            ${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'attention')}
+          <section class="hmrc-period-info">
+            <div class="hmrc-period-info-heading"><h6>CT600 return</h6>
+              <button type="button" class="icon-btn hmrc-filing-action" data-hmrc-open="filing" data-hmrc-period="${escapeHtml(period.periodEnd)}" aria-label="${recordedFiling ? 'Edit' : 'Record'} CT600" title="${recordedFiling ? 'Edit' : 'Record'} CT600" ${editingAllowed ? '' : 'disabled'}>${recordedFiling ? EDIT_ICON : PLUS_ICON}</button>
+            </div>
+            <div class="hmrc-period-status-row">${hmrcBadge(recordedFiling ? 'Recorded filed' : 'Not recorded', recordedFiling ? 'success' : 'attention')}${hmrcBadge(filingEvidence.length ? 'Evidence attached' : 'No evidence attached', filingEvidence.length ? 'success' : 'neutral')}</div>
             <dl><dt>Submitted</dt><dd>${hmrcDate(record.filedOn)}</dd>
               <dt>Reference</dt><dd>${escapeHtml(record.filingReference) || '—'}</dd>
               <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
@@ -744,7 +760,10 @@ function renderHmrcTracking() {
               <dt class="hmrc-summary-total">Outstanding</dt><dd class="hmrc-summary-total ${record.outstanding === null || record.outstanding > 0 ? 'hmrc-value-attention' : 'hmrc-value-positive'}">${record.outstanding === null ? 'Unknown' : CURRENCY_FORMAT.format(record.outstanding)}</dd></dl>
             ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
           </section>
-          <section class="hmrc-period-info"><h6>HMRC payment details</h6>
+          <section class="hmrc-period-info">
+            <div class="hmrc-period-info-heading"><h6>HMRC payment details</h6>
+              <button type="button" class="primary-btn hmrc-payment-add" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>${PLUS_ICON}<span>Tax payment</span></button>
+            </div>
             <p class="muted">Reference for this period</p>
             <div class="hmrc-reference-row"><strong class="hmrc-ref" data-hmrc-ref-value="${escapeHtml(period.periodEnd)}">${hmrcDisplayReference(record.paymentReference)}</strong>
             ${record.paymentReference ? `<button class="secondary-btn hmrc-ref-toggle" data-hmrc-reveal-ref="${escapeHtml(period.periodEnd)}" type="button" aria-label="Show payment reference for period ending ${escapeHtml(formatComplianceDateUK(period.periodEnd))}">Show</button>` : ''}</div>
@@ -763,7 +782,7 @@ function renderHmrcTracking() {
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
         </div>
         <details class="hmrc-card-documents"><summary>Supporting documents</summary>
-          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}${hmrcLegacyPaymentEvidenceMarkup(period.periodEnd)}</div>
+          <div class="hmrc-doc-grid">${hmrcLegacyPaymentEvidenceMarkup(period.periodEnd)}</div>
         </details>
       </article>`;
     }).join('') + '</div>'
@@ -1010,6 +1029,7 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderHmrcTracking();
     renderHmrcDashboard();
     if (input.id === 'companyComplianceEvidenceInput') renderCompanyComplianceDialog(ruleKey, false);
+    else if (input.id === 'hmrcFilingEvidenceInput') renderHmrcFilingEvidence($('hmrcRecordPeriod').value);
     else { hmrcDialogs.evidence.close(); restoreEvidenceDisclosure(ruleKey); }
     if (input.id === 'hmrcPaymentEvidenceInput') {
       renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
@@ -1019,6 +1039,7 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
     if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Receipt upload failed.';
+    else if (input.id === 'hmrcFilingEvidenceInput') $('hmrcFilingEvidenceMessage').textContent = error.message || 'Upload failed.';
     else $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
   } finally {
     input.disabled = input.id === 'hmrcPaymentEvidenceInput' ? (!editingAllowed || !input.dataset.evidenceUpload) : !editingAllowed;
@@ -1198,6 +1219,7 @@ $('hmrcActivityForm').addEventListener('submit', async (event) => {
 
 $('hmrcRecordPeriod').addEventListener('change', (event) => {
   fillHmrcFilingForm(event.target.value);
+  renderHmrcFilingEvidence(event.target.value);
 });
 
 $('hmrcFilingForm').addEventListener('submit', async (event) => {
