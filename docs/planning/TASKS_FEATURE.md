@@ -2,7 +2,7 @@
 
 ## Overview
 
-A shared task list for SPV workspace members. Users can create tasks, optionally link them to a property, assign them to workspace members, set due dates, and update status. All tasks sync through the existing cloud workspace and respect the three-role access model.
+A four-column Kanban task board for SPV workspace members, using locally bundled SortableJS for mouse and touch dragging, plus a native status picker for keyboard users. Users can create tasks, optionally link them to a property, assign them to workspace members, set due dates, and update status. All tasks sync through the existing cloud workspace and respect the three-role access model.
 
 ---
 
@@ -13,7 +13,7 @@ A shared task list for SPV workspace members. Users can create tasks, optionally
 | `id` | UUID | Same generation pattern as expenses and properties |
 | `title` | string | Required |
 | `description` | string | Optional, freeform |
-| `status` | `todo` \| `in-progress` \| `done` | |
+| `status` | `todo` \| `in-progress` \| `resolved` \| `done` | |
 | `createdBy` | user ID | Set at creation, never changed |
 | `assignedTo` | user ID | Optional — any active workspace member |
 | `dueDate` | ISO date string | Optional |
