@@ -357,6 +357,8 @@ function renderCompanyCompliance() {
   $('companyHouseAuthorityStatus').textContent = companyHouseData ? 'Connected'
     : companyHouseError === 'Checking Companies House…' ? 'Checking'
       : profile.companyNumber ? 'Manual tracking' : 'Company number needed';
+  $('companyHouseAuthorityStatus').classList.toggle('company-identity-chip--recorded', Boolean(companyHouseData));
+  $('companyHouseAuthorityStatus').classList.toggle('company-identity-chip--neutral', !companyHouseData);
   $('companyHouseAuthoritySummary').textContent = companyHouseData
     ? 'Official deadlines retrieved · ' + items.filter((item) => item.source === 'companies-house').length + ' register records'
     : profile.companyNumber ? companyHouseError || 'Connect to retrieve official deadlines'
