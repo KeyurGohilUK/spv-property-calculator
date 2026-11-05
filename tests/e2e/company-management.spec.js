@@ -229,7 +229,10 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcOpenPeriodDialog')).toBeFocused();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('31 Dec 2026');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('1 Oct 2027');
-  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('+ Record CT600');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveAttribute('aria-label', 'Record CT600');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"] svg')).toHaveCount(1);
+  await expect(page.locator('#hmrcFilingEvidenceStatus')).toHaveText('No evidence attached');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-payment-add')).toBeVisible();
   await expect(page.locator('#hmrcPeriodHistory .hmrc-pill--attention')).toContainText(['CT600 not recorded', 'Tax not assessed', 'Not recorded']);
   await expect(page.locator('#hmrcPeriodHistory .hmrc-summary-total')).toHaveCount(2);
   await expect(page.locator('#hmrcPeriodHistory .hmrc-value-attention').last()).toContainText('Unknown');
@@ -247,7 +250,8 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcFilingDialog')).toBeHidden();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeFocused();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('CT600-ACK');
-  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveText('Edit CT600');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toHaveAttribute('aria-label', 'Edit CT600');
+  await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"] svg')).toHaveCount(1);
   await expect(page.locator('#hmrcPeriodHistory')).not.toContainText('12345678901234567');
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('•••••34567');
   await page.locator('[data-hmrc-reveal-ref]').click();
