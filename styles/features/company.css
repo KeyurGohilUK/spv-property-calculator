@@ -377,8 +377,6 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .company-evidence-files li > span { flex: 1 1 175px; min-width: 0; overflow-wrap: anywhere; }
 .company-evidence-files li > span small { display: block; color: var(--muted); }
 .company-evidence-files li.muted { border: none; padding: 0; }
-.company-evidence-upload { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; font-weight: 600; font-size: .87rem; }
-.company-evidence-upload input { width: min(100%, 380px); max-width: 100%; }
 .company-evidence-message:not(:empty) { padding: 12px 14px; border-left: 4px solid var(--brand); background: var(--surface); border-radius: 8px; font-weight: 600; overflow-wrap: anywhere; }
 .company-evidence-message.is-error { border-left-color: var(--danger); color: var(--danger); }
 
@@ -415,8 +413,6 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .hmrc-evidence-list { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
 .hmrc-evidence-list li { display:flex; gap:8px; align-items:center; flex-wrap:wrap; overflow-wrap:anywhere; }
 .hmrc-evidence-list li > span { flex:1 1 140px; min-width:0; }
-.hmrc-upload-label { display:grid; gap:5px; font-weight:650; font-size:.85rem; }
-.hmrc-upload-label input { width:100%; min-width:0; max-width:400px; }
 .hmrc-doc-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .hmrc-pill { display:inline-flex; align-items:center; width:max-content; max-width:100%; padding:5px 10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:99px; font-size:.78rem; font-weight:650; overflow-wrap:anywhere; }
 .hmrc-pill--success { color:var(--positive); border-color:color-mix(in srgb,var(--positive) 45%,var(--border)); background:color-mix(in srgb,var(--positive) 12%,var(--surface)); }

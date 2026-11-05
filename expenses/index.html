@@ -114,12 +114,7 @@
       <label class="field"><span>Supplier / description <em>optional</em></span><input id="expenseDescription" type="text" maxlength="160" placeholder="e.g. Companies House filing fee"></label>
       <label class="field"><span>Notes <em>optional</em></span><textarea id="expenseNotes" rows="3" maxlength="1000" placeholder="Payment details or reason for expense"></textarea></label>
 
-      <label class="field receipt-field"><span>Receipt <em>optional</em></span>
-        <input id="expenseReceipt" type="file" accept="image/*,application/pdf" aria-describedby="expenseReceiptSize expenseReceiptHelp expenseReceiptError">
-        <span id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected</span>
-        <small id="expenseReceiptHelp">Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in.</small>
-        <small id="expenseReceiptError" class="error-text hidden"></small>
-      </label>
+      <file-upload-field input-id="expenseReceipt" label="Receipt" optional accept="image/*,application/pdf" status-id="expenseReceiptSize" help-id="expenseReceiptHelp" error-id="expenseReceiptError" help="Photos are automatically reduced below 2 MB · PDFs must be 2 MB or smaller · kept locally and securely synced when signed in."></file-upload-field>
       <label id="removeReceiptField" class="switch-row compact-switch hidden">
         <span><span class="switch-title">Remove current receipt</span><small>The locally stored receipt will be deleted when you save.</small></span>
         <input id="removeExpenseReceipt" type="checkbox" role="switch">

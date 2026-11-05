@@ -1,3 +1,4 @@
+import '../../components/file-upload-field.js';
 import { getActiveProperties } from '../properties/storage.js';
 import { renderSyncStatus } from '../../components/sync-status.js';
 import { setupDialog } from '../../components/dialog-helper.js';
