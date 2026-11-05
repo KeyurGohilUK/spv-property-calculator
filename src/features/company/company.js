@@ -755,7 +755,10 @@ function renderHmrcTracking() {
               <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
               <dt>Reviewed on</dt><dd>${hmrcDate(record.reviewedOn)}</dd></dl>
           </section>
-          <section class="hmrc-period-info"><h6>Financial summary</h6>
+          <section class="hmrc-period-info">
+            <div class="hmrc-period-info-heading"><h6>Financial summary</h6>
+              <button type="button" class="icon-btn hmrc-payment-add" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" aria-label="Add tax payment" title="Add tax payment" ${editingAllowed ? '' : 'disabled'}>${PLUS_ICON}</button>
+            </div>
             <dl><dt>Tax liability</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
               <dt>Liability status</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
               <dt>Total paid</dt><dd class="hmrc-value-positive">${CURRENCY_FORMAT.format(record.paid)}</dd>
@@ -763,9 +766,7 @@ function renderHmrcTracking() {
             ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
           </section>
           <section class="hmrc-period-info">
-            <div class="hmrc-period-info-heading"><h6>HMRC payment details</h6>
-              <button type="button" class="primary-btn hmrc-payment-add" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>${PLUS_ICON}<span>Tax payment</span></button>
-            </div>
+            <h6>HMRC payment details</h6>
             <p class="muted">Reference for this period</p>
             <div class="hmrc-reference-row"><strong class="hmrc-ref" data-hmrc-ref-value="${escapeHtml(period.periodEnd)}">${hmrcDisplayReference(record.paymentReference)}</strong>
             ${record.paymentReference ? `<button class="secondary-btn hmrc-ref-toggle" data-hmrc-reveal-ref="${escapeHtml(period.periodEnd)}" type="button" aria-label="Show payment reference for period ending ${escapeHtml(formatComplianceDateUK(period.periodEnd))}">Show</button>` : ''}</div>
