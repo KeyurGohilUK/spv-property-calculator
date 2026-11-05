@@ -1,6 +1,7 @@
 {
-  "version": "1.60.27",
+  "version": "1.60.28",
   "notes": [
+    "Move CT600 and payment actions into their summary cards and manage CT600 evidence from its filing dialog.",
     "Keep visible page gutters while reducing the wide-screen gutters by half.",
     "Remove the tinted outer frame from Corporation Tax setup cards.",
     "Simplify the Corporation Tax period list by removing its enclosing tinted panel.",
