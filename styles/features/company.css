@@ -392,7 +392,8 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .hmrc-view-tab-label { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px; min-width:0; }
 .hmrc-view-tab-label small { font-size:.82em; font-weight:550; }
 .hmrc-view-tab-setup-icon { color:var(--muted); }
-.hmrc-view-tab-setup-icon.is-complete { color:var(--positive); }
+.hmrc-view-tab-setup-icon.is-complete { color:#218a62; }
+.hmrc-view-tabs button[aria-selected="true"] .hmrc-view-tab-setup-icon.is-complete { color:#8ce5ad; }
 .hmrc-setup-tab-check { display:none; }
 .hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-check { display:block; }
 .hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-pending { display:none; }
