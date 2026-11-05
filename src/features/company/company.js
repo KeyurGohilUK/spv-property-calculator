@@ -1,3 +1,4 @@
+import '../../components/file-upload-field.js';
 import { setupDialog } from '../../components/dialog-helper.js';
 import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
@@ -319,7 +320,7 @@ function renderCompanyCompliance() {
         <ul class="company-evidence-files">${(profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key).map((file) => `
           <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown')}</small></span>
           ${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
-        ${editingAllowed ? `<label class="company-evidence-upload">Attach PDF or image (maximum 5 MB)<input type="file" data-evidence-upload="${escapeHtml(item.key)}" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"></label>` : ''}
+        ${editingAllowed ? `<file-upload-field input-id="companyEvidence-${escapeHtml(item.key)}" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="companyEvidenceStatus-${escapeHtml(item.key)}" help="PDF or image · maximum 5 MB" data-evidence-upload="${escapeHtml(item.key)}"></file-upload-field>` : ''}
       </div>
     </div></details>`).join('');
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
@@ -786,7 +787,6 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   if (!input?.files?.length) return;
   const ruleKey = input.dataset.evidenceUpload;
   const file = input.files[0];
-  if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceSelection').textContent = file.name + ' · ' + Math.ceil(file.size / 1024) + ' KB';
   input.disabled = true;
   setEvidenceMessage('Uploading compliance evidence…');
   try {
@@ -824,7 +824,8 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   } finally {
     input.disabled = input.id === 'hmrcPaymentEvidenceInput' ? (!editingAllowed || !input.dataset.evidenceUpload) : !editingAllowed;
     input.value = '';
-    if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
+    const status = input.closest('file-upload-field')?.querySelector('.receipt-file-size');
+    if (status) status.textContent = 'No file selected';
   }
 });
 
