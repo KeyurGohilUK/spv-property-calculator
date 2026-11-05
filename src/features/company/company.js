@@ -398,7 +398,7 @@ function renderCompanyComplianceDialog(ruleKey, open = true) {
   details.push(item.source === 'companies-house' ? (companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.') : item.source === 'hmrc' ? 'This is a suggested deadline based on the HMRC period you entered; check your HMRC account or accountant.' : 'Confirm this requirement and keep appropriate evidence.');
   $('companyComplianceDialogDetails').innerHTML = details.map((line) => '<p>' + escapeHtml(line) + '</p>').join('');
   const files = (profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key);
-  $('companyComplianceDialogEvidenceFiles').innerHTML = files.map((file) => '<li><span><strong>' + escapeHtml(file.name) + '</strong><small>' + Math.ceil(file.size / 1024) + ' KB · ' + escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown') + '</small></span>' + evidenceActionMarkup(file, editingAllowed) + '</li>').join('') || '<li class="muted">No supporting documents attached.</li>';
+  $('companyComplianceDialogEvidenceFiles').innerHTML = files.map((file) => '<li><span><strong>' + escapeHtml(file.name) + '</strong><small>' + Math.ceil(file.size / 1024) + ' KB · ' + escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown') + '</small></span>' + evidenceActionMarkup(file, editingAllowed) + '</li>').join('');
   const upload = $('companyComplianceEvidenceUpload');
   const input = $('companyComplianceEvidenceInput');
   upload.hidden = !editingAllowed;
