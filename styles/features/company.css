@@ -562,3 +562,10 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .hmrc-period-actions { width:100%; }
   .hmrc-period-actions button { flex:1 1 145px; }
 }
+
+.hmrc-payment-evidence { display:grid; gap:10px; margin:4px 0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); }
+.hmrc-payment-evidence-heading { display:grid; gap:3px; }
+.hmrc-payment-evidence-heading .muted { font-size:.85rem; }
+.hmrc-payment-receipt-upload { margin:0; }
+.hmrc-payment-evidence #hmrcPaymentEvidenceMessage:empty { display:none; }
+.hmrc-payment-evidence .company-evidence-files { margin-top:2px; }

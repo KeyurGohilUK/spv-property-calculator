@@ -4,7 +4,7 @@ import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
 import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, removeHmrcPayment } from './hmrc-tracking.js';
 import { hmrcOverviewState } from './hmrc-guided.js';
-import { uploadComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
+import { uploadComplianceEvidence, viewComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
 import {
   getCompanyProfile,
   setActiveCompanyId,
@@ -28,6 +28,7 @@ const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpp
 const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
 const ATTACHMENT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
 const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
+const VIEW_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const REMOVE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
 function evidenceActionMarkup(file, allowRemove) {
   const id = escapeHtml(file.id);
@@ -383,6 +384,20 @@ function hmrcEvidenceMarkup(ruleKey, label) {
   </div>`;
 }
 
+function renderHmrcPaymentEvidence(periodEnd = $('hmrcPaymentPeriod').value) {
+  const ruleKey = periodEnd ? 'corporation-tax-payment:' + periodEnd : '';
+  const input = $('hmrcPaymentEvidenceInput');
+  input.dataset.evidenceUpload = ruleKey;
+  input.disabled = !editingAllowed || !ruleKey;
+  const files = (profile.complianceEvidence || []).filter((file) => file.ruleKey === ruleKey);
+  $('hmrcPaymentEvidenceFiles').innerHTML = files.map((file) => {
+    const id = escapeHtml(file.id);
+    const name = escapeHtml(file.name);
+    return '<li><span><strong>' + name + '</strong><small>' + Math.ceil(file.size / 1024) + ' KB · ' + escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown') + '</small></span>' +
+      '<button type="button" class="icon-btn company-evidence-action" data-evidence-view="' + id + '" aria-label="View ' + name + '" title="View ' + name + '">' + VIEW_ICON + '</button>' +
+      evidenceActionMarkup(file, editingAllowed) + '</li>';
+  }).join('') || '<li class="muted">No receipts attached.</li>';
+}
 function renderHmrcDashboard() {
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
   const state = hmrcOverviewState(profile.hmrc);
@@ -475,6 +490,12 @@ function hmrcRecordPeriodOptions(selectedId) {
   const periods = hmrcTaxPeriods(profile.hmrc);
   return periods.map((period) => `<option value="${escapeHtml(period.periodEnd)}" ${selectedId === period.periodEnd ? 'selected' : ''}>${escapeHtml(formatComplianceDateUK(period.periodStart))} – ${escapeHtml(formatComplianceDateUK(period.periodEnd))}</option>`).join('');
 }
+$('hmrcPaymentPeriod').addEventListener('change', () => {
+  $('hmrcPaymentEvidenceMessage').textContent = '';
+  $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
+  renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
+});
+
 function fillHmrcFilingForm(periodEnd) {
   const selected = hmrcPeriodSummary(profile.hmrc, periodEnd);
   $('hmrcFiledOn').value = selected.filedOn;
@@ -499,8 +520,12 @@ function renderHmrcTracking() {
   $('hmrcPaymentPeriod').innerHTML = hmrcRecordPeriodOptions(paymentPeriod);
   fillHmrcFilingForm(selectedPeriod);
   for (const form of [$('hmrcFilingForm'), $('hmrcPaymentForm')]) {
-    form.querySelectorAll('input,select,button').forEach((element) => { element.disabled = !editingAllowed || !periods.length; });
+    form.querySelectorAll('input,select,button').forEach((element) => {
+      const receiptReadAction = form.id === 'hmrcPaymentForm' && element.matches('[data-evidence-view], [data-evidence-download]');
+      element.disabled = !receiptReadAction && (!editingAllowed || !periods.length);
+    });
   }
+  renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
   $('hmrcPeriodHistory').innerHTML = periods.length
     ? '<div class="hmrc-period-cards">' + [...periods].reverse().map((period) => {
       const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
@@ -560,8 +585,7 @@ function renderHmrcTracking() {
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
         </div>
         <details class="hmrc-card-documents"><summary>Supporting documents</summary>
-          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}
-          ${hmrcEvidenceMarkup('corporation-tax-payment:' + period.periodEnd, 'Payment receipts')}</div>
+          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}</div>
         </details>
       </article>`;
     }).join('') + '</div>'
@@ -762,6 +786,7 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   if (!input?.files?.length) return;
   const ruleKey = input.dataset.evidenceUpload;
   const file = input.files[0];
+  if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceSelection').textContent = file.name + ' · ' + Math.ceil(file.size / 1024) + ' KB';
   input.disabled = true;
   setEvidenceMessage('Uploading compliance evidence…');
   try {
@@ -787,27 +812,40 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderHmrcDashboard();
     hmrcDialogs.evidence.close();
     restoreEvidenceDisclosure(ruleKey);
+    if (input.id === 'hmrcPaymentEvidenceInput') {
+      renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
+      $('hmrcPaymentEvidenceMessage').textContent = 'Receipt uploaded and saved.';
+    }
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
-    $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
+    if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Receipt upload failed.';
+    else $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
   } finally {
-    input.disabled = !editingAllowed;
+    input.disabled = input.id === 'hmrcPaymentEvidenceInput' ? (!editingAllowed || !input.dataset.evidenceUpload) : !editingAllowed;
     input.value = '';
+    if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
   }
 });
 
 $('complianceTabPanel').addEventListener('click', async (event) => {
+  const view = event.target.closest('[data-evidence-view]');
   const download = event.target.closest('[data-evidence-download]');
   const remove = event.target.closest('[data-evidence-remove]');
-  if (!download && !remove) return;
-  const id = (download || remove).dataset[download ? 'evidenceDownload' : 'evidenceRemove'];
+  if (!view && !download && !remove) return;
+  const action = view || download || remove;
+  const id = action.dataset[view ? 'evidenceView' : download ? 'evidenceDownload' : 'evidenceRemove'];
   const entry = getCompanyProfile().complianceEvidence.find((item) => item.id === id);
   if (!entry) { setEvidenceMessage('This document is no longer attached. Refresh the page.', true); return; }
-  const button = download || remove;
+  const button = action;
+  const preview = view ? window.open('about:blank', '_blank') : null;
   button.disabled = true;
   try {
-    if (download) {
+    if (view) {
+      if (!preview) throw new Error('Allow pop-ups to view this receipt.');
+      await viewComplianceEvidence(profile.id, entry, preview);
+      $('hmrcPaymentEvidenceMessage').textContent = 'Receipt opened in a new tab.';
+    } else if (download) {
       await downloadComplianceEvidence(profile.id, entry);
       setEvidenceMessage('Document downloaded.');
     } else {
@@ -827,11 +865,14 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
       renderCompanyCompliance();
       renderHmrcTracking();
       renderHmrcDashboard();
+      if (entry.ruleKey.startsWith('corporation-tax-payment:')) renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
       restoreEvidenceDisclosure(entry.ruleKey);
       setEvidenceMessage('Evidence removed.');
     }
   } catch (error) {
+    preview?.close();
     setEvidenceMessage(error.message || 'Evidence action failed.', true);
+    if (view) $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Unable to view receipt.';
   } finally {
     button.disabled = false;
   }
@@ -1054,6 +1095,9 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       $('hmrcPaymentMethod').value = 'bank-transfer';
       $('hmrcPaymentConfirmed').checked = false;
       $('hmrcPaymentMessage').textContent = '';
+      $('hmrcPaymentEvidenceMessage').textContent = '';
+      $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
+      renderHmrcPaymentEvidence(periodEnd);
       hmrcDialogs.payment.open(action);
     }
     return;

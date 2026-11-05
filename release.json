@@ -1,6 +1,6 @@
 {
-  "version": "1.60.8",
+  "version": "1.60.9",
   "notes": [
-    "Use shared positive theme colors consistently across the app, including HMRC confirmations and payment totals."
+    "Attach and view Corporation Tax payment receipts in the payment dialog."
   ]
 }
