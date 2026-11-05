@@ -1,5 +1,6 @@
 import { setupDialog } from '../../components/dialog-helper.js';
 import { escapeHtml } from '../../utils/format-utils.js';
+import { getActiveProperties } from '../properties/storage.js';
 import {
   listStoredCompanyProfiles, newCompanyId, setActiveCompanyId, saveCompanyProfile
 } from './company-storage.js';
@@ -16,14 +17,33 @@ const addDialog = setupDialog($('addCompanyDialog'), {
 function renderCompanies() {
   const records = listStoredCompanyProfiles().sort((a, b) => a.companyName.localeCompare(b.companyName));
   $('newCompanyBtn').disabled = !editingAllowed;
-  $('companyCards').innerHTML = records.map((company) => `
-    <a class="company-list-card" href="./company/details.html?company=${encodeURIComponent(company.id)}">
-      <span class="company-list-card-icon" aria-hidden="true">⌂</span>
-      <strong>${escapeHtml(company.companyName)}</strong>
-      <small>${escapeHtml(company.companyNumber || 'Company number not recorded')}</small>
-      <span class="company-list-card-status">${escapeHtml(company.companyStatus ? company.companyStatus.charAt(0).toUpperCase() + company.companyStatus.slice(1) : 'Details needed')}</span>
-      <span class="company-list-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
-    </a>`).join('');
+  const properties = getActiveProperties();
+  $('companyCards').innerHTML = records.map((company) => {
+    const propertyCount = properties.filter((property) => property.purchasingCompanyId === company.id).length;
+    const status = displayCompanyStatus(company.companyStatus) || 'Details needed';
+    const isActive = status.toLowerCase() === 'active';
+    const incorporationDate = company.incorporationDate
+      ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${company.incorporationDate}T00:00:00Z`))
+      : 'Not recorded';
+    return `
+      <a class="company-list-card" href="./company/details.html?company=${encodeURIComponent(company.id)}">
+        <span class="company-list-card-icon" aria-hidden="true">⌂</span>
+        <span class="company-list-card-content">
+          <span class="company-list-card-heading">
+            <strong>${escapeHtml(company.companyName)}</strong>
+            <span class="company-list-card-status${isActive ? ' is-active' : ''}"><span aria-hidden="true"></span>${escapeHtml(status)}</span>
+          </span>
+          <span class="company-list-card-details">
+            <span>CRN: <strong>${escapeHtml(company.companyNumber || 'Not recorded')}</strong></span>
+            <span>Incorp: <strong>${escapeHtml(incorporationDate)}</strong></span>
+          </span>
+          <span class="company-list-card-meta">
+            <span class="company-list-card-property-count"><span aria-hidden="true">⌂</span> ${propertyCount} ${propertyCount === 1 ? 'Property' : 'Properties'}</span>
+          </span>
+        </span>
+        <span class="company-list-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </a>`;
+  }).join('');
   $('companyListMessage').textContent = records.length
     ? `${records.length} compan${records.length === 1 ? 'y' : 'ies'} in this workspace`
     : 'No company records yet. Add your first company.';
