@@ -4,6 +4,7 @@ import { escapeHtml, formatDate as formatSharedDate } from '../../utils/format-u
 const $ = (id) => document.getElementById(id);
 let currentUserId = '';
 let users = [];
+let userFilter = 'all';
 let loading = false;
 
 function formatDate(value) {
