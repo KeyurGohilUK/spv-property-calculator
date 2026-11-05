@@ -1149,13 +1149,6 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) {
         throw new Error('This tax period no longer exists. Refresh the company records.');
       }
-      const initialPeriodFiles = (profile.complianceEvidence || []).filter((file) => {
-        const paymentPrefix = 'corporation-tax-payment:' + periodEnd;
-        return file.ruleKey === 'corporation-tax-return:' + periodEnd
-          || file.ruleKey === paymentPrefix
-          || file.ruleKey.startsWith(paymentPrefix + ':');
-      });
-      if (initialPeriodFiles.length) await requireEvidenceEditor();
       if (navigator.onLine && window.SPVCloud?.getCurrentUser?.()) {
         const before = await syncCompanyProfile(window.SPVCloud);
         if (before.conflicts.length || getCompanyProfile()._cloudDirty) {
@@ -1170,11 +1163,9 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       const files = (profile.complianceEvidence || []).filter((file) =>
         file.ruleKey === 'corporation-tax-return:' + periodEnd
         || file.ruleKey === paymentPrefix
-        || file.ruleKey.startsWith(paymentPrefix + ':')
+        || String(file.ruleKey || '').startsWith(paymentPrefix + ':')
       );
-      if (files.length && !initialPeriodFiles.every((file) => files.some((current) => current.id === file.id))) {
-        throw new Error('Documents were added while this period was being deleted. Refresh and try again.');
-      }
+      if (files.length) await requireEvidenceEditor();
       const periodLabel = hmrcDate(period.periodStart) + ' – ' + hmrcDate(period.periodEnd);
       const confirmed = window.confirm(
         'Delete tax period ' + periodLabel + ', including its CT600 details, ' + summary.payments.length
