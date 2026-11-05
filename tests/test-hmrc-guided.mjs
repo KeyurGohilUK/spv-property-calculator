@@ -50,7 +50,7 @@ assert.match(styles, /--positive/);
 assert.match(styles, /\.hmrc-period-info \.hmrc-value-positive/);
 assert.match(script, /renderHmrcDashboard\(\)/);
 assert.match(html, /Company Compliance Hub/);
-assert.match(html, /One-Time Setup/);
+assert.match(html, /Company inception setup/);
 assert.doesNotMatch(html, /Steps 1–2/);
 assert.ok(script.includes('hmrcAuthorityProgress'), 'HMRC setup progress is shown in the authority view');
 console.log('HMRC setup and recurring period layout checks passed.');
