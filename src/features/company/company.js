@@ -330,29 +330,32 @@ function renderCompanyCompliance() {
               return `<li><span><strong>${escapeHtml(label)}</strong><small>${escapeHtml(date)} · ${escapeHtml(record.type)}</small></span><a href="${escapeHtml(filingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="View ${escapeHtml(label)} filing on Companies House">View official record</a></li>`;
             }).join('')}</ul>`;
   }
-  const renderCards = (selected) => selected.map((item) => `
-    <article class="company-compliance-item">
-      <div class="company-compliance-item-heading"><strong>${escapeHtml(item.title)}</strong>
-        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div><div class="company-compliance-item-details">
-      ${item.taxPeriod ? `<p class="muted">Tax period: ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodStart))} – ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodEnd))}</p>` : ''}
-      ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}</p>` : ''}
-      ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(formatComplianceDateUK(item.officialFiling.lastPeriod))} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
-      ${item.reminder ? `<p class="company-compliance-reminder">Filing reminder: ${escapeHtml(item.reminder.message)} · ${item.reminder.windowDays}-day reminder window</p>` : ''}
-      <p class="muted">${item.source === 'companies-house'
-        ? companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.'
-        : item.source === 'hmrc'
-          ? 'This is a suggested deadline based on the HMRC period you entered; check your HMRC account or accountant.'
-          : 'Confirm this requirement and keep appropriate evidence.'}</p>
-      ${item.source !== 'companies-house' ? `<button type="button" class="secondary-btn company-compliance-action" data-compliance-key="${escapeHtml(item.key)}" ${editingAllowed ? '' : 'disabled'}>${item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done'}</button>` : ''}
-      ${item.confirmation ? `<small class="muted">Confirmed on ${escapeHtml(formatComplianceDateUK(item.confirmation.confirmedOn))}</small>` : ''}
-      <div class="company-evidence">
-        <strong>Supporting evidence</strong><small class="muted">Files do not independently verify that a filing or payment was completed.</small>
-        <ul class="company-evidence-files">${(profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key).map((file) => `
-          <li><span><strong>${escapeHtml(file.name)}</strong><small>${Math.ceil(file.size / 1024)} KB · ${escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown')}</small></span>
-          ${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
-        ${editingAllowed ? `<file-upload-field input-id="companyEvidence-${escapeHtml(item.key)}" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="companyEvidenceStatus-${escapeHtml(item.key)}" help="PDF or image · maximum 5 MB" data-evidence-upload="${escapeHtml(item.key)}"></file-upload-field>` : ''}
-      </div>
-    </div></article>`).join('');
+  const renderCards = (selected) => selected.map((item) => {
+    const statusLabel = item.status === 'user-confirmed' ? 'Confirmed'
+      : item.status === 'due-soon' ? 'Due soon'
+        : item.status === 'upcoming' ? 'Upcoming'
+          : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified'
+            : 'Needs verification';
+    const summary = item.dueDate
+      ? `Due ${formatComplianceDateUK(item.dueDate)} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}`
+      : item.id === 'statutory-registers'
+        ? 'Keep registers of directors, shareholders and PSCs at the registered office.'
+        : item.id === 'accounting-records'
+          ? 'Keep invoices, receipts and property tenancy records for at least 6 years.'
+          : 'Review this company obligation and keep appropriate records.';
+    const icon = item.status === 'needs-verification' || item.status === 'past-deadline-unverified'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2.1h16a1.4 1.4 0 0 0 1.2-2.1L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h8l4 4V20a1.25 1.25 0 0 1-1.25 1.25h-10.5A1.25 1.25 0 0 1 5 20V5a1.25 1.25 0 0 1 1-1.25Z"/><path d="M14 4v4h4M8 13h8m-8 4h8"/></svg>';
+    return `
+      <article class="company-compliance-item">
+        <span class="company-compliance-item-icon ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}" aria-hidden="true">${icon}</span>
+        <div class="company-compliance-item-copy">
+          <div class="company-compliance-item-heading"><strong>${escapeHtml(item.title)}</strong><span class="company-compliance-status ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}">${statusLabel}</span></div>
+          <p class="muted">${escapeHtml(summary)}</p>
+        </div>
+        <button type="button" class="secondary-btn company-compliance-open" data-open-company-compliance="${escapeHtml(item.key)}">${item.source === 'companies-house' ? 'Review filing' : 'Update record'}</button>
+      </article>`;
+  }).join('');
   $('companyAuthorityNumber').textContent = profile.companyNumber || 'Not recorded';
   $('companyHouseAuthorityStatus').textContent = companyHouseData ? 'Connected'
     : companyHouseError === 'Checking Companies House…' ? 'Checking'
@@ -364,6 +367,40 @@ function renderCompanyCompliance() {
     : profile.companyNumber ? companyHouseError || 'Connect to retrieve official deadlines'
       : 'Add a company number for official deadlines';
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
+
+}
+
+function renderCompanyComplianceDialog(ruleKey, open = true) {
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const item = buildCompanyCompliance({ today, company: companyHouseData || {}, confirmations: profile.complianceConfirmations, hmrc: profile.hmrc, enabledConditional: hmrcTaxPeriods(profile.hmrc).length ? ['corporation-tax-payment'] : [] }).find((entry) => entry.key === ruleKey);
+  if (!item) return;
+  const label = item.status === 'user-confirmed' ? 'Confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification';
+  $('companyComplianceDialogTitle').textContent = item.title;
+  $('companyComplianceDialogStatus').textContent = label;
+  $('companyComplianceDialogStatus').className = 'company-compliance-dialog-status' + (item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? ' is-attention' : '');
+  const details = [];
+  if (item.taxPeriod) details.push('Tax period: ' + formatComplianceDateUK(item.taxPeriod.periodStart) + ' – ' + formatComplianceDateUK(item.taxPeriod.periodEnd));
+  if (item.dueDate) details.push('Due ' + formatComplianceDateUK(item.dueDate) + ' · ' + (item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'));
+  if (item.officialFiling?.lastPeriod) details.push('Last filed period: ' + formatComplianceDateUK(item.officialFiling.lastPeriod) + ' · Companies House');
+  else if (item.source === 'companies-house') details.push('Last filing period not available');
+  if (item.reminder) details.push('Filing reminder: ' + item.reminder.message + ' · ' + item.reminder.windowDays + '-day reminder window');
+  details.push(item.source === 'companies-house' ? (companyHouseData ? 'Official public filing period and next deadline; upcoming filing is not marked complete.' : 'Official filing data unavailable; check Companies House.') : item.source === 'hmrc' ? 'This is a suggested deadline based on the HMRC period you entered; check your HMRC account or accountant.' : 'Confirm this requirement and keep appropriate evidence.');
+  $('companyComplianceDialogDetails').innerHTML = details.map((line) => '<p>' + escapeHtml(line) + '</p>').join('');
+  const files = (profile.complianceEvidence || []).filter((file) => file.ruleKey === item.key);
+  $('companyComplianceDialogEvidenceFiles').innerHTML = files.map((file) => '<li><span><strong>' + escapeHtml(file.name) + '</strong><small>' + Math.ceil(file.size / 1024) + ' KB · ' + escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown') + '</small></span>' + evidenceActionMarkup(file, editingAllowed) + '</li>').join('') || '<li class="muted">No supporting documents attached.</li>';
+  const upload = $('companyComplianceEvidenceUpload');
+  const input = $('companyComplianceEvidenceInput');
+  upload.hidden = !editingAllowed;
+  input.dataset.evidenceUpload = item.key;
+  input.disabled = !editingAllowed;
+  const done = $('companyComplianceDialogDone');
+  done.hidden = item.source === 'companies-house';
+  done.disabled = !editingAllowed;
+  done.dataset.complianceKey = item.source === 'companies-house' ? '' : item.key;
+  done.textContent = item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done';
+  $('companyComplianceDialogMessage').textContent = '';
+  const dialog = $('companyComplianceDialog');
+  if (open && !dialog.open) dialog.showModal();
 }
 
 let hmrcGuideSelected = 'utr';
@@ -817,6 +854,8 @@ async function syncAfterSave() {
 function setEvidenceMessage(message, isError = false) {
   const el = $('companyEvidenceStatus');
   el.textContent = message;
+  const dialogMessage = $('companyComplianceDialogMessage');
+  if (dialogMessage) { dialogMessage.textContent = message; dialogMessage.classList.toggle('is-error', isError); }
   el.classList.toggle('is-error', isError);
   el.setAttribute('role', isError ? 'alert' : 'status');
 }
@@ -872,8 +911,8 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     renderCompanyCompliance();
     renderHmrcTracking();
     renderHmrcDashboard();
-    hmrcDialogs.evidence.close();
-    restoreEvidenceDisclosure(ruleKey);
+    if (input.id === 'companyComplianceEvidenceInput') renderCompanyComplianceDialog(ruleKey, false);
+    else { hmrcDialogs.evidence.close(); restoreEvidenceDisclosure(ruleKey); }
     if (input.id === 'hmrcPaymentEvidenceInput') {
       renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
       $('hmrcPaymentEvidenceMessage').textContent = 'Receipt uploaded and saved.';
@@ -1388,7 +1427,10 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   }
 });
 
+$('companyComplianceDialogClose').addEventListener('click', () => $('companyComplianceDialog').close());
 $('complianceTabPanel').addEventListener('click', async (event) => {
+  const openDetails = event.target.closest('[data-open-company-compliance]');
+  if (openDetails) { renderCompanyComplianceDialog(openDetails.dataset.openCompanyCompliance); return; }
   const button = event.target.closest('[data-compliance-key]');
   if (!button || !editingAllowed) return;
   const key = button.dataset.complianceKey;
@@ -1398,12 +1440,12 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
   }).find((item) => item.key === key);
   if (!current || current.source === 'companies-house') return;
   const alreadyConfirmed = current.status === 'user-confirmed';
-  if (!alreadyConfirmed && !window.confirm('Confirm that you completed this requirement? This is your own record, not official verification.')) return;
   try {
     profile = saveComplianceConfirmation(key, !alreadyConfirmed,
       new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
     renderProfile();
     await syncAfterSave();
+    renderCompanyComplianceDialog(key, false);
   } catch (error) {
     setSyncStatus(error.message || 'Could not save confirmation', 'error');
   }
