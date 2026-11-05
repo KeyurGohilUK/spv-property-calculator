@@ -174,6 +174,10 @@ $('addCompanyForm').addEventListener('submit', async (event) => {
 });
 
 window.addEventListener('spv-workspace-synced', renderCompanies);
+window.addEventListener('spv-properties-updated', renderCompanies);
+window.addEventListener('storage', (event) => {
+  if (!event.key || event.key === 'spv-property-calculator.properties.v1') renderCompanies();
+});
 
 async function initialiseCompanyList() {
   renderCompanies();
