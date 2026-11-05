@@ -35,6 +35,7 @@ async function mockCompanyWorkspace(page, role = 'editor', initialProfile = null
 }
 
 test('editor manages company particulars and appointment roles', async ({ page }) => {
+  page.on('pageerror', (error) => console.log('COMPANY PAGE ERROR:', error.stack || error.message));
   await mockCompanyWorkspace(page, 'editor', { companyName: 'Initial SPV Ltd', companyNumber: '87654321', appointments: [] });
   await page.goto('/company/');
   await expect(page.getByRole('heading', { name: 'Manage Companies' })).toBeVisible();
