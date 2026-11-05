@@ -184,13 +184,11 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('UTR letter');
-  await expect(page.locator('#hmrcSetupViewTab')).toContainText('One-Time Setup');
-  await expect(page.locator('#hmrcSetupViewTab')).not.toContainText('Steps');
-  await expect(page.locator('#hmrcSetupViewTab')).toContainText('0/2 Complete');
-  await expect(page.locator('#hmrcRecurringViewTab')).toContainText('Active & Recurring');
-  await expect(page.locator('#hmrcRecurringViewTab')).not.toContainText('Steps');
-  await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
+  await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
+  await expect(page.locator('#hmrcRecurringOverview')).toBeVisible();
+  await expect(page.locator('#hmrcAuthorityProgress')).toHaveText('Setup 0 of 2 recorded');
   await page.locator('#hmrcSetupCards .hmrc-card-documents summary').first().click();
   const downloadEvidence = page.getByRole('button', { name: 'Download UTR letter.pdf' });
   const removeEvidence = page.getByRole('button', { name: 'Remove UTR letter.pdf' });
@@ -214,37 +212,13 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('input[name="hmrcActivity"][value="active"]').check();
   await page.locator('#hmrcActivityForm button[type="submit"]').click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('Corporation Tax registration');
-  await expect(page.locator('#hmrcSetupViewTab')).toContainText('2/3 Complete');
-  await expect(page.locator('#hmrcSetupTabIcon')).toHaveClass(/is-progress/);
-  const partialProgressColor = await page.evaluate(() => {
-    const icon = document.querySelector('#hmrcSetupTabIcon');
-    const probe = document.createElement('span');
-    probe.style.color = 'var(--positive-on-brand)';
-    document.body.append(probe);
-    const expected = getComputedStyle(probe).color;
-    probe.remove();
-    return { actual: getComputedStyle(icon).color, expected };
-  });
-  expect(partialProgressColor.actual).toBe(partialProgressColor.expected);
+  await expect(page.locator('#hmrcAuthorityProgress')).toHaveText('Setup 2 of 3 recorded');
   await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
   await page.locator('#hmrcRegistrationConfirmedOn').fill('2026-02-06');
   await page.locator('#hmrcAccountantName').fill('Example Accountants');
   await page.locator('#hmrcSetupForm button[type="submit"]').click();
 
-  await expect(page.locator('#hmrcSetupViewTab')).toContainText('3/3 Done');
-  await expect(page.locator('#hmrcSetupTabIcon')).toHaveClass(/is-complete/);
-  const completedIconColors = await page.evaluate(() => {
-    const icon = document.querySelector('#hmrcSetupTabIcon');
-    const probe = document.createElement('span');
-    probe.style.color = 'var(--positive-on-brand)';
-    document.body.append(probe);
-    const expected = getComputedStyle(probe).color;
-    probe.remove();
-    return { actual: getComputedStyle(icon).color, expected };
-  });
-  expect(completedIconColors.actual).toBe(completedIconColors.expected);
-  await expect(page.locator('#hmrcRecurringViewTab')).toBeVisible();
-  await page.locator('#hmrcRecurringViewTab').click();
+  await expect(page.locator('#hmrcAuthorityProgress')).toHaveText('Setup 3 of 3 complete');
   await page.locator('#hmrcOpenPeriodDialog').click();
   await expect(page.locator('#hmrcPeriodDialog')).toBeVisible();
   await page.locator('#hmrcPeriodStart').fill('2026-01-01');
@@ -293,6 +267,7 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('HMRC confirmed');
   await page.reload();
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£900.00');
   page.once('dialog', (dialog) => dialog.accept());
   await page.locator('[data-hmrc-payment-remove]').click();
@@ -303,6 +278,7 @@ test('HMRC setup remains compact while company is preparing to buy', async ({ pa
   await mockCompanyWorkspace(page, 'editor', { companyName: 'Waiting SPV Ltd' });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcAuthorityTab').click();
   await page.locator('#hmrcSetupCards [data-hmrc-open="utr"]').click();
   await page.locator('#hmrcPendingBtn').click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('Waiting');
@@ -311,9 +287,8 @@ test('HMRC setup remains compact while company is preparing to buy', async ({ pa
   await page.locator('input[name="hmrcActivity"][value="preparing"]').check();
   await page.locator('#hmrcActivityForm button[type="submit"]').click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('Preparing to buy');
-  await expect(page.locator('#hmrcRecurringViewTab')).toBeHidden();
   await expect(page.locator('#hmrcSetupCards [data-hmrc-open="registration"]')).toHaveCount(0);
-  await expect(page.locator('#hmrcSetupViewTab')).toContainText('0/2 Complete');
+  await expect(page.locator('#hmrcAuthorityProgress')).toHaveText('Setup 0 of 2 recorded');
 });
 
 test('@mobile HMRC summary does not overflow a phone viewport', async ({ page }) => {
@@ -328,7 +303,7 @@ test('@mobile HMRC summary does not overflow a phone viewport', async ({ page })
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
-  await page.locator('#hmrcRecurringViewTab').click();
+  await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£1,900.00');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
   expect(overflow).toBe(false);
@@ -346,8 +321,8 @@ test('viewer cannot change HMRC tax records', async ({ page }) => {
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
+  await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcSetupCards [data-hmrc-open="utr"]')).toBeDisabled();
-  await page.locator('#hmrcRecurringViewTab').click();
   await expect(page.locator('#hmrcOpenPeriodDialog')).toBeDisabled();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]')).toBeDisabled();
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="payment"]')).toBeDisabled();
@@ -364,7 +339,7 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   });
   await page.goto('/company/details.html?company=default');
   await page.getByRole('tab', { name: 'Compliance' }).click();
-  await page.locator('#hmrcSetupViewTab').click();
+  await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
   // Use the same accessible pencil icon as the rest of the Company page.
   for (const [step, label] of [
@@ -416,8 +391,6 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   await checkControls('hmrcSetupDialog', ['hmrcUtrReceivedOn']);
   await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
   await checkControls('hmrcSetupDialog', ['hmrcRegistrationConfirmedOn', 'hmrcRegistrationReference']);
-
-  await page.locator('#hmrcRecurringViewTab').click();
   await page.locator('#hmrcOpenPeriodDialog').click();
   await checkControls('hmrcPeriodDialog', ['hmrcPeriodStart', 'hmrcPeriodEnd']);
   await page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"]').click();
