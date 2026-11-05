@@ -1,6 +1,6 @@
 {
-  "version": "1.60.11",
+  "version": "1.60.12",
   "notes": [
-    "Align HMRC payment dialog fields and expand payment receipts across the form width."
+    "Edit recorded Corporation Tax payments and attach receipts to individual payments."
   ]
 }

@@ -78,6 +78,23 @@ export function recordHmrcPayment(hmrc, periodEnd, payment) {
   });
 }
 
+export function updateHmrcPayment(hmrc, periodEnd, payment) {
+  if (!validDate(payment.date)) throw new Error('Enter a valid payment date.');
+  const amount = money(payment.amount);
+  if (amount === null || amount <= 0) throw new Error('Enter a positive payment amount.');
+  const id = String(payment.id || '');
+  if (!PAYMENT_ID.test(id)) throw new Error('Invalid payment reference.');
+  const record = hmrcPeriodSummary(hmrc, periodEnd);
+  if (!record.payments.some((item) => item.id === id)) throw new Error('Payment not found.');
+  return saveHmrcPeriodRecord(hmrc, periodEnd, {
+    payments: record.payments.map((item) => item.id === id ? {
+      id, date: payment.date, amount, reference: clean(payment.reference),
+      method: ['bank-transfer', 'direct-debit', 'card', 'other'].includes(payment.method) ? payment.method : 'other',
+      status: payment.status === 'hmrc-confirmed' ? 'hmrc-confirmed' : 'recorded'
+    } : item)
+  });
+}
+
 export function removeHmrcPayment(hmrc, periodEnd, paymentId) {
   const record = hmrcPeriodSummary(hmrc, periodEnd);
   if (!record.payments.some((p) => p.id === paymentId)) throw new Error('Payment not found.');

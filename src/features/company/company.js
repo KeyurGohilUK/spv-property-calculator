@@ -3,7 +3,7 @@ import { setupDialog } from '../../components/dialog-helper.js';
 import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
-import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, removeHmrcPayment } from './hmrc-tracking.js';
+import { normalizeHmrcTracking, hmrcPeriodSummary, saveHmrcSetup, saveHmrcPeriodRecord, recordHmrcPayment, updateHmrcPayment, removeHmrcPayment } from './hmrc-tracking.js';
 import { hmrcOverviewState } from './hmrc-guided.js';
 import { uploadComplianceEvidence, viewComplianceEvidence, downloadComplianceEvidence, deleteComplianceEvidence, validateEvidenceFile } from '../../services/compliance-evidence.js';
 import {
@@ -327,6 +327,8 @@ function renderCompanyCompliance() {
 }
 
 let hmrcGuideSelected = 'utr';
+let hmrcPaymentEditingId = '';
+let hmrcPaymentIsNew = false;
 let hmrcActiveView = hmrcTaxPeriods(profile.hmrc).length ? 'periods' : 'setup';
 
 const hmrcDialogs = {
@@ -350,6 +352,8 @@ for (const controller of Object.values(hmrcDialogs)) {
       returnSelector = period
         ? `[data-hmrc-open="${kind}"][data-hmrc-period="${period}"]`
         : `[data-hmrc-open="${kind}"]`;
+    } else if (trigger?.dataset?.hmrcPaymentEdit) {
+      returnSelector = `[data-hmrc-payment-edit="${trigger.dataset.hmrcPaymentEdit}"]`;
     } else if (trigger?.dataset?.hmrcAttach) {
       returnSelector = `[data-hmrc-attach="${trigger.dataset.hmrcAttach}"]`;
     } else {
@@ -385,8 +389,12 @@ function hmrcEvidenceMarkup(ruleKey, label) {
   </div>`;
 }
 
-function renderHmrcPaymentEvidence(periodEnd = $('hmrcPaymentPeriod').value) {
-  const ruleKey = periodEnd ? 'corporation-tax-payment:' + periodEnd : '';
+function hmrcPaymentEvidenceRuleKey(periodEnd, paymentId) {
+  return periodEnd && paymentId ? 'corporation-tax-payment:' + periodEnd + ':' + paymentId : '';
+}
+
+function renderHmrcPaymentEvidence(periodEnd = $('hmrcPaymentPeriod').value, paymentId = hmrcPaymentEditingId) {
+  const ruleKey = hmrcPaymentEvidenceRuleKey(periodEnd, paymentId);
   const input = $('hmrcPaymentEvidenceInput');
   input.dataset.evidenceUpload = ruleKey;
   input.disabled = !editingAllowed || !ruleKey;
@@ -399,6 +407,15 @@ function renderHmrcPaymentEvidence(periodEnd = $('hmrcPaymentPeriod').value) {
       evidenceActionMarkup(file, editingAllowed) + '</li>';
   }).join('') || '<li class="muted">No receipts attached.</li>';
 }
+function hmrcLegacyPaymentEvidenceMarkup(periodEnd) {
+  const ruleKey = 'corporation-tax-payment:' + periodEnd;
+  if (!(profile.complianceEvidence || []).some((file) => file.ruleKey === ruleKey)) return '';
+  const files = profile.complianceEvidence.filter((file) => file.ruleKey === ruleKey);
+  return `<div class="hmrc-evidence-section"><strong>Receipts not linked to a payment</strong>
+    <ul class="hmrc-evidence-list">${files.map((file) => `<li><span>${escapeHtml(file.name)}</span>${evidenceActionMarkup(file, editingAllowed)}</li>`).join('')}</ul>
+  </div>`;
+}
+
 function renderHmrcDashboard() {
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
   const state = hmrcOverviewState(profile.hmrc);
@@ -494,7 +511,7 @@ function hmrcRecordPeriodOptions(selectedId) {
 $('hmrcPaymentPeriod').addEventListener('change', () => {
   $('hmrcPaymentEvidenceMessage').textContent = '';
   $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
-  renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
+  renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value, hmrcPaymentEditingId);
 });
 
 function fillHmrcFilingForm(periodEnd) {
@@ -582,11 +599,11 @@ function renderHmrcTracking() {
               <td>${hmrcDate(payment.date)}</td><td>${CURRENCY_FORMAT.format(payment.amount)}</td>
               <td>${escapeHtml(payment.reference) || '—'}</td>
               <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
-              <td>${editingAllowed ? `<button class="hmrc-remove-payment" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}">Remove</button>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
+              <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
         </div>
         <details class="hmrc-card-documents"><summary>Supporting documents</summary>
-          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}</div>
+          <div class="hmrc-doc-grid">${hmrcEvidenceMarkup('corporation-tax-return:' + period.periodEnd, 'CT600 evidence')}${hmrcLegacyPaymentEvidenceMarkup(period.periodEnd)}</div>
         </details>
       </article>`;
     }).join('') + '</div>'
@@ -787,6 +804,15 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
   if (!input?.files?.length) return;
   const ruleKey = input.dataset.evidenceUpload;
   const file = input.files[0];
+  if (input.id === 'hmrcPaymentEvidenceInput') {
+    try {
+      validateEvidenceFile(file);
+      $('hmrcPaymentEvidenceMessage').textContent = 'Save the payment to attach this receipt to it.';
+    } catch (error) {
+      $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Select a valid receipt.';
+    }
+    return;
+  }
   input.disabled = true;
   setEvidenceMessage('Uploading compliance evidence…');
   try {
@@ -1035,25 +1061,82 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!editingAllowed) return;
   const periodEnd = $('hmrcPaymentPeriod').value;
+  const paymentId = hmrcPaymentEditingId || globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now();
+  const receiptInput = $('hmrcPaymentEvidenceInput');
+  const receipt = receiptInput.files?.[0] || null;
   try {
-    const hmrc = recordHmrcPayment(profile.hmrc, periodEnd, {
-      id: globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now(),
+    if (receipt) {
+      validateEvidenceFile(receipt);
+      await requireEvidenceEditor();
+    }
+    const payment = {
+      id: paymentId,
       date: $('hmrcPaymentDate').value,
       amount: $('hmrcPaymentAmount').value,
       reference: $('hmrcPaymentReference').value,
       method: $('hmrcPaymentMethod').value,
       status: $('hmrcPaymentConfirmed').checked ? 'hmrc-confirmed' : 'recorded'
-    });
+    };
+    const exists = hmrcPeriodSummary(profile.hmrc, periodEnd).payments.some((item) => item.id === paymentId);
+    const hmrc = exists
+      ? updateHmrcPayment(profile.hmrc, periodEnd, payment)
+      : recordHmrcPayment(profile.hmrc, periodEnd, payment);
     profile = saveCompanyProfile({ ...profile, hmrc });
+    hmrcPaymentEditingId = paymentId;
+    hmrcPaymentIsNew = false;
+    $('hmrcPaymentDialogTitle').textContent = 'Edit tax payment';
+    $('hmrcPaymentSaveBtn').textContent = 'Save changes';
+    $('hmrcPaymentPeriod').disabled = true;
     renderProfile();
     $('hmrcPaymentPeriod').value = periodEnd;
+
+    if (receipt) {
+      $('hmrcPaymentEvidenceMessage').textContent = 'Saving payment receipt…';
+      const before = await syncCompanyProfile(window.SPVCloud);
+      if (before.conflicts.length || getCompanyProfile()._cloudDirty) throw new Error('Resolve company sync before uploading the receipt.');
+      profile = getCompanyProfile();
+      const ruleKey = hmrcPaymentEvidenceRuleKey(periodEnd, paymentId);
+      const uploaded = await uploadComplianceEvidence(profile.id, receipt);
+      try {
+        addCompanyEvidence({ ...uploaded, ruleKey });
+      } catch (error) {
+        await deleteComplianceEvidence(profile.id, uploaded).catch(() => {});
+        throw error;
+      }
+      receiptInput.value = '';
+      const selection = receiptInput.closest('file-upload-field')?.querySelector('.receipt-file-size');
+      if (selection) selection.textContent = 'No receipt selected';
+      const saved = await syncCompanyProfile(window.SPVCloud);
+      if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+        profile = getCompanyProfile();
+        renderHmrcTracking();
+        renderHmrcDashboard();
+        renderHmrcPaymentEvidence(periodEnd, paymentId);
+        throw new Error('Receipt uploaded, but its attachment sync is pending. Retry company sync; do not upload it again.');
+      }
+      profile = getCompanyProfile();
+      renderCompanyCompliance();
+      renderHmrcTracking();
+      renderHmrcDashboard();
+      renderHmrcPaymentEvidence(periodEnd, paymentId);
+      $('hmrcPaymentEvidenceMessage').textContent = 'Receipt uploaded and saved.';
+    } else {
+      await syncAfterSave();
+    }
+
     $('hmrcPaymentDate').value = '';
     $('hmrcPaymentAmount').value = '';
     $('hmrcPaymentReference').value = '';
+    receiptInput.value = '';
     hmrcDialogs.payment.close();
-    await syncAfterSave();
+    hmrcPaymentEditingId = '';
+    hmrcPaymentIsNew = false;
   } catch (error) {
-    $('hmrcPaymentMessage').textContent = error.message || 'Unable to record payment.';
+    $('hmrcPaymentMessage').textContent = error.message || 'Unable to save payment.';
+    if (hmrcPaymentEditingId) {
+      $('hmrcPaymentDialogTitle').textContent = hmrcPaymentIsNew ? 'Record tax payment' : 'Edit tax payment';
+      $('hmrcPaymentSaveBtn').textContent = hmrcPaymentIsNew ? 'Save payment' : 'Save changes';
+    }
   }
 });
 
@@ -1078,6 +1161,31 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
     hmrcDialogs.evidence.open(attach);
     return;
   }
+  const editPayment = event.target.closest('[data-hmrc-payment-edit]');
+  if (editPayment && editingAllowed) {
+    const periodEnd = editPayment.dataset.hmrcPaymentPeriod;
+    const paymentId = editPayment.dataset.hmrcPaymentEdit;
+    const payment = hmrcPeriodSummary(profile.hmrc, periodEnd).payments.find((item) => item.id === paymentId);
+    if (!payment) return;
+    hmrcPaymentEditingId = payment.id;
+    hmrcPaymentIsNew = false;
+    $('hmrcPaymentDialogTitle').textContent = 'Edit tax payment';
+    $('hmrcPaymentSaveBtn').textContent = 'Save changes';
+    $('hmrcPaymentPeriod').value = periodEnd;
+    $('hmrcPaymentPeriod').disabled = true;
+    $('hmrcPaymentDate').value = payment.date;
+    $('hmrcPaymentAmount').value = String(payment.amount);
+    $('hmrcPaymentReference').value = payment.reference || '';
+    $('hmrcPaymentMethod').value = payment.method || 'other';
+    $('hmrcPaymentConfirmed').checked = payment.status === 'hmrc-confirmed';
+    $('hmrcPaymentMessage').textContent = '';
+    $('hmrcPaymentEvidenceMessage').textContent = '';
+    $('hmrcPaymentEvidenceInput').value = '';
+    $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
+    renderHmrcPaymentEvidence(periodEnd, payment.id);
+    hmrcDialogs.payment.open(editPayment);
+    return;
+  }
   const action = event.target.closest('[data-hmrc-open][data-hmrc-period]');
   if (action && editingAllowed) {
     const periodEnd = action.dataset.hmrcPeriod;
@@ -1090,6 +1198,11 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       $('hmrcFilingMessage').textContent = '';
       hmrcDialogs.filing.open(action);
     } else {
+      hmrcPaymentEditingId = globalThis.crypto?.randomUUID?.() || 'payment-' + Date.now();
+      hmrcPaymentIsNew = true;
+      $('hmrcPaymentDialogTitle').textContent = 'Record tax payment';
+      $('hmrcPaymentSaveBtn').textContent = 'Save payment';
+      $('hmrcPaymentPeriod').disabled = false;
       $('hmrcPaymentDate').value = '';
       $('hmrcPaymentAmount').value = '';
       $('hmrcPaymentReference').value = '';
@@ -1097,23 +1210,44 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
       $('hmrcPaymentConfirmed').checked = false;
       $('hmrcPaymentMessage').textContent = '';
       $('hmrcPaymentEvidenceMessage').textContent = '';
+      $('hmrcPaymentEvidenceInput').value = '';
       $('hmrcPaymentEvidenceSelection').textContent = 'No receipt selected';
-      renderHmrcPaymentEvidence(periodEnd);
+      renderHmrcPaymentEvidence(periodEnd, hmrcPaymentEditingId);
       hmrcDialogs.payment.open(action);
     }
     return;
   }
   const button = event.target.closest('[data-hmrc-payment-remove]');
   if (!button || !editingAllowed) return;
-  if (!window.confirm('Remove this recorded Corporation Tax payment?')) return;
+  const periodEnd = button.dataset.hmrcPaymentPeriod;
+  const paymentId = button.dataset.hmrcPaymentRemove;
+  const ruleKey = hmrcPaymentEvidenceRuleKey(periodEnd, paymentId);
+  const receiptFiles = (profile.complianceEvidence || []).filter((file) => file.ruleKey === ruleKey);
+  const receiptNote = receiptFiles.length ? ' and its ' + receiptFiles.length + ' attached receipt' + (receiptFiles.length === 1 ? '' : 's') : '';
+  if (!window.confirm('Delete this recorded Corporation Tax payment' + receiptNote + '?')) return;
   try {
-    const hmrc = removeHmrcPayment(profile.hmrc, button.dataset.hmrcPaymentPeriod, button.dataset.hmrcPaymentRemove);
+    if (receiptFiles.length) {
+      await requireEvidenceEditor();
+      const before = await syncCompanyProfile(window.SPVCloud);
+      if (before.conflicts.length || getCompanyProfile()._cloudDirty) throw new Error('Resolve company sync before deleting payment receipts.');
+      profile = getCompanyProfile();
+    }
+    const currentFiles = (profile.complianceEvidence || []).filter((file) => file.ruleKey === ruleKey);
+    const hmrc = removeHmrcPayment(profile.hmrc, periodEnd, paymentId);
     profile = saveCompanyProfile({ ...profile, hmrc });
+    for (const file of currentFiles) removeCompanyEvidence(file.id);
+    if (currentFiles.length) {
+      const saved = await syncCompanyProfile(window.SPVCloud);
+      if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Payment was deleted, but receipt detachment is pending sync. Retry company sync before deleting stored receipt files.');
+      }
+      for (const file of currentFiles) await deleteComplianceEvidence(profile.id, file);
+    }
     renderProfile();
-    $('hmrcPaymentMessage').textContent = 'Recorded payment removed.';
     await syncAfterSave();
   } catch (error) {
-    $('hmrcPaymentMessage').textContent = error.message || 'Unable to remove payment.';
+    $('companyEvidenceStatus').textContent = error.message || 'Unable to delete payment.';
+    $('companyEvidenceStatus').classList.add('is-error');
   }
 });
 

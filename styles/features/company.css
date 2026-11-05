@@ -565,3 +565,6 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-payment-receipt-upload { margin:0; }
 .hmrc-payment-evidence #hmrcPaymentEvidenceMessage:empty { display:none; }
 .hmrc-payment-evidence .company-evidence-files { margin-top:2px; }
+
+.hmrc-payment-actions { display:inline-flex; align-items:center; gap:6px; }
+.hmrc-payment-actions .company-evidence-action { flex:0 0 40px; width:40px; height:40px; min-height:40px; }
