@@ -1,6 +1,7 @@
 {
-  "version": "1.60.15",
+  "version": "1.60.16",
   "notes": [
+    "Switch Companies House and HMRC directly within a single compliance hub.",
     "Delete a Corporation Tax period together with its records and attached files.",
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
     "Hide the empty receipt message while a receipt is selected.",
