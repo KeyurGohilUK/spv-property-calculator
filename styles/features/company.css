@@ -658,3 +658,77 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .company-compliance-dialog-actions { justify-content:stretch; }
   .company-compliance-dialog-actions button { flex:1 1 100%; }
 }
+
+/* Compliance obligations use the full hub width; dates and statuses stay easy to scan. */
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-list {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  min-height:86px;
+  padding:16px 18px;
+  text-align:left;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-copy {
+  flex:1 1 auto;
+  min-width:0;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 12px;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading strong {
+  flex:0 1 auto;
+  font-size:1rem;
+  line-height:1.35;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-copy p {
+  margin:4px 0 0;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-copy p strong {
+  color:var(--text);
+  font-weight:750;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-open {
+  flex:0 0 auto;
+  min-width:132px;
+  margin:0;
+  white-space:nowrap;
+}
+.company-compliance-hub #companyHouseAuthorityPanel .company-compliance-status {
+  flex:0 0 auto;
+  font-weight:650;
+}
+@media (max-width:700px) {
+  .company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item {
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr);
+    gap:10px 12px;
+    padding:14px;
+  }
+  .company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-icon {
+    grid-column:1;
+    grid-row:1;
+  }
+  .company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-copy {
+    grid-column:2;
+    grid-row:1;
+  }
+  .company-compliance-hub #companyHouseAuthorityPanel .company-compliance-open {
+    grid-column:2;
+    width:auto;
+    justify-self:start;
+    min-height:42px;
+  }
+}
