@@ -1,6 +1,6 @@
 {
-  "version": "1.60.37",
+  "version": "1.60.38",
   "notes": [
-    "Apply shared hover, pressed, and keyboard-focus feedback to buttons throughout the app."
+    "Introduce four-column task board with offline drag-and-drop and Resolved status."
   ]
 }
