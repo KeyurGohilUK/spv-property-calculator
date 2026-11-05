@@ -39,8 +39,8 @@ for (const id of ['hmrcSetupViewTab','hmrcRecurringViewTab','hmrcSetupCards','hm
 assert.doesNotMatch(html, /id="hmrcComplianceItems"/, 'Duplicate HMRC checklist removed');
 assert.doesNotMatch(html, /id="hmrcGuideSteps"/, 'Old 5-step wizard removed');
 assert.doesNotMatch(script, /renderHmrcGuide|hmrcEditingPeriod|openEvidenceRequirement/, 'Old UI handlers removed');
-assert.match(styles, /\.hmrc-view-tab-setup-icon\.is-complete \{ color:var\(--positive\); \}/);
-assert.match(styles, /hmrc-view-tabs button\[aria-selected="true"\].*hmrc-view-tab-setup-icon\.is-complete \{ color:var\(--positive-on-brand\); \}/);
+assert.match(styles, /\.hmrc-view-tab-setup-icon\.is-progress \{ color:var\(--positive\); \}/);
+assert.match(styles, /hmrc-view-tabs button\[aria-selected="true"\].*hmrc-view-tab-setup-icon\.is-progress \{ color:var\(--positive-on-brand\); \}/);
 assert.match(styles, /\.hmrc-period-info \.hmrc-value-positive \{ color:var\(--positive\);/);
 assert.match(tokens, /--positive:\s*#[0-9a-f]{6};/i);
 assert.match(tokens, /--positive-on-brand:\s*#[0-9a-f]{6};/i);
