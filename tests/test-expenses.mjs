@@ -19,7 +19,7 @@ assert.match(expensePage, /Optimising receipt…[\s\S]*Receipt reduced from/, 'R
 assert.match(expensePage, /file\.type === 'application\/pdf' && file\.size <= TARGET_RECEIPT_SIZE|file\.type === 'application\/pdf'/, 'PDF receipts must bypass image optimisation');
 assert.match(expenseHtml, /Photos are automatically reduced below 2 MB/, 'Receipt guidance must explain automatic image reduction');
 assert.match(expenseHtml, /accept="image\/\*,application\/pdf"/, 'Receipt picker must allow supported iPhone photos');
-assert.match(expenseHtml, /id="expenseReceiptSize" class="receipt-file-size" aria-live="polite">No receipt selected<\/span>/, 'Visible receipt size status is missing');
+assert.match(expenseHtml, /<file-upload-field[^>]*input-id="expenseReceipt"[^>]*status-id="expenseReceiptSize"[^>]*help-id="expenseReceiptHelp"/, 'Shared receipt upload field and status are missing');
 assert.match(expensePage, /function updateReceiptSelectionDetails\(\)[\s\S]*Selected: \$\{file\.name\} · \$\{formatFileSize\(file\.size\)\}[\s\S]*will be optimised when saved[\s\S]*addEventListener\('input', updateReceiptSelectionDetails\)[\s\S]*addEventListener\('change', updateReceiptSelectionDetails\)/, 'Selected receipt details must update reliably on iOS');
 assert.match(expensePage, /Current receipt: \$\{expense\.receipt\.name[\s\S]*formatFileSize\(expense\.receipt\.size\)/, 'Existing receipt details must display while editing');
 assert.match(expensePage, /async function viewReceipt\(expense\)[\s\S]*window\.open\('', '_blank'\)[\s\S]*await getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*viewer\.location\.replace\(url\)/, 'Receipt viewer must open synchronously before version-aware IndexedDB access for iOS Safari');
@@ -59,8 +59,11 @@ assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filt
 assert.equal((expenseHtml.match(/id="exportExpensesBtn"/g) || []).length, 1, 'Export action must not be duplicated in the report card');
 assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
 const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/features/expenses.css', import.meta.url), 'utf8'));
+const fileUploadStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/components/file-upload.css', import.meta.url), 'utf8'));
+const fileUploadComponent = await import('node:fs').then((fs) => fs.readFileSync(new URL('../src/components/file-upload-field.js', import.meta.url), 'utf8'));
 const dialogStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8'));
-assert.match(expenseStyles, /\.receipt-file-size \{[^}]*min-height: 38px;[^}]*overflow-wrap: anywhere;/, 'Receipt details must remain visible and wrap safely');
+assert.match(fileUploadStyles, /\.receipt-file-size \{[^}]*min-height:38px;[^}]*overflow-wrap:anywhere;/, 'Shared receipt details must remain visible and wrap safely');
+assert.match(fileUploadComponent, /customElements\.define\('file-upload-field'/, 'Shared upload field must be registered for all app pages');
 assert.match(expenseStyles, /\.expense-report-inline \{[\s\S]*grid-column: 1 \/ -1[\s\S]*box-shadow: none/, 'Nested Expense Summary must span the filter panel without a second shadow');
 assert.doesNotMatch(expenseStyles, /\.expense-sync-status/, 'Expense page must not define a separate sync-status component');
 assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
