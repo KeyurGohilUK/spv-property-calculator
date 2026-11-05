@@ -747,3 +747,102 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 @media (max-width: 620px) {
   .company-hero > div > p:last-child { white-space: normal; }
 }
+
+
+/* Keep pending HMRC statuses visible outside the dashboard scope. */
+.hmrc-period-badges .hmrc-pill--attention {
+  color:var(--hmrc-attention,#a92631);
+  border-color:color-mix(in srgb,var(--hmrc-attention,#a92631) 72%,var(--border));
+  background:color-mix(in srgb,var(--hmrc-attention,#a92631) 16%,var(--surface));
+  font-weight:750;
+}
+
+/* Company chooser rows follow the compact, scannable horizontal layout. */
+.company-cards { grid-template-columns:minmax(0,1fr); gap:12px; }
+.company-list-card:not(.company-list-add) {
+  display:grid;
+  grid-template-columns:32px minmax(0,1fr) 42px;
+  align-items:center;
+  gap:12px;
+  min-height:0;
+  padding:14px 16px;
+  border-color:var(--border);
+  border-radius:13px;
+  background:var(--surface);
+  transition:border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.company-list-card:not(.company-list-add):hover,
+.company-list-card:not(.company-list-add):focus-visible {
+  border-color:var(--brand);
+  background:var(--surface);
+  box-shadow:0 3px 12px color-mix(in srgb,var(--text) 9%,transparent);
+}
+.company-list-card:not(.company-list-add):focus-visible {
+  outline:2px solid var(--brand);
+  outline-offset:2px;
+}
+.company-list-card-icon {
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  background:transparent;
+  font-size:1rem;
+}
+.company-list-card-content { display:grid; gap:6px; min-width:0; }
+.company-list-card-heading,
+.company-list-card-details,
+.company-list-card-meta { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
+.company-list-card-heading strong { font-size:.94rem; line-height:1.2; }
+.company-list-card-details,
+.company-list-card-meta { color:var(--text-muted); font-size:.76rem; }
+.company-list-card-details strong { color:var(--text); font-weight:650; }
+.company-list-card-status {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 8px;
+  border-color:var(--border);
+  background:var(--surface-2);
+  color:var(--text-muted);
+  font-size:.7rem;
+  line-height:1.1;
+}
+.company-list-card-status > span {
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:currentColor;
+}
+.company-list-card-status.is-active {
+  color:var(--positive);
+  border-color:color-mix(in srgb,var(--positive) 25%,var(--border));
+  background:color-mix(in srgb,var(--positive) 10%,var(--surface));
+}
+.company-list-card-property-count {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--surface-2);
+}
+.company-list-card-chevron {
+  position:static;
+  width:32px;
+  height:32px;
+  transform:none;
+  background:var(--surface-2);
+  transition:background-color .16s ease,color .16s ease,border-color .16s ease;
+}
+.company-list-card-chevron svg { width:16px; height:16px; }
+.company-list-card:hover .company-list-card-chevron,
+.company-list-card:focus-visible .company-list-card-chevron {
+  color:var(--surface);
+  border-color:var(--brand);
+  background:var(--brand);
+}
+@media(max-width:600px) {
+  .company-list-card:not(.company-list-add) { grid-template-columns:30px minmax(0,1fr) 34px; gap:9px; padding:12px; }
+  .company-list-card-details { gap:4px 8px; }
+}
