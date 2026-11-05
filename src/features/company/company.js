@@ -788,9 +788,6 @@ function renderHmrcTracking() {
               <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
         </div>
-        <details class="hmrc-card-documents"><summary>Supporting documents</summary>
-          <div class="hmrc-doc-grid">${hmrcLegacyPaymentEvidenceMarkup(period.periodEnd)}</div>
-        </details>
       </article>`;
     }).join('') + '</div>'
     : '<div class="hmrc-period-empty"><p>No tax periods recorded yet.</p><p class="muted">Add the dates confirmed by HMRC or your accountant.</p></div>';
