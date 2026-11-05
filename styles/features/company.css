@@ -392,8 +392,8 @@
 /* Stronger, accessible attention and payment colours in the HMRC dashboard. */
 .hmrc-dashboard { --hmrc-attention:#a92631; }
 html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
-.hmrc-pill--attention { color:var(--hmrc-attention); border:1px solid var(--hmrc-attention); background:color-mix(in srgb,var(--hmrc-attention) 13%,var(--surface)); font-weight:750; }
-.hmrc-period-info .hmrc-value-attention { color:var(--hmrc-attention); font-weight:750; }
+.hmrc-pill--attention { color:var(--hmrc-attention,#a92631); border:1px solid color-mix(in srgb,var(--hmrc-attention,#a92631) 72%,var(--border)); background:color-mix(in srgb,var(--hmrc-attention,#a92631) 16%,var(--surface)); font-weight:750; }
+.hmrc-period-info .hmrc-value-attention { color:var(--hmrc-attention,#a92631); font-weight:750; }
 .hmrc-period-info .hmrc-value-positive { color:var(--positive); font-weight:800; font-size:1rem; }
 .hmrc-period-info dt.hmrc-summary-total,.hmrc-period-info dd.hmrc-summary-total { border-top:1px solid var(--border); padding-top:12px; margin-top:5px; font-weight:750; }
 .hmrc-period-info dd.hmrc-summary-total { font-size:1rem; }
