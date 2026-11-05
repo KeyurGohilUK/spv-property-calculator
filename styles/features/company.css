@@ -568,3 +568,43 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 
 .hmrc-payment-actions { display:inline-flex; align-items:center; gap:6px; }
 .hmrc-payment-actions .company-evidence-action { flex:0 0 40px; width:40px; height:40px; min-height:40px; }
+
+
+/* One compliance hub with direct authority switching. */
+.company-compliance-summarybar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:14px 0 0; }
+.company-compliance-summarybar .company-compliance-summary { flex:1; min-width:0; }
+.company-compliance-evidence-summary { color:var(--muted); font-size:.84rem; text-align:right; }
+.compliance-authority-switcher { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.compliance-authority-option { display:grid; grid-template-columns:44px minmax(0,1fr) auto; align-items:center; gap:12px; width:100%; min-width:0; padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface-2); color:var(--text); text-align:left; cursor:pointer; transition:border-color .16s ease, background-color .16s ease, box-shadow .16s ease; }
+.compliance-authority-option:hover { border-color:var(--brand); }
+.compliance-authority-option[aria-selected="true"] { border:2px solid var(--brand); padding:15px; background:var(--surface); box-shadow:var(--shadow); }
+.compliance-authority-option:focus-visible { outline:3px solid var(--brand); outline-offset:3px; }
+.compliance-authority-option-body { display:grid; gap:5px; min-width:0; }
+.compliance-authority-option-title { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:1rem; }
+.compliance-authority-option-title > strong { font-size:1.02rem; }
+.compliance-authority-option-body > .muted { font-size:.84rem; }
+.compliance-authority-option-meta { color:var(--muted); font-size:.79rem; }
+.compliance-authority-option-action { color:var(--muted); font-size:.78rem; white-space:nowrap; }
+.compliance-authority-option[aria-selected="true"] .compliance-authority-option-action { color:var(--brand); font-weight:700; }
+.compliance-authority-panel { display:grid; gap:14px; min-width:0; }
+.compliance-authority-panel[hidden] { display:none; }
+.authority-details-bar { display:flex; align-items:center; flex-wrap:wrap; gap:12px; min-width:0; padding:13px 16px; border:1px solid var(--border); border-radius:13px; background:var(--surface-2); font-size:.86rem; }
+.authority-details-bar .eyebrow { margin:0; }
+.authority-details-divider { width:1px; align-self:stretch; background:var(--border); }
+.authority-details-number { margin-left:auto; color:var(--muted); }
+.authority-details-number strong { color:var(--text); }
+.hmrc-authority-panel .hmrc-overview { padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface-2); }
+.hmrc-authority-panel .hmrc-section-heading { margin-bottom:12px; }
+.hmrc-authority-panel .hmrc-section-heading h3 { margin:0; font-size:1.08rem; }
+.hmrc-authority-panel .hmrc-section-heading p { margin:5px 0 0; font-size:.86rem; }
+.hmrc-authority-panel .hmrc-setup-cards { grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); }
+.hmrc-authority-panel .hmrc-setup-card { align-content:start; }
+@media (max-width: 720px) {
+  .compliance-authority-switcher { grid-template-columns:1fr; }
+  .compliance-authority-option { grid-template-columns:40px minmax(0,1fr); }
+  .compliance-authority-option .compliance-authority-icon { width:40px; height:40px; }
+  .compliance-authority-option-action { grid-column:2; }
+  .company-compliance-summarybar { align-items:stretch; flex-direction:column; }
+  .company-compliance-evidence-summary { text-align:left; }
+  .authority-details-number { margin-left:0; }
+}
