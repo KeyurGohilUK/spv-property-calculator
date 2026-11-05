@@ -1,5 +1,5 @@
 {
-  "version": "1.60.37",
+  "version": "1.60.38",
   "assets": [
     "./",
     "./index.html",
@@ -90,6 +90,7 @@
     "./tasks/",
     "./styles/features/tasks.css",
     "./src/features/tasks/tasks.js",
+    "./vendor/sortable.min.js",
     "./src/features/tasks/task-description-links.js",
     "./src/features/tasks/task-storage.js",
     "./src/features/tasks/task-cloud-sync.js",
