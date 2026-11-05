@@ -39,3 +39,46 @@
   .user-card { grid-template-columns: 1fr; align-items: stretch; }
   .user-role-field, .user-active-control, .user-save-btn { width: 100%; }
 }
+
+
+/* Admin user management: clear status, compact controls, and useful summaries. */
+.user-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+.user-overview-card { min-width: 0; padding: 14px 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.user-overview-card strong { display: block; color: var(--text); font-size: 20px; line-height: 1.2; }
+.user-overview-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+.user-overview-card.attention strong { color: var(--warning); }
+.user-list-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; margin-bottom: 10px; }
+.user-list-toolbar .save-message { margin: 0; }
+.user-filters { display: inline-flex; gap: 6px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+.user-filter { padding: 6px 11px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.user-filter.active { background: var(--brand-soft); color: var(--brand-strong); }
+.user-card { grid-template-columns: minmax(0, 1fr) minmax(140px, 180px) minmax(100px, auto) auto; align-items: center; }
+.user-identity { align-self: center; }
+.user-identity strong { font-size: 16px; }
+.user-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 9px; }
+.user-status-badge, .user-policy-badge { margin: 0; padding: 5px 9px; font-size: 11px; }
+.user-status-badge.inactive { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); color: var(--warning); }
+.user-policy-badge { background: var(--surface-2); color: var(--muted); }
+.user-policy-badge.pending { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); color: var(--warning); }
+.user-policy-badge.accepted { background: color-mix(in srgb, var(--positive) 12%, var(--surface)); color: var(--positive); }
+.user-access-controls { display: contents; }
+.user-active-control { justify-self: center; }
+.user-save-btn { min-width: 92px; }
+.user-save-btn:disabled { opacity: .55; cursor: not-allowed; }
+.user-card.needs-attention { border-left: 3px solid var(--warning); }
+.user-card-current { background: color-mix(in srgb, var(--brand-soft) 32%, var(--surface)); }
+.user-unsaved-note { display: none; grid-column: 1 / -1; color: var(--brand); font-size: 12px; }
+.user-card.has-unsaved .user-unsaved-note { display: block; }
+.user-empty-filter { padding: 18px; border: 1px dashed var(--border); border-radius: 14px; color: var(--muted); text-align: center; }
+@media (max-width: 800px) {
+  .user-card { grid-template-columns: minmax(0, 1fr) minmax(125px, 160px); }
+  .user-access-controls { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(100px, 140px); align-items: end; gap: 12px; }
+  .user-active-control, .user-save-btn { width: 100%; }
+}
+@media (max-width: 560px) {
+  .user-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .user-overview-card { padding: 12px; }
+  .user-list-toolbar { align-items: flex-start; flex-direction: column; }
+  .user-card { grid-template-columns: 1fr; align-items: stretch; }
+  .user-access-controls { grid-template-columns: 1fr; }
+}
