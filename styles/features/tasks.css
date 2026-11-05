@@ -205,10 +205,12 @@
 }
 .task-board-column-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 3px 7px; }
 .task-board-column-header strong { font-size: 13px; }
-.task-board-column:nth-child(1) .task-board-column-header { color: var(--muted); }
-.task-board-column:nth-child(2) .task-board-column-header { color: var(--brand-strong); }
-.task-board-column:nth-child(3) .task-board-column-header { color: #b88924; }
-.task-board-column:nth-child(4) .task-board-column-header { color: var(--positive); }
+/* Accessible heading text across cream/light and dark themes; use a separate accent. */
+.task-board-column-header { color: var(--text); }
+.task-board-column:nth-child(1) { border-top: 3px solid var(--muted); }
+.task-board-column:nth-child(2) { border-top: 3px solid var(--brand); }
+.task-board-column:nth-child(3) { border-top: 3px solid #b88924; }
+.task-board-column:nth-child(4) { border-top: 3px solid var(--positive); }
 .task-board-column-items { display: grid; align-content: start; gap: 10px; flex: 1; min-height: 108px; border-radius: 10px; }
 .task-board .task-card { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 13px; min-width: 0; }
 .task-board .task-card-main { width: 100%; }
