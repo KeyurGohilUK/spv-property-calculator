@@ -1,6 +1,8 @@
 {
-  "version": "1.60.19",
+  "version": "1.60.20",
   "notes": [
+    "Align compliance status badges and restore focus when dialogs close.",
+    "Show the next Companies House statement date in compliance rows.",
     "Display Companies House obligations in full-width rows with clear filing dates.",
     "Show company compliance details and evidence in a focused dialog.",
     "Fix nested Companies House compliance obligation rows.",
