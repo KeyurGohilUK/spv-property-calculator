@@ -392,8 +392,8 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .hmrc-view-tab-label { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px; min-width:0; }
 .hmrc-view-tab-label small { font-size:.82em; font-weight:550; }
 .hmrc-view-tab-setup-icon { color:var(--muted); }
-.hmrc-view-tab-setup-icon.is-complete { color:#218a62; }
-.hmrc-view-tabs button[aria-selected="true"] .hmrc-view-tab-setup-icon.is-complete { color:#8ce5ad; }
+.hmrc-view-tab-setup-icon.is-complete { color:var(--positive); }
+.hmrc-view-tabs button[aria-selected="true"] .hmrc-view-tab-setup-icon.is-complete { color:var(--positive-on-brand); }
 .hmrc-setup-tab-check { display:none; }
 .hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-check { display:block; }
 .hmrc-view-tab-setup-icon.is-complete .hmrc-setup-tab-pending { display:none; }
@@ -422,11 +422,11 @@ details[open] > summary > .compliance-expand-icon { transform:rotate(225deg); }
 .hmrc-pill--success { color:var(--positive); border-color:color-mix(in srgb,var(--positive) 45%,var(--border)); background:color-mix(in srgb,var(--positive) 12%,var(--surface)); }
 .hmrc-pill--warning { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 50%,var(--border)); background:color-mix(in srgb,var(--warning) 11%,var(--surface)); }
 /* Stronger, accessible attention and payment colours in the HMRC dashboard. */
-.hmrc-dashboard { --hmrc-attention:#a92631; --hmrc-payment-green:#087c45; }
-html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; --hmrc-payment-green:#77e4aa; }
+.hmrc-dashboard { --hmrc-attention:#a92631; }
+html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
 .hmrc-pill--attention { color:var(--hmrc-attention); border:1px solid var(--hmrc-attention); background:color-mix(in srgb,var(--hmrc-attention) 13%,var(--surface)); font-weight:750; }
 .hmrc-period-info .hmrc-value-attention { color:var(--hmrc-attention); font-weight:750; }
-.hmrc-period-info .hmrc-value-positive { color:var(--hmrc-payment-green); font-weight:800; font-size:1rem; }
+.hmrc-period-info .hmrc-value-positive { color:var(--positive); font-weight:800; font-size:1rem; }
 .hmrc-period-info dt.hmrc-summary-total,.hmrc-period-info dd.hmrc-summary-total { border-top:1px solid var(--border); padding-top:12px; margin-top:5px; font-weight:750; }
 .hmrc-period-info dd.hmrc-summary-total { font-size:1rem; }
 
