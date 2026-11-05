@@ -173,6 +173,11 @@ const updated2 = saveTask({ id: savedWithAssignee.id, title: 'Check assignee upd
 assert.equal(updated2.assignedTo, 'user-xyz', 'Updating a task without passing assignedTo must preserve existing value');
 
 // HTML checks
+assert.ok(taskHtml.includes('openTaskSettingsBtn'), 'Task Settings button exists');
+assert.ok(taskHtml.includes('taskSettingsDialog'), 'Task Settings dialog exists');
+assert.ok(taskPage.includes('setTaskMemberColor'), 'Cloud member colour update supported');
+assert.ok(taskPage.includes('canClaimTask(task)'), 'Editor can claim a queued task');
+assert.ok(taskPage.includes('card.dataset.memberColour'), 'Assignee colouring supported');
 assert.ok(taskHtml.includes('vendor/sortable.min.js'), 'Offline SortableJS must be included');
 assert.ok(taskHtml.includes('value="resolved"'), 'Resolved must be available in status controls');
 assert.ok(taskPage.includes('Sortable.create(column'), 'Task columns should support drag and drop');
