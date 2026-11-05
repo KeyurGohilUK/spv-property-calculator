@@ -7,14 +7,14 @@
   background: color-mix(in srgb, var(--surface) 88%, transparent);
   backdrop-filter: blur(18px);
 }
-.header-inner { max-width: 1400px; margin: 0 auto; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.header-inner { max-width: 1328px; margin: 0 auto; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .header-inner h1 { font-size: clamp(20px, 4vw, 27px); margin: 2px 0 0; letter-spacing: -0.035em; }
 .header-actions { display: flex; align-items: center; gap: 8px; }
 .eyebrow { margin: 0; color: var(--brand); text-transform: uppercase; letter-spacing: .09em; font-size: 11px; font-weight: 800; }
 .status-pill, .count-badge, .mode-label { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 700; }
 .status-pill.offline { background: color-mix(in srgb, var(--warning) 18%, var(--surface)); color: var(--warning); }
 
-.main-shell { max-width: 1400px; margin: 0 auto; padding: 20px 16px calc(40px + var(--safe-bottom)); }
+.main-shell { max-width: 1328px; margin: 0 auto; padding: 20px 16px calc(40px + var(--safe-bottom)); }
 .hidden { display: none !important; }
 .hero-card, .section-card, .summary-card, .disclaimer-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .hero-card { padding: 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
