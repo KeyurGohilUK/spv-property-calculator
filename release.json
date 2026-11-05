@@ -1,6 +1,6 @@
 {
-  "version": "1.60.10",
+  "version": "1.60.11",
   "notes": [
-    "Use a shared file upload field across Expenses and HMRC evidence forms."
+    "Align HMRC payment dialog fields and expand payment receipts across the form width."
   ]
 }
