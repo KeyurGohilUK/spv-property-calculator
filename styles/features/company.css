@@ -258,7 +258,7 @@
 .company-detail-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
 .company-tab-panel { min-width: 0; }
 .company-tab-panel:not([hidden]) { width: 100%; max-width: 100%; box-sizing: border-box; }
-.company-tab-panel:not([hidden]) > .company-section { width: calc(100% - 16px); max-width: 100%; margin-inline: 8px; box-sizing: border-box; }
+.company-tab-panel:not([hidden]) > .company-section { width: 100%; max-width: 100%; margin-inline: 0; box-sizing: border-box; }
 .company-tab-panel[hidden] { display: none; }
 .company-tab-panel > .company-section + .company-section { margin-top: 18px; }
 @media (max-width: 480px) {
@@ -740,3 +740,10 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-filing-evidence > p { margin: 0; }
 
 .hmrc-period-actions .hmrc-delete-period-btn { flex:0 0 44px; width:44px; height:44px; min-height:44px; padding:10px; }
+
+/* Keep the company page header description on one line where the layout has room. */
+.company-hero > div { min-width: 0; flex: 1 1 auto; }
+.company-hero > div > p:last-child { white-space: nowrap; }
+@media (max-width: 620px) {
+  .company-hero > div > p:last-child { white-space: normal; }
+}

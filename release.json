@@ -1,6 +1,7 @@
 {
-  "version": "1.60.30",
+  "version": "1.60.31",
   "notes": [
+    "Remove the separate Supporting documents section from Corporation Tax period cards.",
     "Make Manage Users easier to scan with live access summaries, attention filtering and unsaved-change feedback.",
     "Place the payment action in Financial Summary and require typed confirmation before deleting a Corporation Tax period.",
     "Move CT600 and payment actions into their summary cards and manage CT600 evidence from its filing dialog.",

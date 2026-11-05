@@ -27,7 +27,7 @@ assert.match(shellCore, /\.main-shell \{ max-width: 1328px;/, 'Shared pages use 
 assert.match(dialogStyles, /\.main-shell \{ padding-inline: 8px; \}/, 'Mobile page gutters stay visible while remaining reduced');
 assert.match(navigationStyles, /calc\(\(100vw - 1328px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
 const companyStyles = fs.readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
-assert.match(companyStyles, /\.company-tab-panel:not\(\[hidden\]\) > \.company-section \{ width: calc\(100% - 16px\); max-width: 100%; margin-inline: 8px; box-sizing: border-box; \}/, 'Company investment and appointment panels keep consistent side gutters');
+assert.match(companyStyles, /\.company-tab-panel:not\(\[hidden\]\) > \.company-section \{ width: 100%; max-width: 100%; margin-inline: 0; box-sizing: border-box; \}/, 'Company tab sections align to the shared page gutter');
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 assert.match(fs.readFileSync(new URL('../styles/components/linked-content.css', import.meta.url), 'utf8'), /\.inline-text-link[\s\S]*\.property-map-link/);
 assert.match(fs.readFileSync(new URL('../styles/components/rich-textarea.css', import.meta.url), 'utf8'), /\.rich-textbox-toolbar[\s\S]*\.rich-textbox-editor/);
