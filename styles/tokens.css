@@ -9,7 +9,8 @@
   --brand: #966540;
   --brand-strong: #7d5538;
   --brand-soft: #eee3d3;
-  --positive: #55705a;
+  --positive: #287a4b;
+  --positive-on-brand: #b6eac2;
   --warning: #b57928;
   --danger: #a64b3c;
   --on-brand: #fffaf3;
@@ -33,6 +34,7 @@ html[data-theme="dark"] {
     --brand-strong: #e2b484;
     --brand-soft: #3b2b20;
     --positive: #91b497;
+    --positive-on-brand: #21452e;
     --warning: #e0aa5c;
     --danger: #ff9b88;
     --on-brand: #211914;
