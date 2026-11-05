@@ -152,7 +152,7 @@ Deno.serve(async (request) => {
     return respond({
       ...officialCompanyFields(record),
       accounts: { next_accounts: { due_on: record.accounts?.next_accounts?.due_on || null }, last_accounts: { period_end_on: record.accounts?.last_accounts?.period_end_on || null, made_up_to: record.accounts?.last_accounts?.made_up_to || null }, overdue: record.accounts?.overdue === true },
-      confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
+      confirmation_statement: { next_due: record.confirmation_statement?.next_due || null, next_made_up_to: record.confirmation_statement?.next_made_up_to || null, last_made_up_to: record.confirmation_statement?.last_made_up_to || null, overdue: record.confirmation_statement?.overdue === true },
       filingHistory, filingHistoryAvailable,
       officialPeople: { officers, pscs, officersAvailable: officerResponse.available, pscsAvailable: pscResponse.available },
       fetchedAt: new Date().toISOString()
