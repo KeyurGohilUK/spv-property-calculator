@@ -97,6 +97,36 @@ companyTabs.forEach((tab, index) => {
 });
 
 
+const complianceAuthorityTabs = [...document.querySelectorAll('[data-compliance-authority]')];
+function activateComplianceAuthority(tab, focus = false) {
+  complianceAuthorityTabs.forEach((item) => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    const panel = document.getElementById(item.getAttribute('aria-controls'));
+    if (panel) panel.hidden = !selected;
+    const action = document.getElementById(item.dataset.authorityActionId);
+    if (action) action.textContent = selected ? 'Viewing this authority' : 'Switch to view';
+  });
+  if (focus) tab.focus();
+}
+complianceAuthorityTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => activateComplianceAuthority(tab));
+  tab.addEventListener('keydown', (event) => {
+    let nextIndex = index;
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % complianceAuthorityTabs.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + complianceAuthorityTabs.length) % complianceAuthorityTabs.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = complianceAuthorityTabs.length - 1;
+    else return;
+    event.preventDefault();
+    activateComplianceAuthority(complianceAuthorityTabs[nextIndex], true);
+  });
+});
+if (complianceAuthorityTabs.length) activateComplianceAuthority(complianceAuthorityTabs[0]);
+
+
+
 function roleMark(appointment, role) {
   return appointment.roles.includes(role)
     ? '<span class="company-role-mark" role="img" aria-label="Yes">✓</span>'
@@ -323,13 +353,20 @@ function renderCompanyCompliance() {
         ${editingAllowed ? `<file-upload-field input-id="companyEvidence-${escapeHtml(item.key)}" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="companyEvidenceStatus-${escapeHtml(item.key)}" help="PDF or image · maximum 5 MB" data-evidence-upload="${escapeHtml(item.key)}"></file-upload-field>` : ''}
       </div>
     </div></details>`).join('');
+  $('companyAuthorityNumber').textContent = profile.companyNumber || 'Not recorded';
+  $('companyHouseAuthorityStatus').textContent = companyHouseData ? 'Connected'
+    : companyHouseError === 'Checking Companies House…' ? 'Checking'
+      : profile.companyNumber ? 'Manual tracking' : 'Company number needed';
+  $('companyHouseAuthoritySummary').textContent = companyHouseData
+    ? 'Official deadlines retrieved · ' + items.filter((item) => item.source === 'companies-house').length + ' register records'
+    : profile.companyNumber ? companyHouseError || 'Connect to retrieve official deadlines'
+      : 'Add a company number for official deadlines';
   $('companiesHouseComplianceItems').innerHTML = renderCards(items.filter((item) => item.source !== 'hmrc' && !['corporation-tax-registration', 'director-identity', 'psc-identity'].includes(item.id)));
 }
 
 let hmrcGuideSelected = 'utr';
 let hmrcPaymentEditingId = '';
 let hmrcPaymentIsNew = false;
-let hmrcActiveView = hmrcTaxPeriods(profile.hmrc).length ? 'periods' : 'setup';
 
 const hmrcDialogs = {
   setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
@@ -427,11 +464,16 @@ function renderHmrcDashboard() {
   const total = state.setupTotal;
   const activityActive = state.activity === 'active';
   const registrationVisible = activityActive;
-  const canSeePeriods = (activityActive && state.registrationAnswered) || periods.length > 0;
   const registrationDone = Boolean(setup.registrationConfirmedOn);
-  $('hmrcSetupTabStatus').textContent = complete === total ? '(' + total + '/' + total + ' Done)' : '(' + complete + '/' + total + ' Complete)';
-  $('hmrcSetupTabIcon').classList.toggle('is-progress', complete > 0);
-  $('hmrcSetupTabIcon').classList.toggle('is-complete', complete === total);
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const nextDue = periods.flatMap((period) => Object.values(hmrcDeadlines(period)))
+    .filter((date) => date >= today).sort()[0];
+  $('hmrcAuthorityProgress').textContent = complete === total
+    ? 'Setup ' + complete + ' of ' + total + ' complete'
+    : 'Setup ' + complete + ' of ' + total + ' recorded';
+  $('hmrcAuthoritySummary').textContent = periods.length
+    ? periods.length + ' tax period' + (periods.length === 1 ? '' : 's') + (nextDue ? ' · Next due ' + formatComplianceDateUK(nextDue) : ' · No upcoming deadlines')
+    : 'No tax periods recorded yet';
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
       <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
@@ -447,15 +489,8 @@ function renderHmrcDashboard() {
       <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="registration" aria-label="Edit Corporation Tax registration" title="Edit Corporation Tax registration" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
       <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('corporation-tax-registration:once', 'Registration proof')}</details>
     </article>` : ''}`;
-  $('hmrcRecurringViewTab').hidden = !canSeePeriods;
-  if (!canSeePeriods) hmrcActiveView = 'setup';
-  $('hmrcSetupViewTab').setAttribute('aria-selected', String(hmrcActiveView === 'setup'));
-  $('hmrcRecurringViewTab').setAttribute('aria-selected', String(hmrcActiveView === 'periods'));
-  $('hmrcSetupOverview').hidden = hmrcActiveView !== 'setup';
-  $('hmrcRecurringOverview').hidden = hmrcActiveView !== 'periods';
   $('hmrcOpenPeriodDialog').disabled = !editingAllowed || !activityActive || !state.registrationAnswered;
   const notes = [];
-  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   if (periods.some((period) => {
     const due = hmrcDeadlines(period);
     const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
@@ -466,8 +501,6 @@ function renderHmrcDashboard() {
   $('hmrcStatusNote').hidden = !notes.length;
 }
 
-$('hmrcSetupViewTab').addEventListener('click', () => { hmrcActiveView = 'setup'; renderHmrcDashboard(); });
-$('hmrcRecurringViewTab').addEventListener('click', () => { hmrcActiveView = 'periods'; renderHmrcDashboard(); });
 $('hmrcOpenPeriodDialog').addEventListener('click', (event) => {
   if (!editingAllowed) return;
   $('hmrcPeriodMessage').textContent = '';
@@ -1345,7 +1378,6 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
     renderProfile();
     $('hmrcPeriodStart').value = '';
     $('hmrcPeriodEnd').value = '';
-    hmrcActiveView = 'periods';
     renderHmrcDashboard();
     hmrcDialogs.period.close();
     await syncAfterSave();
