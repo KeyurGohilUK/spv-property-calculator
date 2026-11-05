@@ -1,0 +1,83 @@
+/* Shared hover feedback for cards that open, select, or navigate. */
+@media (hover: hover) and (pointer: fine) {
+  .main-shell :is(
+    .property-card,
+    .expense-card,
+    .task-card,
+    .company-list-card:not(.company-list-add),
+    .template-card,
+    .brrr-companion-card,
+    .compliance-authority-option
+  ) {
+    transition:
+      transform .16s ease,
+      border-color .16s ease,
+      box-shadow .16s ease,
+      background-color .16s ease;
+  }
+
+  .main-shell :is(
+    .property-card:hover,
+    .expense-card:hover,
+    .task-card:hover,
+    .company-list-card:not(.company-list-add):hover,
+    .template-card:hover,
+    .brrr-companion-card:hover,
+    .compliance-authority-option:hover
+  ) {
+    transform: translateY(-1px);
+    border-color: var(--brand);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 12%, transparent);
+  }
+
+  .main-shell :is(
+    .property-card:hover h3,
+    .expense-card:hover .expense-card-heading strong,
+    .task-card:hover h3,
+    .task-card:hover h4,
+    .company-list-card:not(.company-list-add):hover .company-list-card-title,
+    .template-card:hover .template-card-info strong,
+    .brrr-companion-card:hover .brrr-companion-card-body strong
+  ) {
+    color: var(--brand);
+  }
+}
+
+.main-shell :is(
+  .property-card:focus-within,
+  .expense-card:focus-within,
+  .task-card:focus-within,
+  .company-list-card:not(.company-list-add):focus-within,
+  .template-card:focus-within,
+  .brrr-companion-card:focus-visible,
+  .compliance-authority-option:focus-visible
+) {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-shell :is(
+    .property-card,
+    .expense-card,
+    .task-card,
+    .company-list-card:not(.company-list-add),
+    .template-card,
+    .brrr-companion-card,
+    .compliance-authority-option
+  ) {
+    transition: none;
+  }
+
+  .main-shell :is(
+    .property-card:hover,
+    .expense-card:hover,
+    .task-card:hover,
+    .company-list-card:not(.company-list-add):hover,
+    .template-card:hover,
+    .brrr-companion-card:hover,
+    .compliance-authority-option:hover
+  ) {
+    transform: none;
+  }
+}
