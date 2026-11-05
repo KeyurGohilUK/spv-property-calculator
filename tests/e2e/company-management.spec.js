@@ -48,7 +48,7 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await expect(cancelCompanyDetailsButton).toBeVisible();
   await expect(saveCompanyDetailsButton).toBeVisible();
   const companyDetailsLayout = await page.evaluate(() => {
-    const actions = document.querySelector('.company-form-actions').getBoundingClientRect();
+    const actions = document.querySelector('#companyDetailsForm .company-form-actions').getBoundingClientRect();
     const cancel = document.querySelector('#cancelCompanyDetailsBtn').getBoundingClientRect();
     const save = document.querySelector('#companyDetailsForm button[type="submit"]').getBoundingClientRect();
     const dateField = document.querySelector('#companyDateInput').getBoundingClientRect();
