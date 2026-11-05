@@ -83,13 +83,16 @@ export function saveTask(task) {
   return record;
 }
 
-export function updateTaskStatus(id, status) {
+export function updateTaskStatus(id, status, claimedBy = null) {
   if (!STATUS_ORDER.includes(status)) throw new Error('Invalid task status.');
   const tasks = readRaw();
   const index = tasks.findIndex((item) => item.id === id);
   if (index < 0) return null;
   const now = new Date().toISOString();
-  tasks[index] = { ...tasks[index], status, updatedAt: now, _cloudDirty: true };
+  const task = tasks[index];
+  const assignedTo = task.status === 'todo' && status === 'in-progress' && !task.assignedTo && claimedBy
+    ? claimedBy : task.assignedTo;
+  tasks[index] = { ...task, status, assignedTo, updatedAt: now, _cloudDirty: true };
   if (!writeRaw(tasks)) throw new Error('Unable to update task status.');
   return tasks[index];
 }

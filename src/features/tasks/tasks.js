@@ -41,6 +41,7 @@ let workspaceMembers = [];
 let cloudUser = null;
 let taskSyncing = false;
 let boardSortables = [];
+const MEMBER_COLORS = ['blue', 'rose', 'mint', 'amber', 'violet', 'teal'];
 let cloudListenerAttached = false;
 let editingTaskId = null;
 let editingCommentId = null;
@@ -142,6 +143,7 @@ function applyEditState() {
   $('openTaskFormBtn').title = tip;
   $('openTemplateDialogBtn').disabled = !canEdit;
   $('openTemplateDialogBtn').title = tip;
+  $('openTaskSettingsBtn').classList.toggle('hidden', userRole !== 'admin');
   const badge = $('taskRoleBadge');
   if (userRole && cloudUser) {
     badge.textContent = { viewer: 'Read-only', editor: 'Editor', admin: 'Admin' }[userRole] || userRole;
@@ -155,6 +157,14 @@ function canEditTask(task) {
   if (!canEdit) return false;
   if (userRole === 'admin') return true;
   return !task.createdBy || task.createdBy === cloudUser?.id;
+}
+
+// Editors may claim someone else's unassigned Todo, but not edit or delete it.
+function canClaimTask(task) {
+  return canEdit && Boolean(cloudUser?.id) && task.status === 'todo' && !task.assignedTo;
+}
+function canMoveTask(task, destination) {
+  return canEditTask(task) || (canClaimTask(task) && destination === 'in-progress');
 }
 
 async function loadWorkspaceMembers() {
@@ -177,6 +187,8 @@ async function loadWorkspaceMembers() {
     loadCached();
   }
   populateAssigneeOptions();
+  render();
+  if ($('taskSettingsDialog').open) renderTaskMemberColours();
 }
 
 function populateAssigneeOptions() {
@@ -362,6 +374,9 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   const card = document.createElement('article');
   card.className = `task-card${task.status === 'done' ? ' is-done' : ''}`;
 
+  const member = workspaceMembers.find((item) => item.userId === task.assignedTo);
+  if (member && MEMBER_COLORS.includes(member.taskColor)) card.dataset.memberColour = member.taskColor;
+
   const openBtn = document.createElement('button');
   openBtn.type = 'button';
   openBtn.className = 'task-card-open';
@@ -377,7 +392,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusBtn.title = canEditTask(task)
     ? `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`
     : 'Viewer accounts cannot change task status';
-  statusBtn.disabled = !canEditTask(task);
+  statusBtn.disabled = !canMoveTask(task, nextStatus(task.status));
   statusBtn.addEventListener('click', () => cycleStatus(task));
 
   const main = document.createElement('div');
@@ -447,7 +462,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
     actions.appendChild(deleteBtn);
   }
 
-  if (canEditTask(task)) {
+  if (canEditTask(task) || canClaimTask(task)) {
     const handle = document.createElement('span');
     handle.className = 'task-drag-handle';
     handle.title = 'Drag task to another column';
@@ -461,8 +476,8 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusSelect.className = 'task-card-status-select';
   statusSelect.setAttribute('aria-label', `Status for ${task.title}`);
   statusSelect.title = 'Change task status';
-  statusSelect.disabled = !canEditTask(task);
-  STATUS_GROUP_ORDER.forEach((status) => {
+  statusSelect.disabled = !(canEditTask(task) || canClaimTask(task));
+  STATUS_GROUP_ORDER.filter((status) => canEditTask(task) || status === task.status || status === 'in-progress').forEach((status) => {
     const option = document.createElement('option');
     option.value = status;
     option.textContent = STATUS_LABELS[status];
@@ -479,12 +494,12 @@ function buildTaskCard(task, { showStatus = true } = {}) {
 const STATUS_GROUP_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
 
 function changeTaskStatus(task, newStatus) {
-  if (!canEditTask(task) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
+  if (!canMoveTask(task, newStatus) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
     render();
     return;
   }
   try {
-    const updated = updateTaskStatus(task.id, newStatus);
+    const updated = updateTaskStatus(task.id, newStatus, cloudUser?.id || null);
     if (!updated) throw new Error('Task no longer exists.');
     addTaskEvent({ taskId: task.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: task.status, toStatus: newStatus });
     render();
@@ -760,6 +775,73 @@ const templateDialogController = setupDialog($('templateDialog'), {
 });
 $('templateDialog').addEventListener('close', () => { selectedTemplateId = null; });
 
+const taskSettingsDialogController = setupDialog($('taskSettingsDialog'), {
+  closeButtons: [$('closeTaskSettingsBtn')]
+});
+
+function renderTaskMemberColours() {
+  const list = $('taskMemberColours');
+  list.replaceChildren();
+  workspaceMembers.forEach((member) => {
+    const row = document.createElement('div');
+    row.className = 'task-member-colour-row';
+    const name = document.createElement('strong');
+    name.textContent = member.displayName || 'Workspace member';
+    const picker = document.createElement('div');
+    picker.className = 'task-member-colour-picker';
+    const swatch = document.createElement('span');
+    swatch.className = 'task-member-colour-swatch';
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', 'Task colour for ' + name.textContent);
+    [['', 'No colour'], ...MEMBER_COLORS.map((color) => [color, color[0].toUpperCase() + color.slice(1)])]
+      .forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+      });
+    select.value = member.taskColor || '';
+    swatch.dataset.memberColour = select.value || 'none';
+    select.addEventListener('change', async () => {
+      const previous = member.taskColor || '';
+      const next = select.value;
+      select.disabled = true;
+      $('taskSettingsMessage').textContent = 'Saving colour…';
+      try {
+        if (userRole !== 'admin' || !navigator.onLine) throw new Error('Sign in as an administrator and connect to update colours.');
+        await window.SPVCloud.setTaskMemberColor(member.userId, next);
+        member.taskColor = next || null;
+        swatch.dataset.memberColour = next || 'none';
+        localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(workspaceMembers));
+        render();
+        $('taskSettingsMessage').textContent = 'Colour saved for ' + name.textContent;
+      } catch (error) {
+        select.value = previous;
+        $('taskSettingsMessage').textContent = error.message || 'Could not save colour.';
+      } finally {
+        select.disabled = false;
+      }
+    });
+    picker.append(swatch, select);
+    row.append(name, picker);
+    list.appendChild(row);
+  });
+  if (!workspaceMembers.length) {
+    const empty = document.createElement('p');
+    empty.className = 'muted';
+    empty.textContent = 'No active members found. Connect to load workspace members.';
+    list.appendChild(empty);
+  }
+}
+
+$('openTaskSettingsBtn').addEventListener('click', async () => {
+  if (userRole !== 'admin') return;
+  $('taskSettingsMessage').textContent = '';
+  renderTaskMemberColours();
+  taskSettingsDialogController.open();
+  await loadWorkspaceMembers();
+});
+
 function openForm(task = null, { preset = null } = {}) {
   if (!task && !canEdit) return;
   const readOnly = !!task && !canEditTask(task);
@@ -892,7 +974,8 @@ function submitTask(event) {
       description: $('taskDescription').value.trim(),
       status: newStatus,
       dueDate: $('taskDueDate').value || null,
-      assignedTo: $('taskAssignedTo').value || null,
+      assignedTo: (existing?.status === 'todo' && newStatus === 'in-progress' && !$('taskAssignedTo').value)
+        ? cloudUser?.id || null : $('taskAssignedTo').value || null,
       scope,
       propertyId,
       createdBy: existing?.createdBy || cloudUser?.id || null

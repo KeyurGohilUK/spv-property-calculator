@@ -45,6 +45,7 @@ Run only migrations newer than the last applied update, in number order:
 - Update 25 — appointment-based expense payers
 - Update 26 — multiple independent company profiles (existing default record retained)
 - Update 27 — four task statuses and Resolved task history
+- Update 28 — member task card colours
 
 All current scripts are designed to be safely rerunnable. Always take a database backup before applying changes to production.
 
@@ -66,7 +67,7 @@ Receipt binaries live in a private Cloudflare R2 bucket. The database stores onl
 
 ## Rules for future changes
 
-The current schema is complete through **Update 27 - Kanban Task Status**.
+The current schema is complete through **Update 28 - Task Member Colours**.
 
 - Never edit an already-deployed numbered migration.
 - Add the next numbered, rerunnable migration.

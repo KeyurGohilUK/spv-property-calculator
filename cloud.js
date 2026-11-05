@@ -515,8 +515,21 @@
     if (error) throw error;
     return (data || []).map((row) => ({
       userId: String(row.user_id),
-      displayName: String(row.display_name || '')
+      displayName: String(row.display_name || ''),
+      taskColor: row.task_color || null
     }));
+  }
+
+  async function setTaskMemberColor(userId, color) {
+    const supabaseClient = ensureClient();
+    await requireUser();
+    const access = await getWorkspaceAccess();
+    if (!access?.active || access.role !== 'admin') throw new Error('Only administrators can change task colours.');
+    const { error } = await supabaseClient.rpc('set_task_member_color', {
+      p_user_id: userId,
+      p_color: color || null
+    });
+    if (error) throw error;
   }
 
   function isTaskConflict(error) {
@@ -920,6 +933,7 @@
     listTaskComments,
     upsertTaskComment,
     listActiveMembers,
+    setTaskMemberColor,
     listExpenses,
     upsertExpense,
     isExpenseConflict,

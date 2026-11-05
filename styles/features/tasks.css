@@ -232,3 +232,34 @@
 @media (prefers-reduced-motion: reduce) {
   .task-board .task-card { transition: none; }
 }
+
+/* Assigned user colour covers the whole card, blended with the active theme. */
+.task-board .task-card[data-member-colour] {
+  background: color-mix(in srgb, var(--task-member-colour) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--task-member-colour) 48%, var(--border));
+  border-left: 5px solid var(--task-member-colour);
+}
+.task-board .task-card[data-member-colour]:hover { border-color: var(--task-member-colour); }
+.task-board .task-card[data-member-colour] .task-card-status-select { background: var(--surface); }
+[data-member-colour="blue"] { --task-member-colour: #3978c6; }
+[data-member-colour="rose"] { --task-member-colour: #c45c82; }
+[data-member-colour="mint"] { --task-member-colour: #318b70; }
+[data-member-colour="amber"] { --task-member-colour: #a47729; }
+[data-member-colour="violet"] { --task-member-colour: #825dbe; }
+[data-member-colour="teal"] { --task-member-colour: #247b8b; }
+.task-settings-dialog { width: min(530px, calc(100% - 24px)); }
+.task-member-colours { display: grid; gap: 10px; margin-top: 16px; }
+.task-member-colour-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--border); padding: 10px 0;
+}
+.task-member-colour-row strong { min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
+.task-member-colour-picker { display: flex; align-items: center; gap: 8px; }
+.task-member-colour-picker select {
+  min-height: 38px; border-radius: 9px; background: var(--surface);
+  color: var(--text); border: 1px solid var(--border); padding: 7px;
+}
+.task-member-colour-swatch { width: 28px; height: 28px; border-radius: 8px; flex: none; border: 1px solid var(--border); background: var(--task-member-colour, var(--surface)); }
+@media (max-width: 440px) {
+  .task-member-colour-row { align-items: stretch; flex-direction: column; }
+}

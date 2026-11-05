@@ -39,6 +39,7 @@
         </div>
         <div class="task-hero-actions">
           <span id="taskSyncStatus" class="sync-status" role="status">Saved on this device</span>
+          <button id="openTaskSettingsBtn" class="secondary-btn compact-task-btn hidden" type="button">Task Settings</button>
           <button id="openTemplateDialogBtn" class="secondary-btn compact-task-btn" type="button">From template</button>
           <button id="openTaskFormBtn" class="primary-btn" type="button">＋ Add Task</button>
         </div>
@@ -99,6 +100,14 @@
     </main>
   </div>
 
+  <dialog id="taskSettingsDialog" class="install-dialog task-settings-dialog" aria-labelledby="taskSettingsTitle">
+    <div class="task-dialog-header"><div><p class="eyebrow">Admin only</p><h3 id="taskSettingsTitle">Task Settings</h3></div>
+      <button id="closeTaskSettingsBtn" class="dialog-close" type="button" aria-label="Close Task Settings">×</button></div>
+    <p class="muted">Choose a card colour for each member. Their assigned task cards share that colour across the workspace.</p>
+    <div id="taskMemberColours" class="task-member-colours"></div>
+    <p id="taskSettingsMessage" class="save-message" role="status" aria-live="polite"></p>
+  </dialog>
+
   <dialog id="taskDialog" class="install-dialog task-dialog" aria-labelledby="taskDialogTitle">
     <form id="taskForm" novalidate>
       <div class="task-dialog-header">
@@ -123,6 +132,7 @@
           <select id="taskStatus">
             <option value="todo">To do</option>
             <option value="in-progress">In progress</option>
+            <option value="resolved">Resolved</option>
             <option value="done">Done</option>
           </select>
         </label>
