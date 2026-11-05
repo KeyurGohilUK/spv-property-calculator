@@ -1,5 +1,5 @@
 {
-  "version": "1.60.22",
+  "version": "1.60.23",
   "notes": [
     "Align compliance status badges and restore focus when dialogs close.",
     "Show the next Companies House statement date in compliance rows.",
@@ -12,6 +12,7 @@
     "Hide the empty receipt message while a receipt is selected.",
     "Refresh payment receipt status immediately after file selection.",
     "Reduce excess spacing between compliance titles and filing details.",
-    "Remove redundant helper text from compliance evidence dialogs."
+    "Remove redundant helper text from compliance evidence dialogs.",
+    "Show API-backed director and PSC verification alongside each appointment."
   ]
 }
