@@ -73,7 +73,8 @@
             <p class="user-role-note"><strong>Note:</strong> Inactive accounts cannot access the shared workspace, regardless of their assigned role.</p>
           </div>
         </details>
-        <p id="userManagementMessage" class="save-message" role="status"></p>
+        <div id="userOverview" class="user-overview" aria-label="Workspace user summary"></div>
+        <div class="user-list-toolbar"><p id="userManagementMessage" class="save-message" role="status"></p><div class="user-filters" role="group" aria-label="Filter users"><button type="button" class="user-filter active" data-user-filter="all" aria-pressed="true">All users</button><button type="button" class="user-filter" data-user-filter="attention" aria-pressed="false">Needs attention</button></div></div>
         <div id="userList" class="user-list"></div>
         <div id="userListEmpty" class="user-access-state hidden">
           <div class="empty-icon" aria-hidden="true">👤</div>
