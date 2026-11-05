@@ -159,6 +159,14 @@ function canEditTask(task) {
   return !task.createdBy || task.createdBy === cloudUser?.id;
 }
 
+// Editors may claim someone else's unassigned Todo, but not edit or delete it.
+function canClaimTask(task) {
+  return canEdit && Boolean(cloudUser?.id) && task.status === 'todo' && !task.assignedTo;
+}
+function canMoveTask(task, destination) {
+  return canEditTask(task) || (canClaimTask(task) && destination === 'in-progress');
+}
+
 async function loadWorkspaceMembers() {
   const cloud = window.SPVCloud;
   const loadCached = () => {
@@ -384,7 +392,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusBtn.title = canEditTask(task)
     ? `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`
     : 'Viewer accounts cannot change task status';
-  statusBtn.disabled = !canEditTask(task);
+  statusBtn.disabled = !canMoveTask(task, nextStatus(task.status));
   statusBtn.addEventListener('click', () => cycleStatus(task));
 
   const main = document.createElement('div');
@@ -454,7 +462,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
     actions.appendChild(deleteBtn);
   }
 
-  if (canEditTask(task)) {
+  if (canEditTask(task) || canClaimTask(task)) {
     const handle = document.createElement('span');
     handle.className = 'task-drag-handle';
     handle.title = 'Drag task to another column';
@@ -468,8 +476,8 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusSelect.className = 'task-card-status-select';
   statusSelect.setAttribute('aria-label', `Status for ${task.title}`);
   statusSelect.title = 'Change task status';
-  statusSelect.disabled = !canEditTask(task);
-  STATUS_GROUP_ORDER.forEach((status) => {
+  statusSelect.disabled = !(canEditTask(task) || canClaimTask(task));
+  STATUS_GROUP_ORDER.filter((status) => canEditTask(task) || status === task.status || status === 'in-progress').forEach((status) => {
     const option = document.createElement('option');
     option.value = status;
     option.textContent = STATUS_LABELS[status];
@@ -486,7 +494,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
 const STATUS_GROUP_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
 
 function changeTaskStatus(task, newStatus) {
-  if (!canEditTask(task) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
+  if (!canMoveTask(task, newStatus) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
     render();
     return;
   }
