@@ -560,7 +560,9 @@ function renderHmrcFilingEvidence(periodEnd = $('hmrcRecordPeriod').value) {
   const input = $('hmrcFilingEvidenceInput');
   input.dataset.evidenceUpload = ruleKey;
   input.disabled = !editingAllowed || !periodEnd;
-  $('hmrcFilingEvidenceStatus').textContent = files.length ? `Evidence attached (${files.length})` : 'No evidence attached';
+  const status = $('hmrcFilingEvidenceStatus');
+  status.textContent = files.length ? `Evidence attached (${files.length})` : 'No evidence attached';
+  status.classList.toggle('is-attached', files.length > 0);
   $('hmrcFilingEvidenceFiles').innerHTML = files.map((file) => `<li><span>${escapeHtml(file.name)}</span>${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No documents attached.</li>';
   $('hmrcFilingEvidenceMessage').textContent = '';
 }
@@ -1439,6 +1441,7 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
     select.value = periodEnd;
     if (isFiling) {
       fillHmrcFilingForm(periodEnd);
+      renderHmrcFilingEvidence(periodEnd);
       $('hmrcFilingMessage').textContent = '';
       hmrcDialogs.filing.open(action);
     } else {
