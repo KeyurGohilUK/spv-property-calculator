@@ -1,6 +1,8 @@
 {
-  "version": "1.60.32",
+  "version": "1.60.33",
   "notes": [
+    "Add direct Compliance and Investment shortcuts to company cards.",
+    "Refine the company listing icon and highlight the company name on hover.",
     "Refresh company cards with status, incorporation and assigned property details.",
     "Highlight pending Corporation Tax period statuses.",
     "Remove the separate Supporting documents section from Corporation Tax period cards.",

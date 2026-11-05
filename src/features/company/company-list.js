@@ -28,12 +28,15 @@ function renderCompanies() {
     const incorporationDate = company.incorporationDate
       ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${company.incorporationDate}T00:00:00Z`))
       : 'Not recorded';
+    const companyUrl = `./company/details.html?company=${encodeURIComponent(company.id)}`;
     return `
-      <a class="company-list-card" href="./company/details.html?company=${encodeURIComponent(company.id)}">
-        <span class="company-list-card-icon" aria-hidden="true">⌂</span>
+      <article class="company-list-card">
+        <span class="company-list-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5.5L12 2l8 3.5V21"/><path d="M2 21h20M8 8h1m6 0h1M8 12h1m6 0h1M8 16h1m6 0h1M11 21v-4h2v4"/></svg>
+        </span>
         <span class="company-list-card-content">
           <span class="company-list-card-heading">
-            <strong>${escapeHtml(company.companyName)}</strong>
+            <a class="company-list-card-title" href="${companyUrl}">${escapeHtml(company.companyName)}</a>
             <span class="company-list-card-status${isActive ? ' is-active' : ''}"><span aria-hidden="true"></span>${escapeHtml(status)}</span>
           </span>
           <span class="company-list-card-details">
@@ -41,11 +44,15 @@ function renderCompanies() {
             <span>Incorp: <strong>${escapeHtml(incorporationDate)}</strong></span>
           </span>
           <span class="company-list-card-meta">
-            <span class="company-list-card-property-count"><span aria-hidden="true">⌂</span> ${propertyCount} ${propertyCount === 1 ? 'Property' : 'Properties'}</span>
+            <span class="company-list-card-property-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg> ${propertyCount} ${propertyCount === 1 ? 'Property' : 'Properties'}</span>
           </span>
         </span>
-        <span class="company-list-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>`;
+        <nav class="company-list-card-shortcuts" aria-label="${escapeHtml(company.companyName)} shortcuts">
+          <a href="${companyUrl}&amp;tab=compliance">Compliance</a>
+          <a href="${companyUrl}&amp;tab=investment">Investment</a>
+        </nav>
+        <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+      </article>`;
   }).join('');
   $('companyListMessage').textContent = records.length
     ? `${records.length} compan${records.length === 1 ? 'y' : 'ies'} in this workspace`
