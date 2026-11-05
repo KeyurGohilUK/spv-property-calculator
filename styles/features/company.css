@@ -738,3 +738,5 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-filing-evidence-status.is-attached { color: var(--positive); }
 .hmrc-filing-evidence .hmrc-evidence-list { margin: 0; }
 .hmrc-filing-evidence > p { margin: 0; }
+
+.hmrc-period-actions .hmrc-delete-period-btn { flex:0 0 44px; width:44px; height:44px; min-height:44px; padding:10px; }
