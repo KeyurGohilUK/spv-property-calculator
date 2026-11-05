@@ -127,6 +127,21 @@
           </section>
         </section>
       </section>
+  <dialog id="companyComplianceDialog" class="install-dialog company-dialog company-compliance-dialog" aria-labelledby="companyComplianceDialogTitle">
+    <div class="company-dialog-header"><h2 id="companyComplianceDialogTitle">Compliance details</h2><button type="button" id="companyComplianceDialogClose" class="dialog-close" aria-label="Close compliance details">×</button></div>
+    <div class="company-compliance-dialog-status" id="companyComplianceDialogStatus"></div>
+    <div id="companyComplianceDialogDetails" class="company-compliance-dialog-details"></div>
+    <section class="company-compliance-dialog-evidence" aria-labelledby="companyComplianceDialogEvidenceHeading">
+      <h3 id="companyComplianceDialogEvidenceHeading">Supporting evidence</h3>
+      <p class="muted">Attach documents you want to keep with this obligation.</p>
+      <ul id="companyComplianceDialogEvidenceFiles" class="company-evidence-files"></ul>
+      <file-upload-field id="companyComplianceEvidenceUpload" input-id="companyComplianceEvidenceInput" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" help="PDF or image · maximum 5 MB"></file-upload-field>
+      <p id="companyComplianceDialogMessage" role="status" aria-live="polite"></p>
+    </section>
+    <div class="company-compliance-dialog-actions">
+      <button id="companyComplianceDialogDone" class="primary-btn" type="button">Mark as done</button>
+    </div>
+  </dialog>
   <dialog id="hmrcSetupDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcSetupDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcSetupDialogTitle">UTR letter</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupDialog" aria-label="Close UTR letter">×</button></div>
   <p class="muted">Record the date, not your UTR number.</p>
