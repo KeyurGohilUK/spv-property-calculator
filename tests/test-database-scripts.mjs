@@ -8,6 +8,7 @@ const revisionRepair = fs.readFileSync(new URL('../database/migrations/Update 12
 const pushMigration = fs.readFileSync(new URL('../database/migrations/Update 14 - Note Push Notifications.sql', import.meta.url), 'utf8');
 const policyMigration = fs.readFileSync(new URL('../database/migrations/Update 15 - Policy Acceptance.sql', import.meta.url), 'utf8');
 const viewingReminderMigration = fs.readFileSync(new URL('../database/migrations/Update 16 - Viewing Push Reminders.sql', import.meta.url), 'utf8');
+const kanbanTaskMigration = fs.readFileSync(new URL('../database/migrations/Update 27 - Kanban Task Status.sql', import.meta.url), 'utf8');
 const taskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 21 - Task Discussions.sql', import.meta.url), 'utf8');
 const editableTaskDiscussionMigration = fs.readFileSync(new URL('../database/migrations/Update 22 - Editable Task Discussions.sql', import.meta.url), 'utf8');
 const expensePayerMigration = fs.readFileSync(new URL('../database/migrations/Update 23 - Expense Payer Attribution.sql', import.meta.url), 'utf8');
@@ -23,6 +24,9 @@ const migrationDirectory = new URL('../database/migrations/', import.meta.url);
 for (const table of ['workspace_members', 'properties', 'property_notes', 'property_deletions', 'expenses', 'company_profiles', 'tasks', 'task_events', 'task_comments', 'push_subscriptions', 'policy_acceptances', 'viewing_reminder_deliveries']) {
   assert.match(bootstrap, new RegExp(`create table if not exists public\\.${table}`), `Bootstrap is missing ${table}`);
 }
+assert.match(kanbanTaskMigration, /status in \('todo', 'in-progress', 'resolved', 'done'\)/, 'Resolved status must be permitted by SQL constraints');
+assert.match(kanbanTaskMigration, /create or replace function public\.upsert_task_if_current/, 'Kanban migration must update revision-safe task RPC');
+assert.match(bootstrap, /from_status in \('todo', 'in-progress', 'resolved', 'done'\)/, 'Task audit schema must support Resolved');
 assert.match(multiCompanyMigration, /upsert_company_profile_by_id_if_current/, 'Multiple companies need revision-safe writes');
 assert.match(multiCompanyMigration, /drop constraint if exists company_profiles_id_check/, 'Legacy single-company restriction must be lifted');
 assert.match(bootstrap, /upsert_company_profile_by_id_if_current/, 'Fresh bootstrap must support multiple companies');

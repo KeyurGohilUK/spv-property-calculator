@@ -27,14 +27,23 @@ assert.equal(task.status, 'todo');
 assert.equal(task._cloudDirty, true, 'New task must be marked cloud dirty');
 assert.equal(task.deletedAt, null);
 
+// Newly created tasks always default to Todo.
+assert.equal(saveTask({ title: 'Default task', scope: 'company' }).status, 'todo');
+
 // Storage: update status
 const updated = updateTaskStatus(task.id, 'in-progress');
 assert.equal(updated.status, 'in-progress');
 assert.equal(updated._cloudDirty, true);
 
+// Storage: task can move directly between any statuses, including Resolved.
+assert.equal(updateTaskStatus(task.id, 'resolved').status, 'resolved');
+assert.equal(updateTaskStatus(task.id, 'todo').status, 'todo');
+assert.throws(() => updateTaskStatus(task.id, 'invalid'), /Invalid task status/);
+
 // Storage: next status cycling
 assert.equal(nextStatus('todo'), 'in-progress');
-assert.equal(nextStatus('in-progress'), 'done');
+assert.equal(nextStatus('in-progress'), 'resolved');
+assert.equal(nextStatus('resolved'), 'done');
 assert.equal(nextStatus('done'), 'todo');
 
 // Storage: getTasks excludes soft-deleted
@@ -60,7 +69,7 @@ replaceTasks([
   { id: 'done-last', title: 'Finished', status: 'done', updatedAt: '2025-01-03T00:00:00Z' },
   { id: 'active-top', title: 'Active', status: 'in-progress', updatedAt: '2025-01-02T00:00:00Z' }
 ]);
-assert.deepEqual(getTasks().map((item) => item.id), ['active-top', 'todo-first', 'done-last']);
+assert.deepEqual(getTasks().map((item) => item.id), ['todo-first', 'active-top', 'done-last']);
 
 // Merge: cloud-only record is added locally
 const local1 = { id: 'a', title: 'Local', status: 'todo', updatedAt: '2024-01-01T00:00:00Z', _cloudDirty: false, _cloudRevision: 1 };
@@ -155,6 +164,13 @@ const updated2 = saveTask({ id: savedWithAssignee.id, title: 'Check assignee upd
 assert.equal(updated2.assignedTo, 'user-xyz', 'Updating a task without passing assignedTo must preserve existing value');
 
 // HTML checks
+assert.ok(taskHtml.includes('vendor/sortable.min.js'), 'Offline SortableJS must be included');
+assert.ok(taskHtml.includes('value="resolved"'), 'Resolved must be available in status controls');
+assert.ok(taskPage.includes('Sortable.create(column'), 'Task columns should support drag and drop');
+assert.ok(taskPage.includes('canEditTask(task)'), 'Permission check required for status changes');
+assert.ok(taskPage.includes('changeTaskStatus(task, destination)'), 'Dropping a card must update status');
+assert.ok(taskPage.includes('task-card-status-select'), 'Accessible status select fallback must be provided');
+assert.ok(taskPage.includes('status: newStatus'), 'Task status must be saved from the task form');
 assert.match(taskHtml, /id="taskSyncStatus" class="sync-status"/, 'Task page must include sync status');
 assert.match(taskHtml, /id="taskList"/, 'Task page must include task list container');
 assert.match(taskHtml, /id="taskEmpty"/, 'Task page must include empty state');
@@ -181,7 +197,7 @@ assert.match(taskPage, /syncTaskEvents\(cloud\)/, 'Tasks must sync status histor
 assert.match(taskPage, /syncTaskComments\(cloud\)/, 'Tasks must sync discussion comments');
 assert.match(taskPage, /updateTaskComment\(/, 'Tasks must support editing discussion comments');
 assert.match(taskPage, /beginEditTaskComment/, 'Task discussion must expose an edit flow for the current user');
-assert.match(taskPage, /STATUS_GROUP_ORDER = \['in-progress', 'todo', 'done'\]/, 'In-progress groups must render first');
+assert.match(taskPage, /STATUS_GROUP_ORDER = \['todo', 'in-progress', 'resolved', 'done'\]/, 'Kanban columns must render in workflow order');
 assert.match(taskPage, /addTaskEvent\(/, 'Tasks must record status change events');
 assert.match(taskPage, /canEdit/, 'Tasks must gate writes behind edit permission');
 assert.match(taskPage, /getWorkspaceAccess/, 'Tasks must check workspace access for edit permission');

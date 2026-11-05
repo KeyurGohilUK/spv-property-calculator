@@ -24,9 +24,9 @@ function writeRaw(tasks) {
   }
 }
 
-const STATUS_ORDER = ['todo', 'in-progress', 'done'];
+const STATUS_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
 // Active work is intentionally surfaced before queued and completed work.
-const SORT_STATUS_ORDER = ['in-progress', 'todo', 'done'];
+const SORT_STATUS_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
 
 function sortTasks(items) {
   const statusRank = (status) => {
@@ -90,7 +90,7 @@ export function updateTaskStatus(id, status) {
   if (index < 0) return null;
   const now = new Date().toISOString();
   tasks[index] = { ...tasks[index], status, updatedAt: now, _cloudDirty: true };
-  writeRaw(tasks);
+  if (!writeRaw(tasks)) throw new Error('Unable to update task status.');
   return tasks[index];
 }
 
