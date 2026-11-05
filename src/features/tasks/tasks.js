@@ -17,10 +17,11 @@ import { TEMPLATES, buildTasksFromTemplate } from './task-templates.js';
 
 const $ = (id) => document.getElementById(id);
 
-const STATUS_LABELS = { todo: 'To do', 'in-progress': 'In progress', done: 'Done' };
+const STATUS_LABELS = { todo: 'Todo', 'in-progress': 'In Progress', resolved: 'Resolved', done: 'Done' };
 const STATUS_ICONS = {
   todo: '<circle cx="12" cy="12" r="9"></circle>',
   'in-progress': '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path>',
+  resolved: '<circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path>',
   done: '<circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-4.5"></path>'
 };
 
@@ -39,6 +40,7 @@ let properties = [];
 let workspaceMembers = [];
 let cloudUser = null;
 let taskSyncing = false;
+let boardSortables = [];
 let cloudListenerAttached = false;
 let editingTaskId = null;
 let editingCommentId = null;
@@ -223,7 +225,8 @@ function getActorName() {
 
 const STATUS_LABELS_FULL = {
   todo: 'To do',
-  'in-progress': 'In progress',
+  'in-progress': 'In Progress',
+  resolved: 'Resolved',
   done: 'Done'
 };
 
@@ -371,10 +374,10 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusBtn.dataset.status = task.status;
   statusBtn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${STATUS_ICONS[task.status] || STATUS_ICONS.todo}</svg>`;
   statusBtn.setAttribute('aria-label', `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`);
-  statusBtn.title = canEdit
+  statusBtn.title = canEditTask(task)
     ? `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`
     : 'Viewer accounts cannot change task status';
-  statusBtn.disabled = !canEdit;
+  statusBtn.disabled = !canEditTask(task);
   statusBtn.addEventListener('click', () => cycleStatus(task));
 
   const main = document.createElement('div');
@@ -444,11 +447,83 @@ function buildTaskCard(task, { showStatus = true } = {}) {
     actions.appendChild(deleteBtn);
   }
 
+  if (canEditTask(task)) {
+    const handle = document.createElement('span');
+    handle.className = 'task-drag-handle';
+    handle.title = 'Drag task to another column';
+    handle.setAttribute('aria-hidden', 'true');
+    handle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>';
+    actions.prepend(handle);
+  }
+
+  // Native select remains usable by keyboard and assistive technology.
+  const statusSelect = document.createElement('select');
+  statusSelect.className = 'task-card-status-select';
+  statusSelect.setAttribute('aria-label', `Status for ${task.title}`);
+  statusSelect.title = 'Change task status';
+  statusSelect.disabled = !canEditTask(task);
+  STATUS_GROUP_ORDER.forEach((status) => {
+    const option = document.createElement('option');
+    option.value = status;
+    option.textContent = STATUS_LABELS[status];
+    statusSelect.appendChild(option);
+  });
+  statusSelect.value = task.status;
+  statusSelect.addEventListener('change', () => changeTaskStatus(task, statusSelect.value));
+  actions.prepend(statusSelect);
+
   card.append(openBtn, statusBtn, main, actions);
   return card;
 }
 
-const STATUS_GROUP_ORDER = ['in-progress', 'todo', 'done'];
+const STATUS_GROUP_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
+
+function changeTaskStatus(task, newStatus) {
+  if (!canEditTask(task) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
+    render();
+    return;
+  }
+  try {
+    const updated = updateTaskStatus(task.id, newStatus);
+    if (!updated) throw new Error('Task no longer exists.');
+    addTaskEvent({ taskId: task.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: task.status, toStatus: newStatus });
+    render();
+    syncTasks({ showFeedback: false });
+    checkViewingSuggestion(task, newStatus);
+  } catch (error) {
+    setSyncStatus(error.message || 'Unable to update task status', 'error');
+    render();
+  }
+}
+
+function setupBoardDragAndDrop() {
+  boardSortables.forEach((sortable) => sortable.destroy());
+  boardSortables = [];
+  if (!canEdit || !window.Sortable) return;
+
+  document.querySelectorAll('.task-board-column-items').forEach((column) => {
+    boardSortables.push(window.Sortable.create(column, {
+      group: 'spv-tasks',
+      animation: 160,
+      handle: '.task-drag-handle',
+      draggable: '.task-card',
+      ghostClass: 'task-drag-ghost',
+      chosenClass: 'task-drag-chosen',
+      delayOnTouchOnly: true,
+      delay: 120,
+      touchStartThreshold: 4,
+      onEnd(event) {
+        const task = getTasks().find((item) => item.id === event.item?.dataset.taskId);
+        const destination = event.to?.dataset.status;
+        if (task && destination && destination !== task.status) {
+          changeTaskStatus(task, destination);
+        } else {
+          render();
+        }
+      }
+    }));
+  });
+}
 
 function render() {
   const tasks = getTasks().filter(taskMatchesFilter);
@@ -456,49 +531,41 @@ function render() {
   $('taskEmpty').classList.toggle('hidden', tasks.length > 0);
   updateFilterBadge();
 
+  boardSortables.forEach((sortable) => sortable.destroy());
+  boardSortables = [];
   const list = $('taskList');
   list.innerHTML = '';
+  STATUS_GROUP_ORDER.forEach((status) => {
+    const group = document.createElement('section');
+    group.className = 'task-board-column';
+    group.setAttribute('aria-label', STATUS_LABELS[status]);
 
-  if ($('taskGroupBy').value === 'status') {
-    const groups = Object.fromEntries(STATUS_GROUP_ORDER.map((s) => [s, []]));
-    tasks.forEach((t) => { if (groups[t.status]) groups[t.status].push(t); });
+    const header = document.createElement('div');
+    header.className = 'task-board-column-header';
+    const name = document.createElement('strong');
+    name.textContent = STATUS_LABELS[status];
+    const count = document.createElement('span');
+    count.className = 'count-badge';
+    const groupTasks = tasks.filter((task) => task.status === status);
+    count.textContent = String(groupTasks.length);
+    header.append(name, count);
 
-    STATUS_GROUP_ORDER.forEach((status) => {
-      const groupTasks = groups[status];
-      if (!groupTasks.length) return;
-
-      const group = document.createElement('div');
-      group.className = 'task-group';
-
-      const header = document.createElement('div');
-      header.className = 'task-group-header';
-      const chip = document.createElement('span');
-      chip.className = `task-chip ${status}`;
-      chip.textContent = STATUS_LABELS[status];
-      const count = document.createElement('span');
-      count.className = 'count-badge';
-      count.textContent = String(groupTasks.length);
-      header.append(chip, count);
-      group.appendChild(header);
-
-      groupTasks.forEach((task) => group.appendChild(buildTaskCard(task, { showStatus: false })));
-      list.appendChild(group);
+    const items = document.createElement('div');
+    items.className = 'task-board-column-items';
+    items.dataset.status = status;
+    groupTasks.forEach((task) => {
+      const card = buildTaskCard(task, { showStatus: false });
+      card.dataset.taskId = task.id;
+      items.appendChild(card);
     });
-  } else {
-    tasks.forEach((task) => list.appendChild(buildTaskCard(task)));
-  }
+    group.append(header, items);
+    list.appendChild(group);
+  });
+  setupBoardDragAndDrop();
 }
 
 function cycleStatus(task) {
-  if (!canEdit) return;
-  const newStatus = nextStatus(task.status);
-  const updated = updateTaskStatus(task.id, newStatus);
-  if (updated) {
-    addTaskEvent({ taskId: task.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: task.status, toStatus: newStatus });
-    render();
-    syncTasks({ showFeedback: false });
-    checkViewingSuggestion(task, newStatus);
-  }
+  changeTaskStatus(task, nextStatus(task.status));
 }
 
 function removeTask(task) {
@@ -705,6 +772,7 @@ function openForm(task = null, { preset = null } = {}) {
   $('taskTitle').value = task?.title ?? preset?.title ?? '';
   $('taskDescription').value = task?.description || '';
   $('taskStatus').value = task?.status || 'todo';
+  $('taskStatus').disabled = !task;
   $('taskDueDate').value = task?.dueDate || '';
   $('taskAssignedTo').value = task?.assignedTo || '';
   $('taskScope').value = task?.scope ?? preset?.scope ?? 'company';
@@ -713,7 +781,7 @@ function openForm(task = null, { preset = null } = {}) {
     ? (userRole === 'viewer' ? 'You have read-only access to tasks' : 'You can only edit tasks you created')
     : '';
   ['taskTitle', 'taskDescription', 'taskStatus', 'taskDueDate', 'taskAssignedTo', 'taskScope', 'taskProperty'].forEach((id) => {
-    $(id).disabled = readOnly;
+    $(id).disabled = readOnly || (id === 'taskStatus' && !task);
   });
   if (task) {
     renderTaskHistory(task.id);
@@ -816,7 +884,7 @@ function submitTask(event) {
 
   try {
     const existing = editingTaskId ? getAllTasks().find((t) => t.id === editingTaskId) : null;
-    const newStatus = $('taskStatus').value;
+    const newStatus = existing ? $('taskStatus').value : 'todo';
     saveTask({
       ...existing,
       id: editingTaskId || undefined,
@@ -861,7 +929,6 @@ $('taskFilter').addEventListener('change', render);
 $('taskStatusFilter').addEventListener('change', render);
 $('taskDueFilter').addEventListener('change', render);
 $('taskAssignedFilter').addEventListener('change', render);
-$('taskGroupBy').addEventListener('change', render);
 $('toggleTaskFiltersBtn').addEventListener('click', () => {
   const opening = $('taskFilters').classList.contains('hidden');
   $('taskFilters').classList.toggle('hidden', !opening);
@@ -872,7 +939,6 @@ $('clearTaskFiltersBtn').addEventListener('click', () => {
   $('taskStatusFilter').value = 'all';
   $('taskDueFilter').value = 'all';
   $('taskAssignedFilter').value = 'all';
-  $('taskGroupBy').value = 'none';
   render();
 });
 window.addEventListener('online', () => syncTasks({ showFeedback: false }));
