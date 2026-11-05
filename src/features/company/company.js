@@ -158,7 +158,7 @@ function renderAppointments() {
     <article class="company-appointment-card">
       <div class="company-appointment-card-heading"><h3>${escapeHtml(appointment.name)}</h3><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></div>
       <ul class="company-role-chips">${appointment.roles.map((role) => `<li>${escapeHtml(ROLE_LABELS[role])}</li>`).join('')}</ul>
-    </div></details>`).join('');
+    </div></article>`).join('');
   document.querySelectorAll('[data-edit-appointment]').forEach((button) => {
     button.addEventListener('click', () => openAppointment(button.dataset.editAppointment));
   });
@@ -331,9 +331,9 @@ function renderCompanyCompliance() {
             }).join('')}</ul>`;
   }
   const renderCards = (selected) => selected.map((item) => `
-    <details class="company-compliance-item">
-      <summary class="company-compliance-item-heading"><strong>${escapeHtml(item.title)}</strong>
-        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span><span class="compliance-expand-icon" aria-hidden="true"></span></summary><div class="company-compliance-item-details">
+    <article class="company-compliance-item">
+      <div class="company-compliance-item-heading"><strong>${escapeHtml(item.title)}</strong>
+        <span class="company-compliance-status">${item.status === 'user-confirmed' ? 'User confirmed' : item.status === 'due-soon' ? 'Due soon' : item.status === 'upcoming' ? 'Upcoming' : item.status === 'past-deadline-unverified' ? 'Past deadline · unverified' : 'Needs verification'}</span></div><div class="company-compliance-item-details">
       ${item.taxPeriod ? `<p class="muted">Tax period: ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodStart))} – ${escapeHtml(formatComplianceDateUK(item.taxPeriod.periodEnd))}</p>` : ''}
       ${item.dueDate ? `<p class="muted">Due ${escapeHtml(formatComplianceDateUK(item.dueDate))} · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}</p>` : ''}
       ${item.officialFiling?.lastPeriod ? `<p class="muted">Last filed period: ${escapeHtml(formatComplianceDateUK(item.officialFiling.lastPeriod))} · Companies House</p>` : item.source === 'companies-house' ? '<p class="muted">Last filing period not available</p>' : ''}
