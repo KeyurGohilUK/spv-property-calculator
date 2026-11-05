@@ -44,7 +44,7 @@ assert.ok(script.includes('buildCompanyCompliance({ today, company: companyHouse
 assert.ok(script.includes('hmrc: profile.hmrc'));
 assert.match(script, /renderCards/);
 assert.match(script, /renderCompanyCompliance\(\)/);
-assert.match(script, /escapeHtml\(item.title\)/);
+assert.match(script, /escapeHtml\(displayTitle\)/);
 assert.match(script, /Needs verification/);
 assert.match(style, /\.company-compliance-list/);
 assert.match(style, /\.company-compliance-hub #companyHouseAuthorityPanel \.company-compliance-list/);
