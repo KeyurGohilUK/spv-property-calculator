@@ -57,6 +57,7 @@
 }
 .task-status-btn:hover { border-color: var(--brand); color: var(--brand); background: color-mix(in srgb, var(--brand) 9%, transparent); }
 .task-status-btn[data-status="in-progress"] { border-color: var(--brand); color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, transparent); }
+.task-status-btn[data-status="resolved"] { border-color: #b88924; color: #b88924; }
 .task-status-btn[data-status="done"] { border-color: var(--positive); color: var(--positive); background: color-mix(in srgb, var(--positive) 11%, transparent); }
 .task-status-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .task-card-main { min-width: 0; }
@@ -79,6 +80,7 @@
 }
 .task-chip.todo { background: var(--surface-2); color: var(--muted); }
 .task-chip.in-progress { color: var(--brand-strong); background: color-mix(in srgb, var(--brand) 14%, var(--surface)); }
+.task-chip.resolved { color: #a16207; background: color-mix(in srgb, #d99b22 14%, var(--surface)); }
 .task-chip.done { color: var(--positive); background: color-mix(in srgb, var(--positive) 14%, var(--surface)); }
 .task-chip.overdue { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
 .task-chip.task-role-viewer { color: var(--muted); background: var(--surface-2); }
@@ -181,4 +183,50 @@
 }
 @media (max-width: 700px) {
   .task-card { gap: 10px; padding: 13px 14px; }
+}
+
+/* Four-column task board. Keeps the existing theme tokens and task cards. */
+.task-board-help { margin: 0; font-size: 12px; }
+.task-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+.task-board-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+}
+.task-board-column-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 3px 7px; }
+.task-board-column-header strong { font-size: 13px; }
+.task-board-column:nth-child(1) .task-board-column-header { color: var(--muted); }
+.task-board-column:nth-child(2) .task-board-column-header { color: var(--brand-strong); }
+.task-board-column:nth-child(3) .task-board-column-header { color: #b88924; }
+.task-board-column:nth-child(4) .task-board-column-header { color: var(--positive); }
+.task-board-column-items { display: grid; align-content: start; gap: 10px; flex: 1; min-height: 108px; border-radius: 10px; }
+.task-board .task-card { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 13px; min-width: 0; }
+.task-board .task-card-main { width: 100%; }
+.task-board .task-card-actions { align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.task-board .task-status-btn { align-self: flex-start; }
+.task-board .task-card-open { z-index: 1; }
+.task-board .task-card-actions { z-index: 2; }
+.task-drag-handle { position: relative; z-index: 3; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); cursor: grab; touch-action: none; }
+.task-drag-handle:active { cursor: grabbing; }
+.task-drag-handle svg { width: 17px; height: 17px; fill: currentColor; }
+.task-card-status-select { position: relative; z-index: 3; min-width: 0; max-width: 100%; flex: 1 1 100px; min-height: 34px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); padding: 4px 6px; font-size: 12px; }
+.task-card-status-select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.task-drag-ghost { opacity: .35; border: 2px dashed var(--brand) !important; }
+.task-drag-chosen { box-shadow: 0 6px 18px color-mix(in srgb, var(--text) 13%, transparent); }
+@media (max-width: 950px) {
+  .task-board { display: flex; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 12px; -webkit-overflow-scrolling: touch; }
+  .task-board-column { flex: 0 0 min(280px, 76vw); scroll-snap-align: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-board .task-card { transition: none; }
 }
