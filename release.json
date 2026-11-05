@@ -1,6 +1,6 @@
 {
-  "version": "1.60.35",
+  "version": "1.60.36",
   "notes": [
-    "Use consistent hover colors and tooltips for icon-only actions throughout the app."
+    "Add consistent hover colors and keyboard focus styles to action buttons throughout the app."
   ]
 }
