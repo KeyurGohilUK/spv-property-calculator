@@ -40,6 +40,15 @@ assert.equal(updateTaskStatus(task.id, 'resolved').status, 'resolved');
 assert.equal(updateTaskStatus(task.id, 'todo').status, 'todo');
 assert.throws(() => updateTaskStatus(task.id, 'invalid'), /Invalid task status/);
 
+const queued = saveTask({ title: 'Claim me', scope: 'company' });
+const claimed = updateTaskStatus(queued.id, 'in-progress', 'user-123');
+assert.equal(claimed.assignedTo, 'user-123');
+assert.equal(updateTaskStatus(queued.id, 'resolved', 'user-456').assignedTo, 'user-123');
+const assigned = saveTask({ title: 'Assigned', assignedTo: 'user-A' });
+assert.equal(updateTaskStatus(assigned.id, 'in-progress', 'user-B').assignedTo, 'user-A');
+const skipped = saveTask({ title: 'Skipped' });
+assert.equal(updateTaskStatus(skipped.id, 'done', 'user-B').assignedTo, null);
+
 // Storage: next status cycling
 assert.equal(nextStatus('todo'), 'in-progress');
 assert.equal(nextStatus('in-progress'), 'resolved');
