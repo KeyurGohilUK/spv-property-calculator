@@ -177,6 +177,12 @@
 <label>17-character HMRC payment reference<input id="hmrcPeriodPaymentReference" type="text" maxlength="17" minlength="17" pattern="[A-Za-z0-9]{17}" autocomplete="off" placeholder="From HMRC for this period"></label>
 <label>Accountant reviewed on<input id="hmrcReviewedOn" type="date"></label>
 <label>Reviewed by<input id="hmrcReviewedBy" type="text" maxlength="160" autocomplete="name"></label>
+<section class="hmrc-filing-evidence hmrc-span-all" aria-labelledby="hmrcFilingEvidenceHeading">
+  <div class="hmrc-filing-evidence-heading"><strong id="hmrcFilingEvidenceHeading">CT600 evidence</strong><span id="hmrcFilingEvidenceStatus" class="hmrc-filing-evidence-status">No evidence attached</span></div>
+  <ul id="hmrcFilingEvidenceFiles" class="hmrc-evidence-list"><li class="muted">No documents attached.</li></ul>
+  <file-upload-field input-id="hmrcFilingEvidenceInput" label="Add evidence" optional accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcFilingEvidenceSelection" help-id="hmrcFilingEvidenceHelp" help="PDF or image · maximum 5 MB" data-evidence-upload=""></file-upload-field>
+  <p id="hmrcFilingEvidenceMessage" role="status" aria-live="polite"></p>
+</section>
 <p class="muted hmrc-span-all">Your entry is not HMRC verification.</p>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save record</button></div><p id="hmrcFilingMessage" role="status" aria-live="polite"></p></form>
 </dialog>
