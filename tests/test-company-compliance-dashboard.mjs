@@ -23,9 +23,9 @@ assert.doesNotMatch(html, /hmrc-view-tabs/, 'HMRC setup and periods must use one
 assert.match(html, /<details class="company-official-people company-identity-overview compliance-subsection" open>/);
 assert.match(html, /<details class="company-filing-history compliance-subsection">/);
 assert.doesNotMatch(html, /<details class="company-filing-history compliance-subsection" open>/, 'Filing history remains a compact disclosure');
-assert.match(script, /<details class="company-compliance-item">/, 'Individual obligations must be collapsible');
-assert.match(script, /<\/div><\/details>\x60\)\.join\(''\)/, 'Every generated compliance row must close its details element');
-assert.doesNotMatch(script, /<\/article>\x60\)\.join\(''\)/, 'Do not leave unmatched legacy article tags');
+assert.match(script, /<article class="company-compliance-item">/, 'Company obligations render as direct rows');
+assert.match(script, /<\/div><\/article>\x60\)\.join\(''\)/, 'Every generated compliance row must close its article');
+assert.doesNotMatch(script, /<details class="company-compliance-item">/, 'Company obligations do not add nested expanders');
 assert.ok(style.includes('.compliance-authority-switcher'), 'Authority cards should present one direct view selector');
 
 assert.match(html, /id="companyIdentitySummary"/);
