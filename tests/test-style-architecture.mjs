@@ -25,7 +25,7 @@ const dialogStyles = fs.readFileSync(new URL('../styles/dialogs.css', import.met
 const navigationStyles = fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8');
 assert.match(shellCore, /\.main-shell \{ max-width: 1328px;/, 'Shared pages use the expanded desktop content width');
 assert.match(dialogStyles, /\.main-shell \{ padding-inline: 8px; \}/, 'Mobile page gutters stay visible while remaining reduced');
-assert.match(navigationStyles, /calc\(\(100vw - 1400px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
+assert.match(navigationStyles, /calc\(\(100vw - 1328px\) \/ 2 \+ 16px\)/, 'Desktop navigation aligns with the expanded page width');
 assert.match(fs.readFileSync(new URL('../styles/features/properties.css', import.meta.url), 'utf8'), /\.property-card/);
 assert.match(fs.readFileSync(new URL('../styles/components/linked-content.css', import.meta.url), 'utf8'), /\.inline-text-link[\s\S]*\.property-map-link/);
 assert.match(fs.readFileSync(new URL('../styles/components/rich-textarea.css', import.meta.url), 'utf8'), /\.rich-textbox-toolbar[\s\S]*\.rich-textbox-editor/);
