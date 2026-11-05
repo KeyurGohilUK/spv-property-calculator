@@ -1,6 +1,7 @@
 {
-  "version": "1.60.23",
+  "version": "1.60.24",
   "notes": [
+    "Simplify the Corporation Tax period list by removing its enclosing tinted panel.",
     "Align compliance status badges and restore focus when dialogs close.",
     "Show the next Companies House statement date in compliance rows.",
     "Display Companies House obligations in full-width rows with clear filing dates.",
@@ -12,7 +13,6 @@
     "Hide the empty receipt message while a receipt is selected.",
     "Refresh payment receipt status immediately after file selection.",
     "Reduce excess spacing between compliance titles and filing details.",
-    "Remove redundant helper text from compliance evidence dialogs.",
-    "Show API-backed director and PSC verification alongside each appointment."
+    "Remove redundant helper text from compliance evidence dialogs."
   ]
 }
