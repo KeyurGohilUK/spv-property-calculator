@@ -1,7 +1,6 @@
 {
-  "version": "1.60.7",
+  "version": "1.60.8",
   "notes": [
-    "Show HMRC one-time setup progress using confirmed completion rules and a visible green check icon.",
-    "Count Corporation Tax registration as a separate setup step when business activity has started."
+    "Use shared positive theme colors consistently across the app, including HMRC confirmations and payment totals."
   ]
 }

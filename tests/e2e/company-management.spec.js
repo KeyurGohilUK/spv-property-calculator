@@ -215,6 +215,17 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await page.locator('#hmrcActivityForm button[type="submit"]').click();
   await expect(page.locator('#hmrcSetupCards')).toContainText('Corporation Tax registration');
   await expect(page.locator('#hmrcSetupViewTab')).toContainText('2/3 Complete');
+  await expect(page.locator('#hmrcSetupTabIcon')).toHaveClass(/is-progress/);
+  const partialProgressColor = await page.evaluate(() => {
+    const icon = document.querySelector('#hmrcSetupTabIcon');
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--positive-on-brand)';
+    document.body.append(probe);
+    const expected = getComputedStyle(probe).color;
+    probe.remove();
+    return { actual: getComputedStyle(icon).color, expected };
+  });
+  expect(partialProgressColor.actual).toBe(partialProgressColor.expected);
   await page.locator('#hmrcSetupCards [data-hmrc-open="registration"]').click();
   await page.locator('#hmrcRegistrationConfirmedOn').fill('2026-02-06');
   await page.locator('#hmrcAccountantName').fill('Example Accountants');
@@ -222,7 +233,16 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
 
   await expect(page.locator('#hmrcSetupViewTab')).toContainText('3/3 Done');
   await expect(page.locator('#hmrcSetupTabIcon')).toHaveClass(/is-complete/);
-  await expect(page.locator('#hmrcSetupTabIcon')).toHaveCSS('color', 'rgb(140, 229, 173)');
+  const completedIconColors = await page.evaluate(() => {
+    const icon = document.querySelector('#hmrcSetupTabIcon');
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--positive-on-brand)';
+    document.body.append(probe);
+    const expected = getComputedStyle(probe).color;
+    probe.remove();
+    return { actual: getComputedStyle(icon).color, expected };
+  });
+  expect(completedIconColors.actual).toBe(completedIconColors.expected);
   await expect(page.locator('#hmrcRecurringViewTab')).toBeVisible();
   await page.locator('#hmrcRecurringViewTab').click();
   await page.locator('#hmrcOpenPeriodDialog').click();

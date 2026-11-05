@@ -32,13 +32,19 @@ assert.equal(hmrcOverviewState(hmrc).setupRecorded, 3);
 const html = readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
 const script = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../styles/features/company.css', import.meta.url), 'utf8');
+const tokens = readFileSync(new URL('../styles/tokens.css', import.meta.url), 'utf8');
 for (const id of ['hmrcSetupViewTab','hmrcRecurringViewTab','hmrcSetupCards','hmrcPeriodHistory','hmrcSetupDialog','hmrcActivityDialog','hmrcFilingDialog','hmrcPaymentDialog','hmrcPeriodDialog','hmrcEvidenceDialog']) {
   assert.match(html, new RegExp('id="' + id + '"'));
 }
 assert.doesNotMatch(html, /id="hmrcComplianceItems"/, 'Duplicate HMRC checklist removed');
 assert.doesNotMatch(html, /id="hmrcGuideSteps"/, 'Old 5-step wizard removed');
 assert.doesNotMatch(script, /renderHmrcGuide|hmrcEditingPeriod|openEvidenceRequirement/, 'Old UI handlers removed');
-assert.match(styles, /hmrc-view-tabs button\[aria-selected="true"\].*hmrc-view-tab-setup-icon\.is-complete \{ color:#8ce5ad; \}/);
+assert.match(styles, /\.hmrc-view-tab-setup-icon\.is-progress \{ color:var\(--positive\); \}/);
+assert.match(styles, /hmrc-view-tabs button\[aria-selected="true"\].*hmrc-view-tab-setup-icon\.is-progress \{ color:var\(--positive-on-brand\); \}/);
+assert.match(styles, /\.hmrc-period-info \.hmrc-value-positive \{ color:var\(--positive\);/);
+assert.match(tokens, /--positive:\s*#[0-9a-f]{6};/i);
+assert.match(tokens, /--positive-on-brand:\s*#[0-9a-f]{6};/i);
+assert.doesNotMatch(styles, /#(?:218a62|8ce5ad|087c45|77e4aa)/i);
 assert.match(styles, /\.hmrc-pill--success/);
 assert.match(styles, /\.hmrc-pill--warning/);
 assert.match(script, /renderHmrcDashboard\(\)/);
