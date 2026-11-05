@@ -19,7 +19,7 @@ assert.doesNotMatch(app, /<summary[^>]*aria-haspopup="menu"/, 'Card disclosure m
 assert.doesNotMatch(index, /role="log"[^>]*aria-live=/, 'Log role must rely on its implicit live-region behaviour');
 assert.doesNotMatch(users, /role="status"[^>]*aria-live=/, 'Status role must rely on its implicit live-region behaviour');
 assert.doesNotMatch(users, /class="user-list"[^>]*aria-label=/, 'Generic user list must not carry an ineffective accessible name');
-assert.match(company, /<table class="company-appointments-table">[\s\S]*<th scope="col">Officer<\/th>/, 'Company appointments must use a semantic table with labelled columns');
+assert.match(company, /<table class="company-appointments-table">[\s\S]*<th scope="col">Person<\/th>/, 'Company appointments must use a semantic table with a person column');
 assert.match(company, /<label class="field"><span>Company name/, 'Company name input must have an associated label');
 
 console.log('ARIA semantics cleanup checks passed.');

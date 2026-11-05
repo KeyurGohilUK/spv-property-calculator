@@ -140,30 +140,137 @@ function setSyncStatus(message, state = '') {
   status.classList.toggle('synced', state === 'synced');
 }
 
+function normalizeCompaniesHousePersonName(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort()
+    .join(' ');
+}
+
+function appointmentIdentityCheck(appointment) {
+  const people = companyHouseData?.officialPeople;
+  const roleDefinitions = [
+    {
+      role: 'director',
+      label: 'Director',
+      available: people?.officersAvailable,
+      records: (people?.officers || []).filter((entry) => entry.role === 'director')
+    },
+    {
+      role: 'psc',
+      label: 'PSC',
+      available: people?.pscsAvailable,
+      records: people?.pscs || []
+    }
+  ].filter((definition) => appointment.roles.includes(definition.role));
+
+  if (!roleDefinitions.length) {
+    return { state: 'not-applicable', label: 'Not applicable', detail: 'No director or PSC role listed.', verifiedCount: 0, totalCount: 0 };
+  }
+  if (!people) {
+    return {
+      state: 'unknown',
+      label: 'Not checked',
+      detail: companyHouseError || (profile.companyNumber ? 'Waiting for Companies House records.' : 'Add a company number to check Companies House.'),
+      verifiedCount: 0,
+      totalCount: roleDefinitions.length
+    };
+  }
+
+  const personName = normalizeCompaniesHousePersonName(appointment.name);
+  const results = roleDefinitions.map((definition) => {
+    if (!definition.available) return { ...definition, state: 'unavailable', detail: 'Records unavailable' };
+    const matches = definition.records.filter((entry) => normalizeCompaniesHousePersonName(entry.name) === personName);
+    if (matches.length > 1) return { ...definition, state: 'ambiguous', detail: 'More than one public record matches this name' };
+    if (!matches.length) return { ...definition, state: 'not-found', detail: 'No matching public record' };
+    const entry = matches[0];
+    const statementDate = entry.verification?.statementStartOn;
+    const verifiedDate = entry.verification?.verifiedOn;
+    if (!statementDate && !verifiedDate) {
+      return { ...definition, state: 'unverified', detail: 'Verification evidence not published' };
+    }
+    const evidenceDate = statementDate || verifiedDate;
+    return {
+      ...definition,
+      state: 'verified',
+      detail: statementDate
+        ? `statement recorded${evidenceDate ? ` ${formatComplianceDateUK(evidenceDate)}` : ''}`
+        : `identity verified${evidenceDate ? ` ${formatComplianceDateUK(evidenceDate)}` : ''}`
+    };
+  });
+
+  const verifiedCount = results.filter((result) => result.state === 'verified').length;
+  const detail = results.map((result) => `${result.label}: ${result.detail}`).join(' · ');
+  if (verifiedCount === results.length) {
+    return { state: 'verified', label: 'Verified', detail, verifiedCount, totalCount: results.length };
+  }
+  if (results.some((result) => result.state === 'unavailable')) {
+    return { state: 'unknown', label: 'Unavailable', detail, verifiedCount, totalCount: results.length };
+  }
+  if (verifiedCount > 0) {
+    return { state: 'attention', label: 'Review', detail, verifiedCount, totalCount: results.length };
+  }
+  return { state: 'attention', label: 'Not confirmed', detail, verifiedCount, totalCount: results.length };
+}
+
+function identityCheckBadgeMarkup(check) {
+  const tone = check.state === 'verified'
+    ? 'company-identity-chip--recorded'
+    : check.state === 'attention'
+      ? 'company-identity-chip--attention'
+      : 'company-identity-chip--neutral';
+  return `<span class="company-identity-chip ${tone}">${escapeHtml(check.label)}</span>`;
+}
+
 function renderAppointments() {
   const empty = profile.appointments.length === 0;
   $('companyAppointmentsEmpty').classList.toggle('hidden', !empty);
   $('companyAppointmentsTable').classList.toggle('hidden', empty);
   $('companyAppointmentCards').classList.toggle('hidden', empty);
-  $('companyAppointmentsRows').innerHTML = profile.appointments.map((appointment) => `
-    <tr>
-      <th scope="row">${escapeHtml(appointment.name)}</th>
-      <td>${roleMark(appointment, 'director')}</td>
-      <td>${roleMark(appointment, 'shareholder')}</td>
-      <td>${roleMark(appointment, 'secretary')}</td>
-      <td>${roleMark(appointment, 'psc')}</td>
-      <td><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></td>
-    </tr>`).join('');
-  $('companyAppointmentCards').innerHTML = profile.appointments.map((appointment) => `
-    <article class="company-appointment-card">
-      <div class="company-appointment-card-heading"><h3>${escapeHtml(appointment.name)}</h3><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></div>
-      <ul class="company-role-chips">${appointment.roles.map((role) => `<li>${escapeHtml(ROLE_LABELS[role])}</li>`).join('')}</ul>
-    </div></article>`).join('');
+
+  const checks = profile.appointments.map((appointment) => appointmentIdentityCheck(appointment));
+  const applicableChecks = checks.filter((check) => check.totalCount > 0);
+  const totalRoles = applicableChecks.reduce((total, check) => total + check.totalCount, 0);
+  const verifiedRoles = applicableChecks.reduce((total, check) => total + check.verifiedCount, 0);
+  const recordsAvailable = applicableChecks.every((check) => check.state !== 'unknown');
+  $('companyIdentitySummary').innerHTML = !totalRoles
+    ? '<span class="company-identity-chip company-identity-chip--neutral">No checks listed</span><span>Add director or PSC roles to compare them with Companies House.</span>'
+    : !recordsAvailable
+      ? '<span class="company-identity-chip company-identity-chip--neutral">Companies House unavailable</span><span>Identity status will appear when the official people records are retrieved.</span>'
+      : `<span class="company-identity-chip ${verifiedRoles === totalRoles ? 'company-identity-chip--recorded' : 'company-identity-chip--neutral'}">${verifiedRoles} of ${totalRoles} roles verified</span><span>Based on identity verification evidence returned by Companies House for the listed appointments.</span>`;
+
+  $('companyAppointmentsRows').innerHTML = profile.appointments.map((appointment) => {
+    const roles = appointment.roles.map((role) => ROLE_LABELS[role]).filter(Boolean);
+    const check = appointmentIdentityCheck(appointment);
+    return `
+      <tr>
+        <th scope="row"><div class="company-appointment-person"><div class="company-appointment-person-copy"><span class="company-appointment-name">${escapeHtml(appointment.name)} <small class="company-appointment-role-list">(${escapeHtml(roles.join(', ') || 'No roles selected')})</small></span><small class="company-identity-detail">${escapeHtml(check.detail)}</small></div>${identityCheckBadgeMarkup(check)}</div></th>
+        <td class="company-appointment-action-cell"><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></td>
+      </tr>`;
+  }).join('');
+  $('companyAppointmentCards').innerHTML = profile.appointments.map((appointment) => {
+    const roles = appointment.roles.map((role) => ROLE_LABELS[role]).filter(Boolean);
+    const check = appointmentIdentityCheck(appointment);
+    return `
+      <article class="company-appointment-card">
+        <div class="company-appointment-person">
+          <div class="company-appointment-person-copy">
+            <span class="company-appointment-name">${escapeHtml(appointment.name)} <small class="company-appointment-role-list">(${escapeHtml(roles.join(', ') || 'No roles selected')})</small></span>
+            <small class="company-identity-detail">${escapeHtml(check.detail)}</small>
+          </div>
+          <div class="company-appointment-actions">${identityCheckBadgeMarkup(check)}<button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit appointment for ${escapeHtml(appointment.name)}" title="Edit appointment for ${escapeHtml(appointment.name)}" data-edit-appointment="${escapeHtml(appointment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></div>
+        </div>
+      </article>`;
+  }).join('');
   document.querySelectorAll('[data-edit-appointment]').forEach((button) => {
     button.addEventListener('click', () => openAppointment(button.dataset.editAppointment));
   });
 }
-
 
 function eligibleInvestmentMembers() {
   return profile.appointments.filter((appointment) =>
@@ -284,36 +391,6 @@ function renderCompanyCompliance() {
     ? `${items.filter((item) => item.source !== 'companies-house' && item.status === 'user-confirmed').length} manually confirmed · ${companyHouseData ? 'Companies House deadlines retrieved' : companyHouseError || 'deadlines not yet retrieved'}`
     : 'Add a company number in Particulars to associate this checklist with your SPV.';
   $('hmrcTaxStatus').value = profile.hmrc?.status || 'unknown';
-  const peopleRoot = $('companyOfficialPeople');
-  if (peopleRoot) {
-    const people = companyHouseData?.officialPeople;
-    const normalized = (name) => String(name || '').toUpperCase().replace(/[^A-Z ]/g, ' ').split(/\\s+/).filter(Boolean).sort().join(' ');
-    const internalDirectors = profile.appointments.filter((a) => a.roles.includes('director'));
-    const officialDirectors = (people?.officers || []).filter((a) => a.role === 'director');
-    const namesMatch = (name) => internalDirectors.some((a) => normalized(a.name) === normalized(name));
-    const showDate = (date) => date ? formatComplianceDateUK(date) : '';
-    const directors = people?.officersAvailable ? officialDirectors : [];
-    const pscs = people?.pscsAvailable ? (people.pscs || []) : [];
-    const counted = [...directors, ...pscs];
-    const recorded = counted.filter((entry) => entry.verification?.statementStartOn || entry.verification?.verifiedOn).length;
-    const complete = people?.officersAvailable && people?.pscsAvailable && directors.length > 0 && recorded === counted.length && counted.length > 0;
-    $('companyIdentitySummary').innerHTML = !people || !people.officersAvailable || !people.pscsAvailable
-      ? '<span class="company-identity-chip company-identity-chip--neutral">Unable to verify public records</span><span>Check the official register when available.</span>'
-      : `<span class="company-identity-chip ${complete ? 'company-identity-chip--recorded' : 'company-identity-chip--neutral'}">${complete ? 'Statements recorded' : 'Review verification records'}</span><span>${recorded} of ${counted.length} director and PSC roles have published verification evidence.</span>`;
-    const verification = (entry) => entry.verification?.statementStartOn
-      ? `Appointment verification statement recorded ${escapeHtml(showDate(entry.verification.statementStartOn))}`
-      : entry.verification?.verifiedOn
-        ? `Identity verification date published: ${escapeHtml(showDate(entry.verification.verifiedOn))}`
-        : 'Verification status not publicly confirmed';
-    const renderPeople = (entries, isDirector) => entries.map((entry) => `<li class="company-identity-person"><div><strong>${escapeHtml(entry.name)}</strong><small>${isDirector ? namesMatch(entry.name) ? 'Name matches internal director' : 'Review internal director record' : 'PSC on public register'}</small></div><div><span class="company-identity-chip ${entry.verification?.statementStartOn || entry.verification?.verifiedOn ? 'company-identity-chip--recorded' : 'company-identity-chip--neutral'}">${entry.verification?.statementStartOn ? 'Statement recorded' : entry.verification?.verifiedOn ? 'Verification date published' : 'Not confirmed publicly'}</span><small>${verification(entry)}${entry.verification?.statementDueOn ? ' · Statement due ' + escapeHtml(showDate(entry.verification.statementDueOn)) : ''}</small></div></li>`).join('');
-    peopleRoot.innerHTML = !people
-      ? '<p class="muted">Official people records unavailable until Companies House lookup completes.</p>'
-      : `<p class="muted">Official Companies House records · Directors: ${people.officersAvailable ? 'Retrieved' : 'Unavailable'} · PSCs: ${people.pscsAvailable ? 'Retrieved' : 'Unavailable'}</p>
-          ${people.officersAvailable ? `<h4>Current directors</h4><ul>${renderPeople(officialDirectors, true) || '<li>No current directors returned.</li>'}</ul>` : ''}
-          ${people.pscsAvailable ? `<h4>Current PSCs</h4><ul>${renderPeople(people.pscs || [], false) || '<li>No PSC entries returned. Check for PSC statements.</li>'}</ul>` : ''}
-          ${people.officersAvailable && officialDirectors.length !== internalDirectors.length ? '<p class="muted">Director counts differ between internal and official records. Check the names and appointment details.</p>' : ''}
-          <p class="muted">Name matching is indicative only, not identity proof. Check the official register for discrepancies.</p>`;
-  }
   const historyRoot = $('companyFilingHistory');
   if (historyRoot) {
     const records = Array.isArray(companyHouseData?.filingHistory) ? companyHouseData.filingHistory : [];
@@ -715,10 +792,19 @@ function renderProfile() {
 
 async function refreshCompanyHouseDeadlines() {
   const companyNumber = String(profile.companyNumber || '').trim().toUpperCase();
-  if (!companyNumber || !navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) return;
-  if (lookupCompanyNumber !== companyNumber) companyHouseData = null;
-  lookupCompanyNumber = companyNumber;
+  if (lookupCompanyNumber !== companyNumber) {
+    companyHouseData = null;
+    lookupCompanyNumber = companyNumber;
+  }
+  if (!companyNumber || !navigator.onLine || !window.SPVCloud?.getCompanyHouseDeadlines) {
+    companyHouseError = !companyNumber ? '' : !navigator.onLine ? 'Connect to check Companies House.' : 'Companies House lookup is not configured.';
+    renderAppointments();
+    renderCompanyCompliance();
+    return;
+  }
+
   companyHouseError = 'Checking Companies House…';
+  renderAppointments();
   renderCompanyCompliance();
   try {
     const data = await window.SPVCloud.getCompanyHouseDeadlines(companyNumber);
@@ -731,6 +817,7 @@ async function refreshCompanyHouseDeadlines() {
     companyHouseError = 'Lookup unavailable';
     console.warn('Companies House lookup failed:', error);
   }
+  renderAppointments();
   renderCompanyCompliance();
 }
 
