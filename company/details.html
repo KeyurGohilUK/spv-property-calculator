@@ -97,14 +97,6 @@
             <span class="authority-details-number">CRN: <strong id="companyAuthorityNumber">Not recorded</strong></span>
           </div>
           <div id="companiesHouseComplianceItems" class="company-compliance-list"></div>
-          <details class="company-official-people company-identity-overview compliance-subsection" open>
-            <summary><span class="compliance-subsection-label"><span class="eyebrow">One-time identity check · per appointment</span><strong id="companyOfficialPeopleTitle">People &amp; identity verification</strong><span class="muted">Director and PSC verification statements from Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary>
-            <div class="compliance-subsection-content">
-              <div id="companyIdentitySummary" class="company-identity-summary" role="status" aria-live="polite"></div>
-              <div id="companyOfficialPeople"></div>
-              <p class="muted company-identity-note">A recorded statement relates to the role shown; it does not guarantee all obligations are complete. New appointments may require new statements. Public data may be incomplete.</p>
-            </div>
-          </details>
           <details class="company-filing-history compliance-subsection">
             <summary><span class="compliance-subsection-label"><strong id="companyFilingHistoryTitle">Official filing history</strong><span class="muted">Check original records with Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary>
             <div class="compliance-subsection-content"><div id="companyFilingHistory" aria-live="polite"></div></div>
@@ -250,15 +242,16 @@
       </div>
       <div id="appointmentTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="appointmentTab" tabindex="0" hidden>
 <section class="company-section" aria-labelledby="companyAppointmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once, then select all roles that apply.</p></div>
+        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once; Companies House verification is shown alongside their roles.</p></div>
           <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">＋ Add person</button>
         </div>
+        <div id="companyIdentitySummary" class="company-identity-summary" role="status" aria-live="polite"></div>
         <div id="companyAppointmentsEmpty" class="company-appointments-empty">
           <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
         </div>
         <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
           <table class="company-appointments-table">
-            <thead><tr><th scope="col">Officer</th><th scope="col">Director</th><th scope="col">Shareholder</th><th scope="col">Secretary</th><th scope="col">PSC</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <thead><tr><th scope="col">Person</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
             <tbody id="companyAppointmentsRows"></tbody>
           </table>
         </div>
