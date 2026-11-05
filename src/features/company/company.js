@@ -97,6 +97,15 @@ companyTabs.forEach((tab, index) => {
   });
 });
 
+const requestedTabName = new URLSearchParams(window.location.search).get('tab');
+const requestedTab = companyTabs.find((tab) => tab.id === ({
+  company: 'companyTab',
+  compliance: 'complianceTab',
+  investment: 'investmentTab',
+  appointment: 'appointmentTab'
+})[requestedTabName]);
+if (requestedTab) activateCompanyTab(requestedTab);
+
 
 const complianceAuthorityTabs = [...document.querySelectorAll('[data-compliance-authority]')];
 function activateComplianceAuthority(tab, focus = false) {
