@@ -738,6 +738,8 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   justify-content:flex-start;
   align-items:center;
   gap:8px 12px;
+  min-height:0;
+  padding:0;
 }
 .company-compliance-hub #companyHouseAuthorityPanel .company-compliance-item-heading strong {
   flex:0 1 auto;
