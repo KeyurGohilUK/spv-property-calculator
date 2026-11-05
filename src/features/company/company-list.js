@@ -48,7 +48,6 @@ function renderCompanies() {
           </span>
         </span>
         <nav class="company-list-card-shortcuts" aria-label="${escapeHtml(company.companyName)} shortcuts">
-          <a href="${companyUrl}&amp;tab=company">Particulars</a>
           <a href="${companyUrl}&amp;tab=compliance">Compliance</a>
           <a href="${companyUrl}&amp;tab=investment">Investment</a>
         </nav>
