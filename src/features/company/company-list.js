@@ -31,9 +31,9 @@ function renderCompanies() {
     const companyUrl = `./company/details.html?company=${encodeURIComponent(company.id)}`;
     return `
       <article class="company-list-card">
-        <a class="company-list-card-icon" href="${companyUrl}" aria-label="Open ${escapeHtml(company.companyName)}" title="Open company">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5.5L12 2l8 3.5V21"/><path d="M2 21h20M8 8h1m6 0h1M8 12h1m6 0h1M8 16h1m6 0h1M11 21v-4h2v4"/></svg>
-        </a>
+        <span class="company-list-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5.5L12 2l8 3.5V21"/><path d="M2 21h20M8 8h1m6 0h1M8 12h1m6 0h1M8 16h1m6 0h1M11 21v-4h2v4"/></svg>
+        </span>
         <span class="company-list-card-content">
           <span class="company-list-card-heading">
             <a class="company-list-card-title" href="${companyUrl}">${escapeHtml(company.companyName)}</a>
@@ -51,7 +51,7 @@ function renderCompanies() {
           <a href="${companyUrl}&amp;tab=compliance">Compliance</a>
           <a href="${companyUrl}&amp;tab=investment">Investment</a>
         </nav>
-        <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open ${escapeHtml(company.companyName)} details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+        <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
       </article>`;
   }).join('');
   $('companyListMessage').textContent = records.length
