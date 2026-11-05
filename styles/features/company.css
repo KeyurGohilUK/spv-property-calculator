@@ -258,7 +258,7 @@
 .company-detail-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
 .company-tab-panel { min-width: 0; }
 .company-tab-panel:not([hidden]) { width: 100%; max-width: 100%; box-sizing: border-box; }
-.company-tab-panel:not([hidden]) > .company-section { width: 100%; max-width: 100%; box-sizing: border-box; }
+.company-tab-panel:not([hidden]) > .company-section { width: calc(100% - 16px); max-width: 100%; margin-inline: 8px; box-sizing: border-box; }
 .company-tab-panel[hidden] { display: none; }
 .company-tab-panel > .company-section + .company-section { margin-top: 18px; }
 @media (max-width: 480px) {
@@ -731,10 +731,12 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 .hmrc-filing-action { flex: 0 0 auto; width: 38px; min-height: 38px; height: 38px; padding: 9px; }
 .hmrc-filing-action svg, .hmrc-payment-add svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .hmrc-period-status-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 9px 0 12px; }
-.hmrc-payment-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: auto !important; min-height: 38px; padding: 7px 11px; font-size: 13px; white-space: nowrap; }
+.hmrc-payment-add { flex: 0 0 auto; width: 38px !important; min-width: 38px; height: 38px; min-height: 38px; padding: 9px; }
 .hmrc-filing-evidence { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
 .hmrc-filing-evidence-heading { flex-wrap: wrap; }
 .hmrc-filing-evidence-status { color: var(--muted); font-size: 13px; font-weight: 700; }
 .hmrc-filing-evidence-status.is-attached { color: var(--positive); }
 .hmrc-filing-evidence .hmrc-evidence-list { margin: 0; }
 .hmrc-filing-evidence > p { margin: 0; }
+
+.hmrc-period-actions .hmrc-delete-period-btn { flex:0 0 44px; width:44px; height:44px; min-height:44px; padding:10px; }

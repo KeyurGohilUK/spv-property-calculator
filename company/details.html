@@ -165,6 +165,16 @@
 <div class="hmrc-dialog-actions"><button id="suggestNextHmrcPeriod" class="secondary-btn" type="button">Suggest next period</button><button id="saveHmrcPeriod" class="primary-btn" type="submit">Save period</button></div>
 <p id="hmrcPeriodMessage" role="status" aria-live="polite"></p></form>
 </dialog>
+  <dialog id="hmrcDeletePeriodDialog" class="install-dialog company-dialog" aria-labelledby="hmrcDeletePeriodDialogTitle">
+    <form id="deleteHmrcPeriodForm">
+      <div class="company-dialog-header"><h2 id="hmrcDeletePeriodDialogTitle">Delete tax period?</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcDeletePeriodDialog" aria-label="Close delete tax period confirmation">×</button></div>
+      <p>Delete the Corporation Tax period <strong id="deleteHmrcPeriodName"></strong>?</p>
+      <p id="deleteHmrcPeriodSummary" class="muted"></p>
+      <label class="field"><span>Type DELETE to confirm</span><input id="confirmDeleteHmrcPeriodInput" type="text" autocomplete="off" spellcheck="false" required></label>
+      <p id="deleteHmrcPeriodMessage" class="save-message" role="alert" aria-live="assertive"></p>
+      <div class="dialog-actions company-form-actions"><button type="button" class="secondary-btn" data-hmrc-close="hmrcDeletePeriodDialog">Cancel</button><button id="confirmDeleteHmrcPeriodBtn" type="submit" class="secondary-btn danger-text">Delete period</button></div>
+    </form>
+  </dialog>
   <dialog id="hmrcFilingDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcFilingDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcFilingDialogTitle">CT600 and tax liability</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcFilingDialog" aria-label="Close CT600 and tax liability">×</button></div>
   

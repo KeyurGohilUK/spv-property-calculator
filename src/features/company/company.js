@@ -495,6 +495,7 @@ function renderCompanyComplianceDialog(ruleKey, open = true) {
 let hmrcGuideSelected = 'utr';
 let hmrcPaymentEditingId = '';
 let hmrcPaymentIsNew = false;
+let hmrcPeriodToDelete = '';
 
 const hmrcDialogs = {
   setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
@@ -502,7 +503,8 @@ const hmrcDialogs = {
   period: setupDialog($('hmrcPeriodDialog'), { closeButtons: [...$('hmrcPeriodDialog').querySelectorAll('[data-hmrc-close]')] }),
   filing: setupDialog($('hmrcFilingDialog'), { closeButtons: [...$('hmrcFilingDialog').querySelectorAll('[data-hmrc-close]')] }),
   payment: setupDialog($('hmrcPaymentDialog'), { closeButtons: [...$('hmrcPaymentDialog').querySelectorAll('[data-hmrc-close]')] }),
-  evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] })
+  evidence: setupDialog($('hmrcEvidenceDialog'), { closeButtons: [...$('hmrcEvidenceDialog').querySelectorAll('[data-hmrc-close]')] }),
+  deletePeriod: setupDialog($('hmrcDeletePeriodDialog'), { closeButtons: [...$('hmrcDeletePeriodDialog').querySelectorAll('[data-hmrc-close]')] })
 };
 
 // HMRC cards are rebuilt when saved. The native dialog otherwise tries to return
@@ -521,6 +523,8 @@ for (const controller of Object.values(hmrcDialogs)) {
       returnSelector = `[data-hmrc-payment-edit="${trigger.dataset.hmrcPaymentEdit}"]`;
     } else if (trigger?.dataset?.hmrcAttach) {
       returnSelector = `[data-hmrc-attach="${trigger.dataset.hmrcAttach}"]`;
+    } else if (trigger?.dataset?.hmrcPeriodRemove) {
+      returnSelector = '#hmrcOpenPeriodDialog';
     } else {
       returnSelector = trigger?.id ? `#${trigger.id}` : '';
     }
@@ -741,7 +745,7 @@ function renderHmrcTracking() {
             <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
           </div>
           <div class="hmrc-period-actions">
-            <button type="button" class="secondary-btn danger-text" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>Delete period</button>
+            <button type="button" class="icon-btn company-evidence-action company-evidence-action--remove hmrc-delete-period-btn" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" aria-label="Delete tax period ending ${escapeHtml(period.periodEnd)}" title="Delete period" ${editingAllowed ? '' : 'disabled'}>${REMOVE_ICON}</button>
           </div>
         </header>
         <div class="hmrc-period-grid">
@@ -755,7 +759,10 @@ function renderHmrcTracking() {
               <dt>Reviewed by</dt><dd>${escapeHtml(record.reviewedBy) || '—'}</dd>
               <dt>Reviewed on</dt><dd>${hmrcDate(record.reviewedOn)}</dd></dl>
           </section>
-          <section class="hmrc-period-info"><h6>Financial summary</h6>
+          <section class="hmrc-period-info">
+            <div class="hmrc-period-info-heading"><h6>Financial summary</h6>
+              <button type="button" class="icon-btn hmrc-payment-add" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" aria-label="Add tax payment" title="Add tax payment" ${editingAllowed ? '' : 'disabled'}>${PLUS_ICON}</button>
+            </div>
             <dl><dt>Tax liability</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? CURRENCY_FORMAT.format(record.liability) : 'Not assessed'}</dd>
               <dt>Liability status</dt><dd class="${liabilityKnown ? '' : 'hmrc-value-attention'}">${liabilityKnown ? escapeHtml(({ estimated: 'Estimated', confirmed: 'Confirmed', recorded: 'Recorded' })[record.liabilityStatus] || 'Recorded') : 'Unknown'}</dd>
               <dt>Total paid</dt><dd class="hmrc-value-positive">${CURRENCY_FORMAT.format(record.paid)}</dd>
@@ -763,9 +770,7 @@ function renderHmrcTracking() {
             ${record.overpayment ? `<p class="hmrc-value-warning">Overpayment: ${CURRENCY_FORMAT.format(record.overpayment)}</p>` : ''}
           </section>
           <section class="hmrc-period-info">
-            <div class="hmrc-period-info-heading"><h6>HMRC payment details</h6>
-              <button type="button" class="primary-btn hmrc-payment-add" data-hmrc-open="payment" data-hmrc-period="${escapeHtml(period.periodEnd)}" ${editingAllowed ? '' : 'disabled'}>${PLUS_ICON}<span>Tax payment</span></button>
-            </div>
+            <h6>HMRC payment details</h6>
             <p class="muted">Reference for this period</p>
             <div class="hmrc-reference-row"><strong class="hmrc-ref" data-hmrc-ref-value="${escapeHtml(period.periodEnd)}">${hmrcDisplayReference(record.paymentReference)}</strong>
             ${record.paymentReference ? `<button class="secondary-btn hmrc-ref-toggle" data-hmrc-reveal-ref="${escapeHtml(period.periodEnd)}" type="button" aria-label="Show payment reference for period ending ${escapeHtml(formatComplianceDateUK(period.periodEnd))}">Show</button>` : ''}</div>
@@ -1101,6 +1106,60 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
   }
 });
 
+$('deleteHmrcPeriodForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const message = $('deleteHmrcPeriodMessage');
+  if (!editingAllowed) { message.textContent = 'Editor permission is required.'; return; }
+  if ($('confirmDeleteHmrcPeriodInput').value.trim() !== 'DELETE') {
+    message.textContent = 'Type DELETE exactly to confirm.';
+    return;
+  }
+  const periodEnd = hmrcPeriodToDelete;
+  if (!periodEnd) { message.textContent = 'Select a tax period to delete.'; return; }
+  const button = $('confirmDeleteHmrcPeriodBtn');
+  button.disabled = true;
+  try {
+    if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) {
+      throw new Error('This tax period no longer exists. Refresh the company records.');
+    }
+    if (navigator.onLine && window.SPVCloud?.getCurrentUser?.()) {
+      const before = await syncCompanyProfile(window.SPVCloud);
+      if (before.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Resolve company sync before deleting a tax period.');
+      }
+      profile = getCompanyProfile();
+    }
+    const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
+    if (!period) throw new Error('This tax period changed during sync. Refresh and try again.');
+    const paymentPrefix = 'corporation-tax-payment:' + periodEnd;
+    const files = (profile.complianceEvidence || []).filter((file) =>
+      file.ruleKey === 'corporation-tax-return:' + periodEnd
+      || file.ruleKey === paymentPrefix
+      || String(file.ruleKey || '').startsWith(paymentPrefix + ':')
+    );
+    if (files.length) await requireEvidenceEditor();
+    const hmrc = removeHmrcPeriod(profile.hmrc, periodEnd);
+    profile = saveCompanyProfile({ ...profile, hmrc });
+    for (const file of files) removeCompanyEvidence(file.id);
+    if (files.length) {
+      const saved = await syncCompanyProfile(window.SPVCloud);
+      if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+        throw new Error('Tax period was deleted locally, but document removal is pending sync. Retry company sync before removing stored files.');
+      }
+      for (const file of files) await deleteComplianceEvidence(profile.id, file);
+    }
+    hmrcPeriodToDelete = '';
+    hmrcDialogs.deletePeriod.close();
+    renderProfile();
+    await syncAfterSave();
+    setEvidenceMessage('Tax period and its records deleted.');
+  } catch (error) {
+    message.textContent = error.message || 'Unable to delete the tax period.';
+  } finally {
+    button.disabled = false;
+  }
+});
+
 $('openDeleteCompanyBtn').addEventListener('click', () => {
   if (!deleteAllowed || profile.deletedAt) return;
   $('deleteCompanyName').textContent = profile.companyName;
@@ -1341,50 +1400,27 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
   const deletePeriodButton = event.target.closest('[data-hmrc-period-remove]');
   if (deletePeriodButton && editingAllowed) {
     const periodEnd = deletePeriodButton.dataset.hmrcPeriodRemove;
-    try {
-      if (!hmrcTaxPeriods(profile.hmrc).some((period) => period.periodEnd === periodEnd)) {
-        throw new Error('This tax period no longer exists. Refresh the company records.');
-      }
-      if (navigator.onLine && window.SPVCloud?.getCurrentUser?.()) {
-        const before = await syncCompanyProfile(window.SPVCloud);
-        if (before.conflicts.length || getCompanyProfile()._cloudDirty) {
-          throw new Error('Resolve company sync before deleting a tax period.');
-        }
-        profile = getCompanyProfile();
-      }
-      const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
-      if (!period) throw new Error('This tax period changed during sync. Refresh and try again.');
-      const summary = hmrcPeriodSummary(profile.hmrc, periodEnd);
-      const paymentPrefix = 'corporation-tax-payment:' + periodEnd;
-      const files = (profile.complianceEvidence || []).filter((file) =>
-        file.ruleKey === 'corporation-tax-return:' + periodEnd
-        || file.ruleKey === paymentPrefix
-        || String(file.ruleKey || '').startsWith(paymentPrefix + ':')
-      );
-      if (files.length) await requireEvidenceEditor();
-      const periodLabel = hmrcDate(period.periodStart) + ' – ' + hmrcDate(period.periodEnd);
-      const confirmed = window.confirm(
-        'Delete tax period ' + periodLabel + ', including its CT600 details, ' + summary.payments.length
-        + ' payment' + (summary.payments.length === 1 ? '' : 's') + ', and ' + files.length
-        + ' attached document' + (files.length === 1 ? '' : 's') + '? This cannot be undone.'
-      );
-      if (!confirmed) return;
-      const hmrc = removeHmrcPeriod(profile.hmrc, periodEnd);
-      profile = saveCompanyProfile({ ...profile, hmrc });
-      for (const file of files) removeCompanyEvidence(file.id);
-      if (files.length) {
-        const saved = await syncCompanyProfile(window.SPVCloud);
-        if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
-          throw new Error('Tax period was deleted locally, but document removal is pending sync. Retry company sync before removing stored files.');
-        }
-        for (const file of files) await deleteComplianceEvidence(profile.id, file);
-      }
-      renderProfile();
-      await syncAfterSave();
-      setEvidenceMessage('Tax period and its records deleted.');
-    } catch (error) {
-      setEvidenceMessage(error.message || 'Unable to delete the tax period.', true);
+    const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
+    if (!period) {
+      setEvidenceMessage('This tax period no longer exists. Refresh the company records.', true);
+      return;
     }
+    const summary = hmrcPeriodSummary(profile.hmrc, periodEnd);
+    const paymentPrefix = 'corporation-tax-payment:' + periodEnd;
+    const files = (profile.complianceEvidence || []).filter((file) =>
+      file.ruleKey === 'corporation-tax-return:' + periodEnd
+      || file.ruleKey === paymentPrefix
+      || String(file.ruleKey || '').startsWith(paymentPrefix + ':')
+    );
+    hmrcPeriodToDelete = periodEnd;
+    $('deleteHmrcPeriodName').textContent = hmrcDate(period.periodStart) + ' – ' + hmrcDate(period.periodEnd);
+    $('deleteHmrcPeriodSummary').textContent =
+      'This also deletes the CT600 record, ' + summary.payments.length + ' payment'
+      + (summary.payments.length === 1 ? '' : 's') + ', and ' + files.length + ' attached document'
+      + (files.length === 1 ? '' : 's') + '. This cannot be undone.';
+    $('confirmDeleteHmrcPeriodInput').value = '';
+    $('deleteHmrcPeriodMessage').textContent = '';
+    hmrcDialogs.deletePeriod.open(deletePeriodButton);
     return;
   }
   const reveal = event.target.closest('[data-hmrc-reveal-ref]');
