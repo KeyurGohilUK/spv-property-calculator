@@ -233,6 +233,8 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcPeriodHistory [data-hmrc-open="filing"] svg')).toHaveCount(1);
   await expect(page.locator('#hmrcFilingEvidenceStatus')).toHaveText('No evidence attached');
   await expect(page.locator('#hmrcPeriodHistory .hmrc-payment-add')).toBeVisible();
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-period-info').filter({ hasText: 'Financial summary' }).locator('.hmrc-payment-add')).toHaveAttribute('aria-label', 'Add tax payment');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-period-info').filter({ hasText: 'HMRC payment details' }).locator('.hmrc-payment-add')).toHaveCount(0);
   await expect(page.locator('#hmrcPeriodHistory .hmrc-pill--attention')).toContainText(['CT600 not recorded', 'Tax not assessed', 'Not recorded']);
   await expect(page.locator('#hmrcPeriodHistory .hmrc-summary-total')).toHaveCount(2);
   await expect(page.locator('#hmrcPeriodHistory .hmrc-value-attention').last()).toContainText('Unknown');
