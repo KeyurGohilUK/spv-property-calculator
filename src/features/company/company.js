@@ -352,7 +352,7 @@ function renderCompanyCompliance() {
           ${evidenceActionMarkup(file, editingAllowed)}</li>`).join('') || '<li class="muted">No supporting documents attached.</li>'}</ul>
         ${editingAllowed ? `<file-upload-field input-id="companyEvidence-${escapeHtml(item.key)}" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="companyEvidenceStatus-${escapeHtml(item.key)}" help="PDF or image · maximum 5 MB" data-evidence-upload="${escapeHtml(item.key)}"></file-upload-field>` : ''}
       </div>
-    </div></details>`).join('');
+    </div></article>`).join('');
   $('companyAuthorityNumber').textContent = profile.companyNumber || 'Not recorded';
   $('companyHouseAuthorityStatus').textContent = companyHouseData ? 'Connected'
     : companyHouseError === 'Checking Companies House…' ? 'Checking'
