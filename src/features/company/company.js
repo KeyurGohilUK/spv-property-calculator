@@ -819,7 +819,8 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
     setEvidenceMessage('Evidence uploaded and saved.');
   } catch (error) {
     setEvidenceMessage(error.message || 'Evidence upload failed.', true);
-    $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
+    if (input.id === 'hmrcPaymentEvidenceInput') $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Receipt upload failed.';
+    else $('hmrcEvidenceMessage').textContent = error.message || 'Upload failed.';
   } finally {
     input.disabled = input.id === 'hmrcPaymentEvidenceInput' ? (!editingAllowed || !input.dataset.evidenceUpload) : !editingAllowed;
     input.value = '';
@@ -843,6 +844,7 @@ $('complianceTabPanel').addEventListener('click', async (event) => {
     if (view) {
       if (!preview) throw new Error('Allow pop-ups to view this receipt.');
       await viewComplianceEvidence(profile.id, entry, preview);
+      $('hmrcPaymentEvidenceMessage').textContent = 'Receipt opened in a new tab.';
     } else if (download) {
       await downloadComplianceEvidence(profile.id, entry);
       setEvidenceMessage('Document downloaded.');
