@@ -1,4 +1,4 @@
-/* Consistent hover and tooltip feedback for icon-only actions across every app page. */
+/* Shared hover, focus, and tooltip feedback for icon-only actions across every page. */
 .main-shell :is(
   button.icon-btn,
   button[class*="-icon-btn"],
@@ -14,51 +14,6 @@
     border-color .15s ease,
     box-shadow .15s ease,
     transform .15s ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"],
-    button.metric-help-btn,
-    button.dialog-close,
-    button.chat-send-btn
-  )[aria-label]:not([data-tooltip]):not(:disabled):hover,
-  .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"],
-    button.metric-help-btn,
-    button.dialog-close,
-    button.chat-send-btn
-  )[aria-label]:not([data-tooltip]):not(:disabled):focus-visible {
-    color: var(--brand-strong);
-    background-color: color-mix(in srgb, var(--brand) 14%, var(--surface));
-    border-color: color-mix(in srgb, var(--brand) 42%, var(--border));
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 14%, transparent);
-  }
-
-  .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"],
-    button.metric-help-btn,
-    button.dialog-close,
-    button.chat-send-btn
-  )[aria-label]:not([data-tooltip]):not(:disabled):hover::after,
-  .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"],
-    button.metric-help-btn,
-    button.dialog-close,
-    button.chat-send-btn
-  )[aria-label]:not([data-tooltip]):not(:disabled):focus-visible::after {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
 }
 
 .main-shell :is(
@@ -92,18 +47,39 @@
   pointer-events: none;
 }
 
-/* Keep destructive actions clearly destructive while retaining the shared hover. */
 @media (hover: hover) and (pointer: fine) {
   .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"]
-  )[aria-label]:is(.danger-text, .company-evidence-action--remove, .archive, [class*="delete"], [class*="remove"]):not(:disabled):hover,
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([data-tooltip]):not(:disabled):hover {
+    color: var(--brand-strong);
+    background-color: color-mix(in srgb, var(--brand) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--border));
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 14%, transparent);
+  }
+
+  .main-shell :is(
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([data-tooltip]):not(:disabled):hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
   .main-shell :is(
     button.icon-btn,
     button[class*="-icon-btn"],
     button[class*="-icon-action"]
-  )[aria-label]:is(.danger-text, .company-evidence-action--remove, .archive, [class*="delete"], [class*="remove"]):not(:disabled):focus-visible {
+  )[aria-label]:is(.danger-text, .company-evidence-action--remove, .archive, [class*="delete"], [class*="remove"]):not(:disabled):hover {
     color: var(--danger);
     background-color: color-mix(in srgb, var(--danger) 12%, var(--surface));
     border-color: color-mix(in srgb, var(--danger) 42%, var(--border));
@@ -111,15 +87,53 @@
   }
 }
 
+.main-shell :is(
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([data-tooltip]):focus-visible {
+  color: var(--brand-strong);
+  background-color: color-mix(in srgb, var(--brand) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 42%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.main-shell :is(
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([data-tooltip]):focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.main-shell :is(
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"]
+)[aria-label]:is(.danger-text, .company-evidence-action--remove, .archive, [class*="delete"], [class*="remove"]):focus-visible {
+  color: var(--danger);
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .main-shell :is(
-    button.icon-btn,
-    button[class*="-icon-btn"],
-    button[class*="-icon-action"],
-    button.metric-help-btn,
-    button.dialog-close,
-    button.chat-send-btn
-  )[aria-label]:not([data-tooltip]) {
+  button.icon-btn,
+  button[class*="-icon-btn"],
+  button[class*="-icon-action"],
+  button.metric-help-btn,
+  button.dialog-close,
+  button.chat-send-btn
+)[aria-label]:not([data-tooltip]) {
     transition: none;
   }
 }
