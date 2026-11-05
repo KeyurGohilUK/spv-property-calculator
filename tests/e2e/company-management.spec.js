@@ -79,7 +79,8 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await page.getByLabel('Person with significant control (PSC)').check();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
-  await expect(page.locator('#companyAppointmentsRows')).toContainText('✓');
+  await expect(page.locator('#companyAppointmentsRows')).toContainText('Alex Director (Director, PSC)');
+  await expect(page.locator('#companyAppointmentsRows')).toContainText('Not checked');
   await expect.poll(() => page.evaluate(() => window.savedCompanyProfile?.appointments?.length)).toBe(1);
 
   await expect(page.getByRole('link', { name: 'Company', exact: true })).toBeVisible();
