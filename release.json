@@ -1,6 +1,7 @@
 {
-  "version": "1.60.28",
+  "version": "1.60.29",
   "notes": [
+    "Place the add-payment icon in the financial summary card.",
     "Move CT600 and payment actions into their summary cards and manage CT600 evidence from its filing dialog.",
     "Keep visible page gutters while reducing the wide-screen gutters by half.",
     "Remove the tinted outer frame from Corporation Tax setup cards.",
@@ -13,7 +14,6 @@
     "Switch Companies House and HMRC directly within a single compliance hub.",
     "Delete a Corporation Tax period together with its records and attached files.",
     "Edit recorded Corporation Tax payments and attach receipts to individual payments.",
-    "Hide the empty receipt message while a receipt is selected.",
-    "Refresh payment receipt status immediately after file selection."
+    "Hide the empty receipt message while a receipt is selected."
   ]
 }
