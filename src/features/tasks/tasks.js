@@ -41,6 +41,7 @@ let workspaceMembers = [];
 let cloudUser = null;
 let taskSyncing = false;
 let boardSortables = [];
+const MEMBER_COLORS = ['blue', 'rose', 'mint', 'amber', 'violet', 'teal'];
 let cloudListenerAttached = false;
 let editingTaskId = null;
 let editingCommentId = null;
@@ -142,6 +143,7 @@ function applyEditState() {
   $('openTaskFormBtn').title = tip;
   $('openTemplateDialogBtn').disabled = !canEdit;
   $('openTemplateDialogBtn').title = tip;
+  $('openTaskSettingsBtn').classList.toggle('hidden', userRole !== 'admin');
   const badge = $('taskRoleBadge');
   if (userRole && cloudUser) {
     badge.textContent = { viewer: 'Read-only', editor: 'Editor', admin: 'Admin' }[userRole] || userRole;
@@ -484,7 +486,7 @@ function changeTaskStatus(task, newStatus) {
     return;
   }
   try {
-    const updated = updateTaskStatus(task.id, newStatus);
+    const updated = updateTaskStatus(task.id, newStatus, cloudUser?.id || null);
     if (!updated) throw new Error('Task no longer exists.');
     addTaskEvent({ taskId: task.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: task.status, toStatus: newStatus });
     render();
