@@ -179,6 +179,8 @@ async function loadWorkspaceMembers() {
     loadCached();
   }
   populateAssigneeOptions();
+  render();
+  if ($('taskSettingsDialog').open) renderTaskMemberColours();
 }
 
 function populateAssigneeOptions() {
@@ -363,6 +365,9 @@ function formatDueDate(dueDate) {
 function buildTaskCard(task, { showStatus = true } = {}) {
   const card = document.createElement('article');
   card.className = `task-card${task.status === 'done' ? ' is-done' : ''}`;
+
+  const member = workspaceMembers.find((item) => item.userId === task.assignedTo);
+  if (member && MEMBER_COLORS.includes(member.taskColor)) card.dataset.memberColour = member.taskColor;
 
   const openBtn = document.createElement('button');
   openBtn.type = 'button';
@@ -894,7 +899,8 @@ function submitTask(event) {
       description: $('taskDescription').value.trim(),
       status: newStatus,
       dueDate: $('taskDueDate').value || null,
-      assignedTo: $('taskAssignedTo').value || null,
+      assignedTo: (existing?.status === 'todo' && newStatus === 'in-progress' && !$('taskAssignedTo').value)
+        ? cloudUser?.id || null : $('taskAssignedTo').value || null,
       scope,
       propertyId,
       createdBy: existing?.createdBy || cloudUser?.id || null
