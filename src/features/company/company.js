@@ -405,7 +405,7 @@ function renderHmrcPaymentEvidence(periodEnd = $('hmrcPaymentPeriod').value, pay
     return '<li><span><strong>' + name + '</strong><small>' + Math.ceil(file.size / 1024) + ' KB · ' + escapeHtml(formatComplianceDateUK(file.uploadedAt?.slice(0, 10) || '') || 'Date unknown') + '</small></span>' +
       '<button type="button" class="icon-btn company-evidence-action" data-evidence-view="' + id + '" aria-label="View ' + name + '" title="View ' + name + '">' + VIEW_ICON + '</button>' +
       evidenceActionMarkup(file, editingAllowed) + '</li>';
-  }).join('') || '<li class="muted">No receipts attached.</li>';
+  }).join('') || (input.files?.length ? '' : '<li class="muted">No receipts attached.</li>');
 }
 function hmrcLegacyPaymentEvidenceMarkup(periodEnd) {
   const ruleKey = 'corporation-tax-payment:' + periodEnd;
