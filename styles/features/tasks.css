@@ -150,26 +150,20 @@
   .task-form-main .task-title-field { flex: 0 0 auto; }
   .task-form-main .task-description-field {
     display: flex;
-    flex: 3 1 0;
+    flex: 2.25 1 0;
     flex-direction: column;
     min-height: 0;
   }
-  .task-form-main .task-description-field > .rich-textbox {
-    display: flex;
+  .task-form-main .task-description-field > #taskDescription {
     flex: 1 1 0;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .task-form-main .task-description-field .rich-textbox-editor {
-    flex: 1 1 0;
+    width: 100%;
     min-height: 0;
     max-height: none;
-    overflow-y: auto;
+    resize: none;
   }
-  .task-form-main #taskDescription { min-height: 300px; }
   .task-dialog .task-form-main #taskDiscussion:not(.hidden) {
     display: flex;
-    flex: 2 1 0;
+    flex: 2.75 1 0;
     flex-direction: column;
     min-height: 0;
     margin: 0;
@@ -178,20 +172,35 @@
     overflow: hidden;
   }
   .task-form-main .task-discussion-header { flex: 0 0 auto; margin-bottom: 8px; }
+  .task-dialog .task-form-main .task-discussion-feed {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    padding: 10px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface-2) 72%, var(--surface));
+  }
   .task-dialog .task-form-main .task-discussion-list {
     flex: 1 1 0;
     min-height: 0;
     max-height: none;
     overflow-y: auto;
-    border-radius: 14px;
+    padding: 4px 6px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
   }
   .task-dialog .task-form-main #taskCommentComposer {
     position: relative;
     z-index: 1;
     flex: 0 0 auto;
-    margin-bottom: 8px;
+    margin: 0;
     border: 1px solid var(--border);
     border-radius: 14px;
+    background: var(--surface);
   }
   .task-form-side { min-height: 0; }
   .task-dialog .task-form-side .field { margin-bottom: 12px; }

@@ -1,6 +1,6 @@
 {
-  "version": "1.60.44",
+  "version": "1.60.45",
   "notes": [
-    "Fix task dialog alignment and keep the newest discussion messages below the visible comment composer."
+    "Give discussion more space, combine its composer and message list into one panel, and use a plain task description field."
   ]
 }
