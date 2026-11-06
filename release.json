@@ -1,6 +1,6 @@
 {
-  "version": "1.60.46",
+  "version": "1.60.47",
   "notes": [
-    "Use a native task comment field and align its send button with the input."
+    "Remove the task comment wrapper card and use a white plain-text input."
   ]
 }
