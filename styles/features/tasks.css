@@ -216,11 +216,10 @@
 .task-board .task-card-main { width: 100%; }
 .task-board .task-card-actions { align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 .task-board .task-status-btn { align-self: flex-start; }
-.task-board .task-card-open { z-index: 1; }
+.task-board .task-card-open { z-index: 1; pointer-events: none; }
 .task-board .task-card-actions { z-index: 2; }
-.task-drag-handle { position: relative; z-index: 3; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); cursor: grab; touch-action: none; }
-.task-drag-handle:active { cursor: grabbing; }
-.task-drag-handle svg { width: 17px; height: 17px; fill: currentColor; }
+.task-board .task-card.is-draggable { cursor: grab; touch-action: pan-y; }
+.task-board .task-card.is-draggable:active { cursor: grabbing; }
 .task-card-status-select { position: relative; z-index: 3; min-width: 0; max-width: 100%; flex: 1 1 100px; min-height: 34px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); padding: 4px 6px; font-size: 12px; }
 .task-card-status-select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .task-drag-ghost { opacity: .35; border: 2px dashed var(--brand) !important; }
