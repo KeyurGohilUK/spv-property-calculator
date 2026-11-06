@@ -124,7 +124,7 @@
 
         <label class="field task-description-field">
           <span>Description <em>optional</em></span>
-          <textarea id="taskDescription" rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
+          <textarea id="taskDescription" data-plain-text rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
         </label>
 
         <section id="taskDiscussion" class="task-discussion hidden" aria-labelledby="taskDiscussionHeading">
@@ -135,7 +135,8 @@
             </div>
             <span id="taskCommentCount" class="count-badge">0</span>
           </div>
-          <div id="taskCommentComposer" class="chat-composer-wrap">
+          <div class="task-discussion-feed">
+<div id="taskCommentComposer" class="chat-composer-wrap">
             <label id="taskCommentLabel" class="chat-label" for="taskComment">Add a message</label>
             <div class="chat-composer">
               <textarea id="taskComment" rows="1" maxlength="2000" placeholder="Write a message…"></textarea>
@@ -149,6 +150,7 @@
             </div>
           </div>
           <div id="taskCommentList" class="chat-list task-discussion-list" role="log" aria-label="Task discussion"></div>
+          </div>
         </section>
       </div>
 

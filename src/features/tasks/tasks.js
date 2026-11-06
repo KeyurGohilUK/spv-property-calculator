@@ -1,6 +1,7 @@
 import { renderSyncStatus } from '../../components/sync-status.js';
 import { renderChatThread, setChatComposerMode } from '../../components/chat-thread.js';
 import { setupDialog } from '../../components/dialog-helper.js';
+import { buildSafeRichText } from '../../utils/rich-text.js';
 import { getActiveProperties } from '../properties/storage.js';
 import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
 import { populateScopeFilterOptions } from '../../utils/scope-filter.js';
@@ -847,6 +848,19 @@ $('openTaskSettingsBtn').addEventListener('click', async () => {
   await loadWorkspaceMembers();
 });
 
+function taskDescriptionAsPlainText(value) {
+  const holder = document.createElement('div');
+  holder.append(buildSafeRichText(value || ''));
+  holder.querySelectorAll('br').forEach((lineBreak) => lineBreak.replaceWith(document.createTextNode('\n')));
+  holder.querySelectorAll('p, div, li, blockquote').forEach((block) => {
+    if (block.nextSibling) block.after(document.createTextNode('\n'));
+  });
+  return holder.textContent
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function openForm(task = null, { preset = null } = {}) {
   if (!task && !canEdit) return;
   const readOnly = !!task && !canEditTask(task);
@@ -857,7 +871,7 @@ function openForm(task = null, { preset = null } = {}) {
   $('saveTaskBtn').classList.toggle('hidden', readOnly);
   $('cancelTaskBtn').textContent = readOnly ? 'Close' : 'Cancel';
   $('taskTitle').value = task?.title ?? preset?.title ?? '';
-  $('taskDescription').value = task?.description || '';
+  $('taskDescription').value = taskDescriptionAsPlainText(task?.description || '');
   $('taskStatus').value = task?.status || 'todo';
   $('taskStatus').disabled = !task;
   $('taskDueDate').value = task?.dueDate || '';
