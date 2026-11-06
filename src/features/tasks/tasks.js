@@ -521,7 +521,7 @@ function setupBoardDragAndDrop() {
       animation: 160,
       handle: '.task-card',
       draggable: '.task-card.is-draggable',
-      filter: 'button, select, input, textarea, a, [contenteditable="true"]',
+      filter: '.task-card-actions, .task-status-btn, .task-card-status-select',
       preventOnFilter: false,
       ghostClass: 'task-drag-ghost',
       chosenClass: 'task-drag-chosen',

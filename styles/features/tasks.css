@@ -216,7 +216,7 @@
 .task-board .task-card-main { width: 100%; }
 .task-board .task-card-actions { align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 .task-board .task-status-btn { align-self: flex-start; }
-.task-board .task-card-open { z-index: 1; pointer-events: none; }
+.task-board .task-card-open { z-index: 1; }
 .task-board .task-card-actions { z-index: 2; }
 .task-board .task-card.is-draggable { cursor: grab; touch-action: pan-y; }
 .task-board .task-card.is-draggable:active { cursor: grabbing; }
