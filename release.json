@@ -1,6 +1,6 @@
 {
-  "version": "1.60.43",
+  "version": "1.60.44",
   "notes": [
-    "Fit the wide task dialog to the viewport and keep scrolling inside details and discussion."
+    "Fix task dialog alignment and keep the newest discussion messages below the visible comment composer."
   ]
 }
