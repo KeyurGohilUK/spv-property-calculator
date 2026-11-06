@@ -200,10 +200,15 @@ assert.match(taskStyles, /height: calc\(100dvh - 32px\);[\s\S]*?overflow: hidden
 assert.match(taskStyles, /\.task-description-field \.rich-textbox-editor \{[\s\S]*?overflow-y: auto;/, 'Task details editor must scroll within its area');
 assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{[\s\S]*?overflow-y: auto;/, 'Task discussion messages must scroll within their area');
 assert.match(taskHtml, /class="field task-description-field"/, 'Task description must expose the flexible details area');
+assert.match(taskStyles, /#taskForm > \.task-form-side \{ grid-area: side; align-self: start; margin-top: 0; padding-top: 0; \}/, 'Task controls must align with the title column');
 assert.match(taskStyles, /\.task-form-side select \{[\s\S]*?min-height: 40px;/, 'Right-side dropdowns must use a compact height');
 assert.match(taskHtml, /id="taskHistory"/, 'Task dialog must include history section');
 assert.match(taskHtml, /id="taskHistoryList"/, 'Task dialog must include history list');
 assert.match(taskHtml, /id="taskDiscussion"/, 'Task dialog must include a discussion area');
+assert.ok(taskHtml.indexOf('id="taskCommentComposer"') < taskHtml.indexOf('id="taskCommentList"'), 'Task comment composer must appear above the message list');
+assert.match(taskPage, /messages: \[\.\.\.comments\]\.sort\(\(a, b\) => \{[\s\S]*?return bTime - aTime;/, 'Task discussion must show newest comments first');
+assert.match(taskStyles, /\.task-discussion \{[^}]*border-top: 0;/, 'Task discussion must not have a divider above it');
+assert.match(taskStyles, /\.task-discussion-list \{[\s\S]*?overflow-y: auto;/, 'Task discussion messages must remain independently scrollable');
 assert.match(taskHtml, /id="taskCommentList"/, 'Task discussion must include a comment list');
 assert.match(taskHtml, /id="addTaskCommentBtn"/, 'Task discussion must include a post action');
 assert.match(taskHtml, /id="cancelTaskCommentEditBtn"/, 'Task discussion must allow comment editing to be cancelled');

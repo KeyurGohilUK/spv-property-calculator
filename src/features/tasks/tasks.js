@@ -293,7 +293,11 @@ function renderTaskDiscussion(taskId) {
   $('taskCommentCount').textContent = String(comments.length);
   renderChatThread({
     container: $('taskCommentList'),
-    messages: comments,
+    messages: [...comments].sort((a, b) => {
+      const aTime = Date.parse(a.createdAt || '') || 0;
+      const bTime = Date.parse(b.createdAt || '') || 0;
+      return bTime - aTime;
+    }),
     currentUserId: cloudUser?.id || null,
     getId: (comment) => comment.id,
     getAuthorId: (comment) => comment.userId,
