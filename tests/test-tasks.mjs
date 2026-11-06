@@ -205,7 +205,8 @@ assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{[\s\S]*?over
 assert.match(taskHtml, /class="field task-description-field"/, 'Task description must expose the flexible details area');
 assert.doesNotMatch(taskHtml, /id="taskDescription"[^>]*data-plain-text/, 'Task description must remain rich text');
 assert.match(taskHtml, /id="taskComment" data-plain-text/, 'Task comment input must stay a native plain text area');
-assert.match(taskStyles, /#taskCommentComposer #taskComment \{[\s\S]*?height: 44px;[\s\S]*?resize: none;/, 'Task comment input must align as a normal single-row text box');
+assert.match(taskStyles, /#taskCommentComposer \{[\s\S]*?padding: 0;[\s\S]*?border: 0;[\s\S]*?background: transparent;/, 'Task comment wrapper must not draw a separate card');
+assert.match(taskStyles, /#taskCommentComposer #taskComment \{[\s\S]*?height: 44px;[\s\S]*?resize: none;[\s\S]*?background: #fff;/, 'Task comment input must be white and align as a normal single-row text box');
 assert.match(taskStyles, /#taskCommentComposer \.chat-send-btn \{[\s\S]*?height: 44px;/, 'Task comment send button must align with the text box');
 assert.match(taskPage, /\$\('taskDescription'\)\.value = task\?\.description \|\| '';/, 'Saved descriptions must remain rich text');
 assert.match(taskPage, /taskContentAsPlainText\(comment\.message\)/, 'Saved rich comments must be converted to readable plain text when edited');

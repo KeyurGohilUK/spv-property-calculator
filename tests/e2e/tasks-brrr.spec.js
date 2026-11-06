@@ -37,6 +37,8 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
   await expect(discussionPanel).toBeVisible();
   await expect(discussionPanel.locator('#taskCommentComposer')).toBeVisible();
   await expect(discussionPanel.locator('#taskComment')).toBeVisible();
+  await expect(discussionPanel.locator('#taskComment')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(discussionPanel.locator('#taskCommentComposer')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await expect(discussionPanel.locator('.rich-textbox-toolbar')).toHaveCount(0);
   await expect(discussionPanel.locator('#taskCommentList')).toHaveClass(/chat-list/);
 
