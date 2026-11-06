@@ -203,7 +203,10 @@ assert.match(taskStyles, /\.task-description-field > #taskDescription \{[\s\S]*?
 assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{[\s\S]*?overflow-y: auto;/, 'Task discussion messages must scroll within their area');
 assert.match(taskHtml, /class="field task-description-field"/, 'Task description must expose the flexible details area');
 assert.match(taskHtml, /id="taskDescription" data-plain-text/, 'Task description must stay a native plain text area');
-assert.match(taskPage, /taskDescriptionAsPlainText\(task\?\.description \|\| ''\)/, 'Saved rich descriptions must be converted to readable plain text when edited');
+assert.match(taskHtml, /id="taskComment" data-plain-text/, 'Task comment input must stay a native plain text area');
+assert.match(taskStyles, /#taskCommentComposer #taskComment \{[\s\S]*?height: 44px;[\s\S]*?resize: none;/, 'Task comment input must align as a normal single-row text box');
+assert.match(taskStyles, /#taskCommentComposer \.chat-send-btn \{[\s\S]*?height: 44px;/, 'Task comment send button must align with the text box');
+assert.match(taskPage, /taskContentAsPlainText\(task\?\.description \|\| ''\)/, 'Saved rich task content must be converted to readable plain text when edited');
 assert.match(taskStyles, /#taskForm > \.task-form-side \{ grid-area: side; align-self: start; margin-top: 0; padding-top: 0; \}/, 'Task controls must align with the title column');
 assert.match(taskStyles, /\.task-form-side select \{[\s\S]*?min-height: 40px;/, 'Right-side dropdowns must use a compact height');
 assert.match(taskHtml, /id="taskHistory"/, 'Task dialog must include history section');

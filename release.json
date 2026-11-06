@@ -1,6 +1,6 @@
 {
-  "version": "1.60.45",
+  "version": "1.60.46",
   "notes": [
-    "Give discussion more space, combine its composer and message list into one panel, and use a plain task description field."
+    "Use a native task comment field and align its send button with the input."
   ]
 }

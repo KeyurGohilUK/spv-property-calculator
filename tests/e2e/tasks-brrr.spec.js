@@ -35,6 +35,8 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
   const discussionPanel = page.locator('#taskDiscussion .task-discussion-feed');
   await expect(discussionPanel).toBeVisible();
   await expect(discussionPanel.locator('#taskCommentComposer')).toBeVisible();
+  await expect(discussionPanel.locator('#taskComment')).toBeVisible();
+  await expect(discussionPanel.locator('.rich-textbox-toolbar')).toHaveCount(0);
   await expect(discussionPanel.locator('#taskCommentList')).toHaveClass(/chat-list/);
 
   await page.locator('#taskComment').fill('Need an Agreement in Principle first: https://example.com/aip');
