@@ -127,49 +127,6 @@
           <textarea id="taskDescription" rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
         </label>
 
-        <div class="task-form-grid">
-          <label class="field">
-            <span>Status</span>
-            <select id="taskStatus">
-              <option value="todo">To do</option>
-              <option value="in-progress">In progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="done">Done</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Due date <em>optional</em></span>
-            <input id="taskDueDate" type="date">
-          </label>
-        </div>
-      </div>
-
-      <div class="task-form-side">
-        <label class="field">
-          <span>Assigned to <em>optional</em></span>
-          <select id="taskAssignedTo">
-            <option value="">Unassigned</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Task relates to</span>
-          <select id="taskScope">
-            <option value="company">General company task</option>
-            <option value="property">Specific property</option>
-          </select>
-        </label>
-        <label id="taskPropertyField" class="field hidden">
-          <span>Property <strong aria-hidden="true">*</strong></span>
-          <select id="taskProperty" aria-describedby="taskPropertyError"></select>
-          <small id="taskPropertyError" class="error-text hidden">Select a property.</small>
-        </label>
-
-        <section id="taskHistory" class="task-history hidden" aria-label="Status history">
-          <h4 class="task-history-heading">History</h4>
-          <ol id="taskHistoryList" class="task-history-list"></ol>
-        </section>
-
         <section id="taskDiscussion" class="task-discussion hidden" aria-labelledby="taskDiscussionHeading">
           <div class="task-discussion-header">
             <div>
@@ -192,6 +149,49 @@
               <button id="cancelTaskCommentEditBtn" class="text-btn chat-cancel-edit hidden" type="button">Cancel edit</button>
             </div>
           </div>
+        </section>
+      </div>
+
+      <div class="task-form-side">
+        <label class="field">
+          <span>Assigned to <em>optional</em></span>
+          <select id="taskAssignedTo">
+            <option value="">Unassigned</option>
+          </select>
+        </label>
+
+        <div class="task-form-grid">
+          <label class="field">
+            <span>Status</span>
+            <select id="taskStatus">
+              <option value="todo">To do</option>
+              <option value="in-progress">In progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="done">Done</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Due date <em>optional</em></span>
+            <input id="taskDueDate" type="date">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Task relates to</span>
+          <select id="taskScope">
+            <option value="company">General company task</option>
+            <option value="property">Specific property</option>
+          </select>
+        </label>
+        <label id="taskPropertyField" class="field hidden">
+          <span>Property <strong aria-hidden="true">*</strong></span>
+          <select id="taskProperty" aria-describedby="taskPropertyError"></select>
+          <small id="taskPropertyError" class="error-text hidden">Select a property.</small>
+        </label>
+
+        <section id="taskHistory" class="task-history hidden" aria-label="Status history">
+          <h4 class="task-history-heading">History</h4>
+          <ol id="taskHistoryList" class="task-history-list"></ol>
         </section>
       </div>
 

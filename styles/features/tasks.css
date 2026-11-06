@@ -133,8 +133,22 @@
   #taskForm > #taskSaveMessage { grid-area: message; }
   #taskForm > .task-form-actions { grid-area: actions; }
   .task-form-main .field { margin-bottom: 16px; }
-  .task-form-main #taskDescription { min-height: 240px; }
+  .task-form-main #taskDescription { min-height: 300px; }
+  .task-form-main #taskDiscussion { margin-top: 20px; }
+  .task-form-main .task-discussion-list { min-height: 220px; max-height: 360px; }
   .task-form-side .field { margin-bottom: 15px; }
+  .task-form-side .task-form-grid { grid-template-columns: minmax(0, 1fr); margin: 0 0 15px; }
+  .task-form-side select {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .task-form-side #taskDueDate { min-height: 42px; padding: 8px 10px; font-size: 14px; }
+}
+@media (min-width: 1024px) {
+  .task-form-side .task-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .task-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; padding-right: 42px; }
 .task-dialog-header h3 { margin: 4px 0 0; }
