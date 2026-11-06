@@ -1,4 +1,6 @@
 {
-  "version": "1.60.40",
-  "notes": ["Make task cards open on click and drag after a press and hold."]
+  "version": "1.60.41",
+  "notes": [
+    "Use a wider two-column task dialog on iPad and laptop screens."
+  ]
 }
