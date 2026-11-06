@@ -195,9 +195,12 @@ const taskSideFields = taskHtml.slice(taskHtml.indexOf('<div class="task-form-si
 assert.ok(taskMainFields.indexOf('id="taskDescription"') < taskMainFields.indexOf('id="taskDiscussion"'), 'Task discussion must follow details in the main column');
 assert.ok(taskSideFields.indexOf('id="taskAssignedTo"') < taskSideFields.indexOf('id="taskStatus"'), 'Task status and due date must follow assignee');
 assert.ok(taskSideFields.indexOf('id="taskStatus"') < taskSideFields.indexOf('id="taskScope"'), 'Task status and due date must precede scope and property fields');
-assert.match(taskStyles, /\.task-form-main #taskDescription \{ min-height: 300px; \}/, 'Desktop task details area must be enlarged');
-assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{ min-height: 220px; max-height: 360px; \}/, 'Desktop discussion area must be enlarged');
-assert.match(taskStyles, /\.task-form-side select \{[\s\S]*?min-height: 42px;/, 'Right-side dropdowns must use a compact height');
+assert.match(taskStyles, /grid-template-columns: minmax\(0, 3fr\) minmax\(270px, 1fr\)/, 'Wide task dialog must allocate most of its width to details and discussion');
+assert.match(taskStyles, /height: calc\(100dvh - 32px\);[\s\S]*?overflow: hidden;/, 'Wide task dialog must fit the viewport without dialog-level scrolling');
+assert.match(taskStyles, /\.task-description-field \.rich-textbox-editor \{[\s\S]*?overflow-y: auto;/, 'Task details editor must scroll within its area');
+assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{[\s\S]*?overflow-y: auto;/, 'Task discussion messages must scroll within their area');
+assert.match(taskHtml, /class="field task-description-field"/, 'Task description must expose the flexible details area');
+assert.match(taskStyles, /\.task-form-side select \{[\s\S]*?min-height: 40px;/, 'Right-side dropdowns must use a compact height');
 assert.match(taskHtml, /id="taskHistory"/, 'Task dialog must include history section');
 assert.match(taskHtml, /id="taskHistoryList"/, 'Task dialog must include history list');
 assert.match(taskHtml, /id="taskDiscussion"/, 'Task dialog must include a discussion area');

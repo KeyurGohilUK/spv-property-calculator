@@ -1,6 +1,6 @@
 {
-  "version": "1.60.42",
+  "version": "1.60.43",
   "notes": [
-    "Reorder task details, discussion, status and due date in the wide task dialog."
+    "Fit the wide task dialog to the viewport and keep scrolling inside details and discussion."
   ]
 }
