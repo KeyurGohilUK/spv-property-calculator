@@ -13,7 +13,8 @@ test('task manager creates a company task and keeps it visible', async ({ page }
 
   await page.getByRole('button', { name: /Add Task/i }).click();
   await expect(page.locator('#taskDescription')).toBeVisible();
-  await expect(page.locator('.task-description-field .rich-textbox-toolbar')).toHaveCount(0);
+  await expect(page.locator('.task-description-field .rich-textbox-toolbar')).toBeVisible();
+  await expect(page.locator('.task-description-field .rich-textbox-editor[contenteditable="true"]')).toBeVisible();
   await page.locator('#taskTitle').fill('Review mortgage offer');
   await page.locator('#taskDescription').fill('Check https://example.com/mortgage-guide before the call.');
   await page.getByRole('button', { name: 'Save' }).click();

@@ -871,7 +871,7 @@ function openForm(task = null, { preset = null } = {}) {
   $('saveTaskBtn').classList.toggle('hidden', readOnly);
   $('cancelTaskBtn').textContent = readOnly ? 'Close' : 'Cancel';
   $('taskTitle').value = task?.title ?? preset?.title ?? '';
-  $('taskDescription').value = taskContentAsPlainText(task?.description || '');
+  $('taskDescription').value = task?.description || '';
   $('taskStatus').value = task?.status || 'todo';
   $('taskStatus').disabled = !task;
   $('taskDueDate').value = task?.dueDate || '';

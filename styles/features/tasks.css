@@ -154,12 +154,17 @@
     flex-direction: column;
     min-height: 0;
   }
-  .task-form-main .task-description-field > #taskDescription {
+  .task-form-main .task-description-field > .rich-textbox {
+    display: flex;
     flex: 1 1 0;
-    width: 100%;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .task-form-main .task-description-field .rich-textbox-editor {
+    flex: 1 1 0;
     min-height: 0;
     max-height: none;
-    resize: none;
+    overflow-y: auto;
   }
   .task-dialog .task-form-main #taskDiscussion:not(.hidden) {
     display: flex;
