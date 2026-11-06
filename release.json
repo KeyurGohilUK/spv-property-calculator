@@ -1,4 +1,4 @@
 {
-  "version": "1.60.39",
-  "notes": ["Add auto-claim for tasks and admin-managed assignee card colours."]
+  "version": "1.60.40",
+  "notes": ["Make task cards open on click and drag after a press and hold."]
 }

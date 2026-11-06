@@ -372,7 +372,8 @@ function formatDueDate(dueDate) {
 
 function buildTaskCard(task, { showStatus = true } = {}) {
   const card = document.createElement('article');
-  card.className = `task-card${task.status === 'done' ? ' is-done' : ''}`;
+  const canDrag = canEditTask(task) || canClaimTask(task);
+  card.className = `task-card${task.status === 'done' ? ' is-done' : ''}${canDrag ? ' is-draggable' : ''}`;
 
   const member = workspaceMembers.find((item) => item.userId === task.assignedTo);
   if (member && MEMBER_COLORS.includes(member.taskColor)) card.dataset.memberColour = member.taskColor;
@@ -382,6 +383,13 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   openBtn.className = 'task-card-open';
   openBtn.setAttribute('aria-label', canEditTask(task) ? `Edit task: ${task.title}` : `View task: ${task.title}`);
   openBtn.addEventListener('click', () => openForm(task));
+
+  // In the board, clicking the card opens it while the whole card remains the
+  // SortableJS handle. Keep nested controls focused on their own actions.
+  card.addEventListener('click', (event) => {
+    if (event.target.closest('.task-card-open, .task-card-actions, .task-status-btn')) return;
+    openForm(task);
+  });
 
   const statusBtn = document.createElement('button');
   statusBtn.type = 'button';
@@ -462,15 +470,6 @@ function buildTaskCard(task, { showStatus = true } = {}) {
     actions.appendChild(deleteBtn);
   }
 
-  if (canEditTask(task) || canClaimTask(task)) {
-    const handle = document.createElement('span');
-    handle.className = 'task-drag-handle';
-    handle.title = 'Drag task to another column';
-    handle.setAttribute('aria-hidden', 'true');
-    handle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>';
-    actions.prepend(handle);
-  }
-
   // Native select remains usable by keyboard and assistive technology.
   const statusSelect = document.createElement('select');
   statusSelect.className = 'task-card-status-select';
@@ -520,12 +519,14 @@ function setupBoardDragAndDrop() {
     boardSortables.push(window.Sortable.create(column, {
       group: 'spv-tasks',
       animation: 160,
-      handle: '.task-drag-handle',
-      draggable: '.task-card',
+      handle: '.task-card',
+      draggable: '.task-card.is-draggable',
+      filter: '.task-card-actions, .task-status-btn, .task-card-status-select',
+      preventOnFilter: false,
       ghostClass: 'task-drag-ghost',
       chosenClass: 'task-drag-chosen',
-      delayOnTouchOnly: true,
-      delay: 120,
+      delayOnTouchOnly: false,
+      delay: 220,
       touchStartThreshold: 4,
       onEnd(event) {
         const task = getTasks().find((item) => item.id === event.item?.dataset.taskId);
