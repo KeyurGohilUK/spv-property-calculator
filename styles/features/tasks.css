@@ -154,12 +154,17 @@
     flex-direction: column;
     min-height: 0;
   }
-  .task-form-main .task-description-field > #taskDescription {
+  .task-form-main .task-description-field > .rich-textbox {
+    display: flex;
     flex: 1 1 0;
-    width: 100%;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .task-form-main .task-description-field .rich-textbox-editor {
+    flex: 1 1 0;
     min-height: 0;
     max-height: none;
-    resize: none;
+    overflow-y: auto;
   }
   .task-dialog .task-form-main #taskDiscussion:not(.hidden) {
     display: flex;
@@ -201,6 +206,25 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     background: var(--surface);
+  }
+  .task-dialog #taskCommentComposer .chat-composer { align-items: center; }
+  .task-dialog #taskCommentComposer #taskComment {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    resize: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .task-dialog #taskCommentComposer .chat-send-btn {
+    align-self: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
   }
   .task-form-side { min-height: 0; }
   .task-dialog .task-form-side .field { margin-bottom: 12px; }

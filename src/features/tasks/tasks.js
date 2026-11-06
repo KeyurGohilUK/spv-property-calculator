@@ -848,7 +848,7 @@ $('openTaskSettingsBtn').addEventListener('click', async () => {
   await loadWorkspaceMembers();
 });
 
-function taskDescriptionAsPlainText(value) {
+function taskContentAsPlainText(value) {
   const holder = document.createElement('div');
   holder.append(buildSafeRichText(value || ''));
   holder.querySelectorAll('br').forEach((lineBreak) => lineBreak.replaceWith(document.createTextNode('\n')));
@@ -871,7 +871,7 @@ function openForm(task = null, { preset = null } = {}) {
   $('saveTaskBtn').classList.toggle('hidden', readOnly);
   $('cancelTaskBtn').textContent = readOnly ? 'Close' : 'Cancel';
   $('taskTitle').value = task?.title ?? preset?.title ?? '';
-  $('taskDescription').value = taskDescriptionAsPlainText(task?.description || '');
+  $('taskDescription').value = task?.description || '';
   $('taskStatus').value = task?.status || 'todo';
   $('taskStatus').disabled = !task;
   $('taskDueDate').value = task?.dueDate || '';
@@ -919,7 +919,7 @@ function beginEditTaskComment(comment) {
     sendButton: $('addTaskCommentBtn'),
     cancelButton: $('cancelTaskCommentEditBtn'),
     editing: true,
-    value: comment.message
+    value: taskContentAsPlainText(comment.message)
   });
   $('taskCommentMessage').textContent = '';
   $('taskComment').focus();

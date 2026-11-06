@@ -13,7 +13,8 @@ test('task manager creates a company task and keeps it visible', async ({ page }
 
   await page.getByRole('button', { name: /Add Task/i }).click();
   await expect(page.locator('#taskDescription')).toBeVisible();
-  await expect(page.locator('.task-description-field .rich-textbox-toolbar')).toHaveCount(0);
+  await expect(page.locator('.task-description-field .rich-textbox-toolbar')).toBeVisible();
+  await expect(page.locator('.task-description-field .rich-textbox-editor[contenteditable="true"]')).toBeVisible();
   await page.locator('#taskTitle').fill('Review mortgage offer');
   await page.locator('#taskDescription').fill('Check https://example.com/mortgage-guide before the call.');
   await page.getByRole('button', { name: 'Save' }).click();
@@ -35,6 +36,8 @@ test('task discussion reuses the compact shared chat flow', async ({ page }) => 
   const discussionPanel = page.locator('#taskDiscussion .task-discussion-feed');
   await expect(discussionPanel).toBeVisible();
   await expect(discussionPanel.locator('#taskCommentComposer')).toBeVisible();
+  await expect(discussionPanel.locator('#taskComment')).toBeVisible();
+  await expect(discussionPanel.locator('.rich-textbox-toolbar')).toHaveCount(0);
   await expect(discussionPanel.locator('#taskCommentList')).toHaveClass(/chat-list/);
 
   await page.locator('#taskComment').fill('Need an Agreement in Principle first: https://example.com/aip');

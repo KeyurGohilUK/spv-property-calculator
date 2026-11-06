@@ -124,7 +124,7 @@
 
         <label class="field task-description-field">
           <span>Description <em>optional</em></span>
-          <textarea id="taskDescription" data-plain-text rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
+          <textarea id="taskDescription" rows="3" maxlength="2000" placeholder="Additional details or context"></textarea>
         </label>
 
         <section id="taskDiscussion" class="task-discussion hidden" aria-labelledby="taskDiscussionHeading">
@@ -139,7 +139,7 @@
 <div id="taskCommentComposer" class="chat-composer-wrap">
             <label id="taskCommentLabel" class="chat-label" for="taskComment">Add a message</label>
             <div class="chat-composer">
-              <textarea id="taskComment" rows="1" maxlength="2000" placeholder="Write a message…"></textarea>
+              <textarea id="taskComment" data-plain-text rows="1" maxlength="2000" placeholder="Write a message…"></textarea>
               <button id="addTaskCommentBtn" class="chat-send-btn" type="button" aria-label="Send message" title="Send message">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>
               </button>
