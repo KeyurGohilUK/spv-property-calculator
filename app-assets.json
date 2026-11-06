@@ -1,5 +1,5 @@
 {
-  "version": "1.60.42",
+  "version": "1.60.43",
   "assets": [
     "./",
     "./index.html",
@@ -120,4 +120,4 @@
     "./styles/components/file-upload.css",
     "./src/components/file-upload-field.js"
   ]
-}
+}\n

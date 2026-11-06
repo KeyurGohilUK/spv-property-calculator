@@ -111,23 +111,94 @@
 
 @media (min-width: 740px) {
   .task-dialog {
-    width: min(1080px, calc(100vw - 48px));
-    max-width: calc(100vw - 48px);
-    max-height: calc(100dvh - 40px);
-    padding: clamp(24px, 3vw, 36px);
+    box-sizing: border-box;
+    width: min(1560px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    height: calc(100dvh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow: hidden;
+    padding: clamp(20px, 2vw, 30px);
   }
   #taskForm {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: minmax(0, 3fr) minmax(270px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas:
       "header header"
       "main side"
       "message message"
       "actions actions";
-    column-gap: clamp(22px, 3vw, 36px);
-    align-items: start;
+    column-gap: clamp(20px, 2.2vw, 34px);
+    row-gap: 0;
+    align-items: stretch;
   }
   #taskForm > .task-dialog-header { grid-area: header; }
+  #taskForm > .task-form-main { grid-area: main; }
+  #taskForm > .task-form-side { grid-area: side; }
+  #taskForm > #taskSaveMessage { grid-area: message; }
+  #taskForm > .task-form-actions { grid-area: actions; }
+  .task-form-main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .task-form-main .field { margin: 0; }
+  .task-form-main .task-title-field { flex: 0 0 auto; }
+  .task-form-main .task-description-field {
+    display: flex;
+    flex: 3 1 0;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .task-form-main .task-description-field > .rich-textbox {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .task-form-main .task-description-field .rich-textbox-editor {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+  .task-form-main #taskDescription { min-height: 300px; }
+  .task-form-main #taskDiscussion { margin: 0; }
+  .task-form-main #taskDiscussion:not(.hidden) {
+    display: grid;
+    flex: 2 1 0;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 0;
+    padding-top: 10px;
+    overflow: hidden;
+  }
+  .task-form-main .task-discussion-list {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+  .task-form-side { min-height: 0; }
+  .task-form-side .field { margin-bottom: 12px; }
+  .task-form-side .task-form-grid { grid-template-columns: minmax(0, 1fr); margin: 0 0 12px; }
+  .task-form-side select {
+    width: 100%;
+    min-height: 40px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .task-form-side #taskDueDate { min-height: 40px; padding: 7px 10px; font-size: 14px; }
+  .task-form-side .task-history { margin-top: 12px; padding-top: 12px; }
+  .task-form-actions { margin-top: 12px; }
+}
+@media (min-width: 1200px) {
+  .task-form-side .task-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.task-dialog-header { grid-area: header; }
   #taskForm > .task-form-main { grid-area: main; }
   #taskForm > .task-form-side { grid-area: side; }
   #taskForm > #taskSaveMessage { grid-area: message; }
