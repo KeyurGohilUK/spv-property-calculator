@@ -13,6 +13,7 @@ const { mergeTaskWorkspace } = await import('../src/features/tasks/task-cloud-sy
 
 const taskPage = fs.readFileSync(new URL('../src/features/tasks/tasks.js', import.meta.url), 'utf8');
 const taskHtml = fs.readFileSync(new URL('../tasks/index.html', import.meta.url), 'utf8');
+const taskStyles = fs.readFileSync(new URL('../styles/features/tasks.css', import.meta.url), 'utf8');
 const cloud = fs.readFileSync(new URL('../cloud.js', import.meta.url), 'utf8');
 const workspaceSync = fs.readFileSync(new URL('../src/services/workspace-sync.js', import.meta.url), 'utf8');
 
@@ -189,6 +190,14 @@ assert.match(taskHtml, /id="taskSyncStatus" class="sync-status"/, 'Task page mus
 assert.match(taskHtml, /id="taskList"/, 'Task page must include task list container');
 assert.match(taskHtml, /id="taskEmpty"/, 'Task page must include empty state');
 assert.match(taskHtml, /id="taskDialog"/, 'Task page must include task dialog');
+const taskMainFields = taskHtml.slice(taskHtml.indexOf('<div class="task-form-main">'), taskHtml.indexOf('<div class="task-form-side">'));
+const taskSideFields = taskHtml.slice(taskHtml.indexOf('<div class="task-form-side">'), taskHtml.indexOf('id="taskSaveMessage"'));
+assert.ok(taskMainFields.indexOf('id="taskDescription"') < taskMainFields.indexOf('id="taskDiscussion"'), 'Task discussion must follow details in the main column');
+assert.ok(taskSideFields.indexOf('id="taskAssignedTo"') < taskSideFields.indexOf('id="taskStatus"'), 'Task status and due date must follow assignee');
+assert.ok(taskSideFields.indexOf('id="taskStatus"') < taskSideFields.indexOf('id="taskScope"'), 'Task status and due date must precede scope and property fields');
+assert.match(taskStyles, /\.task-form-main #taskDescription \{ min-height: 300px; \}/, 'Desktop task details area must be enlarged');
+assert.match(taskStyles, /\.task-form-main \.task-discussion-list \{ min-height: 220px; max-height: 360px; \}/, 'Desktop discussion area must be enlarged');
+assert.match(taskStyles, /\.task-form-side select \{[\s\S]*?min-height: 42px;/, 'Right-side dropdowns must use a compact height');
 assert.match(taskHtml, /id="taskHistory"/, 'Task dialog must include history section');
 assert.match(taskHtml, /id="taskHistoryList"/, 'Task dialog must include history list');
 assert.match(taskHtml, /id="taskDiscussion"/, 'Task dialog must include a discussion area');

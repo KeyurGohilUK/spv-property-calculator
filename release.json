@@ -1,6 +1,6 @@
 {
-  "version": "1.60.41",
+  "version": "1.60.42",
   "notes": [
-    "Use a wider two-column task dialog on iPad and laptop screens."
+    "Reorder task details, discussion, status and due date in the wide task dialog."
   ]
 }
