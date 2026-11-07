@@ -1,4 +1,4 @@
 {
-  "version": "1.60.56",
-  "notes": ["Polish mobile company details while preserving larger-screen layouts."]
+  "version": "1.60.57",
+  "notes": ["Clarify company detail navigation and tuck away the rarely used delete action."]
 }
