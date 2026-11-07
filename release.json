@@ -1,4 +1,4 @@
 {
-  "version": "1.60.55",
-  "notes": ["Fix responsive company detail pages and align chooser icons."]
+  "version": "1.60.56",
+  "notes": ["Polish mobile company details while preserving larger-screen layouts."]
 }
