@@ -126,7 +126,7 @@ export function setupAccountController({
     try {
       await cloud.signOut();
       await applyUser(null, 'sign-out');
-      elements.dialog.close();
+      dialogController.close();
     } catch (error) {
       if (elements.accountMessage) elements.accountMessage.textContent = error.message || 'Could not sign out.';
     } finally {

@@ -121,7 +121,7 @@
           </section>
         </section>
       </section>
-  <dialog id="companyComplianceDialog" class="install-dialog company-dialog company-compliance-dialog" aria-labelledby="companyComplianceDialogTitle">
+  <dialog id="companyComplianceDialog" class="app-dialog company-dialog company-compliance-dialog" aria-labelledby="companyComplianceDialogTitle">
     <div class="company-dialog-header"><h2 id="companyComplianceDialogTitle">Compliance details</h2><button type="button" id="companyComplianceDialogClose" class="dialog-close" aria-label="Close compliance details">×</button></div>
     <div class="company-compliance-dialog-status" id="companyComplianceDialogStatus"></div>
     <div id="companyComplianceDialogDetails" class="company-compliance-dialog-details"></div>
@@ -135,7 +135,7 @@
       <button id="companyComplianceDialogDone" class="primary-btn" type="button">Mark as done</button>
     </div>
   </dialog>
-  <dialog id="hmrcSetupDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcSetupDialogTitle">
+  <dialog id="hmrcSetupDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcSetupDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcSetupDialogTitle">UTR letter</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupDialog" aria-label="Close UTR letter">×</button></div>
   <p class="muted">Record the date, not your UTR number.</p>
   <form id="hmrcSetupForm" class="hmrc-tracking-form">
@@ -146,7 +146,7 @@
 <div class="hmrc-dialog-actions"><button id="hmrcPendingBtn" type="button" class="secondary-btn">Still waiting</button><button id="hmrcSetupSaveBtn" class="primary-btn" type="submit">Save</button></div>
 <p id="hmrcSetupMessage" role="status" aria-live="polite"></p></form>
 </dialog>
-  <dialog id="hmrcActivityDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcActivityDialogTitle">
+  <dialog id="hmrcActivityDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcActivityDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcActivityDialogTitle">Company activity</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcActivityDialog" aria-label="Close Company activity">×</button></div>
   
   <form id="hmrcActivityForm" class="hmrc-activity-form">
@@ -156,7 +156,7 @@
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save</button></div>
 <p id="hmrcActivityMessage" role="status" aria-live="polite"></p></form>
 </dialog>
-  <dialog id="hmrcPeriodDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPeriodDialogTitle">
+  <dialog id="hmrcPeriodDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPeriodDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcPeriodDialogTitle">Tax accounting period</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPeriodDialog" aria-label="Close Tax accounting period">×</button></div>
   
   <form id="hmrcPeriodForm" class="hmrc-tracking-form">
@@ -167,7 +167,7 @@
 <div class="hmrc-dialog-actions"><button id="suggestNextHmrcPeriod" class="secondary-btn" type="button">Suggest next period</button><button id="saveHmrcPeriod" class="primary-btn" type="submit">Save period</button></div>
 <p id="hmrcPeriodMessage" role="status" aria-live="polite"></p></form>
 </dialog>
-  <dialog id="hmrcDeletePeriodDialog" class="install-dialog company-dialog" aria-labelledby="hmrcDeletePeriodDialogTitle">
+  <dialog id="hmrcDeletePeriodDialog" class="app-dialog company-dialog" aria-labelledby="hmrcDeletePeriodDialogTitle">
     <form id="deleteHmrcPeriodForm">
       <div class="company-dialog-header"><h2 id="hmrcDeletePeriodDialogTitle">Delete tax period?</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcDeletePeriodDialog" aria-label="Close delete tax period confirmation">×</button></div>
       <p>Delete the Corporation Tax period <strong id="deleteHmrcPeriodName"></strong>?</p>
@@ -177,7 +177,7 @@
       <div class="dialog-actions company-form-actions"><button type="button" class="secondary-btn" data-hmrc-close="hmrcDeletePeriodDialog">Cancel</button><button id="confirmDeleteHmrcPeriodBtn" type="submit" class="secondary-btn danger-text">Delete period</button></div>
     </form>
   </dialog>
-  <dialog id="hmrcFilingDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcFilingDialogTitle">
+  <dialog id="hmrcFilingDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcFilingDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcFilingDialogTitle">CT600 and tax liability</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcFilingDialog" aria-label="Close CT600 and tax liability">×</button></div>
   
   <form id="hmrcFilingForm" class="hmrc-tracking-form">
@@ -198,12 +198,12 @@
 <p class="muted hmrc-span-all">Your entry is not HMRC verification.</p>
 <div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save record</button></div><p id="hmrcFilingMessage" role="status" aria-live="polite"></p></form>
 </dialog>
-  <dialog id="hmrcEvidenceDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcEvidenceDialogTitle">
+  <dialog id="hmrcEvidenceDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcEvidenceDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcEvidenceDialogTitle">Attach document</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcEvidenceDialog" aria-label="Close document upload">×</button></div>
   <file-upload-field input-id="hmrcEvidenceInput" label="Select document" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcEvidenceSelection" help-id="hmrcEvidenceHelp" help="PDF or image · maximum 5 MB" data-evidence-upload=""></file-upload-field>
   <p id="hmrcEvidenceMessage" role="status" aria-live="polite"></p>
 </dialog>
-  <dialog id="hmrcPaymentDialog" class="install-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPaymentDialogTitle">
+  <dialog id="hmrcPaymentDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPaymentDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcPaymentDialogTitle">Record tax payment</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPaymentDialog" aria-label="Close Record tax payment">×</button></div>
   
   <form id="hmrcPaymentForm" class="hmrc-tracking-form">
@@ -277,7 +277,7 @@
     </main>
   </div>
 
-  <dialog id="companyDetailsDialog" class="install-dialog company-dialog">
+  <dialog id="companyDetailsDialog" class="app-dialog company-dialog">
     <form id="companyDetailsForm" novalidate>
       <div class="company-dialog-header"><div><p class="eyebrow">Company particulars</p><h2 id="companyDetailsDialogTitle">Edit company details</h2></div><button id="closeCompanyDetailsDialog" class="dialog-close" type="button" aria-label="Close company details">×</button></div>
       <div class="company-official-search">
@@ -299,7 +299,7 @@
     </form>
   </dialog>
 
-  <dialog id="appointmentDialog" class="install-dialog company-dialog">
+  <dialog id="appointmentDialog" class="app-dialog company-dialog">
     <form id="appointmentForm" novalidate>
       <div class="company-dialog-header"><div><p class="eyebrow">Company appointments</p><h2 id="appointmentDialogTitle">Add person</h2></div><button id="closeAppointmentDialog" class="dialog-close" type="button" aria-label="Close appointment form">×</button></div>
       <input id="appointmentIdInput" type="hidden">
@@ -315,7 +315,7 @@
     </form>
   </dialog>
 
-  <dialog id="investmentDialog" class="install-dialog company-dialog">
+  <dialog id="investmentDialog" class="app-dialog company-dialog">
     <form id="investmentForm" novalidate>
       <div class="company-dialog-header"><div><p class="eyebrow">Member investments</p><h2 id="investmentDialogTitle">Add investment</h2></div><button id="closeInvestmentDialog" class="dialog-close" type="button" aria-label="Close investment form">×</button></div>
       <input id="investmentIdInput" type="hidden">
@@ -330,7 +330,7 @@
     </form>
   </dialog>
 
-  <dialog id="deleteCompanyDialog" class="install-dialog company-dialog" aria-labelledby="deleteCompanyDialogTitle">
+  <dialog id="deleteCompanyDialog" class="app-dialog company-dialog" aria-labelledby="deleteCompanyDialogTitle">
     <form id="deleteCompanyForm">
       <div class="company-dialog-header"><h2 id="deleteCompanyDialogTitle">Delete company?</h2><button id="closeDeleteCompanyDialog" class="dialog-close" type="button" aria-label="Close delete confirmation">×</button></div>
       <p>Remove <strong id="deleteCompanyName"></strong> from Company Management on all synced devices?</p>

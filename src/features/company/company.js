@@ -56,6 +56,9 @@ let companyHouseError = '';
 let lookupCompanyNumber = '';
 let companySearchSequence = 0;
 
+const companyComplianceDialogController = setupDialog($('companyComplianceDialog'), {
+  closeButtons: [$('companyComplianceDialogClose')]
+});
 const detailsDialog = setupDialog($('companyDetailsDialog'), {
   closeButtons: [$('closeCompanyDetailsDialog'), $('cancelCompanyDetailsBtn')]
 });
@@ -497,8 +500,9 @@ function renderCompanyComplianceDialog(ruleKey, open = true) {
   done.dataset.complianceKey = item.source === 'companies-house' ? '' : item.key;
   done.textContent = item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done';
   $('companyComplianceDialogMessage').textContent = '';
-  const dialog = $('companyComplianceDialog');
-  if (open && !dialog.open) dialog.showModal();
+  if (open && !companyComplianceDialogController.dialog.open) {
+    companyComplianceDialogController.open(document.activeElement);
+  }
 }
 
 let hmrcGuideSelected = 'utr';
@@ -1592,7 +1596,6 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   }
 });
 
-$('companyComplianceDialogClose').addEventListener('click', () => $('companyComplianceDialog').close());
 $('companyComplianceDialog').addEventListener('close', () => {
   const key = companyComplianceDialogTriggerKey;
   if (!key) return;

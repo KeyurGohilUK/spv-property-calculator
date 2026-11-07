@@ -40,12 +40,12 @@ import { setupDialog } from './dialog-helper.js';
     root.querySelectorAll('[data-help-guide]').forEach((trigger) => {
       if (trigger.dataset.helpBound === 'true') return;
       trigger.dataset.helpBound = 'true';
-      trigger.addEventListener('click', () => { trigger.closest('dialog')?.close(); openGuide(document.activeElement); });
+      trigger.addEventListener('click', () => { const parentDialog = trigger.closest('dialog'); if (parentDialog) setupDialog(parentDialog).close(); openGuide(document.activeElement); });
     });
   }
   function init() {
     document.body.insertAdjacentHTML('beforeend', `
-      <dialog id="helpGuideDialog" class="install-dialog help-guide-dialog" aria-labelledby="helpGuideTitle">
+      <dialog id="helpGuideDialog" class="app-dialog help-guide-dialog" aria-labelledby="helpGuideTitle">
         <button class="dialog-close" type="button" data-help-close aria-label="Close help guide">×</button>
         <div class="help-guide-progress-row"><span data-help-progress>1 of ${steps.length}</span><div class="help-guide-dots" aria-hidden="true">${steps.map((_, index) => `<i data-help-dot class="${index === 0 ? 'active' : ''}"></i>`).join('')}</div></div>
         <div class="help-guide-icon" data-help-icon aria-hidden="true"></div><p class="eyebrow" data-help-eyebrow></p>

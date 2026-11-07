@@ -1,4 +1,5 @@
 import { renderAccessState } from './access-gate.js';
+import { setupDialog } from '../components/dialog-helper.js';
 
 export const POLICY_VERSION = '2026-08-26';
 
@@ -20,7 +21,7 @@ function getDialog(root = document) {
   if (dialog) return dialog;
   const legalRoot = new URL('../../legal/', import.meta.url);
   root.body.insertAdjacentHTML('beforeend', `
-    <dialog id="policyAcceptanceDialog" class="install-dialog policy-acceptance-dialog" aria-labelledby="policyAcceptanceTitle" tabindex="-1" autofocus>
+    <dialog id="policyAcceptanceDialog" class="app-dialog policy-acceptance-dialog" aria-labelledby="policyAcceptanceTitle" tabindex="-1" autofocus>
       <p class="eyebrow">One-time acknowledgement</p>
       <h2 id="policyAcceptanceTitle">Review the legal information</h2>
       <p>Before opening the private workspace, please review the current legal documents.</p>
@@ -47,18 +48,15 @@ function collectAcceptance({ user, cloud, root = document }) {
   acceptButton.disabled = true;
   message.textContent = '';
   setPolicyRequired(root);
-  dialog.addEventListener('cancel', (event) => event.preventDefault(), { once: true });
-  if (!dialog.open) dialog.showModal();
-  const focusDialog = () => dialog.focus({ preventScroll: true });
-  focusDialog();
-  window.requestAnimationFrame(focusDialog);
+  const dialogController = setupDialog(dialog, { preventCancel: true, closeOnBackdrop: false });
+  dialogController.open(document.activeElement);
 
   return new Promise((resolve) => {
     const finish = (accepted) => {
       checkbox.removeEventListener('change', onChange);
       acceptButton.removeEventListener('click', onAccept);
       declineButton.removeEventListener('click', onDecline);
-      if (dialog.open) dialog.close();
+      dialogController.close();
       resolve(accepted);
     };
     const onChange = () => { acceptButton.disabled = !checkbox.checked; };

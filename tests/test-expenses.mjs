@@ -57,7 +57,7 @@ assert.match(expenseHtml, /id="expenseFilters"[\s\S]*id="exportExpensesBtn"[\s\S
 assert.match(expensePage, /function exportFilteredExpenses\(\)/, 'Filtered CSV export is not implemented');
 assert.match(expensePage, /renderReports\(visible\)/, 'Reports must use the filtered expense list');
 assert.equal((expenseHtml.match(/id="exportExpensesBtn"/g) || []).length, 1, 'Export action must not be duplicated in the report card');
-assert.match(expenseHtml, /id="expenseDialog" class="install-dialog expense-dialog"/, 'Add/Edit Expense must use shared popup styling');
+assert.match(expenseHtml, /id="expenseDialog" class="app-dialog expense-dialog"/, 'Add/Edit Expense must use shared app dialog styling');
 const expenseStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/features/expenses.css', import.meta.url), 'utf8'));
 const fileUploadStyles = await import('node:fs').then((fs) => fs.readFileSync(new URL('../styles/components/file-upload.css', import.meta.url), 'utf8'));
 const fileUploadComponent = await import('node:fs').then((fs) => fs.readFileSync(new URL('../src/components/file-upload-field.js', import.meta.url), 'utf8'));
@@ -67,7 +67,7 @@ assert.match(fileUploadComponent, /customElements\.define\('file-upload-field'/,
 assert.match(expenseStyles, /\.expense-report-inline \{[\s\S]*grid-column: 1 \/ -1[\s\S]*box-shadow: none/, 'Nested Expense Summary must span the filter panel without a second shadow');
 assert.doesNotMatch(expenseStyles, /\.expense-sync-status/, 'Expense page must not define a separate sync-status component');
 assert.match(expenseStyles, /\.expense-form-grid > \.field \{ min-width: 0; \}/, 'Expense grid fields must be allowed to shrink');
-assert.match(dialogStyles, /\.install-dialog input\[type="date"\][\s\S]*min-inline-size: 0[\s\S]*max-inline-size: 100%[\s\S]*-webkit-appearance: none/, 'Dialog date inputs must stay within their fields on iPhone');
+assert.match(dialogStyles, /\.app-dialog input\[type="date"\][\s\S]*min-inline-size: 0[\s\S]*max-inline-size: 100%[\s\S]*-webkit-appearance: none/, 'Dialog date inputs must stay within their fields on iPhone');
 assert.match(expenseHtml, /class="dialog-actions expense-form-actions"/, 'Expense dialog actions must use the shared button layout');
 assert.match(expenseStyles, /\.expense-dialog[\s\S]*overflow-x: hidden/, 'Expense popup must prevent horizontal overflow');
 assert.match(expenseStyles, /\.expense-filters \.field \{ min-width: 0;/, 'Filter fields must be allowed to shrink');

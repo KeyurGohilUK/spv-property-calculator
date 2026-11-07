@@ -32,7 +32,7 @@ async function syncWorkspace() {
 }
 
 document.body.insertAdjacentHTML('beforeend', `
-  <dialog id="secondaryAccountDialog" class="install-dialog auth-dialog">
+  <dialog id="secondaryAccountDialog" class="app-dialog auth-dialog">
     <button id="closeSecondaryAccount" class="dialog-close" type="button" aria-label="Close">×</button>
     <div id="secondarySignedOut"><p class="eyebrow">Cloud sync</p><h3>Supabase account</h3>
       <label class="field"><span>Email</span><input id="secondaryAuthEmail" type="email" autocomplete="email"></label>

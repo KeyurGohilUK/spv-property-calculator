@@ -1349,7 +1349,7 @@ function init() {
   $('newPropertyBtn').addEventListener('click', () => showEditor());
   $('archiveBtn').addEventListener('click', (event) => {
     event.preventDefault();
-    if ($('moreMenuDialog').open) $('moreMenuDialog').close();
+    appShell.menuDialogController.close();
     showArchive();
   });
   $('backBtn').addEventListener('click', () => showHome());
