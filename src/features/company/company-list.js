@@ -1,4 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
+import { createCompanyProfileDialog } from './company-profile-dialog.js';
 import { escapeHtml } from '../../utils/format-utils.js';
 import { getActiveProperties } from '../properties/storage.js';
 import {
@@ -10,7 +11,8 @@ const $ = (id) => document.getElementById(id);
 let editingAllowed = false;
 let companySearchSequence = 0;
 const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpperCase() + String(status).slice(1) : '';
-const addDialog = setupDialog($('addCompanyDialog'), {
+const addDialogElement = createCompanyProfileDialog('add');
+const addDialog = setupDialog(addDialogElement, {
   closeButtons: [$('closeAddCompanyDialog'), $('cancelAddCompany')]
 });
 

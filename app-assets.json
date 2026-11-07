@@ -1,5 +1,5 @@
 {
-  "version": "1.60.58",
+  "version": "1.60.59",
   "assets": [
     "./",
     "./index.html",
@@ -51,6 +51,7 @@
     "./company/details.html",
     "./src/features/company/company-list.js",
     "./src/features/company/company.js",
+    "./src/features/company/company-profile-dialog.js",
     "./src/features/company/compliance-rules.js",
     "./src/features/company/hmrc-tracking.js",
     "./src/features/company/hmrc-guided.js",

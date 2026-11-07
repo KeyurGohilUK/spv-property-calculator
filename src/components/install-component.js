@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.60.58';
+export const APP_VERSION = '1.60.59';
 
 const APP_ASSET_MANIFEST = './app-assets.json';
 
