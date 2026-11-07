@@ -40,21 +40,22 @@ function renderCompanies() {
             <span class="company-list-card-status${isActive ? ' is-active' : ''}"><span aria-hidden="true"></span>${escapeHtml(status)}</span>
           </span>
           <span class="company-list-card-details">
-            <span>CRN: <strong>${escapeHtml(company.companyNumber || 'Not recorded')}</strong></span>
-            <span>Incorp: <strong>${escapeHtml(incorporationDate)}</strong></span>
+            <span class="company-list-card-detail"><small class="company-list-card-detail-label">CRN</small><strong>${escapeHtml(company.companyNumber || 'Not recorded')}</strong></span>
+            <span class="company-list-card-detail"><small class="company-list-card-detail-label">Incorporated</small><strong>${escapeHtml(incorporationDate)}</strong></span>
           </span>
           <span class="company-list-card-meta">
-            <span class="company-list-card-property-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg> ${propertyCount} ${propertyCount === 1 ? 'Property' : 'Properties'}</span>
+            <span class="company-list-card-property-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg> ${propertyCount} ${propertyCount === 1 ? 'property' : 'properties'}</span>
           </span>
         </span>
         <nav class="company-list-card-shortcuts" aria-label="${escapeHtml(company.companyName)} shortcuts">
-          <a href="${companyUrl}&amp;tab=compliance">Compliance</a>
-          <a href="${companyUrl}&amp;tab=investment">Investment</a>
+          <a href="${companyUrl}&amp;tab=compliance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-2.8 7.8-7 10-4.2-2.2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Compliance</a>
+          <a href="${companyUrl}&amp;tab=investment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20v-5M10 20V9M16 20V4M22 20V11"/></svg>Investment</a>
         </nav>
         <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
       </article>`;
   }).join('');
-  $('companyCount').textContent = `${records.length} ${records.length === 1 ? 'company' : 'companies'}`;
+  $('companyCount').querySelector('.sr-only').textContent = `${records.length} ${records.length === 1 ? 'company' : 'companies'}`;
+  $('companyCount').querySelector('[aria-hidden="true"]').textContent = String(records.length);
   $('companyCount').hidden = records.length === 0;
   $('companyListMessage').hidden = records.length > 0;
   $('companyListMessage').textContent = records.length
