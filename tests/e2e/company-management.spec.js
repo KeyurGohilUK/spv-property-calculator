@@ -108,6 +108,44 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   await expect(editAppointmentButton.locator('svg')).toBeVisible();
 });
 
+test('company details remain responsive on phone, iPad and desktop widths', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Responsive SPV Ltd',
+    companyNumber: '12345678',
+    registeredOffice: '1 Example Street, Bristol',
+    appointments: []
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/company/');
+  await page.getByRole('link', { name: /Responsive SPV Ltd/ }).click();
+
+  for (const width of [390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await page.evaluate(() => {
+      const particulars = document.querySelector('.company-particulars');
+      const section = document.querySelector('[aria-labelledby="companyParticularsTitle"]');
+      const editButton = document.querySelector('#editCompanyDetailsBtn');
+      const tabs = document.querySelector('.company-detail-tabs');
+      return {
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        tabRailWidth: tabs.clientWidth,
+        tabRailContentWidth: tabs.scrollWidth,
+        visibleTabs: [...tabs.querySelectorAll('[role="tab"]')].filter((tab) => tab.getBoundingClientRect().width > 0).length,
+        particularsColumns: getComputedStyle(particulars).gridTemplateColumns.split(' ').length,
+        editRight: editButton.getBoundingClientRect().right,
+        sectionRight: section.getBoundingClientRect().right
+      };
+    });
+
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+    expect(layout.tabRailContentWidth).toBeLessThanOrEqual(layout.tabRailWidth + 1);
+    expect(layout.visibleTabs).toBe(4);
+    expect(layout.editRight).toBeLessThanOrEqual(layout.sectionRight + 1);
+    expect(layout.particularsColumns).toBe(width <= 680 ? 1 : 2);
+  }
+});
+
 test('workspace viewers can read but not edit company records', async ({ page }) => {
   await mockCompanyWorkspace(page, 'viewer', {
     companyName: 'Read Only SPV Ltd',
