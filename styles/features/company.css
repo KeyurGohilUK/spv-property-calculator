@@ -777,6 +777,89 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .company-hero > div > p:last-child { white-space: normal; }
 }
 
+/* Recorded Corporation Tax periods: compact, mobile-only card layout. */
+@media (max-width: 600px) {
+  .hmrc-authority-panel #hmrcRecurringOverview > .hmrc-section-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hmrc-authority-panel #hmrcRecurringOverview > .hmrc-section-heading > button {
+    width: 100%;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-card {
+    padding: 12px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    align-items: start;
+    gap: 8px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-heading {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-actions {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    justify-content: end;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-heading h5 {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-deadlines {
+    line-height: 1.45;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-grid {
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info {
+    padding: 12px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading {
+    align-items: center;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-filing-action,
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-payment-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto !important;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 8px 10px;
+    white-space: nowrap;
+    font-size: .78rem;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-filing-action::after,
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-payment-add::after {
+    content: attr(aria-label);
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-filing-action svg,
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info-heading > .hmrc-payment-add svg {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-status-row {
+    margin: 8px 0 10px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-period-info dl {
+    gap: 8px 10px;
+  }
+  .hmrc-authority-panel #hmrcPeriodHistory .hmrc-summary-total {
+    padding-top: 10px;
+  }
+}
+
 
 /* Keep pending HMRC statuses visible outside the dashboard scope. */
 .hmrc-period-badges .hmrc-pill--attention {
