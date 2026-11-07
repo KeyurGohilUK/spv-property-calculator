@@ -277,7 +277,7 @@
   position: fixed;
   top: calc(var(--safe-top) + 86px);
   left: 50%;
-  width: min(calc(100% - 32px), 1100px);
+  width: min(calc(100% - 32px), 1296px);
   margin: 0;
   transform: translateX(-50%);
   z-index: 19;

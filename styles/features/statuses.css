@@ -35,9 +35,13 @@
   background: transparent !important;
   color: var(--text);
 }
-.viewing-date-input select {
-  flex: 0 0 132px;
+ .viewing-date-input select {
+  flex: 0 0 150px;
+  min-width: 150px;
   min-height: 38px;
+  padding-left: 10px;
+  padding-right: 30px;
+  white-space: nowrap;
   border: 0;
   border-left: 1px solid var(--border);
   border-radius: 0;
@@ -104,5 +108,5 @@
 @media (max-width: 620px) {
   .viewing-date-field { max-width: none; }
   .viewing-date-input { gap: 7px; padding-inline: 10px; }
-  .viewing-date-input select { flex-basis: 118px; padding-left: 9px; }
+  .viewing-date-input select { flex-basis: 138px; min-width: 138px; padding-left: 8px; padding-right: 30px; }
 }

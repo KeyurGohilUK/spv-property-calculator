@@ -1,6 +1,6 @@
 {
-  "version": "1.60.49",
+  "version": "1.60.50",
   "notes": [
-    "Keep task field focus borders visible inside the dialog."
+    "Align the property editor toolbar and fit the viewing time selector."
   ]
 }
