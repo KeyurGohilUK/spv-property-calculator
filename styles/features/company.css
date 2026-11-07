@@ -939,3 +939,143 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   }
   .company-list-card-chevron { grid-column:3; grid-row:1; }
 }
+
+/* Mobile company overview: make the hero, workspace count, and company row read as one compact page. */
+.company-count {
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+  min-height:30px;
+  padding:5px 11px;
+  border:1px solid color-mix(in srgb,var(--brand) 12%,var(--border));
+  border-radius:999px;
+  background:var(--surface-2);
+  color:var(--text);
+  font-size:.78rem;
+  font-weight:650;
+}
+.company-count[hidden] { display:none; }
+.company-list-message[hidden] { display:none; }
+
+@media(max-width:700px) {
+  .company-shell {
+    gap:12px;
+    padding:12px 12px calc(100px + var(--safe-bottom));
+  }
+  .company-hero {
+    align-items:stretch;
+    gap:14px;
+    padding:20px 18px 18px;
+    border-radius:22px;
+  }
+  .company-hero .eyebrow { font-size:.72rem; }
+  .company-hero h1 {
+    margin:5px 0 8px;
+    font-size:clamp(27px,7vw,34px);
+    line-height:1.08;
+  }
+  .company-hero > div > p:last-child {
+    max-width:36rem;
+    font-size:clamp(15px,4vw,18px);
+    line-height:1.4;
+  }
+  .company-hero .property-hero-actions {
+    display:grid;
+    gap:10px;
+    width:100%;
+  }
+  .company-hero .sync-status {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+    font-size:.8rem;
+    font-weight:700;
+  }
+  .company-hero .sync-status::before {
+    content:"✓";
+    display:grid;
+    place-items:center;
+    width:20px;
+    height:20px;
+    flex:0 0 20px;
+    border-radius:50%;
+    color:var(--positive);
+    background:color-mix(in srgb,var(--positive) 13%,var(--surface));
+    font-size:.75rem;
+  }
+  .company-hero #newCompanyBtn {
+    width:100%;
+    min-height:48px;
+    border-radius:15px;
+    font-size:1rem;
+  }
+  .company-section {
+    padding:18px 16px 16px;
+    border-radius:22px;
+  }
+  .company-section-heading {
+    align-items:center;
+    flex-direction:row;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .company-section-heading .eyebrow { font-size:.7rem; }
+  .company-section-heading h2 {
+    margin:3px 0 0;
+    font-size:clamp(25px,6vw,31px);
+    line-height:1.1;
+  }
+  .company-list-message:not([hidden]) {
+    margin:10px 0 0;
+    font-size:.88rem;
+  }
+  .company-cards { margin-top:12px; }
+  .company-list-card:not(.company-list-add) {
+    grid-template-columns:38px minmax(0,1fr) 34px;
+    gap:10px;
+    padding:13px;
+    border-radius:17px;
+  }
+  .company-list-card-icon {
+    width:38px;
+    height:42px;
+    border-radius:13px;
+  }
+  .company-list-card-content { gap:7px; }
+  .company-list-card-heading { gap:7px; }
+  .company-list-card-title { font-size:.93rem; }
+  .company-list-card-details { gap:4px 8px; font-size:.73rem; }
+  .company-list-card-property-count { padding:4px 9px; font-size:.75rem; }
+  .company-list-card-shortcuts {
+    grid-column:2 / 4;
+    grid-row:2;
+    justify-content:flex-start;
+    gap:0;
+    width:100%;
+    padding-top:9px;
+    border-top:1px solid var(--border);
+  }
+  .company-list-card-shortcuts a {
+    display:inline-flex;
+    align-items:center;
+    min-height:34px;
+    padding:0 12px;
+    color:var(--text);
+    font-size:.8rem;
+    font-weight:700;
+  }
+  .company-list-card-shortcuts a:first-child { padding-left:4px; }
+  .company-list-card-shortcuts a + a { border-left:1px solid var(--border); }
+  .company-list-card-chevron { grid-column:3; grid-row:1; }
+}
+
+@media(max-width:390px) {
+  .company-shell { padding-inline:9px; }
+  .company-hero { padding:18px 15px 16px; }
+  .company-section { padding-inline:13px; }
+  .company-list-card:not(.company-list-add) { grid-template-columns:32px minmax(0,1fr) 32px; gap:8px; padding:11px; }
+  .company-list-card-icon { width:32px; height:36px; }
+  .company-list-card-heading { align-items:flex-start; flex-direction:column; }
+  .company-list-card-details { font-size:.69rem; }
+}

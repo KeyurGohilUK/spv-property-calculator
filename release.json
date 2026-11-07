@@ -1,6 +1,4 @@
 {
-  "version": "1.60.50",
-  "notes": [
-    "Align the property editor toolbar and fit the viewing time selector."
-  ]
+  "version": "1.60.51",
+  "notes": ["Improve the mobile Companies page layout and workspace overview."]
 }

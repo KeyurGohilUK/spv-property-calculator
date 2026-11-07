@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.60.50-property-editor-controls';
+const CACHE_NAME = 'spv-property-calculator-v1.60.51-mobile-company-overview';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
