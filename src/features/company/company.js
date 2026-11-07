@@ -722,8 +722,11 @@ function fillHmrcFilingForm(periodEnd) {
 function renderHmrcTracking() {
   const periods = hmrcTaxPeriods(profile.hmrc);
   const orderedPeriods = [...periods].reverse();
-  if (hmrcExpansionCompanyId !== profile.id || hmrcExpandedPeriodEnds === null) {
+  if (hmrcExpansionCompanyId !== profile.id) {
     hmrcExpansionCompanyId = profile.id;
+    hmrcExpandedPeriodEnds = null;
+  }
+  if (hmrcExpandedPeriodEnds === null && orderedPeriods.length) {
     hmrcExpandedPeriodEnds = new Set((orderedPeriods.length > 1 ? orderedPeriods.slice(1) : orderedPeriods).map((period) => period.periodEnd));
   }
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
@@ -756,7 +759,7 @@ function renderHmrcTracking() {
       const isPaid = liabilityKnown && record.liability > 0 && record.outstanding === 0 && record.overpayment === 0;
       const recordedFiling = Boolean(record.filedOn);
       const filingEvidence = (profile.complianceEvidence || []).filter((file) => file.ruleKey === 'corporation-tax-return:' + period.periodEnd);
-      const expanded = hmrcExpandedPeriodEnds.has(period.periodEnd);
+      const expanded = hmrcExpandedPeriodEnds?.has(period.periodEnd) || false;
       const periodId = 'hmrc-period-content-' + period.periodEnd;
       return `<article class="hmrc-period-card hmrc-period-card--tone-${periodIndex % 2 ? 'alternate' : 'base'}${expanded ? ' is-expanded' : ''}">
         <header class="hmrc-period-header">
