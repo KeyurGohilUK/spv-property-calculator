@@ -1,4 +1,4 @@
 {
-  "version": "1.60.52",
-  "notes": ["Match the mobile Companies page to the approved render."]
+  "version": "1.60.53",
+  "notes": ["Align the company icon and correct the mobile company count badge."]
 }
