@@ -133,13 +133,27 @@ test('company details remain responsive on phone, iPad and desktop widths', asyn
         tabRailWidth: tabs.clientWidth,
         tabRailContentWidth: tabs.scrollWidth,
         visibleTabs: [...tabs.querySelectorAll('[role="tab"]')].filter((tab) => tab.getBoundingClientRect().width > 0).length,
+        overflowingElements: [...document.querySelectorAll('body *')]
+          .filter((element) => {
+            const rect = element.getBoundingClientRect();
+            return rect.width > 0 && rect.right > window.innerWidth + 1;
+          })
+          .slice(0, 8)
+          .map((element) => ({
+            tag: element.tagName,
+            id: element.id,
+            className: typeof element.className === 'string' ? element.className : '',
+            right: Math.round(element.getBoundingClientRect().right),
+            width: Math.round(element.getBoundingClientRect().width),
+            text: element.textContent.trim().slice(0, 70)
+          })),
         particularsColumns: getComputedStyle(particulars).gridTemplateColumns.split(' ').length,
         editRight: editButton.getBoundingClientRect().right,
         sectionRight: section.getBoundingClientRect().right
       };
     });
 
-    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+    expect(layout.documentWidth, JSON.stringify(layout.overflowingElements)).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.tabRailContentWidth).toBeLessThanOrEqual(layout.tabRailWidth + 1);
     expect(layout.visibleTabs).toBe(4);
     expect(layout.editRight).toBeLessThanOrEqual(layout.sectionRight + 1);
