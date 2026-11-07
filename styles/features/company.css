@@ -219,9 +219,26 @@
   font-weight: 600;
 }
 
-/* Company deletion is intentionally separated from regular company edits. */
-.company-danger-zone { border: 1px solid var(--danger); }
-.company-danger-zone h2 { color: var(--danger); }
+/* Company deletion stays out of the way until someone deliberately expands it. */
+.company-danger-zone { border: 1px solid color-mix(in srgb, var(--danger) 60%, var(--border)); }
+.company-danger-summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:58px;
+  cursor:pointer;
+  list-style:none;
+}
+.company-danger-summary::-webkit-details-marker { display:none; }
+.company-danger-summary > span { display:grid; gap:4px; }
+.company-danger-summary h2 { margin:0; color:var(--danger); font-size:1.15rem; }
+.company-danger-summary small { color:var(--muted); font-size:.88rem; }
+.company-danger-summary > svg { width:22px; height:22px; flex:0 0 22px; fill:none; stroke:currentColor; stroke-width:2; transition:transform .18s ease; }
+.company-danger-zone[open] .company-danger-summary > svg { transform:rotate(180deg); }
+.company-danger-summary:focus-visible { outline:3px solid var(--brand); outline-offset:4px; border-radius:8px; }
+.company-danger-content { padding-top:12px; }
+.company-danger-content .muted { margin:0 0 16px; }
 .company-danger-zone .danger-text { border-color: var(--danger); }
 #deleteCompanyMessage:not(:empty) { color: var(--danger); font-weight: 700; }
 
@@ -248,6 +265,18 @@
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+.company-detail-tab-icon {
+  display:inline-block;
+  width:19px;
+  height:19px;
+  margin-inline-end:8px;
+  vertical-align:-4px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 .company-detail-tab[aria-selected="true"] {
   border-bottom-color: var(--brand);
@@ -1236,8 +1265,13 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   }
   .company-detail-shell .company-detail-tabs::-webkit-scrollbar { display:none; }
   .company-detail-shell .company-detail-tab {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
     min-width:0;
-    min-height:48px;
+    min-height:66px;
     padding:8px 2px;
     border-radius:10px 10px 0 0;
     font-size:clamp(9px,2.9vw,12px);
@@ -1245,6 +1279,14 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
     text-align:center;
     white-space:normal;
     overflow-wrap:anywhere;
+  }
+  .company-detail-shell .company-detail-tab-icon {
+    display:block;
+    width:22px;
+    height:22px;
+    flex:0 0 22px;
+    margin-inline-end:0;
+    vertical-align:initial;
   }
   .company-detail-shell .company-tab-panel > .company-section + .company-section { margin-top:14px; }
   .company-detail-shell .company-section { padding:18px 16px 16px; border-radius:22px; }

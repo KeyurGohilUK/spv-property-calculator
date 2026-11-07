@@ -206,7 +206,11 @@ test('editor confirms company deletion and keeps other workspace data', async ({
   });
   await page.goto('/company/');
   await page.getByRole('link', { name: /Temporary SPV Ltd/ }).click();
+  const deleteSection = page.locator('.company-danger-zone');
+  await expect(deleteSection).not.toHaveAttribute('open', '');
+  await deleteSection.locator('summary').click();
   const deleteButton = page.locator('#openDeleteCompanyBtn');
+  await expect(deleteButton).toBeVisible();
   await expect(deleteButton).toBeEnabled();
   await deleteButton.click();
   await expect(page.locator('#deleteCompanyName')).toHaveText('Temporary SPV Ltd');
