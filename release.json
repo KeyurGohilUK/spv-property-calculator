@@ -1,4 +1,4 @@
 {
-  "version": "1.60.54",
-  "notes": ["Improve mobile and iPad company layout, icon alignment and count badge."]
+  "version": "1.60.55",
+  "notes": ["Fix responsive company detail pages and align chooser icons."]
 }
