@@ -54,6 +54,9 @@ function renderCompanies() {
         <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
       </article>`;
   }).join('');
+  $('companyCount').textContent = `${records.length} ${records.length === 1 ? 'company' : 'companies'}`;
+  $('companyCount').hidden = records.length === 0;
+  $('companyListMessage').hidden = records.length > 0;
   $('companyListMessage').textContent = records.length
     ? `${records.length} compan${records.length === 1 ? 'y' : 'ies'} in this workspace`
     : 'No company records yet. Add your first company.';
