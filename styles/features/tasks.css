@@ -429,9 +429,8 @@
 .task-dialog #taskDescription:focus,
 .task-dialog .task-description-field .rich-textbox:focus-within {
   border-color: var(--brand-strong);
-  outline: 2px solid color-mix(in srgb, var(--brand-strong) 62%, transparent);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--brand-strong);
 }
 html[data-theme="dark"] .task-dialog #taskTitle,
 html[data-theme="dark"] .task-dialog #taskDescription,

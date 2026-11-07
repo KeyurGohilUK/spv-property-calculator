@@ -1,6 +1,6 @@
 {
-  "version": "1.60.48",
+  "version": "1.60.49",
   "notes": [
-    "Improve task title and description field contrast and focus visibility."
+    "Keep task field focus borders visible inside the dialog."
   ]
 }
