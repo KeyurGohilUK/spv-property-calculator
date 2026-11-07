@@ -511,6 +511,8 @@ let hmrcGuideSelected = 'utr';
 let hmrcPaymentEditingId = '';
 let hmrcPaymentIsNew = false;
 let hmrcPeriodToDelete = '';
+let hmrcExpandedPeriodEnds = null;
+let hmrcExpansionCompanyId = '';
 
 const hmrcDialogs = {
   setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
@@ -719,6 +721,14 @@ function fillHmrcFilingForm(periodEnd) {
 }
 function renderHmrcTracking() {
   const periods = hmrcTaxPeriods(profile.hmrc);
+  const orderedPeriods = [...periods].reverse();
+  if (hmrcExpansionCompanyId !== profile.id) {
+    hmrcExpansionCompanyId = profile.id;
+    hmrcExpandedPeriodEnds = null;
+  }
+  if (hmrcExpandedPeriodEnds === null && orderedPeriods.length) {
+    hmrcExpandedPeriodEnds = new Set((orderedPeriods.length > 1 ? orderedPeriods.slice(1) : orderedPeriods).map((period) => period.periodEnd));
+  }
   const setup = normalizeHmrcTracking(profile.hmrc).setup;
   $('hmrcUtrReceivedOn').value = setup.utrReceivedOn;
   $('hmrcRegistrationConfirmedOn').value = setup.registrationConfirmedOn;
@@ -739,7 +749,7 @@ function renderHmrcTracking() {
   }
   renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value);
   $('hmrcPeriodHistory').innerHTML = periods.length
-    ? '<div class="hmrc-period-cards">' + [...periods].reverse().map((period) => {
+    ? '<div class="hmrc-period-cards">' + orderedPeriods.map((period, periodIndex) => {
       const record = hmrcPeriodSummary(profile.hmrc, period.periodEnd);
       const due = hmrcDeadlines(period);
       const liabilityKnown = record.liability !== null;
@@ -749,20 +759,26 @@ function renderHmrcTracking() {
       const isPaid = liabilityKnown && record.liability > 0 && record.outstanding === 0 && record.overpayment === 0;
       const recordedFiling = Boolean(record.filedOn);
       const filingEvidence = (profile.complianceEvidence || []).filter((file) => file.ruleKey === 'corporation-tax-return:' + period.periodEnd);
-      return `<article class="hmrc-period-card">
+      const expanded = hmrcExpandedPeriodEnds?.has(period.periodEnd) || false;
+      const periodId = 'hmrc-period-content-' + period.periodEnd;
+      return `<article class="hmrc-period-card hmrc-period-card--tone-${periodIndex % 2 ? 'alternate' : 'base'}${expanded ? ' is-expanded' : ''}">
         <header class="hmrc-period-header">
-          <div class="hmrc-period-heading">
-            <h5>${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</h5>
-            <div class="hmrc-period-badges">
+          <button type="button" class="hmrc-period-toggle" data-hmrc-period-toggle="${escapeHtml(period.periodEnd)}" aria-label="${expanded ? 'Collapse' : 'Expand'} tax period ${escapeHtml(formatComplianceDateUK(period.periodStart))} to ${escapeHtml(formatComplianceDateUK(period.periodEnd))}" aria-expanded="${expanded}" aria-controls="${escapeHtml(periodId)}">
+            <span class="hmrc-period-chevron" aria-hidden="true">${expanded ? '⌄' : '›'}</span>
+            <span class="hmrc-period-heading">
+            <span class="hmrc-period-title" role="heading" aria-level="5">${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</span>
+            <span class="hmrc-period-badges">
               ${hmrcBadge(recordedFiling ? 'CT600 recorded' : 'CT600 not recorded', recordedFiling ? 'success' : 'attention')}
               ${hmrcBadge(noTaxDue ? 'No tax due (recorded)' : isPaid ? 'Tax paid' : liabilityKnown && record.outstanding > 0 ? 'Payment outstanding' : 'Tax not assessed', noTaxDue || isPaid ? 'success' : 'attention')}
-            </div>
-            <p class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></p>
-          </div>
+            </span>
+            <span class="hmrc-deadlines">Pay by ${hmrcDate(paymentDate)} · CT600 by ${hmrcDate(filingDate)} <span>(estimates)</span></span>
+            </span>
+          </button>
           <div class="hmrc-period-actions">
             <button type="button" class="icon-btn company-evidence-action company-evidence-action--remove hmrc-delete-period-btn" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" aria-label="Delete tax period ending ${escapeHtml(period.periodEnd)}" title="Delete period" ${editingAllowed ? '' : 'disabled'}>${REMOVE_ICON}</button>
           </div>
         </header>
+        <div id="${escapeHtml(periodId)}" class="hmrc-period-content" ${expanded ? '' : 'hidden'}>
         <div class="hmrc-period-grid">
           <section class="hmrc-period-info">
             <div class="hmrc-period-info-heading"><h6>CT600 return</h6>
@@ -802,6 +818,7 @@ function renderHmrcTracking() {
               <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
               <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
+        </div>
         </div>
       </article>`;
     }).join('') + '</div>'
@@ -1409,6 +1426,21 @@ $('hmrcPaymentForm').addEventListener('submit', async (event) => {
 });
 
 $('hmrcPeriodHistory').addEventListener('click', async (event) => {
+  const periodToggle = event.target.closest('[data-hmrc-period-toggle]');
+  if (periodToggle) {
+    const periodEnd = periodToggle.dataset.hmrcPeriodToggle;
+    const content = document.getElementById(periodToggle.getAttribute('aria-controls'));
+    const expanded = periodToggle.getAttribute('aria-expanded') === 'true';
+    if (!content) return;
+    periodToggle.setAttribute('aria-expanded', String(!expanded));
+    const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
+    if (period) periodToggle.setAttribute('aria-label', (expanded ? 'Expand' : 'Collapse') + ' tax period ' + formatComplianceDateUK(period.periodStart) + ' to ' + formatComplianceDateUK(period.periodEnd));
+    content.hidden = expanded;
+    periodToggle.closest('.hmrc-period-card')?.classList.toggle('is-expanded', !expanded);
+    if (expanded) hmrcExpandedPeriodEnds.delete(periodEnd);
+    else hmrcExpandedPeriodEnds.add(periodEnd);
+    return;
+  }
   const deletePeriodButton = event.target.closest('[data-hmrc-period-remove]');
   if (deletePeriodButton && editingAllowed) {
     const periodEnd = deletePeriodButton.dataset.hmrcPeriodRemove;

@@ -338,6 +338,28 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   page.once('dialog', (dialog) => dialog.accept());
   await page.locator('[data-hmrc-payment-remove]').click();
   await expect(page.locator('#hmrcPeriodHistory')).toContainText('£2,400.00');
+
+  const singlePeriodToggle = page.locator('#hmrcPeriodHistory [data-hmrc-period-toggle]');
+  await expect(singlePeriodToggle).toHaveAttribute('aria-expanded', 'true');
+  await singlePeriodToggle.click();
+  await expect(singlePeriodToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-period-content')).toBeHidden();
+  await singlePeriodToggle.click();
+
+  await page.locator('#hmrcOpenPeriodDialog').click();
+  await page.locator('#hmrcPeriodStart').fill('2027-01-01');
+  await page.locator('#hmrcPeriodEnd').fill('2027-12-31');
+  await page.locator('#hmrcPeriodForm button[type="submit"]').click();
+  const periodCards = page.locator('#hmrcPeriodHistory .hmrc-period-card');
+  const periodToggles = page.locator('#hmrcPeriodHistory [data-hmrc-period-toggle]');
+  await expect(periodCards).toHaveCount(2);
+  await expect(periodCards.nth(0)).toHaveClass(/hmrc-period-card--tone-base/);
+  await expect(periodCards.nth(1)).toHaveClass(/hmrc-period-card--tone-alternate/);
+  await expect(periodToggles.nth(0)).toHaveAttribute('aria-expanded', 'false');
+  await expect(periodToggles.nth(1)).toHaveAttribute('aria-expanded', 'true');
+  await periodToggles.nth(0).click();
+  await expect(periodToggles.nth(0)).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#hmrcPeriodHistory .hmrc-period-content').nth(0)).toBeVisible();
 });
 
 test('HMRC setup remains compact while company is preparing to buy', async ({ page }) => {
