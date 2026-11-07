@@ -118,6 +118,7 @@ test('company details remain responsive on phone, iPad and desktop widths', asyn
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/company/');
   await page.getByRole('link', { name: /Responsive SPV Ltd/ }).click();
+  await expect(page.getByRole('heading', { name: 'Company Details' })).toBeVisible();
 
   for (const width of [390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
