@@ -1,7 +1,7 @@
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.60.57';
+export const APP_VERSION = '1.60.58';
 
 const APP_ASSET_MANIFEST = './app-assets.json';
 
@@ -13,7 +13,7 @@ function createDialog() {
   if (existing) return existing;
 
   document.body.insertAdjacentHTML('beforeend', `
-    <dialog id="installDialog" class="install-dialog">
+    <dialog id="installDialog" class="app-dialog">
       <button id="closeInstallDialog" class="dialog-close" type="button" aria-label="Close">×</button>
       <p class="eyebrow">Install app</p>
       <h3>SPV Property Calculator</h3>
@@ -143,7 +143,7 @@ export function setupInstallComponent({ button, beforeUpdate } = {}) {
     const prompt = deferredInstallPrompt;
     deferredInstallPrompt = null;
     nativeButton.disabled = true;
-    try { prompt.prompt(); const choice = await prompt.userChoice; if (choice?.outcome === 'accepted') dialog.close(); }
+    try { prompt.prompt(); const choice = await prompt.userChoice; if (choice?.outcome === 'accepted') dialogController.close(); }
     finally { nativeButton.disabled = false; nativeButton.classList.add('hidden'); }
   });
   document.getElementById('downloadUpdatesBtn').addEventListener('click', async () => {
@@ -156,7 +156,7 @@ export function setupInstallComponent({ button, beforeUpdate } = {}) {
     message.textContent = !release ? 'Could not check for updates. Try again when online.' : updateButton.dataset.updateAvailable === 'true' ? `Version ${release.version} is available. Tap Download updates.` : 'You’re up to date.';
   });
   window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null; nativeButton.classList.add('hidden'); if (dialog.open) dialog.close();
+    deferredInstallPrompt = null; nativeButton.classList.add('hidden'); dialogController.close();
     button.classList.remove('update-available'); button.setAttribute('aria-label', 'App installed'); button.title = 'App installed'; button.dataset.tooltip = 'App installed';
   });
   return { open, dialog };

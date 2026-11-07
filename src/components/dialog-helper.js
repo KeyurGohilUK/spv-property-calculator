@@ -12,9 +12,10 @@ function ensureLabel(dialog) {
   dialog.setAttribute('aria-labelledby', heading.id);
 }
 
-export function setupDialog(dialog, { closeButtons = [], label } = {}) {
+export function setupDialog(dialog, { closeButtons = [], label, preventCancel = false, closeOnBackdrop = true } = {}) {
   if (!dialog) return { open() {}, close() {} };
   if (controllers.has(dialog)) return controllers.get(dialog);
+  dialog.classList.add('app-dialog');
   if (label) dialog.setAttribute('aria-label', label);
   ensureLabel(dialog);
   if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
@@ -33,12 +34,15 @@ export function setupDialog(dialog, { closeButtons = [], label } = {}) {
   controllers.set(dialog, controller);
 
   closeButtons.forEach((button) => button?.addEventListener('click', close));
-  dialog.addEventListener('click', (event) => {
-    const bounds = dialog.getBoundingClientRect();
-    const outside = event.clientX < bounds.left || event.clientX > bounds.right
-      || event.clientY < bounds.top || event.clientY > bounds.bottom;
-    if (outside) close();
-  });
+  if (preventCancel) dialog.addEventListener('cancel', (event) => event.preventDefault());
+  if (closeOnBackdrop) {
+    dialog.addEventListener('click', (event) => {
+      const bounds = dialog.getBoundingClientRect();
+      const outside = event.clientX < bounds.left || event.clientX > bounds.right
+        || event.clientY < bounds.top || event.clientY > bounds.bottom;
+      if (outside) close();
+    });
+  }
   dialog.addEventListener('close', () => {
     if (returnFocus?.isConnected && visible(returnFocus)) returnFocus.focus();
     returnFocus = null;

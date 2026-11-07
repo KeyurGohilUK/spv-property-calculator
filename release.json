@@ -1,4 +1,4 @@
 {
-  "version": "1.60.57",
-  "notes": ["Clarify company detail navigation and tuck away the rarely used delete action."]
+  "version": "1.60.58",
+  "notes": ["Use one shared dialog foundation throughout the app."]
 }

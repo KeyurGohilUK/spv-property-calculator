@@ -38,7 +38,7 @@ function syncPrimaryNavigationOffset(root) {
 function renderAppMenu(root, { home }) {
   if ($('moreMenuDialog', root)) return $('moreMenuDialog', root);
   root.body.insertAdjacentHTML('beforeend', `
-    <dialog id="moreMenuDialog" class="install-dialog more-menu-dialog" aria-labelledby="appMenuTitle">
+    <dialog id="moreMenuDialog" class="app-dialog more-menu-dialog" aria-labelledby="appMenuTitle">
       <div class="more-menu-header"><h3 id="appMenuTitle">App Menu</h3><button id="closeMoreMenuDialog" class="icon-btn more-menu-close" type="button" aria-label="Close menu">×</button></div>
       <div class="more-menu-list">
         <a id="archiveBtn" class="more-menu-item" href="./?view=archive"><span class="more-menu-icon" aria-hidden="true">↺</span><span><strong>Archived Properties</strong><small>Restore or permanently delete archived calculations</small></span>${home ? '<span id="archiveCountBadge" class="button-count">0</span>' : '<span aria-hidden="true">›</span>'}</a>

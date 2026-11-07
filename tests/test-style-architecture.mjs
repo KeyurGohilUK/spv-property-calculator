@@ -18,7 +18,7 @@ for (const path of expected) {
 }
 assert.match(fs.readFileSync(new URL('../styles/tokens.css', import.meta.url), 'utf8'), /^:root[\s\S]*html\[data-theme="dark"\]/);
 assert.match(fs.readFileSync(new URL('../styles/forms.css', import.meta.url), 'utf8'), /\.field[\s\S]*\.expense-row/);
-assert.match(fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8'), /\.install-dialog/);
+assert.match(fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8'), /\.app-dialog/);
 assert.match(fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8'), /\.primary-app-nav/);
 const shellCore = fs.readFileSync(new URL('../styles/app-shell-core.css', import.meta.url), 'utf8');
 const dialogStyles = fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8');
