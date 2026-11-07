@@ -122,6 +122,10 @@ test('company details remain responsive on phone, iPad and desktop widths', asyn
 
   for (const width of [390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const tabButtons = page.locator('.company-detail-tab');
+    await expect(tabButtons).toHaveCount(4);
+    for (const tab of await tabButtons.all()) await expect(tab).toBeVisible();
     const layout = await page.evaluate(() => {
       const particulars = document.querySelector('.company-particulars');
       const section = document.querySelector('[aria-labelledby="companyParticularsTitle"]');
@@ -132,7 +136,6 @@ test('company details remain responsive on phone, iPad and desktop widths', asyn
         documentWidth: document.documentElement.scrollWidth,
         tabRailWidth: tabs.clientWidth,
         tabRailContentWidth: tabs.scrollWidth,
-        visibleTabs: [...tabs.querySelectorAll('[role="tab"]')].filter((tab) => tab.getBoundingClientRect().width > 0).length,
         overflowingElements: [...document.querySelectorAll('body *')]
           .filter((element) => {
             const rect = element.getBoundingClientRect();
@@ -155,7 +158,6 @@ test('company details remain responsive on phone, iPad and desktop widths', asyn
 
     expect(layout.documentWidth, JSON.stringify(layout.overflowingElements)).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.tabRailContentWidth).toBeLessThanOrEqual(layout.tabRailWidth + 1);
-    expect(layout.visibleTabs).toBe(4);
     expect(layout.editRight).toBeLessThanOrEqual(layout.sectionRight + 1);
     expect(layout.particularsColumns).toBe(width <= 680 ? 1 : 2);
   }
