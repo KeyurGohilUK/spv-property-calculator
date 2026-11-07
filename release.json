@@ -1,4 +1,4 @@
 {
-  "version": "1.60.58",
-  "notes": ["Use one shared dialog foundation throughout the app."]
+  "version": "1.60.59",
+  "notes": ["Use one shared company profile dialog for adding and editing companies."]
 }

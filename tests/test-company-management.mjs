@@ -20,10 +20,10 @@ const {
 } = await import('../src/features/company/company-storage.js');
 const { performCompanyProfileSync } = await import('../src/features/company/company-cloud-sync.js');
 
-const companyEditor = readFileSync(new URL('../company/details.html', import.meta.url), 'utf8');
+const companyProfileDialog = readFileSync(new URL('../src/features/company/company-profile-dialog.js', import.meta.url), 'utf8');
 const companyController = readFileSync(new URL('../src/features/company/company.js', import.meta.url), 'utf8');
 for (const id of ['companySearchInput', 'companySearchBtn', 'companySearchStatus', 'companySearchResults']) {
-  assert.match(companyEditor, new RegExp(`id="${id}"`));
+  assert.ok(companyProfileDialog.includes(id), `${id} must be defined by the shared company dialog`);
 }
 assert.match(companyController, /selectCompanyParticulars/);
 assert.match(companyController, /detailsDialog\.dialog\.open/);

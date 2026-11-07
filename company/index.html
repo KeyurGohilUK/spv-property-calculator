@@ -39,27 +39,6 @@
       </section>
     </main>
   </div>
-  <dialog id="addCompanyDialog" class="app-dialog company-dialog" aria-labelledby="addCompanyDialogTitle">
-    <form id="addCompanyForm">
-      <div class="company-dialog-header"><h2 id="addCompanyDialogTitle">Add company</h2><button id="closeAddCompanyDialog" type="button" class="dialog-close" aria-label="Close add company">×</button></div>
-      <div class="company-official-search">
-        <label class="field"><span>Find company on Companies House</span><input id="newCompanySearchInput" type="search" maxlength="100" autocomplete="off" placeholder="Company name or 8-character number"></label>
-        <button id="newCompanySearchBtn" class="secondary-btn company-search-icon-btn" type="button" aria-label="Search Companies House" title="Search Companies House"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 4.5 4.5"></path></svg></button>
-        <p id="newCompanySearchStatus" class="muted" role="status" aria-live="polite"></p>
-        <div id="newCompanySearchResults" class="company-search-results" role="group" aria-label="Companies House search results"></div>
-        <small class="muted">Select a result to populate the fields below, then review and add the company. You can also enter details manually.</small>
-      </div>
-      <label class="field"><span>Company name <strong aria-hidden="true">*</strong></span><input id="newCompanyName" type="text" maxlength="160" autocomplete="organization" required></label>
-      <label class="field"><span>Company number</span><input id="newCompanyNumber" type="text" maxlength="32" autocomplete="off"></label>
-      <label class="field"><span>Registered office</span><textarea id="newCompanyOffice" rows="3" maxlength="500" autocomplete="street-address" data-plain-text></textarea></label>
-      <div class="company-form-columns">
-        <label class="field"><span>Company status</span><input id="newCompanyStatus" type="text" maxlength="80" placeholder="e.g. Active"></label>
-        <label class="field"><span>Incorporation date</span><input id="newCompanyDate" type="date"></label>
-      </div>
-      <p id="addCompanyMessage" class="save-message" role="status"></p>
-      <div class="dialog-actions company-form-actions"><button id="cancelAddCompany" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Add company</button></div>
-    </form>
-  </dialog>
   <script defer src="./supabase-config.js"></script>
   <script defer src="./cloud.js"></script>
   <script type="module" src="./src/components/secondary-page-header.js"></script>

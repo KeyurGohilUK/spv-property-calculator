@@ -1,5 +1,6 @@
 import '../../components/file-upload-field.js';
 import { setupDialog } from '../../components/dialog-helper.js';
+import { createCompanyProfileDialog } from './company-profile-dialog.js';
 import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
 import { escapeHtml, formatDate } from '../../utils/format-utils.js';
 import { syncCompanyProfile } from './company-cloud-sync.js';
@@ -59,7 +60,8 @@ let companySearchSequence = 0;
 const companyComplianceDialogController = setupDialog($('companyComplianceDialog'), {
   closeButtons: [$('companyComplianceDialogClose')]
 });
-const detailsDialog = setupDialog($('companyDetailsDialog'), {
+const companyDetailsDialogElement = createCompanyProfileDialog('edit');
+const detailsDialog = setupDialog(companyDetailsDialogElement, {
   closeButtons: [$('closeCompanyDetailsDialog'), $('cancelCompanyDetailsBtn')]
 });
 const appointmentDialog = setupDialog($('appointmentDialog'), {

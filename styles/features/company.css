@@ -357,7 +357,7 @@
   stroke-width: 2;
   stroke-linecap: round;
 }
-#newCompanySearchStatus,
+.company-official-search > [id$="SearchStatus"],
 .company-official-search > .company-search-results,
 .company-official-search > small { grid-column: 1 / -1; margin: 0; }
 .company-official-search > small { line-height: 1.45; }
