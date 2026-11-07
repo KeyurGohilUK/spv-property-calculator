@@ -26,14 +26,14 @@
     <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="company"></nav>
     <main class="main-shell company-shell">
       <section class="hero-card company-hero">
-        <div><p class="eyebrow">Company records</p><h1>Manage Companies</h1><p class="muted">Choose a company to manage its particulars, compliance, investments and appointments.</p></div>
+        <div><p class="eyebrow">Company records</p><h1>Manage companies</h1><p class="muted">Create, sync and manage your SPV companies.</p></div>
         <div class="property-hero-actions" role="group" aria-label="Company actions">
           <span id="companyListSyncStatus" class="sync-status" role="status">Saved on this device</span>
-          <button id="newCompanyBtn" class="primary-btn" type="button">＋ New Company</button>
+          <button id="newCompanyBtn" class="primary-btn" type="button" aria-label="New Company">＋ New company</button>
         </div>
       </section>
       <section class="company-section" aria-labelledby="companyListTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">Your workspace</p><h2 id="companyListTitle">Companies</h2></div><span id="companyCount" class="company-count"></span></div>
+        <div class="company-section-heading"><div class="company-section-heading-copy"><p class="eyebrow">Your workspace</p><div class="company-section-title-line"><h2 id="companyListTitle">Companies</h2><span id="companyCount" class="company-count" role="status" aria-live="polite"><span class="sr-only"></span><span aria-hidden="true"></span></span></div></div></div>
         <p id="companyListMessage" class="muted company-list-message" role="status" aria-live="polite"></p>
         <div id="companyCards" class="company-cards"></div>
       </section>
