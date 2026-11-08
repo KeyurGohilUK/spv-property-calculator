@@ -1,18 +1,11 @@
-const icons = Object.freeze({
-  properties: '<path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path>',
-  company: '<rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h3v3H8zM14 7h3v3h-3zM8 13h3v3H8zM14 13h3v3h-3zM10 21v-4h4v4"></path>',
-  portfolio: '<path d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path><path d="M7 10h.01M17 10h.01"></path>',
-  expenses: '<rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h4"></path>',
-  forecast: '<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path>',
-  tasks: '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect><path d="m9 12 2 2 4-4"></path>',
-  more: '<circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle>'
-});
+import { getIconSvg } from '../components/shared-icons.js';
 
 function link(item, activePage, home) {
   const active = item.id === activePage;
   const id = home && item.id === 'properties' ? ' id="propertiesNavLink"' : '';
+  const icon = getIconSvg(item.id === 'portfolio' ? 'properties' : item.id);
   return `<a${id} class="primary-nav-item${active ? ' active' : ''}" href="${item.href}"${active ? ' aria-current="page"' : ''}>
-    <svg viewBox="0 0 24 24" aria-hidden="true">${icons[item.id]}</svg>
+    ${icon}
     <span>${item.label}</span>${item.badge ? `<small>${item.badge}</small>` : ''}
   </a>`;
 }
@@ -31,7 +24,7 @@ export function setupPrimaryNavigation(root = document) {
   ];
   nav.innerHTML = `${items.map((item) => link(item, activePage, home)).join('')}
     <button${home ? ' id="moreNavBtn"' : ''} class="primary-nav-item" type="button" data-more-menu aria-haspopup="dialog">
-      <svg viewBox="0 0 24 24" aria-hidden="true">${icons.more}</svg><span>More</span>
+      ${getIconSvg('more')}<span>More</span>
     </button>`;
   nav.dataset.rendered = 'true';
   return nav;

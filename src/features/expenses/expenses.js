@@ -1,3 +1,4 @@
+import { getIconSvg } from '../../components/shared-icons.js';
 import '../../components/file-upload-field.js';
 import { getActiveProperties } from '../properties/storage.js';
 import { renderSyncStatus } from '../../components/sync-status.js';
@@ -435,7 +436,7 @@ function render() {
       const view = document.createElement('button');
       view.type = 'button';
       view.className = 'view-receipt';
-      view.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z"></path><path d="M14 3v4h4"></path><path d="M9 12h6M9 16h6"></path></svg>';
+      view.innerHTML = getIconSvg('file');
       view.setAttribute('aria-label', `View receipt for ${expense.description || money(expense.amount)}`);
       view.title = 'View receipt';
       view.addEventListener('click', () => viewReceipt(expense));
@@ -444,7 +445,7 @@ function render() {
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'delete-expense';
-    remove.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="m6.5 7 .8 13h9.4l.8-13"></path><path d="M10 11v5M14 11v5"></path></svg>';
+    remove.innerHTML = getIconSvg('trash');
     remove.setAttribute('aria-label', `Delete expense ${expense.description || money(expense.amount)}`);
     remove.title = 'Delete expense';
     remove.addEventListener('click', () => removeExpense(expense));

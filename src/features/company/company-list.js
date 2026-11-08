@@ -1,4 +1,5 @@
 import { setupDialog } from '../../components/dialog-helper.js';
+import { getIconSvg } from '../../components/shared-icons.js';
 import { createCompanyProfileDialog } from './company-profile-dialog.js';
 import { escapeHtml } from '../../utils/format-utils.js';
 import { getActiveProperties } from '../properties/storage.js';
@@ -34,7 +35,7 @@ function renderCompanies() {
     return `
       <article class="company-list-card">
         <span class="company-list-card-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5.5L12 2l8 3.5V21"/><path d="M2 21h20M8 8h1m6 0h1M8 12h1m6 0h1M8 16h1m6 0h1M11 21v-4h2v4"/></svg>
+          ${getIconSvg('company')}
         </span>
         <span class="company-list-card-content">
           <span class="company-list-card-heading">
@@ -46,14 +47,14 @@ function renderCompanies() {
             <span class="company-list-card-detail"><small class="company-list-card-detail-label">Incorporated</small><strong>${escapeHtml(incorporationDate)}</strong></span>
           </span>
           <span class="company-list-card-meta">
-            <span class="company-list-card-property-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg> ${propertyCount} ${propertyCount === 1 ? 'property' : 'properties'}</span>
+            <span class="company-list-card-property-count">${getIconSvg('home')} ${propertyCount} ${propertyCount === 1 ? 'property' : 'properties'}</span>
           </span>
         </span>
         <nav class="company-list-card-shortcuts" aria-label="${escapeHtml(company.companyName)} shortcuts">
-          <a href="${companyUrl}&amp;tab=compliance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-2.8 7.8-7 10-4.2-2.2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Compliance</a>
-          <a href="${companyUrl}&amp;tab=investment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20v-5M10 20V9M16 20V4M22 20V11"/></svg>Investment</a>
+          <a href="${companyUrl}&amp;tab=compliance">${getIconSvg('shieldCheck')}Compliance</a>
+          <a href="${companyUrl}&amp;tab=investment">${getIconSvg('coins')}Investment</a>
         </nav>
-        <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+        <a class="company-list-card-chevron" href="${companyUrl}" aria-label="Open company details" title="Open company details">${getIconSvg('chevronRight')}</a>
       </article>`;
   }).join('');
   $('companyCount').querySelector('.sr-only').textContent = `${records.length} ${records.length === 1 ? 'company' : 'companies'}`;

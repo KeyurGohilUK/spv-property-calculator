@@ -52,10 +52,10 @@
       <div id="propertiesDashboard" class="properties-dashboard">
         <div class="properties-tabs" role="tablist" aria-label="Property pages">
           <button id="opportunitiesTab" class="properties-tab" type="button" role="tab" aria-selected="true" aria-controls="homeView" tabindex="0" data-properties-tab="opportunities">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v10h13V10"></path><path d="M9.5 20v-6h5v6"></path></svg><span>Opportunities</span>
+            <svg data-shared-icon="home" aria-hidden="true"></svg><span>Opportunities</span>
           </button>
           <button id="portfolioTab" class="properties-tab" type="button" role="tab" aria-selected="false" aria-controls="portfolioView" tabindex="-1" data-properties-tab="portfolio">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path><path d="M7 10h.01M17 10h.01"></path></svg><span>Portfolio</span>
+            <svg data-shared-icon="properties" aria-hidden="true"></svg><span>Portfolio</span>
           </button>
         </div>
       <section id="homeView" class="view" role="tabpanel" aria-labelledby="opportunitiesTab" tabindex="0">
@@ -128,11 +128,7 @@
           <div class="editor-topbar-actions">
             <span id="editorModeLabel" class="mode-label">New calculation</span>
             <button id="savePropertyBtn" class="editor-save-icon is-saved" type="button" aria-label="All property changes saved" title="All property changes saved" data-tooltip="All property changes saved">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 4h12l2 2v14H5V4Z"></path>
-                <path d="M8 4v6h8V4"></path>
-                <path d="M8 20v-6h8v6"></path>
-              </svg>
+              <svg data-shared-icon="save" aria-hidden="true"></svg>
             </button>
           </div>
         </div>
@@ -163,7 +159,7 @@
               <label class="field listing-link-field">
                 <span>Property Listing Link <em>optional</em></span>
                 <span class="listing-link-input">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3"></path><path d="M15 3h6v6"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg>
+                  <svg data-shared-icon="externalLink" aria-hidden="true"></svg>
                   <input id="listingUrl" name="listingUrl" type="url" inputmode="url" autocomplete="url" maxlength="1000" placeholder="https://www.rightmove.co.uk/..." aria-describedby="listingUrlHelp listingUrlError">
                 </span>
                 <small id="listingUrlHelp">Rightmove, Zoopla, estate-agent or other web listing.</small>
@@ -173,12 +169,12 @@
               <div class="field viewing-date-field">
                 <label for="viewingDateDay">Viewing Date &amp; Time <em>optional</em></label>
                 <div class="viewing-date-input">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path><circle cx="12" cy="15" r="3"></circle><path d="M12 13.5V15l1 1"></path></svg>
+                  <svg data-shared-icon="calendar" aria-hidden="true"></svg>
                   <input id="viewingDate" name="viewingDate" type="hidden">
                   <input id="viewingDateDay" name="viewingDateDay" type="date" autocomplete="off" aria-label="Viewing date">
                   <select id="viewingTime" name="viewingTime" aria-label="Viewing time" disabled><option value="">Select time</option></select>
                   <button id="addViewingToCalendarBtn" class="viewing-calendar-btn hidden" type="button" aria-label="Add viewing to calendar" title="Add viewing to calendar">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18M12 13v6M9 16h6"></path></svg>
+                    <svg data-shared-icon="calendarAdd" aria-hidden="true"></svg>
                   </button>
                 </div>
               </div>
@@ -380,7 +376,7 @@
                     <small>Shared with all signed-in users</small>
                   </div>
                   <button id="refreshNotesBtn" class="note-refresh-btn" type="button" aria-label="Refresh notes" title="Refresh notes">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 9m0 0V4m0 5h5M4 13a8.1 8.1 0 0 0 14.9 4L21 15m0 0v5m0-5h-5"/></svg>
+                    <svg data-shared-icon="refresh" aria-hidden="true"></svg>
                   </button>
                 </div>
                 <div id="notesList" class="chat-list" role="log" aria-label="Property notes conversation"></div>
@@ -388,7 +384,7 @@
                   <div class="chat-composer">
                     <textarea id="noteText" rows="1" maxlength="2000" aria-label="Write a note" placeholder="Write a note..."></textarea>
                     <button id="saveNoteBtn" class="chat-send-btn" type="button" aria-label="Send note" title="Send note">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+                      <svg data-shared-icon="send" aria-hidden="true"></svg>
                     </button>
                   </div>
                   <span id="noteSaveMessage" class="note-save-message" aria-live="polite"></span>

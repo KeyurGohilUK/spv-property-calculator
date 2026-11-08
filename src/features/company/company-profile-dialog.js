@@ -1,4 +1,6 @@
-const SEARCH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 4.5 4.5"></path></svg>';
+import { getIconSvg } from '../../components/shared-icons.js';
+
+const SEARCH_ICON = getIconSvg('search');
 
 /** Build the shared company particulars dialog with mode-specific copy and IDs. */
 export function createCompanyProfileDialog(mode) {
