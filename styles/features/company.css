@@ -435,13 +435,25 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
 .hmrc-period-toggle:hover .hmrc-period-heading h5 { color:var(--brand); }
 .hmrc-period-toggle:focus-visible { outline:3px solid var(--brand); outline-offset:4px; }
 .hmrc-period-chevron { display:grid; flex:0 0 44px; width:44px; height:44px; place-items:center; margin:0; border-radius:10px; background:var(--surface-2); color:var(--brand); }
-.hmrc-period-chevron-icon { width:22px; height:22px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5; transition:transform 180ms ease; }
-.hmrc-period-toggle[aria-expanded="true"] .hmrc-period-chevron-icon { transform:rotate(90deg); }
-@media (prefers-reduced-motion:reduce) { .hmrc-period-chevron-icon { transition:none; } }
-.hmrc-period-content { display:grid; grid-template-rows:0fr; opacity:0; visibility:hidden; overflow:hidden; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s linear 220ms; }
-.hmrc-period-card.is-expanded .hmrc-period-content { grid-template-rows:1fr; opacity:1; visibility:visible; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s; }
+.company-disclosure-chevron-icon { flex:0 0 22px; width:22px; height:22px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5; transition:transform 180ms ease; }
+.hmrc-period-toggle[aria-expanded="true"] .company-disclosure-chevron-icon,.hmrc-setup-toggle[aria-expanded="true"] .company-disclosure-chevron-icon { transform:rotate(90deg); }
+.company-animated-disclosure { display:grid; grid-template-rows:0fr; opacity:0; visibility:hidden; overflow:hidden; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s linear 220ms; }
+.company-animated-disclosure.is-expanded { grid-template-rows:1fr; opacity:1; visibility:visible; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s; }
+.company-animated-disclosure-inner { min-height:0; overflow:hidden; }
+.hmrc-period-header { transition:padding-bottom 220ms ease,border-color 220ms ease; }
 .hmrc-period-content-inner { min-height:0; overflow:hidden; }
-@media (prefers-reduced-motion:reduce) { .hmrc-period-header,.hmrc-period-content { transition:none; } }
+.hmrc-setup-toggle { display:inline-flex; align-items:center; gap:8px; max-width:100%; padding:5px 8px 5px 0; border:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; text-align:left; text-transform:inherit; cursor:pointer; }
+.hmrc-setup-toggle:focus-visible { outline:3px solid var(--brand); outline-offset:3px; border-radius:6px; }
+.hmrc-setup-toggle .company-disclosure-chevron-icon { color:var(--brand); }
+.hmrc-setup-overview:not(.is-expanded) .hmrc-section-heading { margin-bottom:0; }
+.hmrc-setup-card-title { display:flex; align-items:center; gap:6px; min-width:0; margin-bottom:8px; }
+.hmrc-setup-card-title h5 { margin:0; }
+.hmrc-setup-card .hmrc-setup-help-btn { display:grid; flex:0 0 32px; width:32px; height:32px; min-height:32px; place-items:center; padding:6px; border:1px solid var(--border); border-radius:50%; background:var(--surface-2); color:var(--muted); cursor:pointer; }
+.hmrc-setup-help-btn:hover { color:var(--brand); border-color:var(--brand); }
+.hmrc-setup-help-btn:focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+.hmrc-setup-help-btn svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.8; }
+.hmrc-setup-help-points { display:grid; gap:8px; margin:12px 0 18px; padding-left:1.25rem; line-height:1.5; }
+@media (prefers-reduced-motion:reduce) { .company-disclosure-chevron-icon,.company-animated-disclosure,.hmrc-period-header { transition:none; } }
 .hmrc-period-heading { min-width:0; flex:1 1 300px; }
 .hmrc-period-title { display:block; margin:0 0 10px; font-size:1.06rem; font-weight:750; line-height:1.25; overflow-wrap:anywhere; }
 .hmrc-period-badges { display:flex; flex-wrap:wrap; gap:6px; }

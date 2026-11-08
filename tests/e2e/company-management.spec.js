@@ -249,6 +249,19 @@ test('editor tracks HMRC periods, tax liability and payments through dialogs', a
   await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
   await expect(page.locator('#hmrcRecurringOverview')).toBeVisible();
   await expect(page.locator('#hmrcAuthorityProgress')).toHaveText('Setup 0 of 2 recorded');
+  const setupToggle = page.locator('#hmrcSetupToggle');
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'true');
+  await setupToggle.click();
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#hmrcSetupDisclosure')).toBeHidden();
+  await setupToggle.click();
+  await expect(page.locator('#hmrcSetupDisclosure')).toBeVisible();
+  const setupHelp = page.getByRole('button', { name: 'Help: UTR letter' });
+  await setupHelp.click();
+  await expect(page.locator('#hmrcSetupHelpDialog')).toBeVisible();
+  await expect(page.locator('#hmrcSetupHelpDialog')).toContainText('Do not enter the UTR number here.');
+  await page.locator('#hmrcSetupHelpDialog [data-hmrc-close]').last().click();
+  await expect(setupHelp).toBeFocused();
   await page.locator('#hmrcSetupCards .hmrc-card-documents summary').first().click();
   const downloadEvidence = page.getByRole('button', { name: 'Download UTR letter.pdf' });
   const removeEvidence = page.getByRole('button', { name: 'Remove UTR letter.pdf' });
@@ -429,6 +442,11 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   await page.getByRole('tab', { name: 'Compliance' }).click();
   await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
+  const setupToggle = page.locator('#hmrcSetupToggle');
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'false');
+  await setupToggle.click();
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#hmrcSetupDisclosure')).toBeVisible();
   // Use the same accessible pencil icon as the rest of the Company page.
   for (const [step, label] of [
     ['utr', 'Edit UTR letter'],
