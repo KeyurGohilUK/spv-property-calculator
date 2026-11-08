@@ -1,4 +1,4 @@
 {
-  "version": "1.60.69",
-  "notes": ["Give the expense form more room on iPad and desktop."]
+  "version": "1.60.70",
+  "notes": ["Centralize interface icons in a shared app-wide registry."]
 }

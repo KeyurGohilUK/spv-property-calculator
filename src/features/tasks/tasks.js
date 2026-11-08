@@ -1,3 +1,4 @@
+import { getIconSvg } from '../../components/shared-icons.js';
 import { renderSyncStatus } from '../../components/sync-status.js';
 import { renderChatThread, setChatComposerMode } from '../../components/chat-thread.js';
 import { setupDialog } from '../../components/dialog-helper.js';
@@ -19,12 +20,7 @@ import { TEMPLATES, buildTasksFromTemplate } from './task-templates.js';
 const $ = (id) => document.getElementById(id);
 
 const STATUS_LABELS = { todo: 'Todo', 'in-progress': 'In Progress', resolved: 'Resolved', done: 'Done' };
-const STATUS_ICONS = {
-  todo: '<circle cx="12" cy="12" r="9"></circle>',
-  'in-progress': '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path>',
-  resolved: '<circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path>',
-  done: '<circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-4.5"></path>'
-};
+const STATUS_ICONS = { todo: 'statusTodo', 'in-progress': 'statusProgress', resolved: 'statusResolved', done: 'statusDone' };
 
 const MEMBERS_CACHE_KEY = 'spv-property-calculator.workspace-members.v1';
 
@@ -400,7 +396,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
   statusBtn.type = 'button';
   statusBtn.className = 'task-status-btn';
   statusBtn.dataset.status = task.status;
-  statusBtn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${STATUS_ICONS[task.status] || STATUS_ICONS.todo}</svg>`;
+  statusBtn.innerHTML = getIconSvg(STATUS_ICONS[task.status] || STATUS_ICONS.todo);
   statusBtn.setAttribute('aria-label', `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`);
   statusBtn.title = canEditTask(task)
     ? `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`
@@ -468,7 +464,7 @@ function buildTaskCard(task, { showStatus = true } = {}) {
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'task-delete-btn';
-    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="m6.5 7 .8 13h9.4l.8-13"></path><path d="M10 11v5M14 11v5"></path></svg>';
+    deleteBtn.innerHTML = getIconSvg('trash');
     deleteBtn.setAttribute('aria-label', `Delete task: ${task.title}`);
     deleteBtn.title = 'Delete task';
     deleteBtn.addEventListener('click', () => removeTask(task));

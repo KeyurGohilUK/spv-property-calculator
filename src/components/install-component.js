@@ -1,7 +1,8 @@
+import { getIconSvg } from './shared-icons.js';
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.60.69';
+export const APP_VERSION = '1.60.70';
 
 const APP_ASSET_MANIFEST = './app-assets.json';
 
@@ -19,14 +20,14 @@ function createDialog() {
       <h3>SPV Property Calculator</h3>
       <p class="muted small">Install the calculator on your phone for an app-like experience and offline access after the first successful visit.</p>
       <button id="nativeInstallBtn" class="primary-btn install-now-btn hidden" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v10"></path><path d="m8.5 10.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2.2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2.2"></path></svg>
+        ${getIconSvg('download')}
         Install now
       </button>
       <section class="release-update-card" aria-labelledby="releaseUpdateTitle">
         <div class="release-update-heading"><div><p class="eyebrow">Latest release</p><h4 id="releaseUpdateTitle"><span id="releaseVersion">Version ${APP_VERSION}</span></h4></div><span id="releaseStatus" class="release-status">Up to date · ${APP_VERSION}</span></div>
         <ul id="releaseNotes" class="release-notes"></ul>
         <button id="downloadUpdatesBtn" class="secondary-btn download-updates-btn" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"></path><path d="M4 18v-5h5"></path><path d="M6.1 9a7 7 0 0 1 11.6-2.6L20 9"></path><path d="m4 15 2.3 2.6A7 7 0 0 0 17.9 15"></path></svg>
+          ${getIconSvg('refresh')}
           <span data-update-label>Check for updates</span>
         </button>
         <p id="updateMessage" class="update-message" aria-live="polite"></p>

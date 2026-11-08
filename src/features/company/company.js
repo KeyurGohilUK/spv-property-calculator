@@ -1,4 +1,5 @@
 import '../../components/file-upload-field.js';
+import { getIconSvg, hydrateSharedIcons } from '../../components/shared-icons.js';
 import { setupDialog } from '../../components/dialog-helper.js';
 import { createCompanyProfileDialog } from './company-profile-dialog.js';
 import { buildCompanyCompliance, formatComplianceDateUK, hmrcDeadlines, hmrcTaxPeriods, addMonthsClamped } from './compliance-rules.js';
@@ -25,16 +26,18 @@ import {
 } from './company-storage.js';
 
 const $ = (id) => document.getElementById(id);
+hydrateSharedIcons();
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 const displayCompanyStatus = (status) => status ? String(status).charAt(0).toUpperCase() + String(status).slice(1) : '';
-const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
-const PLUS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
-const ATTACHMENT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
-const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
-const VIEW_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-const REMOVE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
-const HELP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.7c-1.1 1-1.9 1.4-1.9 3"/><path d="M12 17.2h.01"/></svg>';
-const CHEVRON_ICON = '<svg class="company-disclosure-chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>';
+const EDIT_ICON = getIconSvg('edit');
+const PLUS_ICON = getIconSvg('plus');
+const ATTACHMENT_ICON = getIconSvg('attachment');
+const DOWNLOAD_ICON = getIconSvg('download');
+const VIEW_ICON = getIconSvg('eye');
+const REMOVE_ICON = getIconSvg('trash');
+const HELP_ICON = getIconSvg('help');
+const CHEVRON_ICON = getIconSvg('chevronRight', 'company-disclosure-chevron-icon');
+
 const HMRC_SETUP_HELP = Object.freeze({
   utr: {
     title: 'UTR letter',
@@ -476,8 +479,8 @@ function renderCompanyCompliance() {
               ? `Due by <strong>${due}</strong> · ${item.source === 'companies-house' ? 'Companies House' : 'HMRC estimate'}`
               : 'Review this company obligation and keep appropriate records.';
     const icon = item.status === 'needs-verification' || item.status === 'past-deadline-unverified'
-      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2.1h16a1.4 1.4 0 0 0 1.2-2.1L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h8l4 4V20a1.25 1.25 0 0 1-1.25 1.25h-10.5A1.25 1.25 0 0 1 5 20V5a1.25 1.25 0 0 1 1-1.25Z"/><path d="M14 4v4h4M8 13h8m-8 4h8"/></svg>';
+      ? getIconSvg('alert')
+      : getIconSvg('file');
     return `
       <article class="company-compliance-item">
         <span class="company-compliance-item-icon ${item.status === 'needs-verification' || item.status === 'past-deadline-unverified' ? 'is-attention' : ''}" aria-hidden="true">${icon}</span>

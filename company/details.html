@@ -34,15 +34,15 @@
       </section>
 
             <div class="company-detail-tabs" role="tablist" aria-label="Company record sections">
-        <button id="companyTab" class="company-detail-tab" type="button" role="tab" aria-selected="true" aria-controls="companyTabPanel" tabindex="0" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V4h12v17M15 9h6v12M7 8h4M7 12h4M7 16h4M18 13h.01M18 17h.01M2 21h20"/></svg><span>Company</span></button>
-        <button id="complianceTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="complianceTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 22 7-4V6l-7-4-7 4v12l7 4Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg><span>Compliance</span></button>
-        <button id="investmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="investmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="8" cy="6" rx="5.5" ry="2.5"/><path d="M2.5 6v8c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V6M2.5 10c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5"/><ellipse cx="18" cy="5" rx="4.5" ry="2.5"/><path d="M13.5 5v8c0 1.4 2 2.5 4.5 2.5M13.5 9c0 1.4 2 2.5 4.5 2.5s4.5-1.1 4.5-2.5V5"/></svg><span>Investment</span></button>
-        <button id="appointmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="appointmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1M16 3.2a4 4 0 0 1 0 7.6M18 14a6 6 0 0 1 4 5.7V21"/></svg><span>Appointment</span></button>
+        <button id="companyTab" class="company-detail-tab" type="button" role="tab" aria-selected="true" aria-controls="companyTabPanel" tabindex="0" data-company-tab><svg class="company-detail-tab-icon" data-shared-icon="company" aria-hidden="true"></svg><span>Company</span></button>
+        <button id="complianceTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="complianceTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" data-shared-icon="shieldCheck" aria-hidden="true"></svg><span>Compliance</span></button>
+        <button id="investmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="investmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" data-shared-icon="coins" aria-hidden="true"></svg><span>Investment</span></button>
+        <button id="appointmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="appointmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" data-shared-icon="users" aria-hidden="true"></svg><span>Appointment</span></button>
       </div>
       <div id="companyTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="companyTab" tabindex="0">
 <section class="company-section" aria-labelledby="companyParticularsTitle">
         <div class="company-section-heading"><div><p class="eyebrow">Company Overview</p><h2 id="companyParticularsTitle">Particulars</h2></div>
-          <button id="editCompanyDetailsBtn" class="icon-btn company-edit-btn" type="button" aria-label="Edit company details" title="Edit company details"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
+          <button id="editCompanyDetailsBtn" class="icon-btn company-edit-btn" type="button" aria-label="Edit company details" title="Edit company details"><svg data-shared-icon="edit" aria-hidden="true"></svg></button>
         </div>
         <dl class="company-particulars">
           <div><dt>Name</dt><dd id="companyNameValue">Not added</dd></div>
@@ -54,7 +54,7 @@
         <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
       </section>
 <details class="company-section company-danger-zone">
-        <summary class="company-danger-summary"><span><h2 id="deleteCompanyTitle">Delete company</h2><small>Expand to view the removal option</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <summary class="company-danger-summary"><span><h2 id="deleteCompanyTitle">Delete company</h2><small>Expand to view the removal option</small></span><svg data-shared-icon="chevronDown" aria-hidden="true"></svg></summary>
         <div class="company-danger-content">
           <p class="muted">Remove this company from your workspace. Its directors, investments and compliance records will be hidden with it. Properties and expenses are not deleted.</p>
           <button type="button" id="openDeleteCompanyBtn" class="secondary-btn danger-text" disabled>Delete company</button>
@@ -113,7 +113,7 @@
           <div id="hmrcStatusNote" class="hmrc-status-note" role="status" aria-live="polite" hidden></div>
           <section id="hmrcSetupOverview" class="hmrc-overview hmrc-setup-overview" aria-labelledby="hmrcSetupHeading">
             <div class="hmrc-section-heading">
-              <h3 id="hmrcSetupHeading"><button id="hmrcSetupToggle" class="hmrc-setup-toggle" type="button" data-hmrc-setup-toggle aria-expanded="true" aria-controls="hmrcSetupDisclosure"><span>Company inception setup</span><svg class="company-disclosure-chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></button></h3>
+              <h3 id="hmrcSetupHeading"><button id="hmrcSetupToggle" class="hmrc-setup-toggle" type="button" data-hmrc-setup-toggle aria-expanded="true" aria-controls="hmrcSetupDisclosure"><span>Company inception setup</span><svg class="company-disclosure-chevron-icon" data-shared-icon="chevronRight" aria-hidden="true"></svg></button></h3>
               <span id="hmrcAuthorityProgress" class="company-identity-chip company-identity-chip--neutral"></span>
             </div>
             <div id="hmrcSetupDisclosure" class="company-animated-disclosure is-expanded" aria-hidden="false">
