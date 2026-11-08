@@ -1,4 +1,4 @@
 {
-  "version": "1.60.63",
-  "notes": ["Animate HMRC tax-period panels for smoother expansion and collapse."]
+  "version": "1.60.64",
+  "notes": ["Make HMRC company setup collapsible and add task guidance dialogs."]
 }

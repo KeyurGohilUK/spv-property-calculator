@@ -33,6 +33,25 @@ const ATTACHMENT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="
 const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
 const VIEW_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const REMOVE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+const HELP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.7c-1.1 1-1.9 1.4-1.9 3"/><path d="M12 17.2h.01"/></svg>';
+const CHEVRON_ICON = '<svg class="company-disclosure-chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>';
+const HMRC_SETUP_HELP = Object.freeze({
+  utr: {
+    title: 'UTR letter',
+    expectations: ['HMRC sends the company’s 10-digit Unique Taxpayer Reference (UTR) by post to its registered office.'],
+    actions: ['Record the date the letter arrives and attach a copy under Documents.', 'This screen stores the receipt date only. Do not enter the UTR number here.']
+  },
+  activity: {
+    title: 'Company activity',
+    expectations: ['This status describes whether the company is preparing to buy, has started business activity, or is dormant.'],
+    actions: ['Choose the option that reflects the company’s current position; choose Dormant only if HMRC has confirmed that status.', 'Update it if the position changes. Choosing Business activity started makes the Corporation Tax registration step available.']
+  },
+  registration: {
+    title: 'Corporation Tax registration',
+    expectations: ['This step records the company’s Corporation Tax registration confirmation and supporting details.'],
+    actions: ['Follow HMRC’s instructions or ask your accountant what to submit.', 'When HMRC confirms registration, record the date, add any acknowledgement reference or accountant details, and attach proof under Documents.']
+  }
+});
 function evidenceActionMarkup(file, allowRemove) {
   const id = escapeHtml(file.id);
   const label = escapeHtml(file.name);
@@ -513,9 +532,19 @@ let hmrcPaymentIsNew = false;
 let hmrcPeriodToDelete = '';
 let hmrcExpandedPeriodEnds = null;
 let hmrcExpansionCompanyId = '';
+let hmrcSetupExpanded = null;
+let hmrcSetupExpandedCompanyId = '';
+
+function setAnimatedDisclosureState(disclosure, expanded) {
+  if (!disclosure) return;
+  disclosure.classList.toggle('is-expanded', expanded);
+  disclosure.inert = !expanded;
+  disclosure.setAttribute('aria-hidden', String(!expanded));
+}
 
 const hmrcDialogs = {
   setup: setupDialog($('hmrcSetupDialog'), { closeButtons: [...$('hmrcSetupDialog').querySelectorAll('[data-hmrc-close]')] }),
+  setupHelp: setupDialog($('hmrcSetupHelpDialog'), { closeButtons: [...$('hmrcSetupHelpDialog').querySelectorAll('[data-hmrc-close]')] }),
   activity: setupDialog($('hmrcActivityDialog'), { closeButtons: [...$('hmrcActivityDialog').querySelectorAll('[data-hmrc-close]')] }),
   period: setupDialog($('hmrcPeriodDialog'), { closeButtons: [...$('hmrcPeriodDialog').querySelectorAll('[data-hmrc-close]')] }),
   filing: setupDialog($('hmrcFilingDialog'), { closeButtons: [...$('hmrcFilingDialog').querySelectorAll('[data-hmrc-close]')] }),
@@ -633,21 +662,31 @@ function renderHmrcDashboard() {
   $('hmrcAuthorityProgress').textContent = complete === total
     ? 'Setup ' + complete + ' of ' + total + ' complete'
     : 'Setup ' + complete + ' of ' + total + ' recorded';
+  if (hmrcSetupExpandedCompanyId !== profile.id) {
+    hmrcSetupExpandedCompanyId = profile.id;
+    hmrcSetupExpanded = null;
+  }
+  if (hmrcSetupExpanded === null) hmrcSetupExpanded = complete < total;
+  const setupDisclosure = $('hmrcSetupDisclosure');
+  const setupToggle = $('hmrcSetupToggle');
+  setAnimatedDisclosureState(setupDisclosure, hmrcSetupExpanded);
+  $('hmrcSetupOverview').classList.toggle('is-expanded', hmrcSetupExpanded);
+  setupToggle.setAttribute('aria-expanded', String(hmrcSetupExpanded));
   $('hmrcAuthoritySummary').textContent = periods.length
     ? periods.length + ' tax period' + (periods.length === 1 ? '' : 's') + (nextDue ? ' · Next due ' + formatComplianceDateUK(nextDue) : ' · No upcoming deadlines')
     : 'No tax periods recorded yet';
   $('hmrcSetupCards').innerHTML = `
     <article class="hmrc-setup-card">
-      <div><h5>UTR letter</h5>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
+      <div><div class="hmrc-setup-card-title"><h5>UTR letter</h5><button class="hmrc-setup-help-btn" type="button" data-hmrc-help="utr" aria-label="Help: UTR letter" title="What is this?">${HELP_ICON}</button></div>${hmrcBadge(utrLabel, setup.utrReceivedOn ? 'success' : setup.utrStatus === 'pending' ? 'warning' : 'neutral')}</div>
       <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="utr" aria-label="Edit UTR letter" title="Edit UTR letter" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
       <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('company-utr-received:once', 'UTR letter')}</details>
     </article>
     <article class="hmrc-setup-card">
-      <div><h5>Company activity</h5>${hmrcBadge(activityLabel, activityActive ? 'success' : state.activity === 'preparing' ? 'warning' : 'neutral')}</div>
+      <div><div class="hmrc-setup-card-title"><h5>Company activity</h5><button class="hmrc-setup-help-btn" type="button" data-hmrc-help="activity" aria-label="Help: Company activity" title="What is this?">${HELP_ICON}</button></div>${hmrcBadge(activityLabel, activityActive ? 'success' : state.activity === 'preparing' ? 'warning' : 'neutral')}</div>
       <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="activity" aria-label="Edit company activity" title="Edit company activity" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
     </article>
     ${registrationVisible ? `<article class="hmrc-setup-card">
-      <div><h5>Corporation Tax registration</h5>${hmrcBadge(registrationDone ? 'Confirmed' : setup.registrationStatus === 'pending' ? 'Awaiting confirmation' : 'Not recorded', registrationDone ? 'success' : 'warning')}</div>
+      <div><div class="hmrc-setup-card-title"><h5>Corporation Tax registration</h5><button class="hmrc-setup-help-btn" type="button" data-hmrc-help="registration" aria-label="Help: Corporation Tax registration" title="What is this?">${HELP_ICON}</button></div>${hmrcBadge(registrationDone ? 'Confirmed' : setup.registrationStatus === 'pending' ? 'Awaiting confirmation' : 'Not recorded', registrationDone ? 'success' : 'warning')}</div>
       <button class="secondary-btn company-edit-icon-btn" type="button" data-hmrc-open="registration" aria-label="Edit Corporation Tax registration" title="Edit Corporation Tax registration" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button>
       <details class="hmrc-card-documents"><summary>Documents</summary>${hmrcEvidenceMarkup('corporation-tax-registration:once', 'Registration proof')}</details>
     </article>` : ''}`;
@@ -672,6 +711,16 @@ $('hmrcOpenPeriodDialog').addEventListener('click', (event) => {
   hmrcDialogs.period.open(event.currentTarget);
 });
 $('hmrcSetupCards').addEventListener('click', (event) => {
+  const helpButton = event.target.closest('[data-hmrc-help]');
+  if (helpButton) {
+    const help = HMRC_SETUP_HELP[helpButton.dataset.hmrcHelp];
+    if (!help) return;
+    $('hmrcSetupHelpDialogTitle').textContent = help.title;
+    $('hmrcSetupHelpExpectations').innerHTML = help.expectations.map((point) => '<li>' + escapeHtml(point) + '</li>').join('');
+    $('hmrcSetupHelpActions').innerHTML = help.actions.map((point) => '<li>' + escapeHtml(point) + '</li>').join('');
+    hmrcDialogs.setupHelp.open(helpButton);
+    return;
+  }
   const attach = event.target.closest('[data-hmrc-attach]');
   if (attach && editingAllowed) {
     $('hmrcEvidenceInput').dataset.evidenceUpload = attach.dataset.hmrcAttach;
@@ -698,6 +747,14 @@ $('hmrcSetupCards').addEventListener('click', (event) => {
   $('hmrcSetupForm').querySelectorAll('[data-hmrc-setup-field]').forEach((label) => { label.hidden = label.dataset.hmrcSetupField !== step; });
   $('hmrcSetupMessage').textContent = '';
   hmrcDialogs.setup.open(button);
+});
+$('hmrcSetupOverview').addEventListener('click', (event) => {
+  const toggle = event.target.closest('[data-hmrc-setup-toggle]');
+  if (!toggle) return;
+  hmrcSetupExpanded = toggle.getAttribute('aria-expanded') !== 'true';
+  setAnimatedDisclosureState($('hmrcSetupDisclosure'), hmrcSetupExpanded);
+  $('hmrcSetupOverview').classList.toggle('is-expanded', hmrcSetupExpanded);
+  toggle.setAttribute('aria-expanded', String(hmrcSetupExpanded));
 });
 function hmrcRecordPeriodOptions(selectedId) {
   const periods = hmrcTaxPeriods(profile.hmrc);
@@ -764,7 +821,7 @@ function renderHmrcTracking() {
       return `<article class="hmrc-period-card hmrc-period-card--tone-${periodIndex % 2 ? 'alternate' : 'base'}${expanded ? ' is-expanded' : ''}">
         <header class="hmrc-period-header">
           <button type="button" class="hmrc-period-toggle" data-hmrc-period-toggle="${escapeHtml(period.periodEnd)}" aria-label="${expanded ? 'Collapse' : 'Expand'} tax period ${escapeHtml(formatComplianceDateUK(period.periodStart))} to ${escapeHtml(formatComplianceDateUK(period.periodEnd))}" aria-expanded="${expanded}" aria-controls="${escapeHtml(periodId)}">
-            <span class="hmrc-period-chevron" aria-hidden="true"><svg class="hmrc-period-chevron-icon" viewBox="0 0 24 24" focusable="false"><path d="m9 18 6-6-6-6" /></svg></span>
+          <span class="hmrc-period-chevron" aria-hidden="true">${CHEVRON_ICON}</span>
             <span class="hmrc-period-heading">
             <span class="hmrc-period-title" role="heading" aria-level="5">${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</span>
             <span class="hmrc-period-badges">
@@ -778,8 +835,8 @@ function renderHmrcTracking() {
             <button type="button" class="icon-btn company-evidence-action company-evidence-action--remove hmrc-delete-period-btn" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" aria-label="Delete tax period ending ${escapeHtml(period.periodEnd)}" title="Delete period" ${editingAllowed ? '' : 'disabled'}>${REMOVE_ICON}</button>
           </div>
         </header>
-        <div id="${escapeHtml(periodId)}" class="hmrc-period-content" aria-hidden="${!expanded}" ${expanded ? '' : 'inert'}>
-        <div class="hmrc-period-content-inner">
+        <div id="${escapeHtml(periodId)}" class="company-animated-disclosure hmrc-period-content${expanded ? ' is-expanded' : ''}" aria-hidden="${!expanded}" ${expanded ? '' : 'inert'}>
+        <div class="company-animated-disclosure-inner hmrc-period-content-inner">
         <div class="hmrc-period-grid">
           <section class="hmrc-period-info">
             <div class="hmrc-period-info-heading"><h6>CT600 return</h6>
@@ -1437,8 +1494,7 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
     periodToggle.setAttribute('aria-expanded', String(!expanded));
     const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
     if (period) periodToggle.setAttribute('aria-label', (expanded ? 'Expand' : 'Collapse') + ' tax period ' + formatComplianceDateUK(period.periodStart) + ' to ' + formatComplianceDateUK(period.periodEnd));
-    content.inert = expanded;
-    content.setAttribute('aria-hidden', String(expanded));
+    setAnimatedDisclosureState(content, !expanded);
     periodToggle.closest('.hmrc-period-card')?.classList.toggle('is-expanded', !expanded);
     if (expanded) hmrcExpandedPeriodEnds.delete(periodEnd);
     else hmrcExpandedPeriodEnds.add(periodEnd);

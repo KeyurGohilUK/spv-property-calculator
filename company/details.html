@@ -112,8 +112,13 @@
           </div>
           <div id="hmrcStatusNote" class="hmrc-status-note" role="status" aria-live="polite" hidden></div>
           <section id="hmrcSetupOverview" class="hmrc-overview hmrc-setup-overview" aria-labelledby="hmrcSetupHeading">
-            <div class="hmrc-section-heading"><h3 id="hmrcSetupHeading">Company inception setup</h3><span id="hmrcAuthorityProgress" class="company-identity-chip company-identity-chip--neutral"></span></div>
-            <div id="hmrcSetupCards" class="hmrc-setup-cards"></div>
+            <div class="hmrc-section-heading">
+              <h3 id="hmrcSetupHeading"><button id="hmrcSetupToggle" class="hmrc-setup-toggle" type="button" data-hmrc-setup-toggle aria-expanded="true" aria-controls="hmrcSetupDisclosure"><span>Company inception setup</span><svg class="company-disclosure-chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></button></h3>
+              <span id="hmrcAuthorityProgress" class="company-identity-chip company-identity-chip--neutral"></span>
+            </div>
+            <div id="hmrcSetupDisclosure" class="company-animated-disclosure is-expanded" aria-hidden="false">
+              <div class="company-animated-disclosure-inner"><div id="hmrcSetupCards" class="hmrc-setup-cards"></div></div>
+            </div>
           </section>
           <section id="hmrcRecurringOverview" class="hmrc-overview hmrc-recurring-overview" aria-labelledby="hmrcPeriodsHeading">
             <div class="hmrc-section-heading"><h3 id="hmrcPeriodsHeading">Recorded Corporation Tax periods</h3><button id="hmrcOpenPeriodDialog" class="primary-btn" type="button">＋ New period</button></div>
@@ -146,6 +151,12 @@
 <div class="hmrc-dialog-actions"><button id="hmrcPendingBtn" type="button" class="secondary-btn">Still waiting</button><button id="hmrcSetupSaveBtn" class="primary-btn" type="submit">Save</button></div>
 <p id="hmrcSetupMessage" role="status" aria-live="polite"></p></form>
 </dialog>
+  <dialog id="hmrcSetupHelpDialog" class="app-dialog company-dialog hmrc-edit-dialog hmrc-setup-help-dialog" aria-labelledby="hmrcSetupHelpDialogTitle">
+    <div class="company-dialog-header"><h2 id="hmrcSetupHelpDialogTitle">Company setup guidance</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupHelpDialog" aria-label="Close company setup guidance">×</button></div>
+    <h3>What to expect</h3><ul id="hmrcSetupHelpExpectations" class="hmrc-setup-help-points"></ul>
+    <h3>What to do</h3><ul id="hmrcSetupHelpActions" class="hmrc-setup-help-points"></ul>
+    <div class="hmrc-dialog-actions"><button type="button" class="primary-btn" data-hmrc-close="hmrcSetupHelpDialog">Done</button></div>
+  </dialog>
   <dialog id="hmrcActivityDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcActivityDialogTitle">
   <div class="company-dialog-header"><h2 id="hmrcActivityDialogTitle">Company activity</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcActivityDialog" aria-label="Close Company activity">×</button></div>
   
