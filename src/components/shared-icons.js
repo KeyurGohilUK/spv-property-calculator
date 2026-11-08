@@ -13,6 +13,7 @@ const ICONS = Object.freeze({
   more: '<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   shieldCheck: '<path d="m12 22 7-4V6l-7-4-7 4v12l7 4Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/>',
   coins: '<ellipse cx="8" cy="6" rx="5.5" ry="2.5"/><path d="M2.5 6v8c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V6M2.5 10c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5"/><ellipse cx="18" cy="5" rx="4.5" ry="2.5"/><path d="M13.5 5v8c0 1.4 2 2.5 4.5 2.5M13.5 9c0 1.4 2 2.5 4.5 2.5s4.5-1.1 4.5-2.5V5"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21v-1a7.5 7.5 0 0 1 15 0v1"/>',
   users: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1M16 3.2a4 4 0 0 1 0 7.6M18 14a6 6 0 0 1 4 5.7V21"/>',
   edit: '<path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
@@ -56,7 +57,7 @@ export function getIconSvg(name, className = '') {
 
 export function hydrateSharedIcons(root = document) {
   root.querySelectorAll('[data-shared-icon]').forEach((placeholder) => {
-    const svg = getIconSvg(placeholder.dataset.sharedIcon, placeholder.className);
+    const svg = getIconSvg(placeholder.dataset.sharedIcon, placeholder.getAttribute('class') || '');
     if (svg) placeholder.outerHTML = svg;
   });
 }
