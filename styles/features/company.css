@@ -434,7 +434,10 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
 .hmrc-period-toggle { display:flex; flex:1 1 300px; align-items:flex-start; gap:12px; min-width:0; padding:0; border:0; border-radius:10px; background:transparent; color:inherit; text-align:left; cursor:pointer; }
 .hmrc-period-toggle:hover .hmrc-period-heading h5 { color:var(--brand); }
 .hmrc-period-toggle:focus-visible { outline:3px solid var(--brand); outline-offset:4px; }
-.hmrc-period-chevron { display:grid; flex:0 0 36px; width:36px; height:36px; place-items:center; margin-top:1px; border-radius:10px; background:var(--surface-2); color:var(--brand); font-size:26px; font-weight:700; line-height:1; }
+.hmrc-period-chevron { display:grid; flex:0 0 44px; width:44px; height:44px; place-items:center; margin:0; border-radius:10px; background:var(--surface-2); color:var(--brand); }
+.hmrc-period-chevron-icon { width:22px; height:22px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5; transition:transform 180ms ease; }
+.hmrc-period-toggle[aria-expanded="true"] .hmrc-period-chevron-icon { transform:rotate(90deg); }
+@media (prefers-reduced-motion:reduce) { .hmrc-period-chevron-icon { transition:none; } }
 .hmrc-period-content[hidden] { display:none !important; }
 .hmrc-period-heading { min-width:0; flex:1 1 300px; }
 .hmrc-period-title { display:block; margin:0 0 10px; font-size:1.06rem; font-weight:750; line-height:1.25; overflow-wrap:anywhere; }
@@ -565,7 +568,7 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
   .hmrc-edit-dialog { padding:14px; max-height:calc(100dvh - 32px); }
   .hmrc-period-header { display:grid; grid-template-columns:minmax(0,1fr) 44px; align-items:start; gap:8px; }
   .hmrc-period-toggle { grid-column:1; grid-row:1; gap:8px; }
-  .hmrc-period-chevron { flex-basis:32px; width:32px; height:32px; }
+  .hmrc-period-chevron { flex-basis:44px; width:44px; height:44px; }
   .hmrc-period-actions { grid-column:2; grid-row:1; width:auto; justify-content:end; }
   .hmrc-period-actions button { flex:0 0 44px; }
   .hmrc-authority-panel #hmrcRecurringOverview > .hmrc-section-heading { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; gap:10px; }

@@ -764,7 +764,7 @@ function renderHmrcTracking() {
       return `<article class="hmrc-period-card hmrc-period-card--tone-${periodIndex % 2 ? 'alternate' : 'base'}${expanded ? ' is-expanded' : ''}">
         <header class="hmrc-period-header">
           <button type="button" class="hmrc-period-toggle" data-hmrc-period-toggle="${escapeHtml(period.periodEnd)}" aria-label="${expanded ? 'Collapse' : 'Expand'} tax period ${escapeHtml(formatComplianceDateUK(period.periodStart))} to ${escapeHtml(formatComplianceDateUK(period.periodEnd))}" aria-expanded="${expanded}" aria-controls="${escapeHtml(periodId)}">
-            <span class="hmrc-period-chevron" aria-hidden="true">${expanded ? '⌄' : '›'}</span>
+            <span class="hmrc-period-chevron" aria-hidden="true"><svg class="hmrc-period-chevron-icon" viewBox="0 0 24 24" focusable="false"><path d="m9 18 6-6-6-6" /></svg></span>
             <span class="hmrc-period-heading">
             <span class="hmrc-period-title" role="heading" aria-level="5">${hmrcDate(period.periodStart)} – ${hmrcDate(period.periodEnd)}</span>
             <span class="hmrc-period-badges">
