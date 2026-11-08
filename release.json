@@ -1,4 +1,4 @@
 {
-  "version": "1.60.72",
-  "notes": ["Use consistent shared icons in the app menu."]
+  "version": "1.60.73",
+  "notes": ["Improve mobile dialog spacing, scrolling, and action button alignment."]
 }
