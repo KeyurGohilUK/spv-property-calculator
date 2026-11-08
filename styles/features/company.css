@@ -429,7 +429,7 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
 
 .hmrc-period-card { padding:18px; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:16px; }
 .hmrc-period-card--tone-alternate { background:color-mix(in srgb,var(--surface-2) 55%,var(--surface)); }
-.hmrc-period-header { display:flex; justify-content:space-between; align-items:start; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid var(--border); }
+.hmrc-period-header { display:flex; justify-content:space-between; align-items:start; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid var(--border); transition:padding-bottom 220ms ease,border-color 220ms ease; }
 .hmrc-period-card:not(.is-expanded) .hmrc-period-header { padding-bottom:0; border-bottom:0; }
 .hmrc-period-toggle { display:flex; flex:1 1 300px; align-items:flex-start; gap:12px; min-width:0; padding:0; border:0; border-radius:10px; background:transparent; color:inherit; text-align:left; cursor:pointer; }
 .hmrc-period-toggle:hover .hmrc-period-heading h5 { color:var(--brand); }
@@ -438,7 +438,10 @@ html[data-theme="dark"] .hmrc-dashboard { --hmrc-attention:#ff9a9f; }
 .hmrc-period-chevron-icon { width:22px; height:22px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5; transition:transform 180ms ease; }
 .hmrc-period-toggle[aria-expanded="true"] .hmrc-period-chevron-icon { transform:rotate(90deg); }
 @media (prefers-reduced-motion:reduce) { .hmrc-period-chevron-icon { transition:none; } }
-.hmrc-period-content[hidden] { display:none !important; }
+.hmrc-period-content { display:grid; grid-template-rows:0fr; opacity:0; visibility:hidden; overflow:hidden; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s linear 220ms; }
+.hmrc-period-card.is-expanded .hmrc-period-content { grid-template-rows:1fr; opacity:1; visibility:visible; transition:grid-template-rows 220ms ease,opacity 180ms ease,visibility 0s; }
+.hmrc-period-content-inner { min-height:0; overflow:hidden; }
+@media (prefers-reduced-motion:reduce) { .hmrc-period-header,.hmrc-period-content { transition:none; } }
 .hmrc-period-heading { min-width:0; flex:1 1 300px; }
 .hmrc-period-title { display:block; margin:0 0 10px; font-size:1.06rem; font-weight:750; line-height:1.25; overflow-wrap:anywhere; }
 .hmrc-period-badges { display:flex; flex-wrap:wrap; gap:6px; }

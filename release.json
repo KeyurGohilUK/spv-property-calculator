@@ -1,4 +1,4 @@
 {
-  "version": "1.60.62",
-  "notes": ["Fix the animated HMRC tax-period chevron and align its delete control."]
+  "version": "1.60.63",
+  "notes": ["Animate HMRC tax-period panels for smoother expansion and collapse."]
 }

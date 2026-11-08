@@ -778,7 +778,8 @@ function renderHmrcTracking() {
             <button type="button" class="icon-btn company-evidence-action company-evidence-action--remove hmrc-delete-period-btn" data-hmrc-period-remove="${escapeHtml(period.periodEnd)}" aria-label="Delete tax period ending ${escapeHtml(period.periodEnd)}" title="Delete period" ${editingAllowed ? '' : 'disabled'}>${REMOVE_ICON}</button>
           </div>
         </header>
-        <div id="${escapeHtml(periodId)}" class="hmrc-period-content" ${expanded ? '' : 'hidden'}>
+        <div id="${escapeHtml(periodId)}" class="hmrc-period-content" aria-hidden="${!expanded}" ${expanded ? '' : 'inert'}>
+        <div class="hmrc-period-content-inner">
         <div class="hmrc-period-grid">
           <section class="hmrc-period-info">
             <div class="hmrc-period-info-heading"><h6>CT600 return</h6>
@@ -818,6 +819,7 @@ function renderHmrcTracking() {
               <td>${hmrcBadge(payment.status === 'hmrc-confirmed' ? 'HMRC confirmed' : 'Recorded', payment.status === 'hmrc-confirmed' ? 'success' : 'neutral')}</td>
               <td>${editingAllowed ? `<span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" data-hmrc-payment-edit="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Edit payment ${hmrcDate(payment.date)}" title="Edit payment">${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" data-hmrc-payment-remove="${escapeHtml(payment.id)}" data-hmrc-payment-period="${escapeHtml(period.periodEnd)}" aria-label="Delete payment ${hmrcDate(payment.date)}" title="Delete payment">${REMOVE_ICON}</button></span>` : '—'}</td></tr>`).join('')}</tbody></table></div>`
           : '<p class="hmrc-payments-empty">No payments recorded.</p>'}
+        </div>
         </div>
         </div>
       </article>`;
@@ -1435,7 +1437,8 @@ $('hmrcPeriodHistory').addEventListener('click', async (event) => {
     periodToggle.setAttribute('aria-expanded', String(!expanded));
     const period = hmrcTaxPeriods(profile.hmrc).find((item) => item.periodEnd === periodEnd);
     if (period) periodToggle.setAttribute('aria-label', (expanded ? 'Expand' : 'Collapse') + ' tax period ' + formatComplianceDateUK(period.periodStart) + ' to ' + formatComplianceDateUK(period.periodEnd));
-    content.hidden = expanded;
+    content.inert = expanded;
+    content.setAttribute('aria-hidden', String(expanded));
     periodToggle.closest('.hmrc-period-card')?.classList.toggle('is-expanded', !expanded);
     if (expanded) hmrcExpandedPeriodEnds.delete(periodEnd);
     else hmrcExpandedPeriodEnds.add(periodEnd);
