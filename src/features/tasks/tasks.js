@@ -1,1055 +1,3 @@
-import { renderSyncStatus } from '../../components/sync-status.js';
-import { renderChatThread, setChatComposerMode } from '../../components/chat-thread.js';
-import { setupDialog } from '../../components/dialog-helper.js';
-import { buildSafeRichText } from '../../utils/rich-text.js';
-import { getActiveProperties } from '../properties/storage.js';
-import { clearFieldValidation, setFieldValidation } from '../../utils/validation.js';
-import { populateScopeFilterOptions } from '../../utils/scope-filter.js';
-import { formatDate } from '../../utils/format-utils.js';
-import {
-  getTasks, getAllTasks, saveTask, updateTaskStatus, deleteTask, replaceTasks, nextStatus
-} from './task-storage.js';
-import { addTaskEvent, getTaskEvents } from './task-event-storage.js';
-import { addTaskComment, getTaskComments, updateTaskComment } from './task-comment-storage.js';
-import { syncTaskWorkspace } from './task-cloud-sync.js';
-import { syncTaskEvents } from './task-event-sync.js';
-import { syncTaskComments } from './task-comment-sync.js';
-import { TEMPLATES, buildTasksFromTemplate } from './task-templates.js';
-
-const $ = (id) => document.getElementById(id);
-
-const STATUS_LABELS = { todo: 'Todo', 'in-progress': 'In Progress', resolved: 'Resolved', done: 'Done' };
-const STATUS_ICONS = {
-  todo: '<circle cx="12" cy="12" r="9"></circle>',
-  'in-progress': '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path>',
-  resolved: '<circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path>',
-  done: '<circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-4.5"></path>'
-};
-
-const MEMBERS_CACHE_KEY = 'spv-property-calculator.workspace-members.v1';
-
-// Matches task titles that suggest a property viewing has taken place.
-const VIEWING_RE = /\b(viewing|property[\s-]visit|site[\s-]visit|inspect)/i;
-
-const VIEWING_SUGGESTIONS = [
-  { title: 'Make offer', description: 'Prepare and submit a formal offer' },
-  { title: 'Arrange second viewing', description: 'Book a follow-up visit to the property' },
-  { title: 'Request lease pack', description: 'Ask the agent for the full lease documents' },
-];
-
-let properties = [];
-let workspaceMembers = [];
-let cloudUser = null;
-let taskSyncing = false;
-let boardSortables = [];
-const MEMBER_COLORS = ['blue', 'rose', 'mint', 'amber', 'violet', 'teal'];
-let cloudListenerAttached = false;
-let editingTaskId = null;
-let editingCommentId = null;
-let selectedTemplateId = null;
-let userRole = null;
-let canEdit = false;
-let suggestionSourceTask = null;
-const suggestedTaskIds = new Set();
-
-function setSyncStatus(message, state = '') {
-  renderSyncStatus($('taskSyncStatus'), message, state);
-}
-
-async function syncTasks({ showFeedback = true } = {}) {
-  const cloud = window.SPVCloud;
-  if (!cloud || !cloudUser || !navigator.onLine) {
-    if (!cloudUser) setSyncStatus('Saved on this device Â· sign in from Properties to sync');
-    else if (!navigator.onLine) setSyncStatus('Offline Â· changes will sync later');
-    return;
-  }
-
-  taskSyncing = true;
-  setSyncStatus('Syncing tasksâ€¦');
-  try {
-    const result = await syncTaskWorkspace(cloud);
-    await Promise.all([
-      syncTaskEvents(cloud),
-      syncTaskComments(cloud)
-    ]);
-    render();
-    if (result.conflicts.length) {
-      setSyncStatus(`${result.conflicts.length} task conflict${result.conflicts.length === 1 ? '' : 's'} kept locally Â· review before retrying`, 'error');
-    } else {
-      setSyncStatus(showFeedback ? 'Tasks synced' : 'Synced', 'synced');
-    }
-  } catch (error) {
-    console.warn('Task sync failed:', error);
-    const stage = error?.syncStage ? ` while ${error.syncStage}` : '';
-    setSyncStatus(`Task sync pending${stage} Â· local changes are safe`, 'error');
-  } finally {
-    taskSyncing = false;
-  }
-}
-
-async function setupTaskCloud() {
-  const cloud = window.SPVCloud;
-  if (!cloud) {
-    setSyncStatus('Saved on this device Â· cloud unavailable');
-    return;
-  }
-  if (!cloudListenerAttached) {
-    cloud.onAuthChange((user) => {
-      window.setTimeout(async () => {
-        cloudUser = user || null;
-        await refreshEditPermission();
-        await loadWorkspaceMembers();
-        if (cloudUser && navigator.onLine) syncTasks({ showFeedback: false });
-        else setSyncStatus(cloudUser ? 'Offline Â· changes will sync later' : 'Saved on this device Â· sign in from Properties to sync');
-      }, 0);
-    });
-    cloudListenerAttached = true;
-  }
-  try {
-    const state = await cloud.init();
-    cloudUser = state.user || null;
-    await refreshEditPermission();
-    await loadWorkspaceMembers();
-    if (cloudUser && navigator.onLine) await syncTasks({ showFeedback: false });
-    else setSyncStatus(cloudUser ? 'Offline Â· changes will sync later' : 'Saved on this device Â· sign in from Properties to sync');
-  } catch (error) {
-    console.warn('Task cloud setup failed:', error);
-    setSyncStatus('Saved locally Â· cloud setup failed', 'error');
-  }
-}
-
-async function refreshEditPermission() {
-  const cloud = window.SPVCloud;
-  if (!cloudUser || !cloud?.getWorkspaceAccess) {
-    userRole = null;
-    canEdit = false;
-    applyEditState();
-    return;
-  }
-  try {
-    const access = await cloud.getWorkspaceAccess();
-    userRole = (access?.active && ['viewer', 'editor', 'admin'].includes(access.role))
-      ? access.role : null;
-    canEdit = userRole === 'editor' || userRole === 'admin';
-  } catch {
-    userRole = null;
-    canEdit = false;
-  }
-  applyEditState();
-}
-
-function applyEditState() {
-  const tip = userRole === 'viewer' ? 'Viewer accounts cannot create tasks' : '';
-  $('openTaskFormBtn').disabled = !canEdit;
-  $('openTaskFormBtn').title = tip;
-  $('openTemplateDialogBtn').disabled = !canEdit;
-  $('openTemplateDialogBtn').title = tip;
-  $('openTaskSettingsBtn').classList.toggle('hidden', userRole !== 'admin');
-  const badge = $('taskRoleBadge');
-  if (userRole && cloudUser) {
-    badge.textContent = { viewer: 'Read-only', editor: 'Editor', admin: 'Admin' }[userRole] || userRole;
-    badge.className = `task-chip task-role-${userRole}`;
-  } else {
-    badge.className = 'task-chip hidden';
-  }
-}
-
-function canEditTask(task) {
-  if (!canEdit) return false;
-  if (userRole === 'admin') return true;
-  return !task.createdBy || task.createdBy === cloudUser?.id;
-}
-
-// Editors may claim someone else's unassigned Todo, but not edit or delete it.
-function canClaimTask(task) {
-  return canEdit && Boolean(cloudUser?.id) && task.status === 'todo' && !task.assignedTo;
-}
-function canMoveTask(task, destination) {
-  return canEditTask(task) || (canClaimTask(task) && destination === 'in-progress');
-}
-
-async function loadWorkspaceMembers() {
-  const cloud = window.SPVCloud;
-  const loadCached = () => {
-    try {
-      const raw = localStorage.getItem(MEMBERS_CACHE_KEY);
-      workspaceMembers = Array.isArray(JSON.parse(raw || '[]')) ? JSON.parse(raw || '[]') : [];
-    } catch { workspaceMembers = []; }
-  };
-  if (!cloud?.listActiveMembers || !cloudUser) {
-    loadCached();
-    populateAssigneeOptions();
-    return;
-  }
-  try {
-    workspaceMembers = await cloud.listActiveMembers();
-    localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(workspaceMembers));
-  } catch {
-    loadCached();
-  }
-  populateAssigneeOptions();
-  render();
-  if ($('taskSettingsDialog').open) renderTaskMemberColours();
-}
-
-function populateAssigneeOptions() {
-  const formSelect = $('taskAssignedTo');
-  const filterSelect = $('taskAssignedFilter');
-  const savedFilter = filterSelect?.value || 'all';
-
-  formSelect.innerHTML = '<option value="">Unassigned</option>';
-  filterSelect.innerHTML = '<option value="all">Anyone</option>';
-
-  if (cloudUser) {
-    const meOpt = document.createElement('option');
-    meOpt.value = 'me';
-    meOpt.textContent = 'Assigned to me';
-    filterSelect.appendChild(meOpt);
-  }
-
-  const unassignedOpt = document.createElement('option');
-  unassignedOpt.value = 'unassigned';
-  unassignedOpt.textContent = 'Unassigned';
-  filterSelect.appendChild(unassignedOpt);
-
-  workspaceMembers.forEach((m) => {
-    const isMe = m.userId === cloudUser?.id;
-    const formOpt = document.createElement('option');
-    formOpt.value = m.userId;
-    formOpt.textContent = isMe ? `${m.displayName} (you)` : m.displayName;
-    formSelect.appendChild(formOpt);
-
-    if (!isMe) {
-      const filterOpt = document.createElement('option');
-      filterOpt.value = m.userId;
-      filterOpt.textContent = m.displayName;
-      filterSelect.appendChild(filterOpt);
-    }
-  });
-
-  const validValues = new Set(Array.from(filterSelect.options).map((o) => o.value));
-  filterSelect.value = validValues.has(savedFilter) ? savedFilter : 'all';
-}
-
-function getActorName() {
-  if (!cloudUser) return '';
-  return window.SPVCloud?.getUserDisplayName?.() || cloudUser.email || '';
-}
-
-const STATUS_LABELS_FULL = {
-  todo: 'To do',
-  'in-progress': 'In Progress',
-  resolved: 'Resolved',
-  done: 'Done'
-};
-
-function formatRelativeTime(isoString) {
-  if (!isoString) return '';
-  const diff = Date.now() - new Date(isoString).getTime();
-  if (diff < 60_000) return 'just now';
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min ago`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-  if (diff < 7 * 86_400_000) return `${Math.floor(diff / 86_400_000)} days ago`;
-  return formatDate(new Date(isoString));
-}
-
-function renderTaskHistory(taskId) {
-  const events = getTaskEvents(taskId);
-  const list = $('taskHistoryList');
-  list.innerHTML = '';
-  if (!events.length) {
-    const empty = document.createElement('li');
-    empty.className = 'task-history-empty';
-    empty.textContent = 'No status changes recorded yet';
-    list.appendChild(empty);
-    return;
-  }
-  events.forEach((event) => {
-    const item = document.createElement('li');
-    item.className = 'task-history-item';
-
-    const dot = document.createElement('span');
-    dot.className = 'task-history-dot';
-    dot.setAttribute('aria-hidden', 'true');
-
-    const text = document.createElement('span');
-    const toLabel = STATUS_LABELS_FULL[event.toStatus] || event.toStatus || 'â€”';
-    const who = event.userId && event.userId === cloudUser?.id
-      ? 'You'
-      : event.displayName || 'A workspace member';
-    const when = formatRelativeTime(event.createdAt);
-
-    const labelSpan = document.createElement('span');
-    labelSpan.className = 'task-history-label';
-    labelSpan.textContent = toLabel;
-
-    text.append('Marked ', labelSpan, ` Â· ${who} Â· ${when}`);
-    item.append(dot, text);
-    list.appendChild(item);
-  });
-}
-
-function renderTaskDiscussion(taskId) {
-  const comments = getTaskComments(taskId);
-  $('taskCommentCount').textContent = String(comments.length);
-  renderChatThread({
-    container: $('taskCommentList'),
-    messages: [...comments].sort((a, b) => {
-      const aTime = Date.parse(a.createdAt || '') || 0;
-      const bTime = Date.parse(b.createdAt || '') || 0;
-      return bTime - aTime;
-    }),
-    currentUserId: cloudUser?.id || null,
-    getId: (comment) => comment.id,
-    getAuthorId: (comment) => comment.userId,
-    getAuthorName: (comment) => comment.displayName || 'Workspace member',
-    getMessage: (comment) => comment.message,
-    getCreatedAt: (comment) => comment.createdAt || '',
-    getUpdatedAt: (comment) => comment.updatedAt || '',
-    formatTimestamp: formatRelativeTime,
-    onEdit: canEdit ? beginEditTaskComment : null,
-    emptyDescription: 'Start the discussion about this task.'
-  });
-}
-
-function populateProperties() {
-  properties = getActiveProperties();
-  populateScopeFilterOptions($('taskProperty'), $('taskFilter'), properties);
-}
-
-function updateScope() {
-  const propertyScope = $('taskScope').value === 'property';
-  $('taskPropertyField').classList.toggle('hidden', !propertyScope);
-  $('taskProperty').required = propertyScope;
-  if (!propertyScope) {
-    $('taskProperty').value = '';
-    clearFieldValidation($('taskProperty'), $('taskPropertyError'));
-  }
-}
-
-function today() {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-}
-
-function isOverdue(task) {
-  return task.dueDate && task.status !== 'done' && task.dueDate < today();
-}
-
-function taskMatchesFilter(task) {
-  const scope = $('taskFilter').value;
-  if (scope === 'company' && task.scope !== 'company') return false;
-  if (scope.startsWith('property:') && !(task.scope === 'property' && task.propertyId === scope.slice(9))) return false;
-
-  const status = $('taskStatusFilter').value;
-  if (status !== 'all' && task.status !== status) return false;
-
-  const due = $('taskDueFilter').value;
-  if (due !== 'all') {
-    const t = today();
-    const weekAhead = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
-    if (due === 'overdue' && !(task.dueDate && task.status !== 'done' && task.dueDate < t)) return false;
-    if (due === 'due-soon' && !(task.dueDate && task.status !== 'done' && task.dueDate >= t && task.dueDate <= weekAhead)) return false;
-    if (due === 'upcoming' && !(task.dueDate && task.dueDate > weekAhead)) return false;
-    if (due === 'no-date' && task.dueDate) return false;
-  }
-
-  const assignee = $('taskAssignedFilter').value;
-  if (assignee === 'me' && task.assignedTo !== cloudUser?.id) return false;
-  if (assignee === 'unassigned' && task.assignedTo) return false;
-  if (assignee !== 'all' && assignee !== 'me' && assignee !== 'unassigned' && task.assignedTo !== assignee) return false;
-
-  return true;
-}
-
-function updateFilterBadge() {
-  const active = ['taskFilter', 'taskStatusFilter', 'taskDueFilter', 'taskAssignedFilter']
-    .filter((id) => $(id).value !== 'all').length;
-  const btn = $('toggleTaskFiltersBtn');
-  btn.textContent = active ? `Filter (${active})` : 'Filter';
-}
-
-function formatDueDate(dueDate) {
-  if (!dueDate) return '';
-  const parsed = new Date(`${dueDate}T12:00:00`);
-  return Number.isNaN(parsed.getTime()) ? dueDate : formatDate(parsed);
-}
-
-function buildTaskCard(task, { showStatus = true } = {}) {
-  const card = document.createElement('article');
-  const canDrag = canEditTask(task) || canClaimTask(task);
-  card.className = `task-card${task.status === 'done' ? ' is-done' : ''}${canDrag ? ' is-draggable' : ''}`;
-
-  const member = workspaceMembers.find((item) => item.userId === task.assignedTo);
-  if (member && MEMBER_COLORS.includes(member.taskColor)) card.dataset.memberColour = member.taskColor;
-
-  const openBtn = document.createElement('button');
-  openBtn.type = 'button';
-  openBtn.className = 'task-card-open';
-  openBtn.setAttribute('aria-label', canEditTask(task) ? `Edit task: ${task.title}` : `View task: ${task.title}`);
-  openBtn.addEventListener('click', () => openForm(task));
-
-  // In the board, clicking the card opens it while the whole card remains the
-  // SortableJS handle. Keep nested controls focused on their own actions.
-  card.addEventListener('click', (event) => {
-    if (event.target.closest('.task-card-open, .task-card-actions, .task-status-btn')) return;
-    openForm(task);
-  });
-
-  const statusBtn = document.createElement('button');
-  statusBtn.type = 'button';
-  statusBtn.className = 'task-status-btn';
-  statusBtn.dataset.status = task.status;
-  statusBtn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${STATUS_ICONS[task.status] || STATUS_ICONS.todo}</svg>`;
-  statusBtn.setAttribute('aria-label', `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`);
-  statusBtn.title = canEditTask(task)
-    ? `Mark as ${STATUS_LABELS[nextStatus(task.status)]}`
-    : 'Viewer accounts cannot change task status';
-  statusBtn.disabled = !canMoveTask(task, nextStatus(task.status));
-  statusBtn.addEventListener('click', () => cycleStatus(task));
-
-  const main = document.createElement('div');
-  main.className = 'task-card-main';
-
-  const title = document.createElement('p');
-  title.className = 'task-card-title';
-  title.textContent = task.title;
-  main.appendChild(title);
-
-  if (task.description) {
-    const desc = document.createElement('p');
-    desc.className = 'task-card-description';
-    desc.textContent = task.description;
-    main.appendChild(desc);
-  }
-
-  const meta = document.createElement('div');
-  meta.className = 'task-card-meta';
-
-  if (showStatus) {
-    const statusChip = document.createElement('span');
-    statusChip.className = `task-chip ${task.status}`;
-    statusChip.textContent = STATUS_LABELS[task.status] || task.status;
-    meta.appendChild(statusChip);
-  }
-
-  if (task.dueDate) {
-    const dueChip = document.createElement('span');
-    dueChip.className = `task-chip${isOverdue(task) ? ' overdue' : ''}`;
-    dueChip.textContent = `Due ${formatDueDate(task.dueDate)}`;
-    meta.appendChild(dueChip);
-  }
-
-  if (task.assignedTo) {
-    const assigneeChip = document.createElement('span');
-    assigneeChip.className = 'task-chip task-chip-assignee';
-    const member = workspaceMembers.find((m) => m.userId === task.assignedTo);
-    assigneeChip.textContent = task.assignedTo === cloudUser?.id
-      ? 'You'
-      : member?.displayName || 'Assigned';
-    meta.appendChild(assigneeChip);
-  }
-
-  if (task.scope === 'property' && task.propertyId) {
-    const propertyChip = document.createElement('span');
-    const prop = properties.find((p) => p.id === task.propertyId);
-    propertyChip.className = 'task-chip';
-    propertyChip.style.color = 'var(--brand)';
-    propertyChip.textContent = prop?.title || 'Property';
-    meta.appendChild(propertyChip);
-  }
-
-  main.appendChild(meta);
-
-  const actions = document.createElement('div');
-  actions.className = 'task-card-actions';
-
-  if (canEditTask(task)) {
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'task-delete-btn';
-    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="m6.5 7 .8 13h9.4l.8-13"></path><path d="M10 11v5M14 11v5"></path></svg>';
-    deleteBtn.setAttribute('aria-label', `Delete task: ${task.title}`);
-    deleteBtn.title = 'Delete task';
-    deleteBtn.addEventListener('click', () => removeTask(task));
-    actions.appendChild(deleteBtn);
-  }
-
-  // Native select remains usable by keyboard and assistive technology.
-  const statusSelect = document.createElement('select');
-  statusSelect.className = 'task-card-status-select';
-  statusSelect.setAttribute('aria-label', `Status for ${task.title}`);
-  statusSelect.title = 'Change task status';
-  statusSelect.disabled = !(canEditTask(task) || canClaimTask(task));
-  STATUS_GROUP_ORDER.filter((status) => canEditTask(task) || status === task.status || status === 'in-progress').forEach((status) => {
-    const option = document.createElement('option');
-    option.value = status;
-    option.textContent = STATUS_LABELS[status];
-    statusSelect.appendChild(option);
-  });
-  statusSelect.value = task.status;
-  statusSelect.addEventListener('change', () => changeTaskStatus(task, statusSelect.value));
-  actions.prepend(statusSelect);
-
-  card.append(openBtn, statusBtn, main, actions);
-  return card;
-}
-
-const STATUS_GROUP_ORDER = ['todo', 'in-progress', 'resolved', 'done'];
-
-function changeTaskStatus(task, newStatus) {
-  if (!canMoveTask(task, newStatus) || !STATUS_GROUP_ORDER.includes(newStatus) || task.status === newStatus) {
-    render();
-    return;
-  }
-  try {
-    const updated = updateTaskStatus(task.id, newStatus, cloudUser?.id || null);
-    if (!updated) throw new Error('Task no longer exists.');
-    addTaskEvent({ taskId: task.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: task.status, toStatus: newStatus });
-    render();
-    syncTasks({ showFeedback: false });
-    checkViewingSuggestion(task, newStatus);
-  } catch (error) {
-    setSyncStatus(error.message || 'Unable to update task status', 'error');
-    render();
-  }
-}
-
-function setupBoardDragAndDrop() {
-  boardSortables.forEach((sortable) => sortable.destroy());
-  boardSortables = [];
-  if (!canEdit || !window.Sortable) return;
-
-  document.querySelectorAll('.task-board-column-items').forEach((column) => {
-    boardSortables.push(window.Sortable.create(column, {
-      group: 'spv-tasks',
-      animation: 160,
-      handle: '.task-card',
-      draggable: '.task-card.is-draggable',
-      filter: '.task-card-actions, .task-status-btn, .task-card-status-select',
-      preventOnFilter: false,
-      ghostClass: 'task-drag-ghost',
-      chosenClass: 'task-drag-chosen',
-      delayOnTouchOnly: false,
-      delay: 220,
-      touchStartThreshold: 4,
-      onEnd(event) {
-        const task = getTasks().find((item) => item.id === event.item?.dataset.taskId);
-        const destination = event.to?.dataset.status;
-        if (task && destination && destination !== task.status) {
-          changeTaskStatus(task, destination);
-        } else {
-          render();
-        }
-      }
-    }));
-  });
-}
-
-function render() {
-  const tasks = getTasks().filter(taskMatchesFilter);
-  $('taskCount').textContent = String(tasks.length);
-  $('taskEmpty').classList.toggle('hidden', tasks.length > 0);
-  updateFilterBadge();
-
-  boardSortables.forEach((sortable) => sortable.destroy());
-  boardSortables = [];
-  const list = $('taskList');
-  list.innerHTML = '';
-  STATUS_GROUP_ORDER.forEach((status) => {
-    const group = document.createElement('section');
-    group.className = 'task-board-column';
-    group.setAttribute('aria-label', STATUS_LABELS[status]);
-
-    const header = document.createElement('div');
-    header.className = 'task-board-column-header';
-    const name = document.createElement('strong');
-    name.textContent = STATUS_LABELS[status];
-    const count = document.createElement('span');
-    count.className = 'count-badge';
-    const groupTasks = tasks.filter((task) => task.status === status);
-    count.textContent = String(groupTasks.length);
-    header.append(name, count);
-
-    const items = document.createElement('div');
-    items.className = 'task-board-column-items';
-    items.dataset.status = status;
-    groupTasks.forEach((task) => {
-      const card = buildTaskCard(task, { showStatus: false });
-      card.dataset.taskId = task.id;
-      items.appendChild(card);
-    });
-    group.append(header, items);
-    list.appendChild(group);
-  });
-  setupBoardDragAndDrop();
-}
-
-function cycleStatus(task) {
-  changeTaskStatus(task, nextStatus(task.status));
-}
-
-function removeTask(task) {
-  if (!canEditTask(task)) return;
-  if (!window.confirm(`Delete "${task.title}"? This cannot be undone.`)) return;
-  if (deleteTask(task.id)) {
-    render();
-    syncTasks({ showFeedback: false });
-  }
-}
-
-function populateTemplateProperties() {
-  const select = $('templateProperty');
-  select.innerHTML = '<option value="">Select property</option>';
-  properties.forEach((property) => {
-    const option = document.createElement('option');
-    option.value = property.id;
-    option.textContent = property.title || 'Untitled property';
-    select.appendChild(option);
-  });
-}
-
-function renderTemplateCards() {
-  const list = $('templateList');
-  list.innerHTML = '';
-  TEMPLATES.forEach((template) => {
-    const card = document.createElement('div');
-    card.className = 'template-card';
-    card.dataset.templateId = template.id;
-
-    const header = document.createElement('button');
-    header.type = 'button';
-    header.className = 'template-card-header';
-    header.setAttribute('aria-expanded', 'false');
-
-    const initial = document.createElement('div');
-    initial.className = 'template-card-initial';
-    initial.setAttribute('aria-hidden', 'true');
-    initial.textContent = template.icon;
-
-    const info = document.createElement('div');
-    info.className = 'template-card-info';
-
-    const name = document.createElement('strong');
-    name.textContent = template.name;
-
-    const chipRow = document.createElement('div');
-    chipRow.className = 'template-card-meta';
-
-    const scopeChip = document.createElement('span');
-    scopeChip.className = 'task-chip';
-    scopeChip.textContent = template.scope === 'property' ? 'Property' : 'Company';
-
-    const countChip = document.createElement('span');
-    countChip.className = 'task-chip';
-    countChip.textContent = `${template.tasks.length} tasks`;
-
-    const desc = document.createElement('p');
-    desc.className = 'template-card-description';
-    desc.textContent = template.description;
-
-    chipRow.append(scopeChip, countChip);
-    info.append(name, chipRow, desc);
-    header.append(initial, info);
-    header.addEventListener('click', () => selectTemplate(template.id));
-
-    const taskList = document.createElement('ol');
-    taskList.className = 'template-task-list hidden';
-    template.tasks.forEach((taskDef) => {
-      const item = document.createElement('li');
-      item.textContent = taskDef.title;
-      taskList.appendChild(item);
-    });
-
-    card.append(header, taskList);
-    list.appendChild(card);
-  });
-}
-
-function selectTemplate(id) {
-  selectedTemplateId = selectedTemplateId === id ? null : id;
-  const template = TEMPLATES.find((t) => t.id === selectedTemplateId);
-
-  $('templateList').querySelectorAll('.template-card').forEach((card) => {
-    const isSelected = card.dataset.templateId === selectedTemplateId;
-    card.classList.toggle('is-selected', isSelected);
-    card.querySelector('.template-task-list').classList.toggle('hidden', !isSelected);
-    card.querySelector('.template-card-header').setAttribute('aria-expanded', String(isSelected));
-  });
-
-  const needsProperty = template?.scope === 'property';
-  $('templatePropertyRow').classList.toggle('hidden', !needsProperty);
-  if (!needsProperty) $('templateProperty').value = '';
-  clearFieldValidation($('templateProperty'), $('templatePropertyError'));
-  $('applyTemplateBtn').disabled = !template;
-  $('applyTemplateBtn').textContent = template ? `Apply ${template.tasks.length} tasks` : 'Apply tasks';
-  $('templateApplyMessage').textContent = '';
-}
-
-function openTemplateDialog() {
-  if (!canEdit) return;
-  selectedTemplateId = null;
-  populateTemplateProperties();
-  renderTemplateCards();
-  $('templatePropertyRow').classList.add('hidden');
-  $('templateProperty').value = '';
-  $('applyTemplateBtn').disabled = true;
-  $('applyTemplateBtn').textContent = 'Apply tasks';
-  $('templateApplyMessage').textContent = '';
-  templateDialogController.open();
-}
-
-function applyTemplateHandler() {
-  if (!canEdit) return;
-  const template = TEMPLATES.find((t) => t.id === selectedTemplateId);
-  if (!template) return;
-
-  const propertyId = template.scope === 'property' ? $('templateProperty').value : '';
-  if (template.scope === 'property' && !propertyId) {
-    setFieldValidation($('templateProperty'), $('templatePropertyError'), { invalid: true });
-    $('templateProperty').focus();
-    return;
-  }
-
-  const existing = getTasks().filter((t) => t.templateId === template.id
-    && (template.scope === 'property' ? t.propertyId === propertyId : t.scope === 'company'));
-  if (existing.length > 0) {
-    const label = template.scope === 'property'
-      ? (properties.find((p) => p.id === propertyId)?.title || 'this property')
-      : 'the company';
-    if (!window.confirm(`${existing.length} task${existing.length === 1 ? '' : 's'} from this template already exist for ${label}. Apply again?`)) return;
-  }
-
-  $('applyTemplateBtn').disabled = true;
-  $('templateApplyMessage').textContent = 'Applyingâ€¦';
-  try {
-    buildTasksFromTemplate(template.id, propertyId)
-      .forEach((def) => saveTask({ ...def, createdBy: cloudUser?.id || null }));
-    templateDialogController.close();
-    render();
-    syncTasks({ showFeedback: false });
-  } catch (error) {
-    $('templateApplyMessage').textContent = error.message || 'Could not apply this template.';
-    $('applyTemplateBtn').disabled = false;
-  }
-}
-
-function checkViewingSuggestion(task, newStatus) {
-  if (newStatus !== 'done') return;
-  if (suggestedTaskIds.has(task.id)) return;
-  if (!VIEWING_RE.test(task.title || '')) return;
-  suggestedTaskIds.add(task.id);
-  suggestionSourceTask = task;
-  $('suggestionTaskName').textContent = `"${task.title}"`;
-  suggestionDialogController.open();
-}
-
-function applySuggestion(suggestionTitle) {
-  if (!canEdit || !suggestionSourceTask) return;
-  const source = suggestionSourceTask;
-  suggestionDialogController.close();
-  requestAnimationFrame(() => openForm(null, {
-    preset: { title: suggestionTitle, scope: source.scope, propertyId: source.propertyId }
-  }));
-}
-
-const suggestionDialogController = setupDialog($('suggestionDialog'), {
-  closeButtons: [$('closeSuggestionDialogBtn'), $('dismissSuggestionBtn')]
-});
-$('suggestionDialog').addEventListener('close', () => { suggestionSourceTask = null; });
-$('suggestionDialog').querySelectorAll('[data-suggestion]').forEach((btn) => {
-  btn.addEventListener('click', () => applySuggestion(btn.dataset.suggestion));
-});
-
-const taskDialogController = setupDialog($('taskDialog'), {
-  closeButtons: [$('closeTaskDialogBtn'), $('cancelTaskBtn')],
-  initialFocus: () => $('taskTitle')
-});
-$('taskDialog').addEventListener('close', () => {
-  editingTaskId = null;
-  ['taskTitle', 'taskDescription', 'taskStatus', 'taskDueDate', 'taskAssignedTo', 'taskScope', 'taskProperty'].forEach((id) => {
-    $(id).disabled = false;
-  });
-  $('saveTaskBtn').classList.remove('hidden');
-  $('cancelTaskBtn').textContent = 'Cancel';
-  resetCommentComposer();
-  $('taskCommentMessage').textContent = '';
-});
-
-const templateDialogController = setupDialog($('templateDialog'), {
-  closeButtons: [$('closeTemplateDialogBtn'), $('cancelTemplateBtn')],
-});
-$('templateDialog').addEventListener('close', () => { selectedTemplateId = null; });
-
-const taskSettingsDialogController = setupDialog($('taskSettingsDialog'), {
-  closeButtons: [$('closeTaskSettingsBtn')]
-});
-
-function renderTaskMemberColours() {
-  const list = $('taskMemberColours');
-  list.replaceChildren();
-  workspaceMembers.forEach((member) => {
-    const row = document.createElement('div');
-    row.className = 'task-member-colour-row';
-    const name = document.createElement('strong');
-    name.textContent = member.displayName || 'Workspace member';
-    const picker = document.createElement('div');
-    picker.className = 'task-member-colour-picker';
-    const swatch = document.createElement('span');
-    swatch.className = 'task-member-colour-swatch';
-    const select = document.createElement('select');
-    select.setAttribute('aria-label', 'Task colour for ' + name.textContent);
-    [['', 'No colour'], ...MEMBER_COLORS.map((color) => [color, color[0].toUpperCase() + color.slice(1)])]
-      .forEach(([value, label]) => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = label;
-        select.appendChild(option);
-      });
-    select.value = member.taskColor || '';
-    swatch.dataset.memberColour = select.value || 'none';
-    select.addEventListener('change', async () => {
-      const previous = member.taskColor || '';
-      const next = select.value;
-      select.disabled = true;
-      $('taskSettingsMessage').textContent = 'Saving colourâ€¦';
-      try {
-        if (userRole !== 'admin' || !navigator.onLine) throw new Error('Sign in as an administrator and connect to update colours.');
-        await window.SPVCloud.setTaskMemberColor(member.userId, next);
-        member.taskColor = next || null;
-        swatch.dataset.memberColour = next || 'none';
-        localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify(workspaceMembers));
-        render();
-        $('taskSettingsMessage').textContent = 'Colour saved for ' + name.textContent;
-      } catch (error) {
-        select.value = previous;
-        $('taskSettingsMessage').textContent = error.message || 'Could not save colour.';
-      } finally {
-        select.disabled = false;
-      }
-    });
-    picker.append(swatch, select);
-    row.append(name, picker);
-    list.appendChild(row);
-  });
-  if (!workspaceMembers.length) {
-    const empty = document.createElement('p');
-    empty.className = 'muted';
-    empty.textContent = 'No active members found. Connect to load workspace members.';
-    list.appendChild(empty);
-  }
-}
-
-$('openTaskSettingsBtn').addEventListener('click', async () => {
-  if (userRole !== 'admin') return;
-  $('taskSettingsMessage').textContent = '';
-  renderTaskMemberColours();
-  taskSettingsDialogController.open();
-  await loadWorkspaceMembers();
-});
-
-function taskContentAsPlainText(value) {
-  const holder = document.createElement('div');
-  holder.append(buildSafeRichText(value || ''));
-  holder.querySelectorAll('br').forEach((lineBreak) => lineBreak.replaceWith(document.createTextNode('\n')));
-  holder.querySelectorAll('p, div, li, blockquote').forEach((block) => {
-    if (block.nextSibling) block.after(document.createTextNode('\n'));
-  });
-  return holder.textContent
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
-
-function openForm(task = null, { preset = null } = {}) {
-  if (!task && !canEdit) return;
-  const readOnly = !!task && !canEditTask(task);
-  editingTaskId = task?.id || null;
-  $('taskForm').reset();
-  $('taskDialogTitle').textContent = task ? (readOnly ? 'View Task' : 'Edit Task') : 'New Task';
-  $('saveTaskBtn').textContent = 'Save';
-  $('saveTaskBtn').classList.toggle('hidden', readOnly);
-  $('cancelTaskBtn').textContent = readOnly ? 'Close' : 'Cancel';
-  $('taskTitle').value = task?.title ?? preset?.title ?? '';
-  $('taskDescription').value = task?.description || '';
-  $('taskStatus').value = task?.status || 'todo';
-  $('taskStatus').disabled = !task;
-  $('taskDueDate').value = task?.dueDate || '';
-  $('taskAssignedTo').value = task?.assignedTo || '';
-  $('taskScope').value = task?.scope ?? preset?.scope ?? 'company';
-  $('taskProperty').value = task?.propertyId ?? preset?.propertyId ?? '';
-  $('taskSaveMessage').textContent = readOnly
-    ? (userRole === 'viewer' ? 'You have read-only access to tasks' : 'You can only edit tasks you created')
-    : '';
-  ['taskTitle', 'taskDescription', 'taskStatus', 'taskDueDate', 'taskAssignedTo', 'taskScope', 'taskProperty'].forEach((id) => {
-    $(id).disabled = readOnly || (id === 'taskStatus' && !task);
-  });
-  if (task) {
-    renderTaskHistory(task.id);
-    $('taskHistory').classList.remove('hidden');
-    renderTaskDiscussion(task.id);
-    $('taskDiscussion').classList.remove('hidden');
-    $('taskCommentComposer').classList.toggle('hidden', !canEdit);
-  } else {
-    $('taskHistory').classList.add('hidden');
-    $('taskDiscussion').classList.add('hidden');
-  }
-  clearFieldValidation($('taskTitle'), $('taskTitleError'));
-  clearFieldValidation($('taskProperty'), $('taskPropertyError'));
-  updateScope();
-  taskDialogController.open();
-}
-
-function resetCommentComposer() {
-  editingCommentId = null;
-  setChatComposerMode({
-    label: $('taskCommentLabel'),
-    textarea: $('taskComment'),
-    sendButton: $('addTaskCommentBtn'),
-    cancelButton: $('cancelTaskCommentEditBtn')
-  });
-}
-
-function beginEditTaskComment(comment) {
-  if (!canEdit || !cloudUser || comment.userId !== cloudUser.id) return;
-  editingCommentId = comment.id;
-  setChatComposerMode({
-    label: $('taskCommentLabel'),
-    textarea: $('taskComment'),
-    sendButton: $('addTaskCommentBtn'),
-    cancelButton: $('cancelTaskCommentEditBtn'),
-    editing: true,
-    value: taskContentAsPlainText(comment.message)
-  });
-  $('taskCommentMessage').textContent = '';
-  $('taskComment').focus();
-  $('taskComment').setSelectionRange($('taskComment').value.length, $('taskComment').value.length);
-}
-
-function postTaskComment() {
-  if (!editingTaskId || !canEdit) return;
-  const message = $('taskComment').value.trim();
-  if (!message) {
-    $('taskCommentMessage').textContent = 'Enter a message.';
-    $('taskComment').focus();
-    return;
-  }
-
-  const button = $('addTaskCommentBtn');
-  button.disabled = true;
-  $('taskCommentMessage').textContent = editingCommentId ? 'Savingâ€¦' : 'Postingâ€¦';
-  try {
-    if (editingCommentId) {
-      updateTaskComment(editingCommentId, message, cloudUser?.id || null);
-      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Message updated' : 'Update saved on this device';
-    } else {
-      addTaskComment({
-        taskId: editingTaskId,
-        userId: cloudUser?.id || null,
-        displayName: getActorName(),
-        message
-      });
-      $('taskCommentMessage').textContent = navigator.onLine && cloudUser ? 'Message sent' : 'Saved on this device';
-    }
-    resetCommentComposer();
-    renderTaskDiscussion(editingTaskId);
-    syncTasks({ showFeedback: false });
-  } catch (error) {
-    $('taskCommentMessage').textContent = error.message || 'Could not save this message.';
-  } finally {
-    button.disabled = false;
-  }
-}
-
-function submitTask(event) {
-  event.preventDefault();
-  if (!canEdit) return;
-  if (editingTaskId) {
-    const check = getAllTasks().find((t) => t.id === editingTaskId);
-    if (check && !canEditTask(check)) return;
-  }
-
-  const title = $('taskTitle').value.trim();
-  const scope = $('taskScope').value;
-  const propertyId = $('taskProperty').value;
-  const titleInvalid = !title;
-  const propertyInvalid = scope === 'property' && !propertyId;
-
-  setFieldValidation($('taskTitle'), $('taskTitleError'), { invalid: titleInvalid });
-  setFieldValidation($('taskProperty'), $('taskPropertyError'), { invalid: propertyInvalid });
-  if (titleInvalid || propertyInvalid) return;
-
-  const submit = $('taskForm').querySelector('[type="submit"]');
-  submit.disabled = true;
-  $('taskSaveMessage').textContent = 'Savingâ€¦';
-
-  try {
-    const existing = editingTaskId ? getAllTasks().find((t) => t.id === editingTaskId) : null;
-    const newStatus = existing ? $('taskStatus').value : 'todo';
-    saveTask({
-      ...existing,
-      id: editingTaskId || undefined,
-      title,
-      description: $('taskDescription').value.trim(),
-      status: newStatus,
-      dueDate: $('taskDueDate').value || null,
-      assignedTo: (existing?.status === 'todo' && newStatus === 'in-progress' && !$('taskAssignedTo').value)
-        ? cloudUser?.id || null : $('taskAssignedTo').value || null,
-      scope,
-      propertyId,
-      createdBy: existing?.createdBy || cloudUser?.id || null
-    });
-    if (existing && existing.status !== newStatus) {
-      addTaskEvent({ taskId: existing.id, userId: cloudUser?.id || null, displayName: getActorName(), fromStatus: existing.status, toStatus: newStatus });
-    }
-    const becameDone = existing && existing.status !== 'done' && newStatus === 'done';
-    taskDialogController.close();
-    render();
-    syncTasks({ showFeedback: false });
-    if (becameDone) checkViewingSuggestion({ id: editingTaskId, title, scope, propertyId }, newStatus);
-  } catch (error) {
-    $('taskSaveMessage').textContent = error.message || 'Could not save this task.';
-  } finally {
-    submit.disabled = false;
-  }
-}
-
-$('openTaskFormBtn').addEventListener('click', () => openForm());
-$('addTaskCommentBtn').addEventListener('click', postTaskComment);
-$('cancelTaskCommentEditBtn').addEventListener('click', () => {
-  resetCommentComposer();
-  $('taskCommentMessage').textContent = '';
-});
-$('taskComment').addEventListener('input', () => { $('taskCommentMessage').textContent = ''; });
-$('openTemplateDialogBtn').addEventListener('click', openTemplateDialog);
-$('applyTemplateBtn').addEventListener('click', applyTemplateHandler);
-$('taskScope').addEventListener('change', updateScope);
-$('taskTitle').addEventListener('input', () => clearFieldValidation($('taskTitle'), $('taskTitleError')));
-$('taskProperty').addEventListener('change', () => clearFieldValidation($('taskProperty'), $('taskPropertyError')));
-$('taskForm').addEventListener('submit', submitTask);
-$('taskFilter').addEventListener('change', render);
-$('taskStatusFilter').addEventListener('change', render);
-$('taskDueFilter').addEventListener('change', render);
-$('taskAssignedFilter').addEventListener('change', render);
-$('toggleTaskFiltersBtn').addEventListener('click', () => {
-  const opening = $('taskFilters').classList.contains('hidden');
-  $('taskFilters').classList.toggle('hidden', !opening);
-  $('toggleTaskFiltersBtn').setAttribute('aria-expanded', String(opening));
-});
-$('clearTaskFiltersBtn').addEventListener('click', () => {
-  $('taskFilter').value = 'all';
-  $('taskStatusFilter').value = 'all';
-  $('taskDueFilter').value = 'all';
-  $('taskAssignedFilter').value = 'all';
-  render();
-});
-window.addEventListener('online', () => syncTasks({ showFeedback: false }));
-window.addEventListener('offline', () => setSyncStatus('Offline Â· changes will sync later'));
-window.addEventListener('spv-workspace-synced', () => {
-  populateProperties();
-  render();
-});
-
-populateProperties();
-render();
-setupTaskCloud();
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×~7å:-jZ.¶›­–)Þ³V–×÷'B²vWD–6öå7frÒg&öÒrââòââö6ö×öæVçG2÷6†&VBÖ–6öç2æ§2s°¦–×÷'B²&VæFW%7–æ57FGW2Òg&öÒrââòââö6ö×öæVçG2÷7–æ2×7FGW2æ§2s°¦–×÷'B²&VæFW$6†EF‡&VBÂ6WD6†D6ö×÷6W$ÖöFRÒg&öÒrââòââö6ö×öæVçG2ö6†B×F‡&VBæ§2s°¦–×÷'B²6WGWF–ÆörÒg&öÒrââòââö6ö×öæVçG2öF–ÆörÖ†VÇW"æ§2s°¦–×÷'B²'V–ÆE6fU&–6…FW‡BÒg&öÒrââòââ÷WF–Ç2÷&–6‚×FW‡Bæ§2s°¦–×÷'B²vWD7F—fU&÷W'F–W2Òg&öÒrââ÷&÷W'F–W2÷7F÷&vRæ§2s°¦–×÷'B²6ÆV$f–VÆEfÆ–FF–öâÂ6WDf–VÆEfÆ–FF–öâÒg&öÒrââòââ÷WF–Ç2÷fÆ–FF–öâæ§2s°¦–×÷'B²÷VÆFU66÷Tf–ÇFW$÷F–öç2Òg&öÒrââòââ÷WF–Ç2÷66÷RÖf–ÇFW"æ§2s°¦–×÷'B²f÷&ÖDFFRÒg&öÒrââòââ÷WF–Ç2öf÷&ÖB×WF–Ç2æ§2s°¦–×÷'B°¢vWEF6·2ÂvWDÆÅF6·2Â6fUF6²ÂWFFUF6µ7FGW2ÂFVÆWFUF6²Â&WÆ6UF6·2ÂæW‡E7FGW0§Òg&öÒrâ÷F6²×7F÷&vRæ§2s°¦–×÷'B²FEF6´WfVçBÂvWEF6´WfVçG2Òg&öÒrâ÷F6²ÖWfVçB×7F÷&vRæ§2s°¦–×÷'B²FEF6´6öÖÖVçBÂvWEF6´6öÖÖVçG2ÂWFFUF6´6öÖÖVçBÒg&öÒrâ÷F6²Ö6öÖÖVçB×7F÷&vRæ§2s°¦–×÷'B²7–æ5F6µv÷&·76RÒg&öÒrâ÷F6²Ö6Æ÷VB×7–æ2æ§2s°¦–×÷'B²7–æ5F6´WfVçG2Òg&öÒrâ÷F6²ÖWfVçB×7–æ2æ§2s°¦–×÷'B²7–æ5F6´6öÖÖVçG2Òg&öÒrâ÷F6²Ö6öÖÖVçB×7–æ2æ§2s°¦–×÷'B²DTÕÄDU2Â'V–ÆEF6·4g&öÕFV×ÆFRÒg&öÒrâ÷F6²×FV×ÆFW2æ§2s° ¦6öç7BBÒ†–B’ÓâFö7VÖVçBævWDVÆVÖVçD'”–B†–B“° ¦6öç7B5DEU5ôÄ$TÅ2Ò²FöFó¢uFöFòrÂv–â×&öw&W72s¢t–â&öw&W72rÂ&W6öÇfVC¢u&W6öÇfVBrÂFöæS¢tFöæRrÓ°¦6öç7B5DEU5ô”4ôå2Ò²FöFó¢w7FGW5FöFòrÂv–â×&öw&W72s¢w7FGW5&öw&W72rÂ&W6öÇfVC¢w7FGW5&W6öÇfVBrÂFöæS¢w7FGW4FöæRrÓ° ¦6öç7BÔTÔ$U%5ô44„Uô´U’Òw7b×&÷W'G’Ö6Æ7VÆF÷"çv÷&·76RÖÖVÖ&W'2çcs° ¢òòÖF6†W2F6²F—FÆW2F†B7VvvW7B&÷W'G’f–Wv–ær†2F¶VâÆ6Rà¦6öç7Bd”Ut”äuõ$RÒõÆ"‡f–Wv–æwÇ&÷W'G•µÇ2Õ×f—6—GÇ6—FUµÇ2Õ×f—6—GÆ–ç7V7B’ö“° ¦6öç7Bd”Ut”äuõ5TttU5D”ôå2Ò°¢²F—FÆS¢tÖ¶RöffW"rÂFW67&—F–öã¢u&W&RæB7V&Ö—Bf÷&ÖÂöffW"rÒÀ¢²F—FÆS¢t'&ævR6V6öæBf–Wv–ærrÂFW67&—F–öã¢t&öö²föÆÆ÷r×Wf—6—BFòF†R&÷W'G’rÒÀ¢²F—FÆS¢u&WVW7BÆV6R6²rÂFW67&—F–öã¢t6²F†RvVçBf÷"F†RgVÆÂÆV6RFö7VÖVçG2rÒÀ¥Ó° ¦ÆWB&÷W'F–W2ÒµÓ°¦ÆWBv÷&·76TÖVÖ&W'2ÒµÓ°¦ÆWB6Æ÷VEW6W"ÒçVÆÃ°¦ÆWBF6µ7–æ6–ærÒfÇ6S°¦ÆWB&ö&E6÷'F&ÆW2ÒµÓ°¦6öç7BÔTÔ$U%ô4ôÄõ%2Ò²v&ÇVRrÂw&÷6RrÂvÖ–çBrÂvÖ&W"rÂwf–öÆWBrÂwFVÂuÓ°¦ÆWB6Æ÷VDÆ—7FVæW$GF6†VBÒfÇ6S°¦ÆWBVF—F–æuF6´–BÒçVÆÃ°¦ÆWBVF—F–æt6öÖÖVçD–BÒçVÆÃ°¦ÆWB6VÆV7FVEFV×ÆFT–BÒçVÆÃ°¦ÆWBW6W%&öÆRÒçVÆÃ°¦ÆWB6äVF—BÒfÇ6S°¦ÆWB7VvvW7F–öå6÷W&6UF6²ÒçVÆÃ°¦6öç7B7VvvW7FVEF6´–G2ÒæWr6WB‚“° ¦gVæ7F–öâ6WE7–æ57FGW2†ÖW76vRÂ7FFRÒrr’°¢&VæFW%7–æ57FGW2‚B‚wF6µ7–æ57FGW2r’ÂÖW76vRÂ7FFR“°§Ð ¦7–æ2gVæ7F–öâ7–æ5F6·2‡²6†÷tfVVF&6²ÒG'VRÒÒ·Ò’°¢6öç7B6Æ÷VBÒv–æF÷rå5d6Æ÷VC°¢–b‚6Æ÷VBÇÂ6Æ÷VEW6W"ÇÂæf–vF÷"æöäÆ–æR’°¢–b‚6Æ÷VEW6W"’6WE7–æ57FGW2‚u6fVBöâF†—2FWf–6R+r6–vâ–âg&öÒ&÷W'F–W2Fò7–æ2r“°¢VÇ6R–b‚æf–vF÷"æöäÆ–æR’6WE7–æ57FGW2‚töffÆ–æR+r6†ævW2v–ÆÂ7–æ2ÆFW"r“°¢&WGW&ã°¢Ð ¢F6µ7–æ6–ærÒG'VS°¢6WE7–æ57FGW2‚u7–æ6–ærF6·>(
+br“°¢G'’°¢6öç7B&W7VÇBÒv—B7–æ5F6µv÷&·76R†6Æ÷VB“°¢v—B&öÖ—6RæÆÂ…°¢7–æ5F6´WfVçG2†6Æ÷VB’À¢7–æ5F6´6öÖÖVçG2†6Æ÷VB¢Ò“°¢&VæFW"‚“°¢–b‡&W7VÇBæ6öæfÆ–7G2æÆVæwF‚’°¢6WE7–æ57FGW2†G·&W7VÇBæ6öæfÆ–7G2æÆVæwF‡ÒF6²6öæfÆ–7BG·&W7VÇBæ6öæfÆ–7G2æÆVæwF‚ÓÓÒòrr¢w2wÒ¶WBÆö6ÆÇ’+r&Wf–Wr&Vf÷&R&WG'––ævÂvW'&÷"r“°¢ÒVÇ6R°¢6WE7–æ57FGW2‡6†÷tfVVF&6²òuF6·27–æ6VBr¢u7–æ6VBrÂw7–æ6VBr“°¢Ð¢Ò6F6‚†W'&÷"’°¢6öç6öÆRçv&â‚uF6²7–æ2f–ÆVC¢rÂW'&÷"“°¢6öç7B7FvRÒW'&÷#òç7–æ57FvRòv†–ÆRG¶W'&÷"ç7–æ57FvWÖ¢rs°¢6WE7–æ57FGW2†F6²7–æ2VæF–ærG·7FvWÒ+rÆö6Â6†ævW2&R6fVÂvW'&÷"r“°¢Òf–æÆÇ’°¢F6µ7–æ6–ærÒfÇ6S°¢Ð§Ð ¦7–æ2gVæ7F–öâ6WGWF6´6Æ÷VB‚’°¢6öç7B6Æ÷VBÒv–æF÷rå5d6Æ÷VC°¢–b‚6Æ÷VB’°¢6WE7–æ57FGW2‚u6fVBöâF†—2FWf–6R+r6Æ÷VBVæf–Æ&ÆRr“°¢&WGW&ã°¢Ð¢–b‚6Æ÷VDÆ—7FVæW$GF6†VB’°¢6Æ÷VBæöäWF„6†ævR‚‡W6W"’Óâ°¢v–æF÷rç6WEF–ÖV÷WB†7–æ2‚’Óâ°¢6Æ÷VEW6W"ÒW6W"ÇÂçVÆÃ°¢v—B&Vg&W6„VF—EW&Ö—76–öâ‚“°¢v—BÆöEv÷&·76TÖVÖ&W'2‚“°¢–b†6Æ÷VEW6W"bbæf–vF÷"æöäÆ–æR’7–æ5F6·2‡²6†÷tfVVF&6³¢fÇ6RÒ“°¢VÇ6R6WE7–æ57FGW2†6Æ÷VEW6W"òtöffÆ–æR+r6†ævW2v–ÆÂ7–æ2ÆFW"r¢u6fVBöâF†—2FWf–6R+r6–vâ–âg&öÒ&÷W'F–W2Fò7–æ2r“°¢ÒÂ“°¢Ò“°¢6Æ÷VDÆ—7FVæW$GF6†VBÒG'VS°¢Ð¢G'’°¢6öç7B7FFRÒv—B6Æ÷VBæ–æ—B‚“°¢6Æ÷VEW6W"Ò7FFRçW6W"ÇÂçVÆÃ°¢v—B&Vg&W6„VF—EW&Ö—76–öâ‚“°¢v—BÆöEv÷&·76TÖVÖ&W'2‚“°¢–b†6Æ÷VEW6W"bbæf–vF÷"æöäÆ–æR’v—B7–æ5F6·2‡²6†÷tfVVF&6³¢fÇ6RÒ“°¢VÇ6R6WE7–æ57FGW2†6Æ÷VEW6W"òtöffÆ–æR+r6†ævW2v–ÆÂ7–æ2ÆFW"r¢u6fVBöâF†—2FWf–6R+r6–vâ–âg&öÒ&÷W'F–W2Fò7–æ2r“°¢Ò6F6‚†W'&÷"’°¢6öç6öÆRçv&â‚uF6²6Æ÷VB6WGWf–ÆVC¢rÂW'&÷"“°¢6WE7–æ57FGW2‚u6fVBÆö6ÆÇ’+r6Æ÷VB6WGWf–ÆVBrÂvW'&÷"r“°¢Ð§Ð ¦7–æ2gVæ7F–öâ&Vg&W6„VF—EW&Ö—76–öâ‚’°¢6öç7B6Æ÷VBÒv–æF÷rå5d6Æ÷VC°¢–b‚6Æ÷VEW6W"ÇÂ6Æ÷VCòævWEv÷&·76T66W72’°¢W6W%&öÆRÒçVÆÃ°¢6äVF—BÒfÇ6S°¢Ç”VF—E7FFR‚“°¢&WGW&ã°¢Ð¢G'’°¢6öç7B66W72Òv—B6Æ÷VBævWEv÷&·76T66W72‚“°¢W6W%&öÆRÒ†66W73òæ7F—fRbb²wf–WvW"rÂvVF—F÷"rÂvFÖ–âuÒæ–æ6ÇVFW2†66W72ç&öÆR’¢ò66W72ç&öÆR¢çVÆÃ°¢6äVF—BÒW6W%&öÆRÓÓÒvVF—F÷"rÇÂW6W%&öÆRÓÓÒvFÖ–âs°¢Ò6F6‚°¢W6W%&öÆRÒçVÆÃ°¢6äVF—BÒfÇ6S°¢Ð¢Ç”VF—E7FFR‚“°§Ð ¦gVæ7F–öâÇ”VF—E7FFR‚’°¢6öç7BF—ÒW6W%&öÆRÓÓÒwf–WvW"ròuf–WvW"66÷VçG26ææ÷B7&VFRF6·2r¢rs°¢B‚v÷VåF6´f÷&Ô'Fâr’æF—6&ÆVBÒ6äVF—C°¢B‚v÷VåF6´f÷&Ô'Fâr’çF—FÆRÒF—°¢B‚v÷VåFV×ÆFTF–Æöt'Fâr’æF—6&ÆVBÒ6äVF—C°¢B‚v÷VåFV×ÆFTF–Æöt'Fâr’çF—FÆRÒF—°¢B‚v÷VåF6µ6WGF–æw4'Fâr’æ6Æ74Æ—7BçFövvÆR‚v†–FFVârÂW6W%&öÆRÓÒvFÖ–âr“°¢6öç7B&FvRÒB‚wF6µ&öÆT&FvRr“°¢–b‡W6W%&öÆRbb6Æ÷VEW6W"’°¢&FvRçFW‡D6öçFVçBÒ²f–WvW#¢u&VBÖöæÇ’rÂVF—F÷#¢tVF—F÷"rÂFÖ–ã¢tFÖ–ârÕ·W6W%&öÆUÒÇÂW6W%&öÆS°¢&FvRæ6Æ74æÖRÒF6²Ö6†—F6²×&öÆRÒG·W6W%&öÆWÖ°¢ÒVÇ6R°¢&FvRæ6Æ74æÖRÒwF6²Ö6†—†–FFVâs°¢Ð§Ð ¦gVæ7F–öâ6äVF—EF6²‡F6²’°¢–b‚6äVF—B’&WGW&âfÇ6S°¢–b‡W6W%&öÆRÓÓÒvFÖ–âr’&WGW&âG'VS°¢&WGW&âF6²æ7&VFVD'’ÇÂF6²æ7&VFVD'’ÓÓÒ6Æ÷VEW6W#òæ–C°§Ð ¢òòVF—F÷'2Ö’6Æ–Ò6öÖVöæRVÇ6Rw2Væ76–væVBFöFòÂ'WBæ÷BVF—B÷"FVÆWFR—Bà¦gVæ7F–öâ6ä6Æ–ÕF6²‡F6²’°¢&WGW&â6äVF—Bbb&ööÆVâ†6Æ÷VEW6W#òæ–B’bbF6²ç7FGW2ÓÓÒwFöFòrbbF6²æ76–væVEFó°§Ð¦gVæ7F–öâ6äÖ÷fUF6²‡F6²ÂFW7F–æF–öâ’°¢&WGW&â6äVF—EF6²‡F6²’ÇÂ†6ä6Æ–ÕF6²‡F6²’bbFW7F–æF–öâÓÓÒv–â×&öw&W72r“°§Ð ¦7–æ2gVæ7F–öâÆöEv÷&·76TÖVÖ&W'2‚’°¢6öç7B6Æ÷VBÒv–æF÷rå5d6Æ÷VC°¢6öç7BÆöD66†VBÒ‚’Óâ°¢G'’°¢6öç7B&rÒÆö6Å7F÷&vRævWD—FVÒ„ÔTÔ$U%5ô44„Uô´U’“°¢v÷&·76TÖVÖ&W'2Ò'&’æ—4'&’„¥4ôâç'6R‡&rÇÂuµÒr’’ò¥4ôâç'6R‡&rÇÂuµÒr’¢µÓ°¢Ò6F6‚²v÷&·76TÖVÖ&W'2ÒµÓ²Ð¢Ó°¢–b‚6Æ÷VCòæÆ—7D7F—fTÖVÖ&W'2ÇÂ6Æ÷VEW6W"’°¢ÆöD66†VB‚“°¢÷VÆFT76–væVT÷F–öç2‚“°¢&WGW&ã°¢Ð¢G'’°¢v÷&·76TÖVÖ&W'2Òv—B6Æ÷VBæÆ—7D7F—fTÖVÖ&W'2‚“°¢Æö6Å7F÷&vRç6WD—FVÒ„ÔTÔ$U%5ô44„Uô´U’Â¥4ôâç7G&–æv–g’‡v÷&·76TÖVÖ&W'2’“°¢Ò6F6‚°¢ÆöD66†VB‚“°¢Ð¢÷VÆFT76–væVT÷F–öç2‚“°¢&VæFW"‚“°¢–b‚B‚wF6µ6WGF–æw4F–Æörr’æ÷Vâ’&VæFW%F6´ÖVÖ&W$6öÆ÷W'2‚“°§Ð ¦gVæ7F–öâ÷VÆFT76–væVT÷F–öç2‚’°¢6öç7Bf÷&Õ6VÆV7BÒB‚wF6´76–væVEFòr“°¢6öç7Bf–ÇFW%6VÆV7BÒB‚wF6´76–væVDf–ÇFW"r“°¢6öç7B6fVDf–ÇFW"Òf–ÇFW%6VÆV7CòçfÇVRÇÂvÆÂs° ¢f÷&Õ6VÆV7Bæ–ææW$…DÔÂÒsÆ÷F–öâfÇVSÒ"#åVæ76–væVCÂö÷F–öãâs°¢f–ÇFW%6VÆV7Bæ–ææW$…DÔÂÒsÆ÷F–öâfÇVSÒ&ÆÂ#äç–öæSÂö÷F–öãâs° ¢–b†6Æ÷VEW6W"’°¢6öç7BÖT÷BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v÷F–öâr“°¢ÖT÷BçfÇVRÒvÖRs°¢ÖT÷BçFW‡D6öçFVçBÒt76–væVBFòÖRs°¢f–ÇFW%6VÆV7BæVæD6†–ÆB†ÖT÷B“°¢Ð ¢6öç7BVæ76–væVD÷BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v÷F–öâr“°¢Væ76–væVD÷BçfÇVRÒwVæ76–væVBs°¢Væ76–væVD÷BçFW‡D6öçFVçBÒuVæ76–væVBs°¢f–ÇFW%6VÆV7BæVæD6†–ÆB‡Væ76–væVD÷B“° ¢v÷&·76TÖVÖ&W'2æf÷$V6‚‚†Ò’Óâ°¢6öç7B—4ÖRÒÒçW6W$–BÓÓÒ6Æ÷VEW6W#òæ–C°¢6öç7Bf÷&Ô÷BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v÷F–öâr“°¢f÷&Ô÷BçfÇVRÒÒçW6W$–C°¢f÷&Ô÷BçFW‡D6öçFVçBÒ—4ÖRòG¶ÒæF—7Æ”æÖWÒ‡–÷R–¢ÒæF—7Æ”æÖS°¢f÷&Õ6VÆV7BæVæD6†–ÆB†f÷&Ô÷B“° ¢–b‚—4ÖR’°¢6öç7Bf–ÇFW$÷BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v÷F–öâr“°¢f–ÇFW$÷BçfÇVRÒÒçW6W$–C°¢f–ÇFW$÷BçFW‡D6öçFVçBÒÒæF—7Æ”æÖS°¢f–ÇFW%6VÆV7BæVæD6†–ÆB†f–ÇFW$÷B“°¢Ð¢Ò“° ¢6öç7BfÆ–EfÇVW2ÒæWr6WB„'&’æg&öÒ†f–ÇFW%6VÆV7Bæ÷F–öç2’æÖ‚†ò’ÓâòçfÇVR’“°¢f–ÇFW%6VÆV7BçfÇVRÒfÆ–EfÇVW2æ†2‡6fVDf–ÇFW"’ò6fVDf–ÇFW"¢vÆÂs°§Ð ¦gVæ7F–öâvWD7F÷$æÖR‚’°¢–b‚6Æ÷VEW6W"’&WGW&ârs°¢&WGW&âv–æF÷rå5d6Æ÷VCòævWEW6W$F—7Æ”æÖSòâ‚’ÇÂ6Æ÷VEW6W"æVÖ–ÂÇÂrs°§Ð ¦6öç7B5DEU5ôÄ$TÅ5ôeTÄÂÒ°¢FöFó¢uFòFòrÀ¢v–â×&öw&W72s¢t–â&öw&W72rÀ¢&W6öÇfVC¢u&W6öÇfVBrÀ¢FöæS¢tFöæRp§Ó° ¦gVæ7F–öâf÷&ÖE&VÆF—fUF–ÖR†—6õ7G&–ær’°¢–b‚—6õ7G&–ær’&WGW&ârs°¢6öç7BF–fbÒFFRææ÷r‚’ÒæWrFFR†—6õ7G&–ær’ævWEF–ÖR‚“°¢–b†F–fbÂcó’&WGW&âv§W7Bæ÷rs°¢–b†F–fbÂ5ócó’&WGW&âG´ÖF‚æfÆö÷"†F–fbòcó—ÒÖ–âvö°¢–b†F–fbÂƒeóCó’&WGW&âG´ÖF‚æfÆö÷"†F–fbò5ócó—Ö‚vö°¢–b†F–fbÂr¢ƒeóCó’&WGW&âG´ÖF‚æfÆö÷"†F–fbòƒeóCó—ÒF—2vö°¢&WGW&âf÷&ÖDFFR†æWrFFR†—6õ7G&–ær’“°§Ð ¦gVæ7F–öâ&VæFW%F6´†—7F÷'’‡F6´–B’°¢6öç7BWfVçG2ÒvWEF6´WfVçG2‡F6´–B“°¢6öç7BÆ—7BÒB‚wF6´†—7F÷'”Æ—7Br“°¢Æ—7Bæ–ææW$…DÔÂÒrs°¢–b‚WfVçG2æÆVæwF‚’°¢6öç7BV×G’ÒFö7VÖVçBæ7&VFTVÆVÖVçB‚vÆ’r“°¢V×G’æ6Æ74æÖRÒwF6²Ö†—7F÷'’ÖV×G’s°¢V×G’çFW‡D6öçFVçBÒtæò7FGW26†ævW2&V6÷&FVB–WBs°¢Æ—7BæVæD6†–ÆB†V×G’“°¢&WGW&ã°¢Ð¢WfVçG2æf÷$V6‚‚†WfVçB’Óâ°¢6öç7B—FVÒÒFö7VÖVçBæ7&VFTVÆVÖVçB‚vÆ’r“°¢—FVÒæ6Æ74æÖRÒwF6²Ö†—7F÷'’Ö—FVÒs° ¢6öç7BF÷BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚w7âr“°¢F÷Bæ6Æ74æÖRÒwF6²Ö†—7F÷'’ÖF÷Bs°¢F÷Bç6WDGG&–'WFR‚v&–Ö†–FFVârÂwG'VRr“° ¢6öç7BFW‡BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚w7âr“°¢6öç7BFôÆ&VÂÒ5DEU5ôÄ$TÅ5ôeTÄÅ¶WfVçBçFõ7FGW5ÒÇÂWfVçBçFõ7FGW2ÇÂ~(	Bs°¢6öç7Bv†òÒWfVçBçW6W$–BbbWfVçBçW6W$–BÓÓÒ6Æ÷VEW6W#òæ–@¢òu–÷Rp¢¢WfVçBæF—7Æ”æÖRÇÂtv÷&·76RÖVÖ&W"s°¢6öç7Bv†VâÒf÷&ÖE&VÆF—fUF–ÖR†WfVçBæ7&VFVDB“° ¢6öç7BÆ&VÅ7âÒFö7VÖVçBæ7&VFTVÆVÖVçB‚w7âr“°¢Æ&VÅ7âæ6Æ74æÖRÒwF6²Ö†—7F÷'’ÖÆ&VÂs°¢Æ&VÅ7âçFW‡D6öçFVçBÒFôÆ&VÃ° ¢FW‡BæVæB‚tÖ&¶VBrÂÆ&VÅ7âÂ+rG·v†÷Ò+rG·v†VçÖ“°¢—FVÒæVæB†F÷BÂFW‡B“°¢Æ—7BæVæD6†–ÆB†—FVÒ“°¢Ò“°§Ð ¦gVæ7F–öâ&VæFW%F6´F—67W76–öâ‡F6´–B’°¢6öç7B6öÖÖVçG2ÒvWEF6´6öÖÖVçG2‡F6´–B“°¢B‚wF6´6öÖÖVçD6÷VçBr’çFW‡D6öçFVçBÒ7G&–ær†6öÖÖVçG2æÆVæwF‚“°¢&VæFW$6†EF‡&VB‡°¢6öçF–æW#¢B‚wF6´6öÖÖVçDÆ—7Br’À¢ÖW76vW3¢²ââæ6öÖÖVçG5Òç6÷'B‚†Â"’Óâ°¢6öç7BF–ÖRÒFFRç'6R†æ7&VFVDBÇÂrr’ÇÂ°¢6öç7B%F–ÖRÒFFRç'6R†"æ7&VFVDBÇÂrr’ÇÂ°¢&WGW&â%F–ÖRÒF–ÖS°¢Ò’À¢7W'&VçEW6W$–C¢6Æ÷VEW6W#òæ–BÇÂçVÆÂÀ¢vWD–C¢†6öÖÖVçB’Óâ6öÖÖVçBæ–BÀ¢vWDWF†÷$–C¢†6öÖÖVçB’Óâ6öÖÖVçBçW6W$–BÀ¢vWDWF†÷$æÖS¢†6öÖÖVçB’Óâ6öÖÖVçBæF—7Æ”æÖRÇÂuv÷&·76RÖVÖ&W"rÀ¢vWDÖW76vS¢†6öÖÖVçB’Óâ6öÖÖVçBæÖW76vRÀ¢vWD7&VFVDC¢†6öÖÖVçB’Óâ6öÖÖVçBæ7&VFVDBÇÂrrÀ¢vWEWFFVDC¢†6öÖÖVçB’Óâ6öÖÖVçBçWFFVDBÇÂrrÀ¢f÷&ÖEF–ÖW7F×¢f÷&ÖE&VÆF—fUF–ÖRÀ¢öäVF—C¢6äVF—Bò&Vv–äVF—EF6´6öÖÖVçB¢çVÆÂÀ¢V×G”FW67&—F–öã¢u7F'BF†RF—67W76–öâ&÷WBF†—2F6²âp¢Ò“°§Ð ¦gVæ7F–öâ÷VÆFU&÷W'F–W2‚’°¢&÷W'F–W2ÒvWD7F—fU&÷W'F–W2‚“°¢÷VÆFU66÷Tf–ÇFW$÷F–öç2‚B‚wF6µ&÷W'G’r’ÂB‚wF6´f–ÇFW"r’Â&÷W'F–W2“°§Ð ¦gVæ7F–öâWFFU66÷R‚’°¢6öç7B&÷W'G•66÷RÒB‚wF6µ66÷Rr’çfÇVRÓÓÒw&÷W'G’s°¢B‚wF6µ&÷W'G”f–VÆBr’æ6Æ74Æ—7BçFövvÆR‚v†–FFVârÂ&÷W'G•66÷R“°¢B‚wF6µ&÷W'G’r’ç&WV—&VBÒ&÷W'G•66÷S°¢–b‚&÷W'G•66÷R’°¢B‚wF6µ&÷W'G’r’çfÇVRÒrs°¢6ÆV$f–VÆEfÆ–FF–öâ‚B‚wF6µ&÷W'G’r’ÂB‚wF6µ&÷W'G”W'&÷"r’“°¢Ð§Ð ¦gVæ7F–öâFöF’‚’°¢6öç7Bæ÷rÒæWrFFR‚“°¢&WGW&âæWrFFR†æ÷rævWEF–ÖR‚’Òæ÷rævWEF–ÖW¦öæTöfg6WB‚’¢c’çFô•4õ7G&–ær‚’ç6Æ–6RƒÂ“°§Ð ¦gVæ7F–öâ—4÷fW&GVR‡F6²’°¢&WGW&âF6²æGVTFFRbbF6²ç7FGW2ÓÒvFöæRrbbF6²æGVTFFRÂFöF’‚“°§Ð ¦gVæ7F–öâF6´ÖF6†W4f–ÇFW"‡F6²’°¢6öç7B66÷RÒB‚wF6´f–ÇFW"r’çfÇVS°¢–b‡66÷RÓÓÒv6ö×ç’rbbF6²ç66÷RÓÒv6ö×ç’r’&WGW&âfÇ6S°¢–b‡66÷Rç7F'G5v—F‚‚w&÷W'G“¢r’bb‡F6²ç66÷RÓÓÒw&÷W'G’rbbF6²ç&÷W'G”–BÓÓÒ66÷Rç6Æ–6Rƒ’’’’&WGW&âfÇ6S° ¢6öç7B7FGW2ÒB‚wF6µ7FGW4f–ÇFW"r’çfÇVS°¢–b‡7FGW2ÓÒvÆÂrbbF6²ç7FGW2ÓÒ7FGW2’&WGW&âfÇ6S° ¢6öç7BGVRÒB‚wF6´GVTf–ÇFW"r’çfÇVS°¢–b†GVRÓÒvÆÂr’°¢6öç7BBÒFöF’‚“°¢6öç7BvVV´†VBÒæWrFFR„FFRææ÷r‚’²r¢ƒeóCó’çFô•4õ7G&–ær‚’ç6Æ–6RƒÂ“°¢–b†GVRÓÓÒv÷fW&GVRrbb‡F6²æGVTFFRbbF6²ç7FGW2ÓÒvFöæRrbbF6²æGVTFFRÂB’’&WGW&âfÇ6S°¢–b†GVRÓÓÒvGVR×6ööârbb‡F6²æGVTFFRbbF6²ç7FGW2ÓÒvFöæRrbbF6²æGVTFFRãÒBbbF6²æGVTFFRÃÒvVV´†VB’’&WGW&âfÇ6S°¢–b†GVRÓÓÒwW6öÖ–ærrbb‡F6²æGVTFFRbbF6²æGVTFFRâvVV´†VB’’&WGW&âfÇ6S°¢–b†GVRÓÓÒvæòÖFFRrbbF6²æGVTFFR’&WGW&âfÇ6S°¢Ð ¢6öç7B76–væVRÒB‚wF6´76–væVDf–ÇFW"r’çfÇVS°¢–b†76–væVRÓÓÒvÖRrbbF6²æ76–væVEFòÓÒ6Æ÷VEW6W#òæ–B’&WGW&âfÇ6S°¢–b†76–væVRÓÓÒwVæ76–væVBrbbF6²æ76–væVEFò’&WGW&âfÇ6S°¢–b†76–væVRÓÒvÆÂrbb76–væVRÓÒvÖRrbb76–væVRÓÒwVæ76–væVBrbbF6²æ76–væVEFòÓÒ76–væVR’&WGW&âfÇ6S° ¢&WGW&âG'VS°§Ð ¦gVæ7F–öâWFFTf–ÇFW$&FvR‚’°¢6öç7B7F—fRÒ²wF6´f–ÇFW"rÂwF6µ7FGW4f–ÇFW"rÂwF6´GVTf–ÇFW"rÂwF6´76–væVDf–ÇFW"uÐ¢æf–ÇFW"‚†–B’ÓâB†–B’çfÇVRÓÒvÆÂr’æÆVæwFƒ°¢6öç7B'FâÒB‚wFövvÆUF6´f–ÇFW'4'Fâr“°¢'FâçFW‡D6öçFVçBÒ7F—fRòf–ÇFW"‚G¶7F—fWÒ–¢tf–ÇFW"s°§Ð ¦gVæ7F–öâf÷&ÖDGVTFFR†GVTFFR’°¢–b‚GVTFFR’&WGW&ârs°¢6öç7B'6VBÒæWrFFR†G¶GVTFFWÕC#££“°¢&WGW&âçVÖ&W"æ—4æâ‡'6VBævWEF–ÖR‚’’òGVTFFR¢f÷&ÖDFFR‡'6VB“°§Ð ¦gVæ7F–öâ'V–ÆEF6´6&B‡F6²Â²6†÷u7FGW2ÒG'VRÒÒ·Ò’°¢6öç7B6&BÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v'F–6ÆRr“°¢6öç7B6äG&rÒ6äVF—EF6²‡F6²’ÇÂ6ä6Æ–ÕF6²‡F6²“°¢6&Bæ6Æ74æÖRÒF6²Ö6&BG·F6²ç7FGW2ÓÓÒvFöæRròr—2ÖFöæRr¢rwÒG¶6äG&ròr—2ÖG&vv&ÆRr¢rwÖ° ¢6öç7BÖVÖ&W"Òv÷&·76TÖVÖ&W'2æf–æB‚†—FVÒ’Óâ—FVÒçW6W$–BÓÓÒF6²æ76–væVEFò“°¢–b†ÖVÖ&W"bbÔTÔ$U%ô4ôÄõ%2æ–æ6ÇVFW2†ÖVÖ&W"çF6´6öÆ÷"’’6&BæFF6WBæÖVÖ&W$6öÆ÷W"ÒÖVÖ&W"çF6´6öÆ÷#° ¢6öç7B÷Vä'FâÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v'WGFöâr“°¢÷Vä'FâçG—RÒv'WGFöâs°¢÷Vä'Fâæ6Æ74æÖRÒwF6²Ö6&BÖ÷Vâs°¢÷Vä'Fâç6WDGG&–'WFR‚v&–ÖÆ&VÂrÂ6äVF—EF6²‡F6²’òVF—BF6³¢G·F6²çF—FÆWÖ¢f–WrF6³¢G·F6²çF—FÆWÖ“°¢÷Vä'FâæFDWfVçDÆ—7FVæW"‚v6Æ–6²rÂ‚’Óâ÷Väf÷&Ò‡F6²’“° ¢òò–âF†R&ö&BÂ6Æ–6¶–ærF†R6&B÷Vç2—Bv†–ÆRF†Rv†öÆR6&B&VÖ–ç2F†P¢òò6÷'F&ÆT¥2†æFÆRâ¶VWæW7FVB6öçG&öÇ2fö7W6VBöâF†V—"÷vâ7F–öç2à¢6&BæFDWfVçDÆ—7FVæW"‚v6Æ–6²rÂ†WfVçB’Óâ°¢–b†WfVçBçF&vWBæ6Æ÷6W7B‚rçF6²Ö6&BÖ÷VâÂçF6²Ö6&BÖ7F–öç2ÂçF6²×7FGW2Ö'Fâr’’&WGW&ã°¢÷Väf÷&Ò‡F6²“°¢Ò“° ¢6öç7B7FGW4'FâÒFö7VÖVçBæ7&VFTVÆVÖVçB‚v'WGFöâr“°¢7FGW4'FâçG—RÒv'WGFöâs°¢7FGW4'Fâæ6Æ74æÖRÒwF6²×7FGW2Ö'Fâs°¢7FGW4'FâæFF6WBç7FGW=øß›h‘éì¶»§q«^u±…Ñ•	Ñ¸œ¤¹‘¥Í…‰±•€ô€…Ñ•µÁ±…Ñ”ì(€€ …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ôÑ•µÁ±…Ñ”€üÁÁ±ä€‘íÑ•µÁ±…Ñ”¹Ñ…Í­Ì¹±•¹Ñ¡ôÑ…Í­Í€€è€ÁÁ±äÑ…Í­Ìœì(€€ Ñ•µÁ±…Ñ•ÁÁ±å5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì)ô()™Õ¹Ñ¥½¸½Á•¹Q•µÁ±…Ñ•¥…±½œ ¤ì(€¥˜€ ……¹‘¥Ð¤É•ÑÕÉ¸ì(€Í•±•Ñ•‘Q•µÁ±…Ñ•%€ô¹Õ±°ì(€Á½ÁÕ±…Ñ•Q•µÁ±…Ñ•AÉ½Á•ÉÑ¥•Ì ¤ì(€É•¹‘•ÉQ•µÁ±…Ñ•…É‘Ì ¤ì(€€ Ñ•µÁ±…Ñ•AÉ½Á•ÉÑåI½Üœ¤¹±…ÍÍ1¥ÍÐ¹…‘ ¡¥‘‘•¸œ¤ì(€€ Ñ•µÁ±…Ñ•AÉ½Á•ÉÑäœ¤¹Ù…±Õ”€ô€œœì(€€ …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹‘¥Í…‰±•€ôÑÉÕ”ì(€€ …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€ÁÁ±äÑ…Í­Ìœì(€€ Ñ•µÁ±…Ñ•ÁÁ±å5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì(€Ñ•µÁ±…Ñ•¥…±½½¹ÑÉ½±±•È¹½Á•¸ ¤ì)ô()™Õ¹Ñ¥½¸…ÁÁ±åQ•µÁ±…Ñ•!…¹‘±•È ¤ì(€¥˜€ ……¹‘¥Ð¤É•ÑÕÉ¸ì(€½¹ÍÐÑ•µÁ±…Ñ”€ôQ5A1QL¹™¥¹ ¡Ð¤€ôøÐ¹¥€ôôôÍ•±•Ñ•‘Q•µÁ±…Ñ•%¤ì(€¥˜€ …Ñ•µÁ±…Ñ”¤É•ÑÕÉ¸ì((€½¹ÍÐÁÉ½Á•ÉÑå%€ôÑ•µÁ±…Ñ”¹Í½Á”€ôôô€ÁÉ½Á•ÉÑäœ€ü€ Ñ•µÁ±…Ñ•AÉ½Á•ÉÑäœ¤¹Ù…±Õ”€è€œœì(€¥˜€¡Ñ•µÁ±…Ñ”¹Í½Á”€ôôô€ÁÉ½Á•ÉÑäœ€˜˜€…ÁÉ½Á•ÉÑå%¤ì(€€€Í•Ñ¥•±‘Y…±¥‘…Ñ¥½¸  Ñ•µÁ±…Ñ•AÉ½Á•ÉÑäœ¤°€ Ñ•µÁ±…Ñ•AÉ½Á•ÉÑåÉÉ½Èœ¤°ì¥¹Ù…±¥èÑÉÕ”ô¤ì(€€€€ Ñ•µÁ±…Ñ•AÉ½Á•ÉÑäœ¤¹™½ÕÌ ¤ì(€€€É•ÑÕÉ¸ì(€ô((€½¹ÍÐ•á¥ÍÑ¥¹œ€ô•ÑQ…Í­Ì ¤¹™¥±Ñ•È ¡Ð¤€ôøÐ¹Ñ•µÁ±…Ñ•%€ôôôÑ•µÁ±…Ñ”¹¥(€€€€˜˜€¡Ñ•µÁ±…Ñ”¹Í½Á”€ôôô€ÁÉ½Á•ÉÑäœ€üÐ¹ÁÉ½Á•ÉÑå%€ôôôÁÉ½Á•ÉÑå%€èÐ¹Í½Á”€ôôô€½µÁ…¹äœ¤¤ì(€¥˜€¡•á¥ÍÑ¥¹œ¹±•¹Ñ €ø€À¤ì(€€€½¹ÍÐ±…‰•°€ôÑ•µÁ±…Ñ”¹Í½Á”€ôôô€ÁÉ½Á•ÉÑäœ(€€€€€€ü€¡ÁÉ½Á•ÉÑ¥•Ì¹™¥¹ ¡À¤€ôøÀ¹¥€ôôôÁÉ½Á•ÉÑå%¤ü¹Ñ¥Ñ±”ñð€Ñ¡¥ÌÁÉ½Á•ÉÑäœ¤(€€€€€€è€Ñ¡”½µÁ…¹äœì(€€€¥˜€ …Ý¥¹‘½Ü¹½¹™¥É´¡€‘í•á¥ÍÑ¥¹œ¹±•¹Ñ¡ôÑ…Í¬‘í•á¥ÍÑ¥¹œ¹±•¹Ñ €ôôô€Ä€ü€œœ€è€Ìô™É½´Ñ¡¥ÌÑ•µÁ±…Ñ”…±É•…‘ä•á¥ÍÐ™½È€‘í±…‰•±ô¸ÁÁ±ä……¥¸ý€¤¤É•ÑÕÉ¸ì(€ô((€€ …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹‘¥Í…‰±•€ôÑÉÕ”ì(€€ Ñ•µÁ±…Ñ•ÁÁ±å5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€ÁÁ±å¥¹ŸŠ˜œì(€ÑÉäì(€€€‰Õ¥±‘Q…Í­ÍÉ½µQ•µÁ±…Ñ”¡Ñ•µÁ±…Ñ”¹¥°ÁÉ½Á•ÉÑå%¤(€€€€€€¹™½É…  ¡‘•˜¤€ôøÍ…Ù•Q…Í¬¡ì€¸¸¹‘•˜°É•…Ñ•‘	äè±½Õ‘UÍ•Èü¹¥ñð¹Õ±°ô¤¤ì(€€€Ñ•µÁ±…Ñ•¥…±½½¹ÑÉ½±±•È¹±½Í” ¤ì(€€€É•¹‘•È ¤ì(€€€Íå¹Q…Í­Ì¡ìÍ¡½Ý••‘‰…¬è™…±Í”ô¤ì(€ô…Ñ €¡•ÉÉ½È¤ì(€€€€ Ñ•µÁ±…Ñ•ÁÁ±å5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô•ÉÉ½È¹µ•ÍÍ…”ñð€½Õ±¹½Ð…ÁÁ±äÑ¡¥ÌÑ•µÁ±…Ñ”¸œì(€€€€ …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹‘¥Í…‰±•€ô™…±Í”ì(€ô)ô()™Õ¹Ñ¥½¸¡•­Y¥•Ý¥¹MÕ•ÍÑ¥½¸¡Ñ…Í¬°¹•ÝMÑ…ÑÕÌ¤ì(€¥˜€¡¹•ÝMÑ…ÑÕÌ€„ôô€‘½¹”œ¤É•ÑÕÉ¸ì(€¥˜€¡ÍÕ•ÍÑ•‘Q…Í­%‘Ì¹¡…Ì¡Ñ…Í¬¹¥¤¤É•ÑÕÉ¸ì(€¥˜€ …Y%]%9}I¹Ñ•ÍÐ¡Ñ…Í¬¹Ñ¥Ñ±”ñð€œœ¤¤É•ÑÕÉ¸ì(€ÍÕ•ÍÑ•‘Q…Í­%‘Ì¹…‘¡Ñ…Í¬¹¥¤ì(€ÍÕ•ÍÑ¥½¹M½ÕÉ•Q…Í¬€ôÑ…Í¬ì(€€ ÍÕ•ÍÑ¥½¹Q…Í­9…µ”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€ˆ‘íÑ…Í¬¹Ñ¥Ñ±•ô‰€ì(€ÍÕ•ÍÑ¥½¹¥…±½½¹ÑÉ½±±•È¹½Á•¸ ¤ì)ô()™Õ¹Ñ¥½¸…ÁÁ±åMÕ•ÍÑ¥½¸¡ÍÕ•ÍÑ¥½¹Q¥Ñ±”¤ì(€¥˜€ ……¹‘¥Ðñð€…ÍÕ•ÍÑ¥½¹M½ÕÉ•Q…Í¬¤É•ÑÕÉ¸ì(€½¹ÍÐÍ½ÕÉ”€ôÍÕ•ÍÑ¥½¹M½ÕÉ•Q…Í¬ì(€ÍÕ•ÍÑ¥½¹¥…±½½¹ÑÉ½±±•È¹±½Í” ¤ì(€É•ÅÕ•ÍÑ¹¥µ…Ñ¥½¹É…µ”  ¤€ôø½Á•¹½É´¡¹Õ±°°ì(€€€ÁÉ•Í•ÐèìÑ¥Ñ±”èÍÕ•ÍÑ¥½¹Q¥Ñ±”°Í½Á”èÍ½ÕÉ”¹Í½Á”°ÁÉ½Á•ÉÑå%èÍ½ÕÉ”¹ÁÉ½Á•ÉÑå%ô(€ô¤¤ì)ô()½¹ÍÐÍÕ•ÍÑ¥½¹¥…±½½¹ÑÉ½±±•È€ôÍ•ÑÕÁ¥…±½œ  ÍÕ•ÍÑ¥½¹¥…±½œœ¤°ì(€±½Í•	ÕÑÑ½¹Ìèl ±½Í•MÕ•ÍÑ¥½¹¥…±½	Ñ¸œ¤°€ ‘¥Íµ¥ÍÍMÕ•ÍÑ¥½¹	Ñ¸œ¥t)ô¤ì( ÍÕ•ÍÑ¥½¹¥…±½œœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±½Í”œ°€ ¤€ôøìÍÕ•ÍÑ¥½¹M½ÕÉ•Q…Í¬€ô¹Õ±°ìô¤ì( ÍÕ•ÍÑ¥½¹¥…±½œœ¤¹ÅÕ•ÉåM•±•Ñ½É±° m‘…Ñ„µÍÕ•ÍÑ¥½¹tœ¤¹™½É…  ¡‰Ñ¸¤€ôøì(€‰Ñ¸¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°€ ¤€ôø…ÁÁ±åMÕ•ÍÑ¥½¸¡‰Ñ¸¹‘…Ñ…Í•Ð¹ÍÕ•ÍÑ¥½¸¤¤ì)ô¤ì()½¹ÍÐÑ…Í­¥…±½½¹ÑÉ½±±•È€ôÍ•ÑÕÁ¥…±½œ  Ñ…Í­¥…±½œœ¤°ì(€±½Í•	ÕÑÑ½¹Ìèl ±½Í•Q…Í­¥…±½	Ñ¸œ¤°€ …¹•±Q…Í­	Ñ¸œ¥t°(€¥¹¥Ñ¥…±½ÕÌè€ ¤€ôø€ Ñ…Í­Q¥Ñ±”œ¤)ô¤ì( Ñ…Í­¥…±½œœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±½Í”œ°€ ¤€ôøì(€•‘¥Ñ¥¹Q…Í­%€ô¹Õ±°ì(€lÑ…Í­Q¥Ñ±”œ°€Ñ…Í­•ÍÉ¥ÁÑ¥½¸œ°€Ñ…Í­MÑ…ÑÕÌœ°€Ñ…Í­Õ•…Ñ”œ°€Ñ…Í­ÍÍ¥¹•‘Q¼œ°€Ñ…Í­M½Á”œ°€Ñ…Í­AÉ½Á•ÉÑät¹™½É…  ¡¥¤€ôøì(€€€€¡¥¤¹‘¥Í…‰±•€ô™…±Í”ì(€ô¤ì(€€ Í…Ù•Q…Í­	Ñ¸œ¤¹±…ÍÍ1¥ÍÐ¹É•µ½Ù” ¡¥‘‘•¸œ¤ì(€€ …¹•±Q…Í­	Ñ¸œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€…¹•°œì(€É•Í•Ñ½µµ•¹Ñ½µÁ½Í•È ¤ì(€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì)ô¤ì()½¹ÍÐÑ•µÁ±…Ñ•¥…±½½¹ÑÉ½±±•È€ôÍ•ÑÕÁ¥…±½œ  Ñ•µÁ±…Ñ•¥…±½œœ¤°ì(€±½Í•	ÕÑÑ½¹Ìèl ±½Í•Q•µÁ±…Ñ•¥…±½	Ñ¸œ¤°€ …¹•±Q•µÁ±…Ñ•	Ñ¸œ¥t°)ô¤ì( Ñ•µÁ±…Ñ•¥…±½œœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±½Í”œ°€ ¤€ôøìÍ•±•Ñ•‘Q•µÁ±…Ñ•%€ô¹Õ±°ìô¤ì()½¹ÍÐÑ…Í­M•ÑÑ¥¹Í¥…±½½¹ÑÉ½±±•È€ôÍ•ÑÕÁ¥…±½œ  Ñ…Í­M•ÑÑ¥¹Í¥…±½œœ¤°ì(€±½Í•	ÕÑÑ½¹Ìèl ±½Í•Q…Í­M•ÑÑ¥¹Í	Ñ¸œ¥t)ô¤ì()™Õ¹Ñ¥½¸É•¹‘•ÉQ…Í­5•µ‰•É½±½ÕÉÌ ¤ì(€½¹ÍÐ±¥ÍÐ€ô€ Ñ…Í­5•µ‰•É½±½ÕÉÌœ¤ì(€±¥ÍÐ¹É•Á±…•¡¥±‘É•¸ ¤ì(€Ý½É­ÍÁ…•5•µ‰•ÉÌ¹™½É…  ¡µ•µ‰•È¤€ôøì(€€€½¹ÍÐÉ½Ü€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ‘¥Øœ¤ì(€€€É½Ü¹±…ÍÍ9…µ”€ô€Ñ…Í¬µµ•µ‰•Èµ½±½ÕÈµÉ½Üœì(€€€½¹ÍÐ¹…µ”€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ÍÑÉ½¹œœ¤ì(€€€¹…µ”¹Ñ•áÑ½¹Ñ•¹Ð€ôµ•µ‰•È¹‘¥ÍÁ±…å9…µ”ñð€]½É­ÍÁ…”µ•µ‰•Èœì(€€€½¹ÍÐÁ¥­•È€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ‘¥Øœ¤ì(€€€Á¥­•È¹±…ÍÍ9…µ”€ô€Ñ…Í¬µµ•µ‰•Èµ½±½ÕÈµÁ¥­•Èœì(€€€½¹ÍÐÍÝ…Ñ €ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ÍÁ…¸œ¤ì(€€€ÍÝ…Ñ ¹±…ÍÍ9…µ”€ô€Ñ…Í¬µµ•µ‰•Èµ½±½ÕÈµÍÝ…Ñ œì(€€€½¹ÍÐÍ•±•Ð€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð Í•±•Ðœ¤ì(€€€Í•±•Ð¹Í•ÑÑÑÉ¥‰ÕÑ” …É¥„µ±…‰•°œ°€Q…Í¬½±½ÕÈ™½È€œ€¬¹…µ”¹Ñ•áÑ½¹Ñ•¹Ð¤ì(€€€mlœœ°€9¼½±½ÕÈt°€¸¸¹55	I}=1=IL¹µ…À ¡½±½È¤€ôøm½±½È°½±½ÉlÁt¹Ñ½UÁÁ•É…Í” ¤€¬½±½È¹Í±¥” Ä¥t¥t(€€€€€€¹™½É…  ¡mÙ…±Õ”°±…‰•±t¤€ôøì(€€€€€€€½¹ÍÐ½ÁÑ¥½¸€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ½ÁÑ¥½¸œ¤ì(€€€€€€€½ÁÑ¥½¸¹Ù…±Õ”€ôÙ…±Õ”ì(€€€€€€€½ÁÑ¥½¸¹Ñ•áÑ½¹Ñ•¹Ð€ô±…‰•°ì(€€€€€€€Í•±•Ð¹…ÁÁ•¹‘¡¥±¡½ÁÑ¥½¸¤ì(€€€€€ô¤ì(€€€Í•±•Ð¹Ù…±Õ”€ôµ•µ‰•È¹Ñ…Í­½±½Èñð€œœì(€€€ÍÝ…Ñ ¹‘…Ñ…Í•Ð¹µ•µ‰•É½±½ÕÈ€ôÍ•±•Ð¹Ù…±Õ”ñð€¹½¹”œì(€€€Í•±•Ð¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°…Íå¹Œ€ ¤€ôøì(€€€€€½¹ÍÐÁÉ•Ù¥½ÕÌ€ôµ•µ‰•È¹Ñ…Í­½±½Èñð€œœì(€€€€€½¹ÍÐ¹•áÐ€ôÍ•±•Ð¹Ù…±Õ”ì(€€€€€Í•±•Ð¹‘¥Í…‰±•€ôÑÉÕ”ì(€€€€€€ Ñ…Í­M•ÑÑ¥¹Í5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€M…Ù¥¹œ½±½ÕËŠ˜œì(€€€€€ÑÉäì(€€€€€€€¥˜€¡ÕÍ•ÉI½±”€„ôô€…‘µ¥¸œñð€…¹…Ù¥…Ñ½È¹½¹1¥¹”¤Ñ¡É½Ü¹•ÜÉÉ½È M¥¸¥¸…Ì…¸…‘µ¥¹¥ÍÑÉ…Ñ½È…¹½¹¹•ÐÑ¼ÕÁ‘…Ñ”½±½ÕÉÌ¸œ¤ì(€€€€€€€…Ý…¥ÐÝ¥¹‘½Ü¹MAY±½Õ¹Í•ÑQ…Í­5•µ‰•É½±½È¡µ•µ‰•È¹ÕÍ•É%°¹•áÐ¤ì(€€€€€€€µ•µ‰•È¹Ñ…Í­½±½È€ô¹•áÐñð¹Õ±°ì(€€€€€€€ÍÝ…Ñ ¹‘…Ñ…Í•Ð¹µ•µ‰•É½±½ÕÈ€ô¹•áÐñð€¹½¹”œì(€€€€€€€±½…±MÑ½É…”¹Í•Ñ%Ñ•´¡55	IM}!}-d°)M=8¹ÍÑÉ¥¹¥™ä¡Ý½É­ÍÁ…•5•µ‰•ÉÌ¤¤ì(€€€€€€€É•¹‘•È ¤ì(€€€€€€€€ Ñ…Í­M•ÑÑ¥¹Í5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€½±½ÕÈÍ…Ù•™½È€œ€¬¹…µ”¹Ñ•áÑ½¹Ñ•¹Ðì(€€€€€ô…Ñ €¡•ÉÉ½È¤ì(€€€€€€€Í•±•Ð¹Ù…±Õ”€ôÁÉ•Ù¥½ÕÌì(€€€€€€€€ Ñ…Í­M•ÑÑ¥¹Í5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô•ÉÉ½È¹µ•ÍÍ…”ñð€½Õ±¹½ÐÍ…Ù”½±½ÕÈ¸œì(€€€€€ô™¥¹…±±äì(€€€€€€€Í•±•Ð¹‘¥Í…‰±•€ô™…±Í”ì(€€€€€ô(€€€ô¤ì(€€€Á¥­•È¹…ÁÁ•¹¡ÍÝ…Ñ °Í•±•Ð¤ì(€€€É½Ü¹…ÁÁ•¹¡¹…µ”°Á¥­•È¤ì(€€€±¥ÍÐ¹…ÁÁ•¹‘¡¥±¡É½Ü¤ì(€ô¤ì(€¥˜€ …Ý½É­ÍÁ…•5•µ‰•ÉÌ¹±•¹Ñ ¤ì(€€€½¹ÍÐ•µÁÑä€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð Àœ¤ì(€€€•µÁÑä¹±…ÍÍ9…µ”€ô€µÕÑ•œì(€€€•µÁÑä¹Ñ•áÑ½¹Ñ•¹Ð€ô€9¼…Ñ¥Ù”µ•µ‰•ÉÌ™½Õ¹¸½¹¹•ÐÑ¼±½…Ý½É­ÍÁ…”µ•µ‰•ÉÌ¸œì(€€€±¥ÍÐ¹…ÁÁ•¹‘¡¥±¡•µÁÑä¤ì(€ô)ô(( ½Á•¹Q…Í­M•ÑÑ¥¹Í	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°…Íå¹Œ€ ¤€ôøì(€¥˜€¡ÕÍ•ÉI½±”€„ôô€…‘µ¥¸œ¤É•ÑÕÉ¸ì(€€ Ñ…Í­M•ÑÑ¥¹Í5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì(€É•¹‘•ÉQ…Í­5•µ‰•É½±½ÕÉÌ ¤ì(€Ñ…Í­M•ÑÑ¥¹Í¥…±½½¹ÑÉ½±±•È¹½Á•¸ ¤ì(€…Ý…¥Ð±½…‘]½É­ÍÁ…•5•µ‰•ÉÌ ¤ì)ô¤ì()™Õ¹Ñ¥½¸Ñ…Í­½¹Ñ•¹ÑÍA±…¥¹Q•áÐ¡Ù…±Õ”¤ì(€½¹ÍÐ¡½±‘•È€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ‘¥Øœ¤ì(€¡½±‘•È¹…ÁÁ•¹¡‰Õ¥±‘M…™•I¥¡Q•áÐ¡Ù…±Õ”ñð€œœ¤¤ì(€¡½±‘•È¹ÅÕ•ÉåM•±•Ñ½É±° ‰Èœ¤¹™½É…  ¡±¥¹•	É•…¬¤€ôø±¥¹•	É•…¬¹É•Á±…•]¥Ñ ¡‘½Õµ•¹Ð¹É•…Ñ•Q•áÑ9½‘” q¸œ¤¤¤ì(€¡½±‘•È¹ÅÕ•ÉåM•±•Ñ½É±° À°‘¥Ø°±¤°‰±½­ÅÕ½Ñ”œ¤¹™½É…  ¡‰±½¬¤€ôøì(€€€¥˜€¡‰±½¬¹¹•áÑM¥‰±¥¹œ¤‰±½¬¹…™Ñ•È¡‘½Õµ•¹Ð¹É•…Ñ•Q•áÑ9½‘” q¸œ¤¤ì(€ô¤ì(€É•ÑÕÉ¸¡½±‘•È¹Ñ•áÑ½¹Ñ•¹Ð(€€€€¹É•Á±…” ½lqÑt­q¸½œ°€q¸œ¤(€€€€¹É•Á±…” ½q¹ìÌ±ô½œ°€q¹q¸œ¤(€€€€¹ÑÉ¥´ ¤ì)ô()™Õ¹Ñ¥½¸½Á•¹½É´¡Ñ…Í¬€ô¹Õ±°°ìÁÉ•Í•Ð€ô¹Õ±°ô€ôíô¤ì(€¥˜€ …Ñ…Í¬€˜˜€……¹‘¥Ð¤É•ÑÕÉ¸ì(€½¹ÍÐÉ•…‘=¹±ä€ô€„…Ñ…Í¬€˜˜€……¹‘¥ÑQ…Í¬¡Ñ…Í¬¤ì(€•‘¥Ñ¥¹Q…Í­%€ôÑ…Í¬ü¹¥ñð¹Õ±°ì(€€ Ñ…Í­½É´œ¤¹É•Í•Ð ¤ì(€€ Ñ…Í­¥…±½Q¥Ñ±”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ôÑ…Í¬€ü€¡É•…‘=¹±ä€ü€Y¥•ÜQ…Í¬œ€è€‘¥ÐQ…Í¬œ¤€è€9•ÜQ…Í¬œì(€€ Í…Ù•Q…Í­	Ñ¸œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€M…Ù”œì(€€ Í…Ù•Q…Í­	Ñ¸œ¤¹±…ÍÍ1¥ÍÐ¹Ñ½±” ¡¥‘‘•¸œ°É•…‘=¹±ä¤ì(€€ …¹•±Q…Í­	Ñ¸œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ôÉ•…‘=¹±ä€ü€±½Í”œ€è€…¹•°œì(€€ Ñ…Í­Q¥Ñ±”œ¤¹Ù…±Õ”€ôÑ…Í¬ü¹Ñ¥Ñ±”€üüÁÉ•Í•Ðü¹Ñ¥Ñ±”€üü€œœì(€€ Ñ…Í­•ÍÉ¥ÁÑ¥½¸œ¤¹Ù…±Õ”€ôÑ…Í¬ü¹‘•ÍÉ¥ÁÑ¥½¸ñð€œœì(€€ Ñ…Í­MÑ…ÑÕÌœ¤¹Ù…±Õ”€ôÑ…Í¬ü¹ÍÑ…ÑÕÌñð€Ñ½‘¼œì(€€ Ñ…Í­MÑ…ÑÕÌœ¤¹‘¥Í…‰±•€ô€…Ñ…Í¬ì(€€ Ñ…Í­Õ•…Ñ”œ¤¹Ù…±Õ”€ôÑ…Í¬ü¹‘Õ•…Ñ”ñð€œœì(€€ Ñ…Í­ÍÍ¥¹•‘Q¼œ¤¹Ù…±Õ”€ôÑ…Í¬ü¹…ÍÍ¥¹•‘Q¼ñð€œœì(€€ Ñ…Í­M½Á”œ¤¹Ù…±Õ”€ôÑ…Í¬ü¹Í½Á”€üüÁÉ•Í•Ðü¹Í½Á”€üü€½µÁ…¹äœì(€€ Ñ…Í­AÉ½Á•ÉÑäœ¤¹Ù…±Õ”€ôÑ…Í¬ü¹ÁÉ½Á•ÉÑå%€üüÁÉ•Í•Ðü¹ÁÉ½Á•ÉÑå%€üü€œœì(€€ Ñ…Í­M…Ù•5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ôÉ•…‘=¹±ä(€€€€ü€¡ÕÍ•ÉI½±”€ôôô€Ù¥•Ý•Èœ€ü€e½Ô¡…Ù”É•…µ½¹±ä…•ÍÌÑ¼Ñ…Í­Ìœ€è€e½Ô…¸½¹±ä•‘¥ÐÑ…Í­Ìå½ÔÉ•…Ñ•œ¤(€€€€è€œœì(€lÑ…Í­Q¥Ñ±”œ°€Ñ…Í­•ÍÉ¥ÁÑ¥½¸œ°€Ñ…Í­MÑ…ÑÕÌœ°€Ñ…Í­Õ•…Ñ”œ°€Ñ…Í­ÍÍ¥¹•‘Q¼œ°€Ñ…Í­M½Á”œ°€Ñ…Í­AÉ½Á•ÉÑät¹™½É…  ¡¥¤€ôøì(€€€€¡¥¤¹‘¥Í…‰±•€ôÉ•…‘=¹±äñð€¡¥€ôôô€Ñ…Í­MÑ…ÑÕÌœ€˜˜€…Ñ…Í¬¤ì(€ô¤ì(€¥˜€¡Ñ…Í¬¤ì(€€€É•¹‘•ÉQ…Í­!¥ÍÑ½Éä¡Ñ…Í¬¹¥¤ì(€€€€ Ñ…Í­!¥ÍÑ½Éäœ¤¹±…ÍÍ1¥ÍÐ¹É•µ½Ù” ¡¥‘‘•¸œ¤ì(€€€É•¹‘•ÉQ…Í­¥ÍÕÍÍ¥½¸¡Ñ…Í¬¹¥¤ì(€€€€ Ñ…Í­¥ÍÕÍÍ¥½¸œ¤¹±…ÍÍ1¥ÍÐ¹É•µ½Ù” ¡¥‘‘•¸œ¤ì(€€€€ Ñ…Í­½µµ•¹Ñ½µÁ½Í•Èœ¤¹±…ÍÍ1¥ÍÐ¹Ñ½±” ¡¥‘‘•¸œ°€……¹‘¥Ð¤ì(€ô•±Í”ì(€€€€ Ñ…Í­!¥ÍÑ½Éäœ¤¹±…ÍÍ1¥ÍÐ¹…‘ ¡¥‘‘•¸œ¤ì(€€€€ Ñ…Í­¥ÍÕÍÍ¥½¸œ¤¹±…ÍÍ1¥ÍÐ¹…‘ ¡¥‘‘•¸œ¤ì(€ô(€±•…É¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­Q¥Ñ±”œ¤°€ Ñ…Í­Q¥Ñ±•ÉÉ½Èœ¤¤ì(€±•…É¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­AÉ½Á•ÉÑäœ¤°€ Ñ…Í­AÉ½Á•ÉÑåÉÉ½Èœ¤¤ì(€ÕÁ‘…Ñ•M½Á” ¤ì(€Ñ…Í­¥…±½½¹ÑÉ½±±•È¹½Á•¸ ¤ì)ô()™Õ¹Ñ¥½¸É•Í•Ñ½µµ•¹Ñ½µÁ½Í•È ¤ì(€•‘¥Ñ¥¹½µµ•¹Ñ%€ô¹Õ±°ì(€Í•Ñ¡…Ñ½µÁ½Í•É5½‘”¡ì(€€€±…‰•°è€ Ñ…Í­½µµ•¹Ñ1…‰•°œ¤°(€€€Ñ•áÑ…É•„è€ Ñ…Í­½µµ•¹Ðœ¤°(€€€Í•¹‘	ÕÑÑ½¸è€ …‘‘Q…Í­½µµ•¹Ñ	Ñ¸œ¤°(€€€…¹•±	ÕÑÑ½¸è€ …¹•±Q…Í­½µµ•¹Ñ‘¥Ñ	Ñ¸œ¤(€ô¤ì)ô()™Õ¹Ñ¥½¸‰•¥¹‘¥ÑQ…Í­½µµ•¹Ð¡½µµ•¹Ð¤ì(€¥˜€ ……¹‘¥Ðñð€…±½Õ‘UÍ•Èñð½µµ•¹Ð¹ÕÍ•É%€„ôô±½Õ‘UÍ•È¹¥¤É•ÑÕÉ¸ì(€•‘¥Ñ¥¹½µµ•¹Ñ%€ô½µµ•¹Ð¹¥ì(€Í•Ñ¡…Ñ½µÁ½Í•É5½‘”¡ì(€€€±…‰•°è€ Ñ…Í­½µµ•¹Ñ1…‰•°œ¤°(€€€Ñ•áÑ…É•„è€ Ñ…Í­½µµ•¹Ðœ¤°(€€€Í•¹‘	ÕÑÑ½¸è€ …‘‘Q…Í­½µµ•¹Ñ	Ñ¸œ¤°(€€€…¹•±	ÕÑÑ½¸è€ …¹•±Q…Í­½µµ•¹Ñ‘¥Ñ	Ñ¸œ¤°(€€€•‘¥Ñ¥¹œèÑÉÕ”°(€€€Ù…±Õ”èÑ…Í­½¹Ñ•¹ÑÍA±…¥¹Q•áÐ¡½µµ•¹Ð¹µ•ÍÍ…”¤(€ô¤ì(€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì(€€ Ñ…Í­½µµ•¹Ðœ¤¹™½ÕÌ ¤ì(€€ Ñ…Í­½µµ•¹Ðœ¤¹Í•ÑM•±•Ñ¥½¹I…¹”  Ñ…Í­½µµ•¹Ðœ¤¹Ù…±Õ”¹±•¹Ñ °€ Ñ…Í­½µµ•¹Ðœ¤¹Ù…±Õ”¹±•¹Ñ ¤ì)ô()™Õ¹Ñ¥½¸Á½ÍÑQ…Í­½µµ•¹Ð ¤ì(€¥˜€ …•‘¥Ñ¥¹Q…Í­%ñð€……¹‘¥Ð¤É•ÑÕÉ¸ì(€½¹ÍÐµ•ÍÍ…”€ô€ Ñ…Í­½µµ•¹Ðœ¤¹Ù…±Õ”¹ÑÉ¥´ ¤ì(€¥˜€ …µ•ÍÍ…”¤ì(€€€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€¹Ñ•È„µ•ÍÍ…”¸œì(€€€€ Ñ…Í­½µµ•¹Ðœ¤¹™½ÕÌ ¤ì(€€€É•ÑÕÉ¸ì(€ô((€½¹ÍÐ‰ÕÑÑ½¸€ô€ …‘‘Q…Í­½µµ•¹Ñ	Ñ¸œ¤ì(€‰ÕÑÑ½¸¹‘¥Í…‰±•€ôÑÉÕ”ì(€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô•‘¥Ñ¥¹½µµ•¹Ñ%€ü€M…Ù¥¹ŸŠ˜œ€è€A½ÍÑ¥¹ŸŠ˜œì(€ÑÉäì(€€€¥˜€¡•‘¥Ñ¥¹½µµ•¹Ñ%¤ì(€€€€€ÕÁ‘…Ñ•Q…Í­½µµ•¹Ð¡•‘¥Ñ¥¹½µµ•¹Ñ%°µ•ÍÍ…”°±½Õ‘UÍ•Èü¹¥ñð¹Õ±°¤ì(€€€€€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô¹…Ù¥…Ñ½È¹½¹1¥¹”€˜˜±½Õ‘UÍ•È€ü€5•ÍÍ…”ÕÁ‘…Ñ•œ€è€UÁ‘…Ñ”Í…Ù•½¸Ñ¡¥Ì‘•Ù¥”œì(€€€ô•±Í”ì(€€€€€…‘‘Q…Í­½µµ•¹Ð¡ì(€€€€€€€Ñ…Í­%è•‘¥Ñ¥¹Q…Í­%°(€€€€€€€ÕÍ•É%è±½Õ‘UÍ•Èü¹¥ñð¹Õ±°°(€€€€€€€‘¥ÍÁ±…å9…µ”è•ÑÑ½É9…µ” ¤°(€€€€€€€µ•ÍÍ…”(€€€€€ô¤ì(€€€€€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô¹…Ù¥…Ñ½È¹½¹1¥¹”€˜˜±½Õ‘UÍ•È€ü€5•ÍÍ…”Í•¹Ðœ€è€M…Ù•½¸Ñ¡¥Ì‘•Ù¥”œì(€€€ô(€€€É•Í•Ñ½µµ•¹Ñ½µÁ½Í•È ¤ì(€€€É•¹‘•ÉQ…Í­¥ÍÕÍÍ¥½¸¡•‘¥Ñ¥¹Q…Í­%¤ì(€€€Íå¹Q…Í­Ì¡ìÍ¡½Ý••‘‰…¬è™…±Í”ô¤ì(€ô…Ñ €¡•ÉÉ½È¤ì(€€€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô•ÉÉ½È¹µ•ÍÍ…”ñð€½Õ±¹½ÐÍ…Ù”Ñ¡¥Ìµ•ÍÍ…”¸œì(€ô™¥¹…±±äì(€€€‰ÕÑÑ½¸¹‘¥Í…‰±•€ô™…±Í”ì(€ô)ô()™Õ¹Ñ¥½¸ÍÕ‰µ¥ÑQ…Í¬¡•Ù•¹Ð¤ì(€•Ù•¹Ð¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¤ì(€¥˜€ ……¹‘¥Ð¤É•ÑÕÉ¸ì(€¥˜€¡•‘¥Ñ¥¹Q…Í­%¤ì(€€€½¹ÍÐ¡•¬€ô•Ñ±±Q…Í­Ì ¤¹™¥¹ ¡Ð¤€ôøÐ¹¥€ôôô•‘¥Ñ¥¹Q…Í­%¤ì(€€€¥˜€¡¡•¬€˜˜€……¹‘¥ÑQ…Í¬¡¡•¬¤¤É•ÑÕÉ¸ì(€ô((€½¹ÍÐÑ¥Ñ±”€ô€ Ñ…Í­Q¥Ñ±”œ¤¹Ù…±Õ”¹ÑÉ¥´ ¤ì(€½¹ÍÐÍ½Á”€ô€ Ñ…Í­M½Á”œ¤¹Ù…±Õ”ì(€½¹ÍÐÁÉ½Á•ÉÑå%€ô€ Ñ…Í­AÉ½Á•ÉÑäœ¤¹Ù…±Õ”ì(€½¹ÍÐÑ¥Ñ±•%¹Ù…±¥€ô€…Ñ¥Ñ±”ì(€½¹ÍÐÁÉ½Á•ÉÑå%¹Ù…±¥€ôÍ½Á”€ôôô€ÁÉ½Á•ÉÑäœ€˜˜€…ÁÉ½Á•ÉÑå%ì((€Í•Ñ¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­Q¥Ñ±”œ¤°€ Ñ…Í­Q¥Ñ±•ÉÉ½Èœ¤°ì¥¹Ù…±¥èÑ¥Ñ±•%¹Ù…±¥ô¤ì(€Í•Ñ¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­AÉ½Á•ÉÑäœ¤°€ Ñ…Í­AÉ½Á•ÉÑåÉÉ½Èœ¤°ì¥¹Ù…±¥èÁÉ½Á•ÉÑå%¹Ù…±¥ô¤ì(€¥˜€¡Ñ¥Ñ±•%¹Ù…±¥ñðÁÉ½Á•ÉÑå%¹Ù…±¥¤É•ÑÕÉ¸ì((€½¹ÍÐÍÕ‰µ¥Ð€ô€ Ñ…Í­½É´œ¤¹ÅÕ•ÉåM•±•Ñ½È mÑåÁ”ô‰ÍÕ‰µ¥Ð‰tœ¤ì(€ÍÕ‰µ¥Ð¹‘¥Í…‰±•€ôÑÉÕ”ì(€€ Ñ…Í­M…Ù•5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€M…Ù¥¹ŸŠ˜œì((€ÑÉäì(€€€½¹ÍÐ•á¥ÍÑ¥¹œ€ô•‘¥Ñ¥¹Q…Í­%€ü•Ñ±±Q…Í­Ì ¤¹™¥¹ ¡Ð¤€ôøÐ¹¥€ôôô•‘¥Ñ¥¹Q…Í­%¤€è¹Õ±°ì(€€€½¹ÍÐ¹•ÝMÑ…ÑÕÌ€ô•á¥ÍÑ¥¹œ€ü€ Ñ…Í­MÑ…ÑÕÌœ¤¹Ù…±Õ”€è€Ñ½‘¼œì(€€€Í…Ù•Q…Í¬¡ì(€€€€€€¸¸¹•á¥ÍÑ¥¹œ°(€€€€€¥è•‘¥Ñ¥¹Q…Í­%ñðÕ¹‘•™¥¹•°(€€€€€Ñ¥Ñ±”°(€€€€€‘•ÍÉ¥ÁÑ¥½¸è€ Ñ…Í­•ÍÉ¥ÁÑ¥½¸œ¤¹Ù…±Õ”¹ÑÉ¥´ ¤°(€€€€€ÍÑ…ÑÕÌè¹•ÝMÑ…ÑÕÌ°(€€€€€‘Õ•…Ñ”è€ Ñ…Í­Õ•…Ñ”œ¤¹Ù…±Õ”ñð¹Õ±°°(€€€€€…ÍÍ¥¹•‘Q¼è€¡•á¥ÍÑ¥¹œü¹ÍÑ…ÑÕÌ€ôôô€Ñ½‘¼œ€˜˜¹•ÝMÑ…ÑÕÌ€ôôô€¥¸µÁÉ½É•ÍÌœ€˜˜€„ Ñ…Í­ÍÍ¥¹•‘Q¼œ¤¹Ù…±Õ”¤(€€€€€€€€ü±½Õ‘UÍ•Èü¹¥ñð¹Õ±°€è€ Ñ…Í­ÍÍ¥¹•‘Q¼œ¤¹Ù…±Õ”ñð¹Õ±°°(€€€€€Í½Á”°(€€€€€ÁÉ½Á•ÉÑå%°(€€€€€É•…Ñ•‘	äè•á¥ÍÑ¥¹œü¹É•…Ñ•‘	äñð±½Õ‘UÍ•Èü¹¥ñð¹Õ±°(€€€ô¤ì(€€€¥˜€¡•á¥ÍÑ¥¹œ€˜˜•á¥ÍÑ¥¹œ¹ÍÑ…ÑÕÌ€„ôô¹•ÝMÑ…ÑÕÌ¤ì(€€€€€…‘‘Q…Í­Ù•¹Ð¡ìÑ…Í­%è•á¥ÍÑ¥¹œ¹¥°ÕÍ•É%è±½Õ‘UÍ•Èü¹¥ñð¹Õ±°°‘¥ÍÁ±…å9…µ”è•ÑÑ½É9…µ” ¤°™É½µMÑ…ÑÕÌè•á¥ÍÑ¥¹œ¹ÍÑ…ÑÕÌ°Ñ½MÑ…ÑÕÌè¹•ÝMÑ…ÑÕÌô¤ì(€€€ô(€€€½¹ÍÐ‰•…µ•½¹”€ô•á¥ÍÑ¥¹œ€˜˜•á¥ÍÑ¥¹œ¹ÍÑ…ÑÕÌ€„ôô€‘½¹”œ€˜˜¹•ÝMÑ…ÑÕÌ€ôôô€‘½¹”œì(€€€Ñ…Í­¥…±½½¹ÑÉ½±±•È¹±½Í” ¤ì(€€€É•¹‘•È ¤ì(€€€Íå¹Q…Í­Ì¡ìÍ¡½Ý••‘‰…¬è™…±Í”ô¤ì(€€€¥˜€¡‰•…µ•½¹”¤¡•­Y¥•Ý¥¹MÕ•ÍÑ¥½¸¡ì¥è•‘¥Ñ¥¹Q…Í­%°Ñ¥Ñ±”°Í½Á”°ÁÉ½Á•ÉÑå%ô°¹•ÝMÑ…ÑÕÌ¤ì(€ô…Ñ €¡•ÉÉ½È¤ì(€€€€ Ñ…Í­M…Ù•5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô•ÉÉ½È¹µ•ÍÍ…”ñð€½Õ±¹½ÐÍ…Ù”Ñ¡¥ÌÑ…Í¬¸œì(€ô™¥¹…±±äì(€€€ÍÕ‰µ¥Ð¹‘¥Í…‰±•€ô™…±Í”ì(€ô)ô(( ½Á•¹Q…Í­½Éµ	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°€ ¤€ôø½Á•¹½É´ ¤¤ì( …‘‘Q…Í­½µµ•¹Ñ	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°Á½ÍÑQ…Í­½µµ•¹Ð¤ì( …¹•±Q…Í­½µµ•¹Ñ‘¥Ñ	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°€ ¤€ôøì(€É•Í•Ñ½µµ•¹Ñ½µÁ½Í•È ¤ì(€€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœì)ô¤ì( Ñ…Í­½µµ•¹Ðœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¥¹ÁÕÐœ°€ ¤€ôøì€ Ñ…Í­½µµ•¹Ñ5•ÍÍ…”œ¤¹Ñ•áÑ½¹Ñ•¹Ð€ô€œœìô¤ì( ½Á•¹Q•µÁ±…Ñ•¥…±½	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°½Á•¹Q•µÁ±…Ñ•¥…±½œ¤ì( …ÁÁ±åQ•µÁ±…Ñ•	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°…ÁÁ±åQ•µÁ±…Ñ•!…¹‘±•È¤ì( Ñ…Í­M½Á”œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°ÕÁ‘…Ñ•M½Á”¤ì( Ñ…Í­Q¥Ñ±”œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¥¹ÁÕÐœ°€ ¤€ôø±•…É¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­Q¥Ñ±”œ¤°€ Ñ…Í­Q¥Ñ±•ÉÉ½Èœ¤¤¤ì( Ñ…Í­AÉ½Á•ÉÑäœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°€ ¤€ôø±•…É¥•±‘Y…±¥‘…Ñ¥½¸  Ñ…Í­AÉ½Á•ÉÑäœ¤°€ Ñ…Í­AÉ½Á•ÉÑåÉÉ½Èœ¤¤¤ì( Ñ…Í­½É´œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ÍÕ‰µ¥Ðœ°ÍÕ‰µ¥ÑQ…Í¬¤ì( Ñ…Í­¥±Ñ•Èœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°É•¹‘•È¤ì( Ñ…Í­MÑ…ÑÕÍ¥±Ñ•Èœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°É•¹‘•È¤ì( Ñ…Í­Õ•¥±Ñ•Èœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°É•¹‘•È¤ì( Ñ…Í­ÍÍ¥¹•‘¥±Ñ•Èœ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ°É•¹‘•È¤ì( Ñ½±•Q…Í­¥±Ñ•ÉÍ	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°€ ¤€ôøì(€½¹ÍÐ½Á•¹¥¹œ€ô€ Ñ…Í­¥±Ñ•ÉÌœ¤¹±…ÍÍ1¥ÍÐ¹½¹Ñ…¥¹Ì ¡¥‘‘•¸œ¤ì(€€ Ñ…Í­¥±Ñ•ÉÌœ¤¹±…ÍÍ1¥ÍÐ¹Ñ½±” ¡¥‘‘•¸œ°€…½Á•¹¥¹œ¤ì(€€ Ñ½±•Q…Í­¥±Ñ•ÉÍ	Ñ¸œ¤¹Í•ÑÑÑÉ¥‰ÕÑ” …É¥„µ•áÁ…¹‘•œ°MÑÉ¥¹œ¡½Á•¹¥¹œ¤¤ì)ô¤ì( ±•…ÉQ…Í­¥±Ñ•ÉÍ	Ñ¸œ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ°€ ¤€ôøì(€€ Ñ…Í­¥±Ñ•Èœ¤¹Ù…±Õ”€ô€…±°œì(€€ Ñ…Í­MÑ…ÑÕÍ¥±Ñ•Èœ¤¹Ù…±Õ”€ô€…±°œì(€€ Ñ…Í­Õ•¥±Ñ•Èœ¤¹Ù…±Õ”€ô€…±°œì(€€ Ñ…Í­ÍÍ¥¹•‘¥±Ñ•Èœ¤¹Ù…±Õ”€ô€…±°œì(€É•¹‘•È ¤ì)ô¤ì)Ý¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ½¹±¥¹”œ°€ ¤€ôøÍå¹Q…Í­Ì¡ìÍ¡½Ý••‘‰…¬è™…±Í”ô¤¤ì)Ý¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ½™™±¥¹”œ°€ ¤€ôøÍ•ÑMå¹MÑ…ÑÕÌ =™™±¥¹”ƒ
+Ü¡…¹•ÌÝ¥±°Íå¹Œ±…Ñ•Èœ¤¤ì)Ý¥¹‘½Ü¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ÍÁØµÝ½É­ÍÁ…”µÍå¹•œ°€ ¤€ôøì(€Á½ÁÕ±…Ñ•AÉ½Á•ÉÑ¥•Ì ¤ì(€É•¹‘•È ¤ì)ô¤ì()Á½ÁÕ±…Ñ•AÉ½Á•ÉÑ¥•Ì ¤ì)É•¹‘•È ¤ì)Í•ÑÕÁQ…Í­±½Õ ¤ì

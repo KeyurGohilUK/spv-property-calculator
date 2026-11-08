@@ -1,349 +1,8 @@
-<!DOCTYPE html>
-<html lang="en-GB">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <base href="../">
-  <meta name="theme-color" content="#966540">
-  <meta name="description" content="Manage your SPV company particulars and appointments.">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="SPV Company">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
-  <script src="./src/components/theme.js"></script>
-  <script type="module" src="./src/components/help-guide.js"></script>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles/features/company.css">
-  <title>Company Details Â· SPV Property Calculator</title>
-</head>
-<body class="auth-pending">
-  <div id="app">
-    <header class="app-header"><div class="header-inner">
-      <a class="brand-home" href="./" aria-label="Back to property calculator">
-        <img class="brand-logo" src="./icons/icon-192.png" alt="" width="42" height="42">
-        <span class="brand-copy"><span class="eyebrow">UK Limited Company / SPV</span><span class="brand-title">SPV Property Calculator</span></span>
-      </a>
-    </div></header>
-    <nav class="primary-app-nav" aria-label="Primary navigation" data-primary-navigation data-active-page="company"></nav>
-    <main class="main-shell company-shell company-detail-shell">
-      <a class="company-back-link" href="./company/">â† All companies</a>
-      <section class="hero-card company-hero">
-        <div><p class="eyebrow">Company records</p><h1>Company Details</h1><p class="muted">Manage this companyâ€™s particulars, compliance, investments and appointments.</p></div>
-        <span id="companySyncStatus" class="sync-status" role="status">Saved on this device</span>
-      </section>
-
-            <div class="company-detail-tabs" role="tablist" aria-label="Company record sections">
-        <button id="companyTab" class="company-detail-tab" type="button" role="tab" aria-selected="true" aria-controls="companyTabPanel" tabindex="0" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V4h12v17M15 9h6v12M7 8h4M7 12h4M7 16h4M18 13h.01M18 17h.01M2 21h20"/></svg><span>Company</span></button>
-        <button id="complianceTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="complianceTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 22 7-4V6l-7-4-7 4v12l7 4Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg><span>Compliance</span></button>
-        <button id="investmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="investmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="8" cy="6" rx="5.5" ry="2.5"/><path d="M2.5 6v8c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V6M2.5 10c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5"/><ellipse cx="18" cy="5" rx="4.5" ry="2.5"/><path d="M13.5 5v8c0 1.4 2 2.5 4.5 2.5M13.5 9c0 1.4 2 2.5 4.5 2.5s4.5-1.1 4.5-2.5V5"/></svg><span>Investment</span></button>
-        <button id="appointmentTab" class="company-detail-tab" type="button" role="tab" aria-selected="false" aria-controls="appointmentTabPanel" tabindex="-1" data-company-tab><svg class="company-detail-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1M16 3.2a4 4 0 0 1 0 7.6M18 14a6 6 0 0 1 4 5.7V21"/></svg><span>Appointment</span></button>
-      </div>
-      <div id="companyTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="companyTab" tabindex="0">
-<section class="company-section" aria-labelledby="companyParticularsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">Company Overview</p><h2 id="companyParticularsTitle">Particulars</h2></div>
-          <button id="editCompanyDetailsBtn" class="icon-btn company-edit-btn" type="button" aria-label="Edit company details" title="Edit company details"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
-        </div>
-        <dl class="company-particulars">
-          <div><dt>Name</dt><dd id="companyNameValue">Not added</dd></div>
-          <div><dt>Company number</dt><dd id="companyNumberValue">Not recorded</dd></div>
-          <div><dt>Registered office</dt><dd id="companyOfficeValue">Not recorded</dd></div>
-          <div><dt>Company status</dt><dd id="companyStatusValue">Not recorded</dd></div>
-          <div><dt>Incorporation date</dt><dd id="companyDateValue">Not recorded</dd></div>
-        </dl>
-        <p id="companyEmptyHint" class="company-empty-hint">Add your company name and number to start your company record.</p>
-      </section>
-<details class="company-section company-danger-zone">
-        <summary class="company-danger-summary"><span><h2 id="deleteCompanyTitle">Delete company</h2><small>Expand to view the removal option</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
-        <div class="company-danger-content">
-          <p class="muted">Remove this company from your workspace. Its directors, investments and compliance records will be hidden with it. Properties and expenses are not deleted.</p>
-          <button type="button" id="openDeleteCompanyBtn" class="secondary-btn danger-text" disabled>Delete company</button>
-        </div>
-      </details>
-      </div>
-      <div id="complianceTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="complianceTab" tabindex="0" hidden>
-<section class="company-section company-compliance-hub" aria-labelledby="companyComplianceTitle">
-        <div class="company-section-heading">
-          <div><p class="eyebrow">Legal obligations</p><h2 id="companyComplianceTitle">Company Compliance Hub</h2>
-            <p class="muted">Company filings and tax records in one place. Deadlines are indicative until confirmed with official records.</p></div>
-        </div>
-        <div class="company-compliance-summarybar">
-          <div id="companyComplianceSummary" class="company-compliance-summary" role="status" aria-live="polite"></div>
-          <span id="companyEvidenceUsage" class="company-compliance-evidence-summary" aria-label="Attached compliance evidence storage"></span>
-        </div>
-        <p id="companyEvidenceStatus" class="company-evidence-message" role="status" aria-live="polite"></p>
-        <div class="compliance-authority-switcher" role="tablist" aria-label="Compliance authorities">
-          <button id="companyHouseAuthorityTab" class="compliance-authority-option" type="button" role="tab" aria-controls="companyHouseAuthorityPanel" aria-selected="true" data-compliance-authority="companies-house" data-authority-action-id="companyHouseAuthorityAction">
-            <span class="compliance-authority-icon" aria-hidden="true">CH</span>
-            <span class="compliance-authority-option-body">
-              <span class="compliance-authority-option-title"><strong>Companies House</strong><span id="companyHouseAuthorityStatus" class="company-identity-chip company-identity-chip--neutral">Checking</span></span>
-              <span class="muted">Annual filings, company records and director verification.</span>
-              <span id="companyHouseAuthoritySummary" class="compliance-authority-option-meta">Deadlines and identity records</span>
-            </span>
-            <span id="companyHouseAuthorityAction" class="compliance-authority-option-action">Viewing this authority</span>
-          </button>
-          <button id="hmrcAuthorityTab" class="compliance-authority-option" type="button" role="tab" aria-controls="hmrcAuthorityPanel" aria-selected="false" data-compliance-authority="hmrc" data-authority-action-id="hmrcAuthorityAction">
-            <span class="compliance-authority-icon" aria-hidden="true">HM</span>
-            <span class="compliance-authority-option-body">
-              <span class="compliance-authority-option-title"><strong>HMRC Corporation Tax</strong><span class="company-identity-chip company-identity-chip--neutral">Manual tracking</span></span>
-              <span class="muted">CT600 returns, accounting periods and liabilities.</span>
-              <span id="hmrcAuthoritySummary" class="compliance-authority-option-meta">Setup records and tax periods</span>
-            </span>
-            <span id="hmrcAuthorityAction" class="compliance-authority-option-action">Switch to view</span>
-          </button>
-        </div>
-        <section id="companyHouseAuthorityPanel" class="compliance-authority-panel" role="tabpanel" aria-labelledby="companyHouseAuthorityTab">
-          <div class="authority-details-bar">
-            <span class="eyebrow">Authority details</span><span class="authority-details-divider" aria-hidden="true"></span>
-            <span>Official registry: <strong>Companies House England &amp; Wales</strong></span>
-            <span class="authority-details-number">CRN: <strong id="companyAuthorityNumber">Not recorded</strong></span>
-          </div>
-          <div id="companiesHouseComplianceItems" class="company-compliance-list"></div>
-          <details class="company-filing-history compliance-subsection">
-            <summary><span class="compliance-subsection-label"><strong id="companyFilingHistoryTitle">Official filing history</strong><span class="muted">Check original records with Companies House.</span></span><span class="compliance-expand-icon" aria-hidden="true"></span></summary>
-            <div class="compliance-subsection-content"><div id="companyFilingHistory" aria-live="polite"></div></div>
-          </details>
-        </section>
-        <section id="hmrcAuthorityPanel" class="compliance-authority-panel hmrc-authority-panel" role="tabpanel" aria-labelledby="hmrcAuthorityTab" hidden>
-          <div class="authority-details-bar">
-            <span class="eyebrow">Authority details</span><span class="authority-details-divider" aria-hidden="true"></span>
-            <span>Official authority: <strong>HM Revenue &amp; Customs</strong></span>
-            <span class="authority-details-number">Corporation Tax Â· manual records</span>
-          </div>
-          <div id="hmrcStatusNote" class="hmrc-status-note" role="status" aria-live="polite" hidden></div>
-          <section id="hmrcSetupOverview" class="hmrc-overview hmrc-setup-overview" aria-labelledby="hmrcSetupHeading">
-            <div class="hmrc-section-heading">
-              <h3 id="hmrcSetupHeading"><button id="hmrcSetupToggle" class="hmrc-setup-toggle" type="button" data-hmrc-setup-toggle aria-expanded="true" aria-controls="hmrcSetupDisclosure"><span>Company inception setup</span><svg class="company-disclosure-chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></button></h3>
-              <span id="hmrcAuthorityProgress" class="company-identity-chip company-identity-chip--neutral"></span>
-            </div>
-            <div id="hmrcSetupDisclosure" class="company-animated-disclosure is-expanded" aria-hidden="false">
-              <div class="company-animated-disclosure-inner"><div id="hmrcSetupCards" class="hmrc-setup-cards"></div></div>
-            </div>
-          </section>
-          <section id="hmrcRecurringOverview" class="hmrc-overview hmrc-recurring-overview" aria-labelledby="hmrcPeriodsHeading">
-            <div class="hmrc-section-heading"><h3 id="hmrcPeriodsHeading">Recorded Corporation Tax periods</h3><button id="hmrcOpenPeriodDialog" class="primary-btn" type="button">ï¼‹ New period</button></div>
-            <div id="hmrcPeriodHistory" class="hmrc-period-history" aria-live="polite"></div>
-          </section>
-        </section>
-      </section>
-  <dialog id="companyComplianceDialog" class="app-dialog company-dialog company-compliance-dialog" aria-labelledby="companyComplianceDialogTitle">
-    <div class="company-dialog-header"><h2 id="companyComplianceDialogTitle">Compliance details</h2><button type="button" id="companyComplianceDialogClose" class="dialog-close" aria-label="Close compliance details">Ã—</button></div>
-    <div class="company-compliance-dialog-status" id="companyComplianceDialogStatus"></div>
-    <div id="companyComplianceDialogDetails" class="company-compliance-dialog-details"></div>
-    <section class="company-compliance-dialog-evidence" aria-labelledby="companyComplianceDialogEvidenceHeading">
-      <h3 id="companyComplianceDialogEvidenceHeading">Supporting evidence</h3>
-      <ul id="companyComplianceDialogEvidenceFiles" class="company-evidence-files"></ul>
-      <file-upload-field id="companyComplianceEvidenceUpload" input-id="companyComplianceEvidenceInput" label="Attach PDF or image" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" help="PDF or image Â· maximum 5 MB"></file-upload-field>
-      <p id="companyComplianceDialogMessage" role="status" aria-live="polite"></p>
-    </section>
-    <div class="company-compliance-dialog-actions">
-      <button id="companyComplianceDialogDone" class="primary-btn" type="button">Mark as done</button>
-    </div>
-  </dialog>
-  <dialog id="hmrcSetupDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcSetupDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcSetupDialogTitle">UTR letter</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupDialog" aria-label="Close UTR letter">Ã—</button></div>
-  <p class="muted">Record the date, not your UTR number.</p>
-  <form id="hmrcSetupForm" class="hmrc-tracking-form">
-<label data-hmrc-setup-field="utr">Letter received on<input id="hmrcUtrReceivedOn" type="date"></label>
-<label data-hmrc-setup-field="registration">Confirmed on<input id="hmrcRegistrationConfirmedOn" type="date"></label>
-<label data-hmrc-setup-field="registration">Acknowledgement reference<input id="hmrcRegistrationReference" type="text" maxlength="100" autocomplete="off"></label>
-<label data-hmrc-setup-field="registration">Accountant or firm<input id="hmrcAccountantName" type="text" maxlength="160" autocomplete="organization"></label>
-<div class="hmrc-dialog-actions"><button id="hmrcPendingBtn" type="button" class="secondary-btn">Still waiting</button><button id="hmrcSetupSaveBtn" class="primary-btn" type="submit">Save</button></div>
-<p id="hmrcSetupMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-  <dialog id="hmrcSetupHelpDialog" class="app-dialog company-dialog hmrc-edit-dialog hmrc-setup-help-dialog" aria-labelledby="hmrcSetupHelpDialogTitle">
-    <div class="company-dialog-header"><h2 id="hmrcSetupHelpDialogTitle">Company setup guidance</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcSetupHelpDialog" aria-label="Close company setup guidance">Ã—</button></div>
-    <h3>What to expect</h3><ul id="hmrcSetupHelpExpectations" class="hmrc-setup-help-points"></ul>
-    <h3>What to do</h3><ul id="hmrcSetupHelpActions" class="hmrc-setup-help-points"></ul>
-    <div class="hmrc-dialog-actions"><button type="button" class="primary-btn" data-hmrc-close="hmrcSetupHelpDialog">Done</button></div>
-  </dialog>
-  <dialog id="hmrcActivityDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcActivityDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcActivityDialogTitle">Company activity</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcActivityDialog" aria-label="Close Company activity">Ã—</button></div>
-  
-  <form id="hmrcActivityForm" class="hmrc-activity-form">
-<label><input type="radio" name="hmrcActivity" value="preparing"> Preparing to buy property</label>
-<label><input type="radio" name="hmrcActivity" value="active"> Business activity started</label>
-<label><input type="radio" name="hmrcActivity" value="dormant"> Dormant (confirmed by HMRC)</label>
-<div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save</button></div>
-<p id="hmrcActivityMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-  <dialog id="hmrcPeriodDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPeriodDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcPeriodDialogTitle">Tax accounting period</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPeriodDialog" aria-label="Close Tax accounting period">Ã—</button></div>
-  
-  <form id="hmrcPeriodForm" class="hmrc-tracking-form">
-<label hidden>Corporation Tax status<select id="hmrcTaxStatus"><option value="unknown">Awaiting confirmation</option><option value="active">Active</option><option value="dormant">Dormant</option></select></label>
-<label>Period start<input id="hmrcPeriodStart" type="date" required></label>
-<label>Period end<input id="hmrcPeriodEnd" type="date" required></label>
-<p class="muted hmrc-span-all">Confirm dates with HMRC or your accountant.</p>
-<div class="hmrc-dialog-actions"><button id="suggestNextHmrcPeriod" class="secondary-btn" type="button">Suggest next period</button><button id="saveHmrcPeriod" class="primary-btn" type="submit">Save period</button></div>
-<p id="hmrcPeriodMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-  <dialog id="hmrcDeletePeriodDialog" class="app-dialog company-dialog" aria-labelledby="hmrcDeletePeriodDialogTitle">
-    <form id="deleteHmrcPeriodForm">
-      <div class="company-dialog-header"><h2 id="hmrcDeletePeriodDialogTitle">Delete tax period?</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcDeletePeriodDialog" aria-label="Close delete tax period confirmation">Ã—</button></div>
-      <p>Delete the Corporation Tax period <strong id="deleteHmrcPeriodName"></strong>?</p>
-      <p id="deleteHmrcPeriodSummary" class="muted"></p>
-      <label class="field"><span>Type DELETE to confirm</span><input id="confirmDeleteHmrcPeriodInput" type="text" autocomplete="off" spellcheck="false" required></label>
-      <p id="deleteHmrcPeriodMessage" class="save-message" role="alert" aria-live="assertive"></p>
-      <div class="dialog-actions company-form-actions"><button type="button" class="secondary-btn" data-hmrc-close="hmrcDeletePeriodDialog">Cancel</button><button id="confirmDeleteHmrcPeriodBtn" type="submit" class="secondary-btn danger-text">Delete period</button></div>
-    </form>
-  </dialog>
-  <dialog id="hmrcFilingDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcFilingDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcFilingDialogTitle">CT600 and tax liability</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcFilingDialog" aria-label="Close CT600 and tax liability">Ã—</button></div>
-  
-  <form id="hmrcFilingForm" class="hmrc-tracking-form">
-<label>Tax period<select id="hmrcRecordPeriod" required></select></label>
-<label>CT600 submitted on<input id="hmrcFiledOn" type="date"></label>
-<label>Filing reference<input id="hmrcFilingReference" maxlength="120" type="text" autocomplete="off"></label>
-<label>Tax liability (Â£)<input id="hmrcLiability" type="number" min="0" max="1000000000" step=".01" placeholder="Leave blank if unknown"></label>
-<label>Liability status<select id="hmrcLiabilityStatus"><option value="unknown">Not assessed</option><option value="estimated">Estimated</option><option value="confirmed">Confirmed by accountant / HMRC</option><option value="recorded">Recorded</option></select></label>
-<label>17-character HMRC payment reference<input id="hmrcPeriodPaymentReference" type="text" maxlength="17" minlength="17" pattern="[A-Za-z0-9]{17}" autocomplete="off" placeholder="From HMRC for this period"></label>
-<label>Accountant reviewed on<input id="hmrcReviewedOn" type="date"></label>
-<label>Reviewed by<input id="hmrcReviewedBy" type="text" maxlength="160" autocomplete="name"></label>
-<section class="hmrc-filing-evidence hmrc-span-all" aria-labelledby="hmrcFilingEvidenceHeading">
-  <div class="hmrc-filing-evidence-heading"><strong id="hmrcFilingEvidenceHeading">CT600 evidence</strong><span id="hmrcFilingEvidenceStatus" class="hmrc-filing-evidence-status">No evidence attached</span></div>
-  <ul id="hmrcFilingEvidenceFiles" class="hmrc-evidence-list"><li class="muted">No documents attached.</li></ul>
-  <file-upload-field input-id="hmrcFilingEvidenceInput" label="Add evidence" optional accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcFilingEvidenceSelection" help-id="hmrcFilingEvidenceHelp" help="PDF or image Â· maximum 5 MB" data-evidence-upload=""></file-upload-field>
-  <p id="hmrcFilingEvidenceMessage" role="status" aria-live="polite"></p>
-</section>
-<p class="muted hmrc-span-all">Your entry is not HMRC verification.</p>
-<div class="hmrc-dialog-actions"><button class="primary-btn" type="submit">Save record</button></div><p id="hmrcFilingMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-  <dialog id="hmrcEvidenceDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcEvidenceDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcEvidenceDialogTitle">Attach document</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcEvidenceDialog" aria-label="Close document upload">Ã—</button></div>
-  <file-upload-field input-id="hmrcEvidenceInput" label="Select document" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcEvidenceSelection" help-id="hmrcEvidenceHelp" help="PDF or image Â· maximum 5 MB" data-evidence-upload=""></file-upload-field>
-  <p id="hmrcEvidenceMessage" role="status" aria-live="polite"></p>
-</dialog>
-  <dialog id="hmrcPaymentDialog" class="app-dialog company-dialog hmrc-edit-dialog" aria-labelledby="hmrcPaymentDialogTitle">
-  <div class="company-dialog-header"><h2 id="hmrcPaymentDialogTitle">Record tax payment</h2><button type="button" class="dialog-close" data-hmrc-close="hmrcPaymentDialog" aria-label="Close Record tax payment">Ã—</button></div>
-  
-  <form id="hmrcPaymentForm" class="hmrc-tracking-form">
-<label>Tax period<select id="hmrcPaymentPeriod" required></select></label>
-<label>Payment date<input id="hmrcPaymentDate" type="date" required></label>
-<label>Amount paid (Â£)<input id="hmrcPaymentAmount" type="number" min=".01" max="1000000000" step=".01" required></label>
-<label>Method<select id="hmrcPaymentMethod"><option value="bank-transfer">Bank transfer</option><option value="direct-debit">Direct Debit</option><option value="card">Card</option><option value="other">Other</option></select></label>
-<label>Transaction reference<input id="hmrcPaymentReference" type="text" maxlength="160" autocomplete="off"></label>
-<label class="hmrc-confirm-label"><input id="hmrcPaymentConfirmed" type="checkbox"> HMRC has confirmed this payment</label>
-<section id="hmrcPaymentEvidencePanel" class="hmrc-payment-evidence" aria-labelledby="hmrcPaymentEvidenceTitle">
-  <div class="hmrc-payment-evidence-heading"><strong id="hmrcPaymentEvidenceTitle">Payment receipt</strong></div>
-  <file-upload-field input-id="hmrcPaymentEvidenceInput" label="Choose receipt file" optional empty-label="No receipt selected" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" status-id="hmrcPaymentEvidenceSelection" help-id="hmrcPaymentEvidenceHelp" help="PDF or image Â· maximum 5 MB Â· stored securely with this payment." data-evidence-upload=""></file-upload-field>
-  <p id="hmrcPaymentEvidenceMessage" role="status" aria-live="polite"></p>
-  <ul id="hmrcPaymentEvidenceFiles" class="company-evidence-files"></ul>
-</section>
-<div class="hmrc-dialog-actions"><button id="hmrcPaymentSaveBtn" class="primary-btn" type="submit">Save payment</button></div>
-<p id="hmrcPaymentMessage" role="status" aria-live="polite"></p></form>
-</dialog>
-</section>
-        <p class="muted company-compliance-disclaimer">Deadlines are estimates. Check HMRC and Companies House before filing or paying.</p>
-      </div>
-      <div id="investmentTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="investmentTab" tabindex="0" hidden>
-<section class="company-section" aria-labelledby="companyInvestmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">Funding</p><h2 id="companyInvestmentsTitle">Member investments</h2><p class="muted">Track funding from company directors and shareholders. Contribution percentages are based on the total recorded investment.</p></div>
-          <button id="addInvestmentBtn" class="primary-btn company-add-btn" type="button">ï¼‹ Add investment</button>
-        </div>
-        <div id="companyInvestmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">Â£</span><h3>No investments recorded</h3><p>Add a funding entry to see each memberâ€™s total contribution and percentage.</p>
-        </div>
-        <figure id="companyInvestmentChart" class="company-investment-chart hidden" aria-labelledby="companyInvestmentChartTitle">
-          <figcaption id="companyInvestmentChartTitle">Overall member investment split</figcaption>
-          <div class="company-investment-chart-content"><ul class="company-investment-chart-legend" aria-label="Contribution percentages"></ul><div class="company-investment-chart-plot"></div></div>
-        </figure>
-        <div id="companyInvestmentSummaryWrap" class="company-investment-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Member investment contributions">
-          <table class="company-investment-table">
-            <thead><tr><th scope="col">Member</th><th scope="col">Total invested</th><th scope="col">Contribution</th></tr></thead>
-            <tbody id="companyInvestmentSummaryRows"></tbody>
-            <tfoot><tr><th scope="row">Total contributions</th><td id="companyInvestmentTotal"></td><td>100%</td></tr></tfoot>
-          </table>
-        </div>
-        <div class="company-investment-entries">
-          <h3>Funding entries</h3>
-          <div id="companyInvestmentsEntriesEmpty" class="muted">Individual funding entries will appear here.</div>
-          <div id="companyInvestmentEntriesWrap" class="company-investment-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Recorded company funding entries">
-            <table class="company-investment-table company-investment-entry-table">
-              <thead><tr><th scope="col">Date</th><th scope="col">Member</th><th scope="col">Amount</th><th scope="col">Reference / note</th><th scope="col">Actions</th></tr></thead>
-              <tbody id="companyInvestmentEntryRows"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      </div>
-      <div id="appointmentTabPanel" class="company-tab-panel" role="tabpanel" aria-labelledby="appointmentTab" tabindex="0" hidden>
-<section class="company-section" aria-labelledby="companyAppointmentsTitle">
-        <div class="company-section-heading"><div><p class="eyebrow">People &amp; roles</p><h2 id="companyAppointmentsTitle">Appointments</h2><p class="muted">Add each person once; Companies House verification is shown alongside their roles.</p></div>
-          <button id="addAppointmentBtn" class="primary-btn company-add-btn" type="button">ï¼‹ Add person</button>
-        </div>
-        <div id="companyIdentitySummary" class="company-identity-summary" role="status" aria-live="polite"></div>
-        <div id="companyAppointmentsEmpty" class="company-appointments-empty">
-          <span class="empty-icon" aria-hidden="true">â™™</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
-        </div>
-        <div id="companyAppointmentsTable" class="company-appointments-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Company appointments; scroll to see all roles">
-          <table class="company-appointments-table">
-            <thead><tr><th scope="col">Person</th><th scope="col">Actions</th></tr></thead>
-            <tbody id="companyAppointmentsRows"></tbody>
-          </table>
-        </div>
-        <div id="companyAppointmentCards" class="company-appointment-cards hidden"></div>
-      </section>
-      </div>
-    </main>
-  </div>
-
-
-  <dialog id="appointmentDialog" class="app-dialog company-dialog">
-    <form id="appointmentForm" novalidate>
-      <div class="company-dialog-header"><div><p class="eyebrow">Company appointments</p><h2 id="appointmentDialogTitle">Add person</h2></div><button id="closeAppointmentDialog" class="dialog-close" type="button" aria-label="Close appointment form">Ã—</button></div>
-      <input id="appointmentIdInput" type="hidden">
-      <label class="field"><span>Full name <strong aria-hidden="true">*</strong></span><input id="appointmentNameInput" type="text" maxlength="160" autocomplete="name" required></label>
-      <fieldset class="company-role-fieldset"><legend>Appointments <strong aria-hidden="true">*</strong></legend>
-        <label><input type="checkbox" name="appointmentDirector" data-appointment-role value="director"> <span>Director</span></label>
-        <label><input type="checkbox" name="appointmentShareholder" data-appointment-role value="shareholder"> <span>Shareholder</span></label>
-        <label><input type="checkbox" name="appointmentSecretary" data-appointment-role value="secretary"> <span>Secretary</span></label>
-        <label><input type="checkbox" name="appointmentPsc" data-appointment-role value="psc"> <span>Person with significant control (PSC)</span></label>
-      </fieldset>
-      <p id="appointmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="deleteAppointmentBtn" class="text-btn danger-text hidden" type="button">Remove person</button><button id="cancelAppointmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="investmentDialog" class="app-dialog company-dialog">
-    <form id="investmentForm" novalidate>
-      <div class="company-dialog-header"><div><p class="eyebrow">Member investments</p><h2 id="investmentDialogTitle">Add investment</h2></div><button id="closeInvestmentDialog" class="dialog-close" type="button" aria-label="Close investment form">Ã—</button></div>
-      <input id="investmentIdInput" type="hidden">
-      <label class="field"><span>Member <strong aria-hidden="true">*</strong></span><select id="investmentMemberInput" required></select></label>
-      <div class="company-form-columns">
-        <label class="field"><span>Amount (Â£) <strong aria-hidden="true">*</strong></span><input id="investmentAmountInput" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
-        <label class="field"><span>Investment date</span><input id="investmentDateInput" type="date"></label>
-      </div>
-      <label class="field"><span>Funding reference / note</span><textarea id="investmentReferenceInput" rows="3" maxlength="500" placeholder="e.g. Initial director funding or bank transfer reference" data-plain-text></textarea><small>Add a short reference or note for this funding entry.</small></label>
-      <p id="investmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="deleteInvestmentDialog" class="app-dialog company-dialog" aria-labelledby="deleteInvestmentDialogTitle">
-    <form id="deleteInvestmentForm">
-      <div class="company-dialog-header"><h2 id="deleteInvestmentDialogTitle">Delete funding entry?</h2><button id="closeDeleteInvestmentDialog" class="dialog-close" type="button" aria-label="Close delete confirmation">Ã—</button></div>
-      <p>Delete this funding entry for <strong id="deleteInvestmentDescription"></strong>?</p>
-      <p class="muted">This removes the contribution from the companyâ€™s investment records and cannot be undone.</p>
-      <div class="dialog-actions company-form-actions"><button id="cancelDeleteInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="secondary-btn danger-text" type="submit">Delete entry</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="deleteCompanyDialog" class="app-dialog company-dialog" aria-labelledby="deleteCompanyDialogTitle">
-    <form id="deleteCompanyForm">
-      <div class="company-dialog-header"><h2 id="deleteCompanyDialogTitle">Delete company?</h2><button id="closeDeleteCompanyDialog" class="dialog-close" type="button" aria-label="Close delete confirmation">Ã—</button></div>
-      <p>Remove <strong id="deleteCompanyName"></strong> from Company Management on all synced devices?</p>
-      <p class="muted">The company's internal appointments, investments and compliance confirmations will be hidden. Existing property and expense records will remain unchanged. This does not dissolve the legal company at Companies House.</p>
-      <label class="field"><span>Type DELETE to confirm</span><input id="confirmDeleteCompanyInput" type="text" autocomplete="off" spellcheck="false" required></label>
-      <p id="deleteCompanyMessage" class="save-message" role="alert" aria-live="assertive"></p>
-      <div class="dialog-actions company-form-actions"><button id="cancelDeleteCompanyBtn" class="secondary-btn" type="button">Cancel</button><button id="confirmDeleteCompanyBtn" type="submit" class="secondary-btn danger-text">Delete company</button></div>
-    </form>
-  </dialog>
-
-  <script defer src="./supabase-config.js"></script>
-  <script defer src="./cloud.js"></script>
-  <script type="module" src="./src/components/secondary-page-header.js"></script>
-  <script type="module" src="./src/components/admin-menu.js"></script>
-  <script type="module" src="./src/features/company/company.js"></script>
-</body>
-</html>
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×]¹õ:-jZ.¶›­–)Þ³SÂDô5E•R‡FÖÃà£Æ‡FÖÂÆæsÒ&VâÔt"#à£Æ†VCà¢ÆÖWF6†'6WCÒ'WFbÓ‚#à¢ÆÖWFæÖSÒ'f–Ww÷'B"6öçFVçCÒ'v–GFƒÖFWf–6R×v–GF‚Â–æ—F–Â×66ÆSÓÂf–Ww÷'BÖf—CÖ6÷fW"#à¢Æ&6R‡&VcÒ"ââò#à¢ÆÖWFæÖSÒ'F†VÖRÖ6öÆ÷""6öçFVçCÒ"3“ccSC#à¢ÆÖWFæÖSÒ&FW67&—F–öâ"6öçFVçCÒ$ÖævR–÷W"5b6ö×ç’'F–7VÆ'2æBö–çFÖVçG2â#à¢ÆÖWFæÖSÒ&ÆRÖÖö&–ÆR×vV"ÖÖ6&ÆR"6öçFVçCÒ'–W2#à¢ÆÖWFæÖSÒ&ÆRÖÖö&–ÆR×vV"Ö×F—FÆR"6öçFVçCÒ%5b6ö×ç’#à¢ÆÆ–æ²&VÃÒ&Öæ–fW7B"‡&VcÒ"âöÖæ–fW7Bæ§6öâ#à¢ÆÆ–æ²&VÃÒ&ÆR×F÷V6‚Ö–6öâ"‡&VcÒ"âö–6öç2öÆR×F÷V6‚Ö–6öâçær#à¢ÆÆ–æ²&VÃÒ&–6öâ"G—SÒ&–ÖvR÷ær"6—¦W3Ò#3'ƒ3""‡&VcÒ"âö–6öç2öff–6öâÓ3"çær#à¢Ç67&—B7&3Ò"â÷7&2ö6ö×öæVçG2÷F†VÖRæ§2#ãÂ÷67&—Cà¢Ç67&—BG—SÒ&ÖöGVÆR"7&3Ò"â÷7&2ö6ö×öæVçG2ö†VÇÖwV–FRæ§2#ãÂ÷67&—Cà¢ÆÆ–æ²&VÃÒ'7G–ÆW6†VWB"‡&VcÒ"â÷7G–ÆW2æ772#à¢ÆÆ–æ²&VÃÒ'7G–ÆW6†VWB"‡&VcÒ"â÷7G–ÆW2öfVGW&W2ö6ö×ç’æ772#à¢ÇF—FÆSä6ö×ç’FWF–Ç2+r5b&÷W'G’6Æ7VÆF÷#Â÷F—FÆSà£Âö†VCà£Æ&öG’6Æ73Ò&WF‚×VæF–ær#à¢ÆF—b–CÒ&#à¢Æ†VFW"6Æ73Ò&Ö†VFW"#ãÆF—b6Æ73Ò&†VFW"Ö–ææW"#à¢Æ6Æ73Ò&'&æBÖ†öÖR"‡&VcÒ"âò"&–ÖÆ&VÃÒ$&6²Fò&÷W'G’6Æ7VÆF÷"#à¢Æ–Ör6Æ73Ò&'&æBÖÆövò"7&3Ò"âö–6öç2ö–6öâÓ“"çær"ÇCÒ""v–GFƒÒ#C""†V–v‡CÒ#C"#à¢Ç7â6Æ73Ò&'&æBÖ6÷’#ãÇ7â6Æ73Ò&W–V'&÷r#åT²Æ–Ö—FVB6ö×ç’ò5cÂ÷7ããÇ7â6Æ73Ò&'&æB×F—FÆR#å5b&÷W'G’6Æ7VÆF÷#Â÷7ããÂ÷7ãà¢Âöà¢ÂöF—cãÂö†VFW#à¢Ææb6Æ73Ò'&–Ö'’ÖÖæb"&–ÖÆ&VÃÒ%&–Ö'’æf–vF–öâ"FF×&–Ö'’Öæf–vF–öâFFÖ7F—fR×vSÒ&6ö×ç’#ãÂöæcà¢ÆÖ–â6Æ73Ò&Ö–â×6†VÆÂ6ö×ç’×6†VÆÂ6ö×ç’ÖFWF–Â×6†VÆÂ#à¢Æ6Æ73Ò&6ö×ç’Ö&6²ÖÆ–æ²"‡&VcÒ"âö6ö×ç’ò#î(iÆÂ6ö×æ–W3Âöà¢Ç6V7F–öâ6Æ73Ò&†W&òÖ6&B6ö×ç’Ö†W&ò#à¢ÆF—cãÇ6Æ73Ò&W–V'&÷r#ä6ö×ç’&V6÷&G3Â÷ãÆƒä6ö×ç’FWF–Ç3ÂöƒãÇ6Æ73Ò&×WFVB#äÖævRF†—26ö×çž(	—2'F–7VÆ'2Â6ö×Æ–æ6RÂ–çfW7FÖVçG2æBö–çFÖVçG2ãÂ÷ãÂöF—cà¢Ç7â–CÒ&6ö×ç•7–æ57FGW2"6Æ73Ò'7–æ2×7FGW2"&öÆSÒ'7FGW2#å6fVBöâF†—2FWf–6SÂ÷7ãà¢Â÷6V7F–öãà ¢ÆF—b6Æ73Ò&6ö×ç’ÖFWF–Â×F'2"&öÆSÒ'F&Æ—7B"&–ÖÆ&VÃÒ$6ö×ç’&V6÷&B6V7F–öç2#à¢Æ'WGFöâ–CÒ&6ö×ç•F""6Æ73Ò&6ö×ç’ÖFWF–Â×F""G—SÒ&'WGFöâ"&öÆSÒ'F""&–×6VÆV7FVCÒ'G'VR"&–Ö6öçG&öÇ3Ò&6ö×ç•F%æVÂ"F&–æFWƒÒ#"FFÖ6ö×ç’×F#ãÇ7fr6Æ73Ò&6ö×ç’ÖFWF–Â×F"Ö–6öâ"FF×6†&VBÖ–6öãÒ&6ö×ç’"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÇ7ãä6ö×ç“Â÷7ããÂö'WGFöãà¢Æ'WGFöâ–CÒ&6ö×Æ–æ6UF""6Æ73Ò&6ö×ç’ÖFWF–Â×F""G—SÒ&'WGFöâ"&öÆSÒ'F""&–×6VÆV7FVCÒ&fÇ6R"&–Ö6öçG&öÇ3Ò&6ö×Æ–æ6UF%æVÂ"F&–æFWƒÒ"Ó"FFÖ6ö×ç’×F#ãÇ7fr6Æ73Ò&6ö×ç’ÖFWF–Â×F"Ö–6öâ"FF×6†&VBÖ–6öãÒ'6†–VÆD6†V6²"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÇ7ãä6ö×Æ–æ6SÂ÷7ããÂö'WGFöãà¢Æ'WGFöâ–CÒ&–çfW7FÖVçEF""6Æ73Ò&6ö×ç’ÖFWF–Â×F""G—SÒ&'WGFöâ"&öÆSÒ'F""&–×6VÆV7FVCÒ&fÇ6R"&–Ö6öçG&öÇ3Ò&–çfW7FÖVçEF%æVÂ"F&–æFWƒÒ"Ó"FFÖ6ö×ç’×F#ãÇ7fr6Æ73Ò&6ö×ç’ÖFWF–Â×F"Ö–6öâ"FF×6†&VBÖ–6öãÒ&6ö–ç2"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÇ7ãä–çfW7FÖVçCÂ÷7ããÂö'WGFöãà¢Æ'WGFöâ–CÒ&ö–çFÖVçEF""6Æ73Ò&6ö×ç’ÖFWF–Â×F""G—SÒ&'WGFöâ"&öÆSÒ'F""&–×6VÆV7FVCÒ&fÇ6R"&–Ö6öçG&öÇ3Ò&ö–çFÖVçEF%æVÂ"F&–æFWƒÒ"Ó"FFÖ6ö×ç’×F#ãÇ7fr6Æ73Ò&6ö×ç’ÖFWF–Â×F"Ö–6öâ"FF×6†&VBÖ–6öãÒ'W6W'2"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÇ7ãäö–çFÖVçCÂ÷7ããÂö'WGFöãà¢ÂöF—cà¢ÆF—b–CÒ&6ö×ç•F%æVÂ"6Æ73Ò&6ö×ç’×F"×æVÂ"&öÆSÒ'F'æVÂ"&–ÖÆ&VÆÆVF'“Ò&6ö×ç•F""F&–æFWƒÒ##à£Ç6V7F–öâ6Æ73Ò&6ö×ç’×6V7F–öâ"&–ÖÆ&VÆÆVF'“Ò&6ö×ç•'F–7VÆ'5F—FÆR#à¢ÆF—b6Æ73Ò&6ö×ç’×6V7F–öâÖ†VF–ær#ãÆF—cãÇ6Æ73Ò&W–V'&÷r#ä6ö×ç’÷fW'f–WsÂ÷ãÆƒ"–CÒ&6ö×ç•'F–7VÆ'5F—FÆR#å'F–7VÆ'3Âöƒ#ãÂöF—cà¢Æ'WGFöâ–CÒ&VF—D6ö×ç”FWF–Ç4'Fâ"6Æ73Ò&–6öâÖ'Fâ6ö×ç’ÖVF—BÖ'Fâ"G—SÒ&'WGFöâ"&–ÖÆ&VÃÒ$VF—B6ö×ç’FWF–Ç2"F—FÆSÒ$VF—B6ö×ç’FWF–Ç2#ãÇ7frFF×6†&VBÖ–6öãÒ&VF—B"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÂö'WGFöãà¢ÂöF—cà¢ÆFÂ6Æ73Ò&6ö×ç’×'F–7VÆ'2#à¢ÆF—cãÆGCäæÖSÂöGCãÆFB–CÒ&6ö×ç”æÖUfÇVR#äæ÷BFFVCÂöFCãÂöF—cà¢ÆF—cãÆGCä6ö×ç’çVÖ&W#ÂöGCãÆFB–CÒ&6ö×ç”çVÖ&W%fÇVR#äæ÷B&V6÷&FVCÂöFCãÂöF—cà¢ÆF—cãÆGCå&Vv—7FW&VBöff–6SÂöGCãÆFB–CÒ&6ö×ç”öff–6UfÇVR#äæ÷B&V6÷&FVCÂöFCãÂöF—cà¢ÆF—cãÆGCä6ö×ç’7FGW3ÂöGCãÆFB–CÒ&6ö×ç•7FGW5fÇVR#äæ÷B&V6÷&FVCÂöFCãÂöF—cà¢ÆF—cãÆGCä–æ6÷'÷&F–öâFFSÂöGCãÆFB–CÒ&6ö×ç”FFUfÇVR#äæ÷B&V6÷&FVCÂöFCãÂöF—cà¢ÂöFÃà¢Ç–CÒ&6ö×ç”V×G”†–çB"6Æ73Ò&6ö×ç’ÖV×G’Ö†–çB#äFB–÷W"6ö×ç’æÖRæBçVÖ&W"Fò7F'B–÷W"6ö×ç’&V6÷&BãÂ÷à¢Â÷6V7F–öãà£ÆFWF–Ç26Æ73Ò&6ö×ç’×6V7F–öâ6ö×ç’ÖFævW"×¦öæR#à¢Ç7VÖÖ'’6Æ73Ò&6ö×ç’ÖFævW"×7VÖÖ'’#ãÇ7ããÆƒ"–CÒ&FVÆWFT6ö×ç•F—FÆR#äFVÆWFR6ö×ç“Âöƒ#ãÇ6ÖÆÃäW‡æBFòf–WrF†R&VÖ÷fÂ÷F–öãÂ÷6ÖÆÃãÂ÷7ããÇ7frFF×6†&VBÖ–6öãÒ&6†Wg&öäF÷vâ"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÂ÷7VÖÖ'“à¢ÆF—b6Æ73Ò&6ö×ç’ÖFævW"Ö6öçFVçB#à¢Ç6Æ73Ò&×WFVB#å&VÖ÷fRF†—26ö×ç’g&öÒ–÷W"v÷&·76Râ—G2F—&V7F÷'2Â–çfW7FÖVçG2æB6ö×Æ–æ6R&V6÷&G2v–ÆÂ&R†–FFVâv—F‚—Bâ&÷W'F–W2æBW‡Vç6W2&Ræ÷BFVÆWFVBãÂ÷à¢Æ'WGFöâG—SÒ&'WGFöâ"–CÒ&÷VäFVÆWFT6ö×ç”'Fâ"6Æ73Ò'6V6öæF'’Ö'FâFævW"×FW‡B"F—6&ÆVCäFVÆWFR6ö×ç“Âö'WGFöãà¢ÂöF—cà¢ÂöFWF–Ç3à¢ÂöF—cà¢ÆF—b–CÒ&6ö×Æ–æ6UF%æVÂ"6Æ73Ò&6ö×ç’×F"×æVÂ"&öÆSÒ'F'æVÂ"&–ÖÆ&VÆÆVF'“Ò&6ö×Æ–æ6UF""F&–æFWƒÒ#"†–FFVãà£Ç6V7F–öâ6Æ73Ò&6ö×ç’×6V7F–öâ6ö×ç’Ö6ö×Æ–æ6RÖ‡V""&–ÖÆ&VÆÆVF'“Ò&6ö×ç”6ö×Æ–æ6UF—FÆR#à¢ÆF—b6Æ73Ò&6ö×ç’×6V7F–öâÖ†VF–ær#à¢ÆF—cãÇ6Æ73Ò&W–V'&÷r#äÆVvÂö&Æ–vF–öç3Â÷ãÆƒ"–CÒ&6ö×ç”6ö×Æ–æ6UF—FÆR#ä6ö×ç’6ö×Æ–æ6R‡V#Âöƒ#à¢Ç6Æ73Ò&×WFVB#ä6ö×ç’f–Æ–æw2æBF‚&V6÷&G2–âöæRÆ6RâFVFÆ–æW2&R–æF–6F—fRVçF–Â6öæf—&ÖVBv—F‚öff–6–Â&V6÷&G2ãÂ÷ãÂöF—cà¢ÂöF—cà¢ÆF—b6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6R×7VÖÖ'–&"#à¢ÆF—b–CÒ&6ö×ç”6ö×Æ–æ6U7VÖÖ'’"6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6R×7VÖÖ'’"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR#ãÂöF—cà¢Ç7â–CÒ&6ö×ç”Wf–FVæ6UW6vR"6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖWf–FVæ6R×7VÖÖ'’"&–ÖÆ&VÃÒ$GF6†VB6ö×Æ–æ6RWf–FVæ6R7F÷&vR#ãÂ÷7ãà¢ÂöF—cà¢Ç–CÒ&6ö×ç”Wf–FVæ6U7FGW2"6Æ73Ò&6ö×ç’ÖWf–FVæ6RÖÖW76vR"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR#ãÂ÷à¢ÆF—b6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’×7v—F6†W""&öÆSÒ'F&Æ—7B"&–ÖÆ&VÃÒ$6ö×Æ–æ6RWF†÷&—F–W2#à¢Æ'WGFöâ–CÒ&6ö×ç”†÷W6TWF†÷&—G•F""6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâ"G—SÒ&'WGFöâ"&öÆSÒ'F""&–Ö6öçG&öÇ3Ò&6ö×ç”†÷W6TWF†÷&—G•æVÂ"&–×6VÆV7FVCÒ'G'VR"FFÖ6ö×Æ–æ6RÖWF†÷&—G“Ò&6ö×æ–W2Ö†÷W6R"FFÖWF†÷&—G’Ö7F–öâÖ–CÒ&6ö×ç”†÷W6TWF†÷&—G”7F–öâ#à¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö–6öâ"&–Ö†–FFVãÒ'G'VR#ä4ƒÂ÷7ãà¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖ&öG’#à¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâ×F—FÆR#ãÇ7G&öæsä6ö×æ–W2†÷W6SÂ÷7G&öæsãÇ7â–CÒ&6ö×ç”†÷W6TWF†÷&—G•7FGW2"6Æ73Ò&6ö×ç’Ö–FVçF—G’Ö6†—6ö×ç’Ö–FVçF—G’Ö6†—ÒÖæWWG&Â#ä6†V6¶–æsÂ÷7ããÂ÷7ãà¢Ç7â6Æ73Ò&×WFVB#äæçVÂf–Æ–æw2Â6ö×ç’&V6÷&G2æBF—&V7F÷"fW&–f–6F–öâãÂ÷7ãà¢Ç7â–CÒ&6ö×ç”†÷W6TWF†÷&—G•7VÖÖ'’"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖÖWF#äFVFÆ–æW2æB–FVçF—G’&V6÷&G3Â÷7ãà¢Â÷7ãà¢Ç7â–CÒ&6ö×ç”†÷W6TWF†÷&—G”7F–öâ"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖ7F–öâ#åf–Wv–ærF†—2WF†÷&—G“Â÷7ãà¢Âö'WGFöãà¢Æ'WGFöâ–CÒ&†×&4WF†÷&—G•F""6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâ"G—SÒ&'WGFöâ"&öÆSÒ'F""&–Ö6öçG&öÇ3Ò&†×&4WF†÷&—G•æVÂ"&–×6VÆV7FVCÒ&fÇ6R"FFÖ6ö×Æ–æ6RÖWF†÷&—G“Ò&†×&2"FFÖWF†÷&—G’Ö7F–öâÖ–CÒ&†×&4WF†÷&—G”7F–öâ#à¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö–6öâ"&–Ö†–FFVãÒ'G'VR#ä„ÓÂ÷7ãà¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖ&öG’#à¢Ç7â6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâ×F—FÆR#ãÇ7G&öæsä„Õ$26÷'÷&F–öâFƒÂ÷7G&öæsãÇ7â6Æ73Ò&6ö×ç’Ö–FVçF—G’Ö6†—6ö×ç’Ö–FVçF—G’Ö6†—ÒÖæWWG&Â#äÖçVÂG&6¶–æsÂ÷7ããÂ÷7ãà¢Ç7â6Æ73Ò&×WFVB#ä5Cc&WGW&ç2Â66÷VçF–ærW&–öG2æBÆ–&–Æ—F–W2ãÂ÷7ãà¢Ç7â–CÒ&†×&4WF†÷&—G•7VÖÖ'’"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖÖWF#å6WGW&V6÷&G2æBF‚W&–öG3Â÷7ãà¢Â÷7ãà¢Ç7â–CÒ&†×&4WF†÷&—G”7F–öâ"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’Ö÷F–öâÖ7F–öâ#å7v—F6‚Fòf–WsÂ÷7ãà¢Âö'WGFöãà¢ÂöF—cà¢Ç6V7F–öâ–CÒ&6ö×ç”†÷W6TWF†÷&—G•æVÂ"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’×æVÂ"&öÆSÒ'F'æVÂ"&–ÖÆ&VÆÆVF'“Ò&6ö×ç”†÷W6TWF†÷&—G•F"#à¢ÆF—b6Æ73Ò&WF†÷&—G’ÖFWF–Ç2Ö&"#à¢Ç7â6Æ73Ò&W–V'&÷r#äWF†÷&—G’FWF–Ç3Â÷7ããÇ7â6Æ73Ò&WF†÷&—G’ÖFWF–Ç2ÖF—f–FW""&–Ö†–FFVãÒ'G'VR#ãÂ÷7ãà¢Ç7ãäöff–6–Â&Vv—7G'“¢Ç7G&öæsä6ö×æ–W2†÷W6RVævÆæBf×²vÆW3Â÷7G&öæsãÂ÷7ãà¢Ç7â6Æ73Ò&WF†÷&—G’ÖFWF–Ç2ÖçVÖ&W"#ä5$ã¢Ç7G&öær–CÒ&6ö×ç”WF†÷&—G”çVÖ&W"#äæ÷B&V6÷&FVCÂ÷7G&öæsãÂ÷7ãà¢ÂöF—cà¢ÆF—b–CÒ&6ö×æ–W4†÷W6T6ö×Æ–æ6T—FV×2"6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖÆ—7B#ãÂöF—cà¢ÆFWF–Ç26Æ73Ò&6ö×ç’Öf–Æ–ærÖ†—7F÷'’6ö×Æ–æ6R×7V'6V7F–öâ#à¢Ç7VÖÖ'“ãÇ7â6Æ73Ò&6ö×Æ–æ6R×7V'6V7F–öâÖÆ&VÂ#ãÇ7G&öær–CÒ&6ö×ç”f–Æ–æt†—7F÷'•F—FÆR#äöff–6–Âf–Æ–ær†—7F÷'“Â÷7G&öæsãÇ7â6Æ73Ò&×WFVB#ä6†V6²÷&–v–æÂ&V6÷&G2v—F‚6ö×æ–W2†÷W6RãÂ÷7ããÂ÷7ããÇ7â6Æ73Ò&6ö×Æ–æ6RÖW‡æBÖ–6öâ"&–Ö†–FFVãÒ'G'VR#ãÂ÷7ããÂ÷7VÖÖ'“à¢ÆF—b6Æ73Ò&6ö×Æ–æ6R×7V'6V7F–öâÖ6öçFVçB#ãÆF—b–CÒ&6ö×ç”f–Æ–æt†—7F÷'’"&–ÖÆ—fSÒ'öÆ—FR#ãÂöF—cãÂöF—cà¢ÂöFWF–Ç3à¢Â÷6V7F–öãà¢Ç6V7F–öâ–CÒ&†×&4WF†÷&—G•æVÂ"6Æ73Ò&6ö×Æ–æ6RÖWF†÷&—G’×æVÂ†×&2ÖWF†÷&—G’×æVÂ"&öÆSÒ'F'æVÂ"&–ÖÆ&VÆÆVF'“Ò&†×&4WF†÷&—G•F""†–FFVãà¢ÆF—b6Æ73Ò&WF†÷&—G’ÖFWF–Ç2Ö&"#à¢Ç7â6Æ73Ò&W–V'&÷r#äWF†÷&—G’FWF–Ç3Â÷7ããÇ7â6Æ73Ò&WF†÷&—G’ÖFWF–Ç2ÖF—f–FW""&–Ö†–FFVãÒ'G'VR#ãÂ÷7ãà¢Ç7ãäöff–6–ÂWF†÷&—G“¢Ç7G&öæsä„Ò&WfVçVRf×²7W7Fö×3Â÷7G&öæsãÂ÷7ãà¢Ç7â6Æ73Ò&WF†÷&—G’ÖFWF–Ç2ÖçVÖ&W"#ä6÷'÷&F–öâF‚+rÖçVÂ&V6÷&G3Â÷7ãà¢ÂöF—cà¢ÆF—b–CÒ&†×&57FGW4æ÷FR"6Æ73Ò&†×&2×7FGW2Öæ÷FR"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR"†–FFVããÂöF—cà¢Ç6V7F–öâ–CÒ&†×&56WGW÷fW'f–Wr"6Æ73Ò&†×&2Ö÷fW'f–Wr†×&2×6WGWÖ÷fW'f–Wr"&–ÖÆ&VÆÆVF'“Ò&†×&56WGW†VF–ær#à¢ÆF—b6Æ73Ò&†×&2×6V7F–öâÖ†VF–ær#à¢Æƒ2–CÒ&†×&56WGW†VF–ær#ãÆ'WGFöâ–CÒ&†×&56WGWFövvÆR"6Æ73Ò&†×&2×6WGW×FövvÆR"G—SÒ&'WGFöâ"FFÖ†×&2×6WGW×FövvÆR&–ÖW‡æFVCÒ'G'VR"&–Ö6öçG&öÇ3Ò&†×&56WGWF—66Æ÷7W&R#ãÇ7ãä6ö×ç’–æ6WF–öâ6WGWÂ÷7ããÇ7fr6Æ73Ò&6ö×ç’ÖF—66Æ÷7W&RÖ6†Wg&öâÖ–6öâ"FF×6†&VBÖ–6öãÒ&6†Wg&öå&–v‡B"&–Ö†–FFVãÒ'G'VR#ãÂ÷7fsãÂö'WGFöããÂöƒ3à¢Ç7â–CÒ&†×&4WF†÷&—G•&öw&W72"6Æ73Ò&6ö×ç’Ö–FVçF—G’Ö6†—6ö×ç’Ö–FVçF—G’Ö6†—ÒÖæWWG&Â#ãÂ÷7ãà¢ÂöF—cà¢ÆF—b–CÒ&†×&56WGWF—66Æ÷7W&R"6Æ73Ò&6ö×ç’Öæ–ÖFVBÖF—66Æ÷7W&R—2ÖW‡æFVB"&–Ö†–FFVãÒ&fÇ6R#à¢ÆF—b6Æ73Ò&6ö×ç’Öæ–ÖFVBÖF—66Æ÷7W&RÖ–ææW"#ãÆF—b–CÒ&†×&56WGW6&G2"6Æ73Ò&†×&2×6WGWÖ6&G2#ãÂöF—cãÂöF—cà¢ÂöF—cà¢Â÷6V7F–öãà¢Ç6V7F–öâ–CÒ&†×&5&V7W'&–æt÷fW'f–Wr"6Æ73Ò&†×&2Ö÷fW'f–Wr†×&2×&V7W'&–ærÖ÷fW'f–Wr"&–ÖÆ&VÆÆVF'“Ò&†×&5W&–öG4†VF–ær#à¢ÆF—b6Æ73Ò&†×&2×6V7F–öâÖ†VF–ær#ãÆƒ2–CÒ&†×&5W&–öG4†VF–ær#å&V6÷&FVB6÷'÷&F–öâF‚W&–öG3Âöƒ3ãÆ'WGFöâ–CÒ&†×&4÷VåW&–öDF–Æör"6Æ73Ò'&–Ö'’Ö'Fâ"G—SÒ&'WGFöâ#îûÈ²æWrW&–öCÂö'WGFöããÂöF—cà¢ÆF—b–CÒ&†×&5W&–öD†—7F÷'’"6Æ73Ò&†×&2×W&–öBÖ†—7F÷'’"&–ÖÆ—fSÒ'öÆ—FR#ãÂöF—cà¢Â÷6V7F–öãà¢Â÷6V7F–öãà¢Â÷6V7F–öãà¢ÆF–Æör–CÒ&6ö×ç”6ö×Æ–æ6TF–Æör"6Æ73Ò&ÖF–Æör6ö×ç’ÖF–Æör6ö×ç’Ö6ö×Æ–æ6RÖF–Æör"&–ÖÆ&VÆÆVF'“Ò&6ö×ç”6ö×Æ–æ6TF–ÆöuF—FÆR#à¢ÆF—b6Æ73Ò&6ö×ç’ÖF–ÆörÖ†VFW"#ãÆƒ"–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆöuF—FÆR#ä6ö×Æ–æ6RFWF–Ç3Âöƒ#ãÆ'WGFöâG—SÒ&'WGFöâ"–CÒ&6ö×ç”6ö×Æ–æ6TF–Æöt6Æ÷6R"6Æ73Ò&F–ÆörÖ6Æ÷6R"&–ÖÆ&VÃÒ$6Æ÷6R6ö×Æ–æ6RFWF–Ç2#ì9sÂö'WGFöããÂöF—cà¢ÆF—b6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖF–Æör×7FGW2"–CÒ&6ö×ç”6ö×Æ–æ6TF–Æöu7FGW2#ãÂöF—cà¢ÆF—b–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆötFWF–Ç2"6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖF–ÆörÖFWF–Ç2#ãÂöF—cà¢Ç6V7F–öâ6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖF–ÆörÖWf–FVæ6R"&–ÖÆ&VÆÆVF'“Ò&6ö×ç”6ö×Æ–æ6TF–ÆötWf–FVæ6T†VF–ær#à¢Æƒ2–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆötWf–FVæ6T†VF–ær#å7W÷'F–ærWf–FVæ6SÂöƒ3à¢ÇVÂ–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆötWf–FVæ6Tf–ÆW2"6Æ73Ò&6ö×ç’ÖWf–FVæ6RÖf–ÆW2#ãÂ÷VÃà¢Æf–ÆR×WÆöBÖf–VÆB–CÒ&6ö×ç”6ö×Æ–æ6TWf–FVæ6UWÆöB"–çWBÖ–CÒ&6ö×ç”6ö×Æ–æ6TWf–FVæ6T–çWB"Æ&VÃÒ$GF6‚Db÷"–ÖvR"66WCÒ"çFbÂæ§rÂæ§VrÂçærÂçvV'Âæ†V–2Âæ†V–bÆÆ–6F–öâ÷FbÆ–ÖvRö§VrÆ–ÖvR÷ærÆ–ÖvR÷vV'Æ–ÖvRö†V–2Æ–ÖvRö†V–b"†VÇÒ%Db÷"–ÖvR+rÖ†–×VÒRÔ"#ãÂöf–ÆR×WÆöBÖf–VÆCà¢Ç–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆötÖW76vR"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR#ãÂ÷à¢Â÷6V7F–öãà¢ÆF—b6Æ73Ò&6ö×ç’Ö6ö×Æ–æ6RÖF–ÆörÖ7F–öç2#à¢Æ'WGFöâ–CÒ&6ö×ç”6ö×Æ–æ6TF–ÆötFöæR"6Æ73Ò'&–Ö'’Ö'Fâ"G—SÒ&'WGFöâ#äÖ&²2FöæSÂö'WGFöãà¢ÂöF—cà¢ÂöF–Æösà¢ÆF–Æör–CÒ&†×&56WGWF–Æör"6Æ73Ò&ÖF–Æör6ö×ç’ÖF–Æör†×&2ÖVF—BÖF–Æör"&–ÖÆ&VÆÆVF'“Ò&†×&56WGWF–ÆöuF—FÆR#à¢ÆF—b6Æ73Ò&6ö×ç’ÖF–ÆörÖ†VFW"#ãÆƒ"–CÒ&†×&56WGWF–ÆöuF—FÆR#åUE"ÆWGFW#Âöƒ#ãÆ'WGFöâG—SÒ&'WGFöâ"6Æ73Ò&F–ÆörÖ6Æ÷6R"FFÖ†×&2Ö6Æ÷6SÒ&†×&56WGWF–Æör"&–ÖÆ&VÃÒ$6Æ÷6RUE"ÆWGFW"#ì9sÂö'WGFöããÂöF—cà¢Ç6Æ73Ò&×WFVB#å&V6÷&BF†RFFRÂæ÷B–÷W"UE"çVÖ&W"ãÂ÷à¢Æf÷&Ò–CÒ&†×&56WGWf÷&Ò"6Æ73Ò&†×&2×G&6¶–ærÖf÷&Ò#à£ÆÆ&VÂFFÖ†×&2×6WGWÖf–VÆCÒ'WG"#äÆWGFW"&V6V—fVBöãÆ–çWB–CÒ&†×&5WG%&V6V—fVDöâ"G—SÒ&FFR#ãÂöÆ&VÃà£ÆÆ&VÂFFÖ†×&2×6WGWÖf–VÆCÒ'&Vv—7G&F–öâ#ä6öæf—&ÖVBöãÆ–çWB–CÒ&†×&5&Vv—7G&F–öä6öæf—&ÖVDöâ"G—SÒ&FFR#ãÂöÆ&VÃà£ÆÆ&VÂFFÖ†×&2×6WGWÖf–VÆCÒ'&Vv—7G&F–öâ#ä6¶æ÷vÆVFvVÖVçB&VfW&Væ6SÆ–çWB–CÒ&†×&5&Vv—7G&F–öå&VfW&Væ6R"G—SÒ'FW‡B"Ö†ÆVæwFƒÒ#"WFö6ö×ÆWFSÒ&öfb#ãÂöÆ&VÃà£ÆÆ&VÂFFÖ†×&2×6WGWÖf–VÆCÒ'&Vv—7G&F–öâ#ä66÷VçFçB÷"f—&ÓÆ–çWB–CÒ&†×&466÷VçFçDæÖR"G—SÒ'FW‡B"Ö†ÆVæwFƒÒ#c"WFö6ö×ÆWFSÒ&÷&væ—¦F–öâ#ãÂöÆ&VÃà£ÆF—b6Æ73Ò&†×&2ÖF–ÆörÖ7F–öç2#ãÆ'WGFöâ–CÒ&†×&5VæF–æt'Fâ"G—SÒ&'WGFöâ"6Æ73Ò'6V6öæF'’Ö'Fâ#å7F–ÆÂv—F–æsÂö'WGFöããÆ'WGFöâ–CÒ&†×&56WGW6fT'Fâ"6Æ73Ò'&–Ö'’Ö'Fâ"G—SÒ'7V&Ö—B#å6fSÂö'WGFöããÂöF—cà£Ç–CÒ&†×&56WGWÖW76vR"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR#ãÂ÷ãÂöf÷&Óà£ÂöF–Æösà¢ÆF–Æör–CÒ&†×&56WGW†VÇF–Æör"6Æ73Ò&ÖF–Æör6ö×ç’ÖF–Æör†×&2ÖVF—BÖF–Æör†×&2×6WGWÖ†VÇÖF–Æör"&–ÖÆ&VÆÆVF'“Ò&†×&56WGW†VÇF–ÆöuF—FÆR#à¢ÆF—b6Æ73Ò&6ö×ç’ÖF–ÆörÖ†VFW"#ãÆƒ"–CÒ&†×&56WGW†VÇF–ÆöuF—FÆR#ä6ö×ç’6WGWwV–Fæ6SÂöƒ#ãÆ'WGFöâG—SÒ&'WGFöâ"6Æ73Ò&F–ÆörÖ6Æ÷6R"FFÖ†×&2Ö6Æ÷6SÒ&†×&56WGW†VÇF–Æör"&–ÖÆ&VÃÒ$6Æ÷6R6ö×ç’6WGWwV–Fæ6R#ì9sÂö'WGFöããÂöF—cà¢Æƒ3åv†BFòW‡V7CÂöƒ3ãÇVÂ–CÒ&†×&56WGW†VÇW‡V7FF–öç2"6Æ73Ò&†×&2×6WGWÖ†VÇ×ö–çG2#ãÂ÷VÃà¢Æƒ3åv†BFòFóÂöƒ3ãÇVÂ–CÒ&†×&56WGW†VÇ7F–öç2"6Æ73Ò&†×&2×6WGWÖ†VÇ×ö–çG2#ãÂ÷VÃà¢ÆF—b6Æ73Ò&†×&2ÖF–ÆörÖ7F–öç2#ãÆ'WGFöâG—SÒ&'WGFöâ"6Æ73Ò'&–Ö'’Ö'Fâ"FFÖ†×&2Ö6Æ÷6SÒ&†×&56WGW†VÇF–Æör#äFöæSÂö'WGFöããÂöF—cà¢ÂöF–Æösà¢ÆF–Æör–CÒ&†×&47F—f—G”F–Æör"6Æ73Ò&ÖF–Æör6ö×ç’ÖF–Æör†×&2ÖVF—BÖF–Æör"&–ÖÆ&VÆÆVF'“Ò&†×&4vçÛh‘éì¶»§q«^u1¥…‰¥±¥ÑäˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆµ…àôˆÄÀÀÀÀÀÀÀÀÀˆÍÑ•Àôˆ¸ÀÄˆÁ±…•¡½±‘•Èô‰1•…Ù”‰±…¹¬¥˜Õ¹­¹½Ý¸ˆøð½±…‰•°ø(ñ±…‰•°ù1¥…‰¥±¥ÑäÍÑ…ÑÕÌñÍ•±•Ð¥ô‰¡µÉ1¥…‰¥±¥ÑåMÑ…ÑÕÌˆøñ½ÁÑ¥½¸Ù…±Õ”ô‰Õ¹­¹½Ý¸ˆù9½Ð…ÍÍ•ÍÍ•ð½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰•ÍÑ¥µ…Ñ•ˆùÍÑ¥µ…Ñ•ð½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰½¹™¥Éµ•ˆù½¹™¥Éµ•‰ä…½Õ¹Ñ…¹Ð€¼!5Ið½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰É•½É‘•ˆùI•½É‘•ð½½ÁÑ¥½¸øð½Í•±•Ðøð½±…‰•°ø(ñ±…‰•°øÄÜµ¡…É…Ñ•È!5IÁ…åµ•¹ÐÉ•™•É•¹”ñ¥¹ÁÕÐ¥ô‰¡µÉA•É¥½‘A…åµ•¹ÑI•™•É•¹”ˆÑåÁ”ô‰Ñ•áÐˆµ…á±•¹Ñ ôˆÄÜˆµ¥¹±•¹Ñ ôˆÄÜˆÁ…ÑÑ•É¸ô‰mµi„µèÀ´åuìÄÝôˆ…ÕÑ½½µÁ±•Ñ”ô‰½™˜ˆÁ±…•¡½±‘•Èô‰É½´!5I™½ÈÑ¡¥ÌÁ•É¥½ˆøð½±…‰•°ø(ñ±…‰•°ù½Õ¹Ñ…¹ÐÉ•Ù¥•Ý•½¸ñ¥¹ÁÕÐ¥ô‰¡µÉI•Ù¥•Ý•‘=¸ˆÑåÁ”ô‰‘…Ñ”ˆøð½±…‰•°ø(ñ±…‰•°ùI•Ù¥•Ý•‰äñ¥¹ÁÕÐ¥ô‰¡µÉI•Ù¥•Ý•‘	äˆÑåÁ”ô‰Ñ•áÐˆµ…á±•¹Ñ ôˆÄØÀˆ…ÕÑ½½µÁ±•Ñ”ô‰¹…µ”ˆøð½±…‰•°ø(ñÍ•Ñ¥½¸±…ÍÌô‰¡µÉŒµ™¥±¥¹œµ•Ù¥‘•¹”¡µÉŒµÍÁ…¸µ…±°ˆ…É¥„µ±…‰•±±•‘‰äô‰¡µÉ¥±¥¹Ù¥‘•¹•!•…‘¥¹œˆø(€€ñ‘¥Ø±…ÍÌô‰¡µÉŒµ™¥±¥¹œµ•Ù¥‘•¹”µ¡•…‘¥¹œˆøñÍÑÉ½¹œ¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•!•…‘¥¹œˆùPØÀÀ•Ù¥‘•¹”ð½ÍÑÉ½¹œøñÍÁ…¸¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•MÑ…ÑÕÌˆ±…ÍÌô‰¡µÉŒµ™¥±¥¹œµ•Ù¥‘•¹”µÍÑ…ÑÕÌˆù9¼•Ù¥‘•¹”…ÑÑ…¡•ð½ÍÁ…¸øð½‘¥Øø(€€ñÕ°¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•¥±•Ìˆ±…ÍÌô‰¡µÉŒµ•Ù¥‘•¹”µ±¥ÍÐˆøñ±¤±…ÍÌô‰µÕÑ•ˆù9¼‘½Õµ•¹ÑÌ…ÑÑ…¡•¸ð½±¤øð½Õ°ø(€€ñ™¥±”µÕÁ±½…µ™¥•±¥¹ÁÕÐµ¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•%¹ÁÕÐˆ±…‰•°ô‰‘•Ù¥‘•¹”ˆ½ÁÑ¥½¹…°…•ÁÐôˆ¹Á‘˜°¹©Áœ°¹©Á•œ°¹Á¹œ°¹Ý•‰À°¹¡•¥Œ°¹¡•¥˜±…ÁÁ±¥…Ñ¥½¸½Á‘˜±¥µ…”½©Á•œ±¥µ…”½Á¹œ±¥µ…”½Ý•‰À±¥µ…”½¡•¥Œ±¥µ…”½¡•¥˜ˆÍÑ…ÑÕÌµ¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•M•±•Ñ¥½¸ˆ¡•±Àµ¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•!•±Àˆ¡•±Àô‰A½È¥µ…”ƒ
+Üµ…á¥µÕ´€Ô5ˆ‘…Ñ„µ•Ù¥‘•¹”µÕÁ±½…ôˆˆøð½™¥±”µÕÁ±½…µ™¥•±ø(€€ñÀ¥ô‰¡µÉ¥±¥¹Ù¥‘•¹•5•ÍÍ…”ˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àø(ð½Í•Ñ¥½¸ø(ñÀ±…ÍÌô‰µÕÑ•¡µÉŒµÍÁ…¸µ…±°ˆùe½ÕÈ•¹ÑÉä¥Ì¹½Ð!5IÙ•É¥™¥…Ñ¥½¸¸ð½Àø(ñ‘¥Ø±…ÍÌô‰¡µÉŒµ‘¥…±½œµ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸ˆÑåÁ”ô‰ÍÕ‰µ¥ÐˆùM…Ù”É•½Éð½‰ÕÑÑ½¸øð½‘¥ØøñÀ¥ô‰¡µÉ¥±¥¹5•ÍÍ…”ˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àøð½™½É´ø(ð½‘¥…±½œø(€€ñ‘¥…±½œ¥ô‰¡µÉÙ¥‘•¹•¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œ¡µÉŒµ•‘¥Ðµ‘¥…±½œˆ…É¥„µ±…‰•±±•‘‰äô‰¡µÉÙ¥‘•¹•¥…±½Q¥Ñ±”ˆø(€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ È¥ô‰¡µÉÙ¥‘•¹•¥…±½Q¥Ñ±”ˆùÑÑ… ‘½Õµ•¹Ðð½ Èøñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆ‘…Ñ„µ¡µÉŒµ±½Í”ô‰¡µÉÙ¥‘•¹•¥…±½œˆ…É¥„µ±…‰•°ô‰±½Í”‘½Õµ•¹ÐÕÁ±½…ˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€ñ™¥±”µÕÁ±½…µ™¥•±¥¹ÁÕÐµ¥ô‰¡µÉÙ¥‘•¹•%¹ÁÕÐˆ±…‰•°ô‰M•±•Ð‘½Õµ•¹Ðˆ…•ÁÐôˆ¹Á‘˜°¹©Áœ°¹©Á•œ°¹Á¹œ°¹Ý•‰À°¹¡•¥Œ°¹¡•¥˜±…ÁÁ±¥…Ñ¥½¸½Á‘˜±¥µ…”½©Á•œ±¥µ…”½Á¹œ±¥µ…”½Ý•‰À±¥µ…”½¡•¥Œ±¥µ…”½¡•¥˜ˆÍÑ…ÑÕÌµ¥ô‰¡µÉÙ¥‘•¹•M•±•Ñ¥½¸ˆ¡•±Àµ¥ô‰¡µÉÙ¥‘•¹•!•±Àˆ¡•±Àô‰A½È¥µ…”ƒ
+Üµ…á¥µÕ´€Ô5ˆ‘…Ñ„µ•Ù¥‘•¹”µÕÁ±½…ôˆˆøð½™¥±”µÕÁ±½…µ™¥•±ø(€€ñÀ¥ô‰¡µÉÙ¥‘•¹•5•ÍÍ…”ˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àø(ð½‘¥…±½œø(€€ñ‘¥…±½œ¥ô‰¡µÉA…åµ•¹Ñ¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œ¡µÉŒµ•‘¥Ðµ‘¥…±½œˆ…É¥„µ±…‰•±±•‘‰äô‰¡µÉA…åµ•¹Ñ¥…±½Q¥Ñ±”ˆø(€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ È¥ô‰¡µÉA…åµ•¹Ñ¥…±½Q¥Ñ±”ˆùI•½ÉÑ…àÁ…åµ•¹Ðð½ Èøñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆ‘…Ñ„µ¡µÉŒµ±½Í”ô‰¡µÉA…åµ•¹Ñ¥…±½œˆ…É¥„µ±…‰•°ô‰±½Í”I•½ÉÑ…àÁ…åµ•¹Ðˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€(€€ñ™½É´¥ô‰¡µÉA…åµ•¹Ñ½É´ˆ±…ÍÌô‰¡µÉŒµÑÉ…­¥¹œµ™½É´ˆø(ñ±…‰•°ùQ…àÁ•É¥½ñÍ•±•Ð¥ô‰¡µÉA…åµ•¹ÑA•É¥½ˆÉ•ÅÕ¥É•øð½Í•±•Ðøð½±…‰•°ø(ñ±…‰•°ùA…åµ•¹Ð‘…Ñ”ñ¥¹ÁÕÐ¥ô‰¡µÉA…åµ•¹Ñ…Ñ”ˆÑåÁ”ô‰‘…Ñ”ˆÉ•ÅÕ¥É•øð½±…‰•°ø(ñ±…‰•°ùµ½Õ¹ÐÁ…¥€£
+Œ¤ñ¥¹ÁÕÐ¥ô‰¡µÉA…åµ•¹Ñµ½Õ¹ÐˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆ¸ÀÄˆµ…àôˆÄÀÀÀÀÀÀÀÀÀˆÍÑ•Àôˆ¸ÀÄˆÉ•ÅÕ¥É•øð½±…‰•°ø(ñ±…‰•°ù5•Ñ¡½ñÍ•±•Ð¥ô‰¡µÉA…åµ•¹Ñ5•Ñ¡½ˆøñ½ÁÑ¥½¸Ù…±Õ”ô‰‰…¹¬µÑÉ…¹Í™•Èˆù	…¹¬ÑÉ…¹Í™•Èð½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰‘¥É•Ðµ‘•‰¥Ðˆù¥É•Ð•‰¥Ðð½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰…Éˆù…Éð½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰½Ñ¡•Èˆù=Ñ¡•Èð½½ÁÑ¥½¸øð½Í•±•Ðøð½±…‰•°ø(ñ±…‰•°ùQÉ…¹Í…Ñ¥½¸É•™•É•¹”ñ¥¹ÁÕÐ¥ô‰¡µÉA…åµ•¹ÑI•™•É•¹”ˆÑåÁ”ô‰Ñ•áÐˆµ…á±•¹Ñ ôˆÄØÀˆ…ÕÑ½½µÁ±•Ñ”ô‰½™˜ˆøð½±…‰•°ø(ñ±…‰•°±…ÍÌô‰¡µÉŒµ½¹™¥É´µ±…‰•°ˆøñ¥¹ÁÕÐ¥ô‰¡µÉA…åµ•¹Ñ½¹™¥Éµ•ˆÑåÁ”ô‰¡•­‰½àˆø!5I¡…Ì½¹™¥Éµ•Ñ¡¥ÌÁ…åµ•¹Ðð½±…‰•°ø(ñÍ•Ñ¥½¸¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•A…¹•°ˆ±…ÍÌô‰¡µÉŒµÁ…åµ•¹Ðµ•Ù¥‘•¹”ˆ…É¥„µ±…‰•±±•‘‰äô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•Q¥Ñ±”ˆø(€€ñ‘¥Ø±…ÍÌô‰¡µÉŒµÁ…åµ•¹Ðµ•Ù¥‘•¹”µ¡•…‘¥¹œˆøñÍÑÉ½¹œ¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•Q¥Ñ±”ˆùA…åµ•¹ÐÉ••¥ÁÐð½ÍÑÉ½¹œøð½‘¥Øø(€€ñ™¥±”µÕÁ±½…µ™¥•±¥¹ÁÕÐµ¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•%¹ÁÕÐˆ±…‰•°ô‰¡½½Í”É••¥ÁÐ™¥±”ˆ½ÁÑ¥½¹…°•µÁÑäµ±…‰•°ô‰9¼É••¥ÁÐÍ•±•Ñ•ˆ…•ÁÐôˆ¹Á‘˜°¹©Áœ°¹©Á•œ°¹Á¹œ°¹Ý•‰À°¹¡•¥Œ°¹¡•¥˜±…ÁÁ±¥…Ñ¥½¸½Á‘˜±¥µ…”½©Á•œ±¥µ…”½Á¹œ±¥µ…”½Ý•‰À±¥µ…”½¡•¥Œ±¥µ…”½¡•¥˜ˆÍÑ…ÑÕÌµ¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•M•±•Ñ¥½¸ˆ¡•±Àµ¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•!•±Àˆ¡•±Àô‰A½È¥µ…”ƒ
+Üµ…á¥µÕ´€Ô5ƒ
+ÜÍÑ½É•Í•ÕÉ•±äÝ¥Ñ Ñ¡¥ÌÁ…åµ•¹Ð¸ˆ‘…Ñ„µ•Ù¥‘•¹”µÕÁ±½…ôˆˆøð½™¥±”µÕÁ±½…µ™¥•±ø(€€ñÀ¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•5•ÍÍ…”ˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àø(€€ñÕ°¥ô‰¡µÉA…åµ•¹ÑÙ¥‘•¹•¥±•Ìˆ±…ÍÌô‰½µÁ…¹äµ•Ù¥‘•¹”µ™¥±•Ìˆøð½Õ°ø(ð½Í•Ñ¥½¸ø(ñ‘¥Ø±…ÍÌô‰¡µÉŒµ‘¥…±½œµ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰¡µÉA…åµ•¹ÑM…Ù•	Ñ¸ˆ±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸ˆÑåÁ”ô‰ÍÕ‰µ¥ÐˆùM…Ù”Á…åµ•¹Ðð½‰ÕÑÑ½¸øð½‘¥Øø(ñÀ¥ô‰¡µÉA…åµ•¹Ñ5•ÍÍ…”ˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àøð½™½É´ø(ð½‘¥…±½œø(ð½Í•Ñ¥½¸ø(€€€€€€€€ñÀ±…ÍÌô‰µÕÑ•½µÁ…¹äµ½µÁ±¥…¹”µ‘¥Í±…¥µ•Èˆù•…‘±¥¹•Ì…É”•ÍÑ¥µ…Ñ•Ì¸¡•¬!5I…¹½µÁ…¹¥•Ì!½ÕÍ”‰•™½É”™¥±¥¹œ½ÈÁ…å¥¹œ¸ð½Àø(€€€€€€ð½‘¥Øø(€€€€€€ñ‘¥Ø¥ô‰¥¹Ù•ÍÑµ•¹ÑQ…‰A…¹•°ˆ±…ÍÌô‰½µÁ…¹äµÑ…ˆµÁ…¹•°ˆÉ½±”ô‰Ñ…‰Á…¹•°ˆ…É¥„µ±…‰•±±•‘‰äô‰¥¹Ù•ÍÑµ•¹ÑQ…ˆˆÑ…‰¥¹‘•àôˆÀˆ¡¥‘‘•¸ø(ñÍ•Ñ¥½¸±…ÍÌô‰½µÁ…¹äµÍ•Ñ¥½¸ˆ…É¥„µ±…‰•±±•‘‰äô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑÍQ¥Ñ±”ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµÍ•Ñ¥½¸µ¡•…‘¥¹œˆøñ‘¥ØøñÀ±…ÍÌô‰•å•‰É½ÜˆùÕ¹‘¥¹œð½Àøñ È¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑÍQ¥Ñ±”ˆù5•µ‰•È¥¹Ù•ÍÑµ•¹ÑÌð½ ÈøñÀ±…ÍÌô‰µÕÑ•ˆùQÉ…¬™Õ¹‘¥¹œ™É½´½µÁ…¹ä‘¥É•Ñ½ÉÌ…¹Í¡…É•¡½±‘•ÉÌ¸½¹ÑÉ¥‰ÕÑ¥½¸Á•É•¹Ñ…•Ì…É”‰…Í•½¸Ñ¡”Ñ½Ñ…°É•½É‘•¥¹Ù•ÍÑµ•¹Ð¸ð½Àøð½‘¥Øø(€€€€€€€€€€ñ‰ÕÑÑ½¸¥ô‰…‘‘%¹Ù•ÍÑµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸½µÁ…¹äµ…‘µ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆû¾ò,‘¥¹Ù•ÍÑµ•¹Ðð½‰ÕÑÑ½¸ø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑÍµÁÑäˆ±…ÍÌô‰½µÁ…¹äµ…ÁÁ½¥¹Ñµ•¹ÑÌµ•µÁÑäˆø(€€€€€€€€€€ñÍÁ…¸±…ÍÌô‰•µÁÑäµ¥½¸ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆû
+Œð½ÍÁ…¸øñ Ìù9¼¥¹Ù•ÍÑµ•¹ÑÌÉ•½É‘•ð½ ÌøñÀù‘„™Õ¹‘¥¹œ•¹ÑÉäÑ¼Í•”•… µ•µ‰•ËŠeÌÑ½Ñ…°½¹ÑÉ¥‰ÕÑ¥½¸…¹Á•É•¹Ñ…”¸ð½Àø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ™¥ÕÉ”¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹Ñ¡…ÉÐˆ±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ¡…ÉÐ¡¥‘‘•¸ˆ…É¥„µ±…‰•±±•‘‰äô‰½µÁ…¹å%¹Ù•ÍÑµ•¹Ñ¡…ÉÑQ¥Ñ±”ˆø(€€€€€€€€€€ñ™¥…ÁÑ¥½¸¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹Ñ¡…ÉÑQ¥Ñ±”ˆù=Ù•É…±°µ•µ‰•È¥¹Ù•ÍÑµ•¹ÐÍÁ±¥Ðð½™¥…ÁÑ¥½¸ø(€€€€€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ¡…ÉÐµ½¹Ñ•¹ÐˆøñÕ°±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ¡…ÉÐµ±••¹ˆ…É¥„µ±…‰•°ô‰½¹ÑÉ¥‰ÕÑ¥½¸Á•É•¹Ñ…•Ìˆøð½Õ°øñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ¡…ÉÐµÁ±½Ðˆøð½‘¥Øøð½‘¥Øø(€€€€€€€€ð½™¥ÕÉ”ø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑMÕµµ…Éå]É…Àˆ±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹ÐµÑ…‰±”µÝÉ…À‘…Ñ„µÑ…‰±”µÍÉ½±°¡¥‘‘•¸ˆÑ…‰¥¹‘•àôˆÀˆ…É¥„µ±…‰•°ô‰5•µ‰•È¥¹Ù•ÍÑµ•¹Ð½¹ÑÉ¥‰ÕÑ¥½¹Ìˆø(€€€€€€€€€€ñÑ…‰±”±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹ÐµÑ…‰±”ˆø(€€€€€€€€€€€€ñÑ¡•…øñÑÈøñÑ Í½Á”ô‰½°ˆù5•µ‰•Èð½Ñ øñÑ Í½Á”ô‰½°ˆùQ½Ñ…°¥¹Ù•ÍÑ•ð½Ñ øñÑ Í½Á”ô‰½°ˆù½¹ÑÉ¥‰ÕÑ¥½¸ð½Ñ øð½ÑÈøð½Ñ¡•…ø(€€€€€€€€€€€€ñÑ‰½‘ä¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑMÕµµ…ÉåI½ÝÌˆøð½Ñ‰½‘äø(€€€€€€€€€€€€ñÑ™½½ÐøñÑÈøñÑ Í½Á”ô‰É½ÜˆùQ½Ñ…°½¹ÑÉ¥‰ÕÑ¥½¹Ìð½Ñ øñÑ¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑQ½Ñ…°ˆøð½ÑøñÑøÄÀÀ”ð½Ñøð½ÑÈøð½Ñ™½½Ðø(€€€€€€€€€€ð½Ñ…‰±”ø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ•¹ÑÉ¥•Ìˆø(€€€€€€€€€€ñ ÌùÕ¹‘¥¹œ•¹ÑÉ¥•Ìð½ Ìø(€€€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹ÑÍ¹ÑÉ¥•ÍµÁÑäˆ±…ÍÌô‰µÕÑ•ˆù%¹‘¥Ù¥‘Õ…°™Õ¹‘¥¹œ•¹ÑÉ¥•ÌÝ¥±°…ÁÁ•…È¡•É”¸ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹Ñ¹ÑÉ¥•Í]É…Àˆ±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹ÐµÑ…‰±”µÝÉ…À‘…Ñ„µÑ…‰±”µÍÉ½±°¡¥‘‘•¸ˆÑ…‰¥¹‘•àôˆÀˆ…É¥„µ±…‰•°ô‰I•½É‘•½µÁ…¹ä™Õ¹‘¥¹œ•¹ÑÉ¥•Ìˆø(€€€€€€€€€€€€ñÑ…‰±”±…ÍÌô‰½µÁ…¹äµ¥¹Ù•ÍÑµ•¹ÐµÑ…‰±”½µÁ…¹äµ¥¹Ù•ÍÑµ•¹Ðµ•¹ÑÉäµÑ…‰±”ˆø(€€€€€€€€€€€€€€ñÑ¡•…øñÑÈøñÑ Í½Á”ô‰½°ˆù…Ñ”ð½Ñ øñÑ Í½Á”ô‰½°ˆù5•µ‰•Èð½Ñ øñÑ Í½Á”ô‰½°ˆùµ½Õ¹Ðð½Ñ øñÑ Í½Á”ô‰½°ˆùI•™•É•¹”€¼¹½Ñ”ð½Ñ øñÑ Í½Á”ô‰½°ˆùÑ¥½¹Ìð½Ñ øð½ÑÈøð½Ñ¡•…ø(€€€€€€€€€€€€€€ñÑ‰½‘ä¥ô‰½µÁ…¹å%¹Ù•ÍÑµ•¹Ñ¹ÑÉåI½ÝÌˆøð½Ñ‰½‘äø(€€€€€€€€€€€€ð½Ñ…‰±”ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø(€€€€€€ð½‘¥Øø(€€€€€€ñ‘¥Ø¥ô‰…ÁÁ½¥¹Ñµ•¹ÑQ…‰A…¹•°ˆ±…ÍÌô‰½µÁ…¹äµÑ…ˆµÁ…¹•°ˆÉ½±”ô‰Ñ…‰Á…¹•°ˆ…É¥„µ±…‰•±±•‘‰äô‰…ÁÁ½¥¹Ñµ•¹ÑQ…ˆˆÑ…‰¥¹‘•àôˆÀˆ¡¥‘‘•¸ø(ñÍ•Ñ¥½¸±…ÍÌô‰½µÁ…¹äµÍ•Ñ¥½¸ˆ…É¥„µ±…‰•±±•‘‰äô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹ÑÍQ¥Ñ±”ˆø(€€€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµÍ•Ñ¥½¸µ¡•…‘¥¹œˆøñ‘¥ØøñÀ±…ÍÌô‰•å•‰É½ÜˆùA•½Á±”€™…µÀìÉ½±•Ìð½Àøñ È¥ô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹ÑÍQ¥Ñ±”ˆùÁÁ½¥¹Ñµ•¹ÑÌð½ ÈøñÀ±…ÍÌô‰µÕÑ•ˆù‘•… Á•ÉÍ½¸½¹”ì½µÁ…¹¥•Ì!½ÕÍ”Ù•É¥™¥…Ñ¥½¸¥ÌÍ¡½Ý¸…±½¹Í¥‘”Ñ¡•¥ÈÉ½±•Ì¸ð½Àøð½‘¥Øø(€€€€€€€€€€ñ‰ÕÑÑ½¸¥ô‰…‘‘ÁÁ½¥¹Ñµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸½µÁ…¹äµ…‘µ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆû¾ò,‘Á•ÉÍ½¸ð½‰ÕÑÑ½¸ø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹å%‘•¹Ñ¥ÑåMÕµµ…Éäˆ±…ÍÌô‰½µÁ…¹äµ¥‘•¹Ñ¥ÑäµÍÕµµ…ÉäˆÉ½±”ô‰ÍÑ…ÑÕÌˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½‘¥Øø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹ÑÍµÁÑäˆ±…ÍÌô‰½µÁ…¹äµ…ÁÁ½¥¹Ñµ•¹ÑÌµ•µÁÑäˆø(€€€€€€€€€€ñÍÁ…¸±…ÍÌô‰•µÁÑäµ¥½¸ˆ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆûŠfdð½ÍÁ…¸øñ Ìù9¼…ÁÁ½¥¹Ñµ•¹ÑÌ…‘‘•ð½ ÌøñÀù‘„‘¥É•Ñ½È°Í¡…É•¡½±‘•È°Í•É•Ñ…Éä½ÈÁ•ÉÍ½¸Ý¥Ñ Í¥¹¥™¥…¹Ð½¹ÑÉ½°¸ð½Àø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹ÑÍQ…‰±”ˆ±…ÍÌô‰½µÁ…¹äµ…ÁÁ½¥¹Ñµ•¹ÑÌµÑ…‰±”µÝÉ…À‘…Ñ„µÑ…‰±”µÍÉ½±°¡¥‘‘•¸ˆÑ…‰¥¹‘•àôˆÀˆ…É¥„µ±…‰•°ô‰½µÁ…¹ä…ÁÁ½¥¹Ñµ•¹ÑÌìÍÉ½±°Ñ¼Í•”…±°É½±•Ìˆø(€€€€€€€€€€ñÑ…‰±”±…ÍÌô‰½µÁ…¹äµ…ÁÁ½¥¹Ñµ•¹ÑÌµÑ…‰±”ˆø(€€€€€€€€€€€€ñÑ¡•…øñÑÈøñÑ Í½Á”ô‰½°ˆùA•ÉÍ½¸ð½Ñ øñÑ Í½Á”ô‰½°ˆùÑ¥½¹Ìð½Ñ øð½ÑÈøð½Ñ¡•…ø(€€€€€€€€€€€€ñÑ‰½‘ä¥ô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹ÑÍI½ÝÌˆøð½Ñ‰½‘äø(€€€€€€€€€€ð½Ñ…‰±”ø(€€€€€€€€ð½‘¥Øø(€€€€€€€€ñ‘¥Ø¥ô‰½µÁ…¹åÁÁ½¥¹Ñµ•¹Ñ…É‘Ìˆ±…ÍÌô‰½µÁ…¹äµ…ÁÁ½¥¹Ñµ•¹Ðµ…É‘Ì¡¥‘‘•¸ˆøð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø(€€€€€€ð½‘¥Øø(€€€€ð½µ…¥¸ø(€€ð½‘¥Øø(((€€ñ‘¥…±½œ¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œˆø(€€€€ñ™½É´¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ½É´ˆ¹½Ù…±¥‘…Ñ”ø(€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ‘¥ØøñÀ±…ÍÌô‰•å•‰É½Üˆù½µÁ…¹ä…ÁÁ½¥¹Ñµ•¹ÑÌð½Àøñ È¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ¥…±½Q¥Ñ±”ˆù‘Á•ÉÍ½¸ð½ Èøð½‘¥Øøñ‰ÕÑÑ½¸¥ô‰±½Í•ÁÁ½¥¹Ñµ•¹Ñ¥…±½œˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ±…‰•°ô‰±½Í”…ÁÁ½¥¹Ñµ•¹Ð™½É´ˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€€€ñ¥¹ÁÕÐ¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ%‘%¹ÁÕÐˆÑåÁ”ô‰¡¥‘‘•¸ˆø(€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ùÕ±°¹…µ”€ñÍÑÉ½¹œ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆø¨ð½ÍÑÉ½¹œøð½ÍÁ…¸øñ¥¹ÁÕÐ¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ9…µ•%¹ÁÕÐˆÑåÁ”ô‰Ñ•áÐˆµ…á±•¹Ñ ôˆÄØÀˆ…ÕÑ½½µÁ±•Ñ”ô‰¹…µ”ˆÉ•ÅÕ¥É•øð½±…‰•°ø(€€€€€€ñ™¥•±‘Í•Ð±…ÍÌô‰½µÁ…¹äµÉ½±”µ™¥•±‘Í•Ðˆøñ±••¹ùÁÁ½¥¹Ñµ•¹ÑÌ€ñÍÑÉ½¹œ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆø¨ð½ÍÑÉ½¹œøð½±••¹ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕÐÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰…ÁÁ½¥¹Ñµ•¹Ñ¥É•Ñ½Èˆ‘…Ñ„µ…ÁÁ½¥¹Ñµ•¹ÐµÉ½±”Ù…±Õ”ô‰‘¥É•Ñ½Èˆø€ñÍÁ…¸ù¥É•Ñ½Èð½ÍÁ…¸øð½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕÐÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰…ÁÁ½¥¹Ñµ•¹ÑM¡…É•¡½±‘•Èˆ‘…Ñ„µ…ÁÁ½¥¹Ñµ•¹ÐµÉ½±”Ù…±Õ”ô‰Í¡…É•¡½±‘•Èˆø€ñÍÁ…¸ùM¡…É•¡½±‘•Èð½ÍÁ…¸øð½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕÐÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰…ÁÁ½¥¹Ñµ•¹ÑM•É•Ñ…Éäˆ‘…Ñ„µ…ÁÁ½¥¹Ñµ•¹ÐµÉ½±”Ù…±Õ”ô‰Í•É•Ñ…Éäˆø€ñÍÁ…¸ùM•É•Ñ…Éäð½ÍÁ…¸øð½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕÐÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰…ÁÁ½¥¹Ñµ•¹ÑAÍŒˆ‘…Ñ„µ…ÁÁ½¥¹Ñµ•¹ÐµÉ½±”Ù…±Õ”ô‰ÁÍŒˆø€ñÍÁ…¸ùA•ÉÍ½¸Ý¥Ñ Í¥¹¥™¥…¹Ð½¹ÑÉ½°€¡AM¤ð½ÍÁ…¸øð½±…‰•°ø(€€€€€€ð½™¥•±‘Í•Ðø(€€€€€€ñÀ¥ô‰…ÁÁ½¥¹Ñµ•¹Ñ5•ÍÍ…”ˆ±…ÍÌô‰Í…Ù”µµ•ÍÍ…”ˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àø(€€€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ì½µÁ…¹äµ™½É´µ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰‘•±•Ñ•ÁÁ½¥¹Ñµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰Ñ•áÐµ‰Ñ¸‘…¹•ÈµÑ•áÐ¡¥‘‘•¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùI•µ½Ù”Á•ÉÍ½¸ð½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸¥ô‰…¹•±ÁÁ½¥¹Ñµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ð½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸ˆÑåÁ”ô‰ÍÕ‰µ¥ÐˆùM…Ù”ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€ð½™½É´ø(€€ð½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰¥¹Ù•ÍÑµ•¹Ñ¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œˆø(€€€€ñ™½É´¥ô‰¥¹Ù•ÍÑµ•¹Ñ½É´ˆ¹½Ù…±¥‘…Ñ”ø(€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ‘¥ØøñÀ±…ÍÌô‰•å•‰É½Üˆù5•µ‰•È¥¹Ù•ÍÑµ•¹ÑÌð½Àøñ È¥ô‰¥¹Ù•ÍÑµ•¹Ñ¥…±½Q¥Ñ±”ˆù‘¥¹Ù•ÍÑµ•¹Ðð½ Èøð½‘¥Øøñ‰ÕÑÑ½¸¥ô‰±½Í•%¹Ù•ÍÑµ•¹Ñ¥…±½œˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ±…‰•°ô‰±½Í”¥¹Ù•ÍÑµ•¹Ð™½É´ˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€€€ñ¥¹ÁÕÐ¥ô‰¥¹Ù•ÍÑµ•¹Ñ%‘%¹ÁÕÐˆÑåÁ”ô‰¡¥‘‘•¸ˆø(€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ù5•µ‰•È€ñÍÑÉ½¹œ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆø¨ð½ÍÑÉ½¹œøð½ÍÁ…¸øñÍ•±•Ð¥ô‰¥¹Ù•ÍÑµ•¹Ñ5•µ‰•É%¹ÁÕÐˆÉ•ÅÕ¥É•øð½Í•±•Ðøð½±…‰•°ø(€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ™½É´µ½±Õµ¹Ìˆø(€€€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ùµ½Õ¹Ð€£
+Œ¤€ñÍÑÉ½¹œ…É¥„µ¡¥‘‘•¸ô‰ÑÉÕ”ˆø¨ð½ÍÑÉ½¹œøð½ÍÁ…¸øñ¥¹ÁÕÐ¥ô‰¥¹Ù•ÍÑµ•¹Ñµ½Õ¹Ñ%¹ÁÕÐˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀ¸ÀÄˆÍÑ•ÀôˆÀ¸ÀÄˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆÉ•ÅÕ¥É•øð½±…‰•°ø(€€€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ù%¹Ù•ÍÑµ•¹Ð‘…Ñ”ð½ÍÁ…¸øñ¥¹ÁÕÐ¥ô‰¥¹Ù•ÍÑµ•¹Ñ…Ñ•%¹ÁÕÐˆÑåÁ”ô‰‘…Ñ”ˆøð½±…‰•°ø(€€€€€€ð½‘¥Øø(€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ùÕ¹‘¥¹œÉ•™•É•¹”€¼¹½Ñ”ð½ÍÁ…¸øñÑ•áÑ…É•„¥ô‰¥¹Ù•ÍÑµ•¹ÑI•™•É•¹•%¹ÁÕÐˆÉ½ÝÌôˆÌˆµ…á±•¹Ñ ôˆÔÀÀˆÁ±…•¡½±‘•Èô‰”¹œ¸%¹¥Ñ¥…°‘¥É•Ñ½È™Õ¹‘¥¹œ½È‰…¹¬ÑÉ…¹Í™•ÈÉ•™•É•¹”ˆ‘…Ñ„µÁ±…¥¸µÑ•áÐøð½Ñ•áÑ…É•„øñÍµ…±°ù‘„Í¡½ÉÐÉ•™•É•¹”½È¹½Ñ”™½ÈÑ¡¥Ì™Õ¹‘¥¹œ•¹ÑÉä¸ð½Íµ…±°øð½±…‰•°ø(€€€€€€ñÀ¥ô‰¥¹Ù•ÍÑµ•¹Ñ5•ÍÍ…”ˆ±…ÍÌô‰Í…Ù”µµ•ÍÍ…”ˆ…É¥„µ±¥Ù”ô‰Á½±¥Ñ”ˆøð½Àø(€€€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ì½µÁ…¹äµ™½É´µ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰…¹•±%¹Ù•ÍÑµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ð½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸±…ÍÌô‰ÁÉ¥µ…Éäµ‰Ñ¸ˆÑåÁ”ô‰ÍÕ‰µ¥ÐˆùM…Ù”ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€ð½™½É´ø(€€ð½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰‘•±•Ñ•%¹Ù•ÍÑµ•¹Ñ¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œˆ…É¥„µ±…‰•±±•‘‰äô‰‘•±•Ñ•%¹Ù•ÍÑµ•¹Ñ¥…±½Q¥Ñ±”ˆø(€€€€ñ™½É´¥ô‰‘•±•Ñ•%¹Ù•ÍÑµ•¹Ñ½É´ˆø(€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ È¥ô‰‘•±•Ñ•%¹Ù•ÍÑµ•¹Ñ¥…±½Q¥Ñ±”ˆù•±•Ñ”™Õ¹‘¥¹œ•¹ÑÉäüð½ Èøñ‰ÕÑÑ½¸¥ô‰±½Í••±•Ñ•%¹Ù•ÍÑµ•¹Ñ¥…±½œˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ±…‰•°ô‰±½Í”‘•±•Ñ”½¹™¥Éµ…Ñ¥½¸ˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€€€ñÀù•±•Ñ”Ñ¡¥Ì™Õ¹‘¥¹œ•¹ÑÉä™½È€ñÍÑÉ½¹œ¥ô‰‘•±•Ñ•%¹Ù•ÍÑµ•¹Ñ•ÍÉ¥ÁÑ¥½¸ˆøð½ÍÑÉ½¹œøüð½Àø(€€€€€€ñÀ±…ÍÌô‰µÕÑ•ˆùQ¡¥ÌÉ•µ½Ù•ÌÑ¡”½¹ÑÉ¥‰ÕÑ¥½¸™É½´Ñ¡”½µÁ…¹çŠeÌ¥¹Ù•ÍÑµ•¹ÐÉ•½É‘Ì…¹…¹¹½Ð‰”Õ¹‘½¹”¸ð½Àø(€€€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ì½µÁ…¹äµ™½É´µ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰…¹•±•±•Ñ•%¹Ù•ÍÑµ•¹Ñ	Ñ¸ˆ±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ð½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸‘…¹•ÈµÑ•áÐˆÑåÁ”ô‰ÍÕ‰µ¥Ðˆù•±•Ñ”•¹ÑÉäð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€ð½™½É´ø(€€ð½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰‘•±•Ñ•½µÁ…¹å¥…±½œˆ±…ÍÌô‰…ÁÀµ‘¥…±½œ½µÁ…¹äµ‘¥…±½œˆ…É¥„µ±…‰•±±•‘‰äô‰‘•±•Ñ•½µÁ…¹å¥…±½Q¥Ñ±”ˆø(€€€€ñ™½É´¥ô‰‘•±•Ñ•½µÁ…¹å½É´ˆø(€€€€€€ñ‘¥Ø±…ÍÌô‰½µÁ…¹äµ‘¥…±½œµ¡•…‘•Èˆøñ È¥ô‰‘•±•Ñ•½µÁ…¹å¥…±½Q¥Ñ±”ˆù•±•Ñ”½µÁ…¹äüð½ Èøñ‰ÕÑÑ½¸¥ô‰±½Í••±•Ñ•½µÁ…¹å¥…±½œˆ±…ÍÌô‰‘¥…±½œµ±½Í”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ…É¥„µ±…‰•°ô‰±½Í”‘•±•Ñ”½¹™¥Éµ…Ñ¥½¸ˆû\ð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€€€ñÀùI•µ½Ù”€ñÍÑÉ½¹œ¥ô‰‘•±•Ñ•½µÁ…¹å9…µ”ˆøð½ÍÑÉ½¹œø™É½´½µÁ…¹ä5…¹…•µ•¹Ð½¸…±°Íå¹•‘•Ù¥•Ìüð½Àø(€€€€€€ñÀ±…ÍÌô‰µÕÑ•ˆùQ¡”½µÁ…¹äÌ¥¹Ñ•É¹…°…ÁÁ½¥¹Ñµ•¹ÑÌ°¥¹Ù•ÍÑµ•¹ÑÌ…¹½µÁ±¥…¹”½¹™¥Éµ…Ñ¥½¹ÌÝ¥±°‰”¡¥‘‘•¸¸á¥ÍÑ¥¹œÁÉ½Á•ÉÑä…¹•áÁ•¹Í”É•½É‘ÌÝ¥±°É•µ…¥¸Õ¹¡…¹•¸Q¡¥Ì‘½•Ì¹½Ð‘¥ÍÍ½±Ù”Ñ¡”±•…°½µÁ…¹ä…Ð½µÁ…¹¥•Ì!½ÕÍ”¸ð½Àø(€€€€€€ñ±…‰•°±…ÍÌô‰™¥•±ˆøñÍÁ…¸ùQåÁ”1QÑ¼½¹™¥É´ð½ÍÁ…¸øñ¥¹ÁÕÐ¥ô‰½¹™¥Éµ•±•Ñ•½µÁ…¹å%¹ÁÕÐˆÑåÁ”ô‰Ñ•áÐˆ…ÕÑ½½µÁ±•Ñ”ô‰½™˜ˆÍÁ•±±¡•¬ô‰™…±Í”ˆÉ•ÅÕ¥É•øð½±…‰•°ø(€€€€€€ñÀ¥ô‰‘•±•Ñ•½µÁ…¹å5•ÍÍ…”ˆ±…ÍÌô‰Í…Ù”µµ•ÍÍ…”ˆÉ½±”ô‰…±•ÉÐˆ…É¥„µ±¥Ù”ô‰…ÍÍ•ÉÑ¥Ù”ˆøð½Àø(€€€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ì½µÁ…¹äµ™½É´µ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰…¹•±•±•Ñ•½µÁ…¹å	Ñ¸ˆ±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ð½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸¥ô‰½¹™¥Éµ•±•Ñ•½µÁ…¹å	Ñ¸ˆÑåÁ”ô‰ÍÕ‰µ¥Ðˆ±…ÍÌô‰Í•½¹‘…Éäµ‰Ñ¸‘…¹•ÈµÑ•áÐˆù•±•Ñ”½µÁ…¹äð½‰ÕÑÑ½¸øð½‘¥Øø(€€€€ð½™½É´ø(€€ð½‘¥…±½œø((€€ñÍÉ¥ÁÐ‘•™•ÈÍÉŒôˆ¸½ÍÕÁ…‰…Í”µ½¹™¥œ¹©Ìˆøð½ÍÉ¥ÁÐø(€€ñÍÉ¥ÁÐ‘•™•ÈÍÉŒôˆ¸½±½Õ¹©Ìˆøð½ÍÉ¥ÁÐø(€€ñÍÉ¥ÁÐÑåÁ”ô‰µ½‘Õ±”ˆÍÉŒôˆ¸½ÍÉŒ½½µÁ½¹•¹ÑÌ½Í•½¹‘…ÉäµÁ…”µ¡•…‘•È¹©Ìˆøð½ÍÉ¥ÁÐø(€€ñÍÉ¥ÁÐÑåÁ”ô‰µ½‘Õ±”ˆÍÉŒôˆ¸½ÍÉŒ½½µÁ½¹•¹ÑÌ½…‘µ¥¸µµ•¹Ô¹©Ìˆøð½ÍÉ¥ÁÐø(€€ñÍÉ¥ÁÐÑåÁ”ô‰µ½‘Õ±”ˆÍÉŒôˆ¸½ÍÉŒ½™•…ÑÕÉ•Ì½½µÁ…¹ä½½µÁ…¹ä¹©Ìˆøð½ÍÉ¥ÁÐø(ð½‰½‘äø(ð½¡Ñµ°ø
