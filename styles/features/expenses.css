@@ -60,7 +60,9 @@
 .expense-dialog-close { margin: 0; }
 .expense-form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .expense-context-grid { align-items: start; }
-.expense-context-grid #expensePropertyField { grid-column: 1 / -1; }
+.expense-context-grid #expenseScopeField { grid-column: 1; grid-row: 1; }
+.expense-context-grid #expensePropertyField { grid-column: 1 / -1; grid-row: 2; }
+.expense-context-grid #expensePaidByField { grid-column: 2; grid-row: 1; }
 .expense-form-grid > .field { min-width: 0; }
 .expense-dialog .field { margin-bottom: 13px; }
 .expense-dialog select, .expense-dialog input[type="date"], .expense-dialog input[type="text"], .expense-dialog input[type="number"], .expense-dialog textarea { width: 100%; }
@@ -99,4 +101,5 @@
   .expense-card { align-items: start; }
   .expense-card-actions { flex-direction: column; }
   .expense-form-grid { grid-template-columns: 1fr; gap: 0; }
+  .expense-context-grid #expenseScopeField, .expense-context-grid #expensePropertyField, .expense-context-grid #expensePaidByField { grid-column: auto; grid-row: auto; }
 }

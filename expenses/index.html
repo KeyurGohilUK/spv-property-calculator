@@ -87,13 +87,13 @@
       </div>
 
       <div class="expense-form-grid expense-context-grid">
-        <label class="field"><span>Expense relates to</span>
+        <label id="expenseScopeField" class="field"><span>Expense relates to</span>
           <select id="expenseScope"><option value="company">General company expense</option><option value="property">Specific property</option></select>
         </label>
-        <label class="field"><span>Paid by</span>
+        <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty" aria-describedby="expensePropertyError"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
+        <label id="expensePaidByField" class="field"><span>Paid by</span>
           <select id="expensePaidBy" required></select>
         </label>
-        <label id="expensePropertyField" class="field hidden"><span>Property <strong aria-hidden="true">*</strong></span><select id="expenseProperty" aria-describedby="expensePropertyError"></select><small id="expensePropertyError" class="error-text hidden">Select a property.</small></label>
       </div>
 
       <div class="expense-form-grid">
