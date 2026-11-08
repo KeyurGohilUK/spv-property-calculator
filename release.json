@@ -1,4 +1,4 @@
 {
-  "version": "1.60.67",
-  "notes": ["Use full-screen dialogs on iPad and desktop while preserving the mobile dialog layout."]
+  "version": "1.60.68",
+  "notes": ["Restore standard dialog sizing on iPad and desktop."]
 }
