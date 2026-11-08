@@ -1,4 +1,4 @@
 {
-  "version": "1.60.66",
-  "notes": ["Move investment deletion to a funding-entry row action with an in-app confirmation dialog."]
+  "version": "1.60.67",
+  "notes": ["Use full-screen dialogs on iPad and desktop while preserving the mobile dialog layout."]
 }
