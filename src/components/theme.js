@@ -20,9 +20,7 @@
       control.setAttribute('aria-pressed', String(isDark));
       control.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} theme`);
       const description = control.querySelector('[data-theme-description]');
-      const icon = control.querySelector('[data-theme-icon]');
       if (description) description.textContent = `${isDark ? 'Dark' : 'Light'} appearance`;
-      if (icon) icon.textContent = isDark ? '☾' : '☀';
     });
   }
 

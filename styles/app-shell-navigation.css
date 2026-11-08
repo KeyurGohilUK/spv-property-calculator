@@ -97,6 +97,14 @@
   background: color-mix(in srgb, var(--brand) 11%, transparent);
   font-weight: 850;
 }
+.more-menu-icon svg { width: 20px; height: 20px; display: block; }
+.more-menu-chevron { width: 18px; height: 18px; color: var(--muted); }
+.theme-icon-sun,
+.theme-icon-moon { display: grid; place-items: center; }
+.theme-icon-sun svg,
+.theme-icon-moon svg { width: 20px; height: 20px; }
+[data-theme-toggle][aria-pressed="false"] .theme-icon-moon,
+[data-theme-toggle][aria-pressed="true"] .theme-icon-sun { display: none; }
 .theme-switch {
   width: 46px;
   height: 26px;
