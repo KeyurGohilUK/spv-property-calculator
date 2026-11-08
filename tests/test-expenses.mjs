@@ -23,8 +23,8 @@ assert.match(expenseHtml, /<file-upload-field[^>]*input-id="expenseReceipt"[^>]*
 assert.match(expensePage, /function updateReceiptSelectionDetails\(\)[\s\S]*Selected: \$\{file\.name\} · \$\{formatFileSize\(file\.size\)\}[\s\S]*will be optimised when saved[\s\S]*addEventListener\('input', updateReceiptSelectionDetails\)[\s\S]*addEventListener\('change', updateReceiptSelectionDetails\)/, 'Selected receipt details must update reliably on iOS');
 assert.match(expensePage, /Current receipt: \$\{expense\.receipt\.name[\s\S]*formatFileSize\(expense\.receipt\.size\)/, 'Existing receipt details must display while editing');
 assert.match(expensePage, /async function viewReceipt\(expense\)[\s\S]*window\.open\('', '_blank'\)[\s\S]*await getReceipt\(expense\.id, expectedObjectPath\)[\s\S]*viewer\.location\.replace\(url\)/, 'Receipt viewer must open synchronously before version-aware IndexedDB access for iOS Safari');
-assert.match(expensePage, /remove\.innerHTML = '<svg[\s\S]*Delete expense/, 'Expense delete action must use an accessible icon');
-assert.match(expensePage, /view\.className = 'view-receipt'[\s\S]*view\.innerHTML = '<svg[\s\S]*View receipt/, 'Receipt view action must use an accessible icon');
+assert.match(expensePage, /remove\.innerHTML = getIconSvg\('trash'\)[\s\S]*aria-label', `Delete expense/, 'Expense delete action must use the shared accessible trash icon');
+assert.match(expensePage, /view\.className = 'view-receipt'[\s\S]*view\.innerHTML = getIconSvg\('file'\)[\s\S]*aria-label', `View receipt/, 'Receipt view action must use the shared accessible file icon');
 assert.doesNotMatch(expensePage, /view\.textContent = 'View'/, 'Expense card must not display View text');
 assert.doesNotMatch(expensePage, /remove\.textContent = 'Delete'/, 'Expense card must not show Delete text');
 assert.match(expensePage, /function openForm\(expense = null\)/, 'Expense editor must support existing records');
@@ -125,4 +125,4 @@ assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/o
 assert.equal(receiptFileFromCache(cachedBlob, 'receipts/e1/new.jpg'), null, 'Legacy unversioned files must be refreshed when a cloud object key exists');
 assert.equal(receiptFileFromCache(cachedBlob), cachedBlob, 'Legacy local-only receipts must remain available offline');
 
-console.log('Expense storage checks passed.');
+conso
