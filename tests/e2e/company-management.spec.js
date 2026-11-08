@@ -86,11 +86,15 @@ test('editor manages company particulars and appointment roles', async ({ page }
   await expect(page.getByRole('link', { name: 'Company', exact: true })).toBeVisible();
 });
 
-test('@mobile company appointment table remains usable in a horizontally scrollable panel', async ({ page }) => {
+test('@mobile company appointment table keeps its heading and actions aligned while scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockCompanyWorkspace(page, 'editor', {
     companyName: 'Example SPV Ltd',
-    appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director', 'psc'] }]
+    appointments: Array.from({ length: 12 }, (_, index) => ({
+      id: 'director-' + index,
+      name: index === 0 ? 'Alex Director' : 'Director ' + index,
+      roles: ['director', 'psc']
+    }))
   });
   await page.goto('/company/');
   await page.getByRole('link', { name: /Example SPV Ltd/ }).click();
@@ -99,9 +103,20 @@ test('@mobile company appointment table remains usable in a horizontally scrolla
   await expect(page.locator('#companyAppointmentsTable')).toContainText('Alex Director');
   const dimensions = await page.locator('#companyAppointmentsTable').evaluate((element) => ({
     viewport: element.clientWidth,
-    content: element.scrollWidth
+    content: element.scrollWidth,
+    height: element.clientHeight,
+    contentHeight: element.scrollHeight,
+    headingPosition: getComputedStyle(element.querySelector('thead th')).position,
+    headingAlignment: getComputedStyle(element.querySelector('thead th:last-child')).textAlign,
+    actionAlignment: getComputedStyle(element.querySelector('tbody td:last-child')).textAlign
   }));
   expect(dimensions.content).toBeGreaterThan(dimensions.viewport);
+  expect(dimensions.contentHeight).toBeGreaterThan(dimensions.height);
+  expect(dimensions.headingPosition).toBe('sticky');
+  expect(dimensions.headingAlignment).toBe('right');
+  expect(dimensions.actionAlignment).toBe('right');
+  await page.locator('#companyAppointmentsTable').evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect(page.locator('#companyAppointmentsTable thead')).toBeVisible();
   await page.locator('#companyAppointmentsTable').evaluate((element) => { element.scrollLeft = element.scrollWidth; });
   const editAppointmentButton = page.getByRole('button', { name: 'Edit appointment for Alex Director' });
   await expect(editAppointmentButton).toBeVisible();

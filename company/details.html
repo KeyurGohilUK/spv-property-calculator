@@ -248,7 +248,7 @@
           <figcaption id="companyInvestmentChartTitle">Overall member investment split</figcaption>
           <div class="company-investment-chart-content"><ul class="company-investment-chart-legend" aria-label="Contribution percentages"></ul><div class="company-investment-chart-plot"></div></div>
         </figure>
-        <div id="companyInvestmentSummaryWrap" class="company-investment-table-wrap hidden" tabindex="0" aria-label="Member investment contributions">
+        <div id="companyInvestmentSummaryWrap" class="company-investment-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Member investment contributions">
           <table class="company-investment-table">
             <thead><tr><th scope="col">Member</th><th scope="col">Total invested</th><th scope="col">Contribution</th></tr></thead>
             <tbody id="companyInvestmentSummaryRows"></tbody>
@@ -258,9 +258,9 @@
         <div class="company-investment-entries">
           <h3>Funding entries</h3>
           <div id="companyInvestmentsEntriesEmpty" class="muted">Individual funding entries will appear here.</div>
-          <div id="companyInvestmentEntriesWrap" class="company-investment-table-wrap hidden" tabindex="0" aria-label="Recorded company funding entries">
+          <div id="companyInvestmentEntriesWrap" class="company-investment-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Recorded company funding entries">
             <table class="company-investment-table company-investment-entry-table">
-              <thead><tr><th scope="col">Date</th><th scope="col">Member</th><th scope="col">Amount</th><th scope="col">Reference / note</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+              <thead><tr><th scope="col">Date</th><th scope="col">Member</th><th scope="col">Amount</th><th scope="col">Reference / note</th><th scope="col">Actions</th></tr></thead>
               <tbody id="companyInvestmentEntryRows"></tbody>
             </table>
           </div>
@@ -276,9 +276,9 @@
         <div id="companyAppointmentsEmpty" class="company-appointments-empty">
           <span class="empty-icon" aria-hidden="true">♙</span><h3>No appointments added</h3><p>Add a director, shareholder, secretary or person with significant control.</p>
         </div>
-        <div id="companyAppointmentsTable" class="company-appointments-table-wrap hidden" tabindex="0" aria-label="Company appointments; scroll horizontally to see all roles">
+        <div id="companyAppointmentsTable" class="company-appointments-table-wrap data-table-scroll hidden" tabindex="0" aria-label="Company appointments; scroll to see all roles">
           <table class="company-appointments-table">
-            <thead><tr><th scope="col">Person</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <thead><tr><th scope="col">Person</th><th scope="col">Actions</th></tr></thead>
             <tbody id="companyAppointmentsRows"></tbody>
           </table>
         </div>

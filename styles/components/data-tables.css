@@ -1,0 +1,81 @@
+/* Keep long table bodies scrollable without losing their column context. */
+.data-table-scroll {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  max-block-size: min(60vh, 560px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: var(--brand) var(--surface-2);
+}
+
+@supports (height: 100dvh) {
+  .data-table-scroll { max-block-size: min(60dvh, 560px); }
+}
+
+.data-table-scroll > table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.data-table-scroll thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--surface-2);
+}
+
+.data-table-scroll tfoot th,
+.data-table-scroll tfoot td {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 2;
+  background: var(--surface-2);
+}
+
+/* Keep headings and values on the same alignment line in each column. */
+.data-table-scroll table.company-appointments-table th:last-child,
+.data-table-scroll table.company-appointments-table td:last-child,
+.data-table-scroll table.company-investment-entry-table th:last-child,
+.data-table-scroll table.company-investment-entry-table td:last-child,
+.data-table-scroll table.hmrc-payment-table th:last-child,
+.data-table-scroll table.hmrc-payment-table td:last-child {
+  text-align: right;
+}
+
+.data-table-scroll table.company-appointments-table td:last-child > *,
+.data-table-scroll table.company-investment-entry-table td:last-child > *,
+.data-table-scroll table.hmrc-payment-table td:last-child > * {
+  margin-inline-start: auto;
+}
+
+.data-table-scroll table.company-investment-table:not(.company-investment-entry-table) th:nth-child(n + 2),
+.data-table-scroll table.company-investment-table:not(.company-investment-entry-table) td:nth-child(n + 2),
+.data-table-scroll table.company-investment-entry-table th:nth-child(3),
+.data-table-scroll table.company-investment-entry-table td:nth-child(3),
+.data-table-scroll table.hmrc-payment-table th:nth-child(2),
+.data-table-scroll table.hmrc-payment-table td:nth-child(2) {
+  text-align: right;
+}
+
+.data-table-scroll table.forecast-table th,
+.data-table-scroll table.forecast-table td,
+.data-table-scroll table.strategy-price-table th,
+.data-table-scroll table.strategy-price-table td {
+  text-align: right;
+}
+
+.data-table-scroll table.forecast-table th:first-child,
+.data-table-scroll table.forecast-table td:first-child,
+.data-table-scroll table.strategy-price-table th:first-child,
+.data-table-scroll table.strategy-price-table td:first-child {
+  text-align: left;
+}
+
+@media (max-width: 680px) {
+  .data-table-scroll { max-block-size: min(58vh, 440px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table-scroll { scroll-behavior: auto; }
+}

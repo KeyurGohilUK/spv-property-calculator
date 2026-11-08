@@ -868,7 +868,7 @@ function renderHmrcTracking() {
         </div>
         <div class="hmrc-payments">
           <h6>Recorded payments <span class="muted">(${record.payments.length})</span></h6>
-          ${record.payments.length ? `<div class="hmrc-payment-table-wrap"><table class="hmrc-payment-table">
+          ${record.payments.length ? `<div class="hmrc-payment-table-wrap data-table-scroll"><table class="hmrc-payment-table">
             <thead><tr><th scope="col">Paid on</th><th scope="col">Amount</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
             <tbody>${record.payments.map((payment) => `<tr>
               <td>${hmrcDate(payment.date)}</td><td>${CURRENCY_FORMAT.format(payment.amount)}</td>
