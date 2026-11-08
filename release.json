@@ -1,4 +1,4 @@
 {
-  "version": "1.60.64",
-  "notes": ["Make HMRC company setup collapsible and add task guidance dialogs."]
+  "version": "1.60.65",
+  "notes": ["Keep table headings and totals visible while rows scroll; align table columns consistently."]
 }
