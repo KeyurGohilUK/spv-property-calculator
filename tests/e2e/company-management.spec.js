@@ -442,6 +442,11 @@ test('@mobile HMRC dialogs use themed, full-size date and form controls', async 
   await page.getByRole('tab', { name: 'Compliance' }).click();
   await page.locator('#hmrcAuthorityTab').click();
   await expect(page.locator('#hmrcSetupOverview')).toBeVisible();
+  const setupToggle = page.locator('#hmrcSetupToggle');
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'false');
+  await setupToggle.click();
+  await expect(setupToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#hmrcSetupDisclosure')).toBeVisible();
   // Use the same accessible pencil icon as the rest of the Company page.
   for (const [step, label] of [
     ['utr', 'Edit UTR letter'],
