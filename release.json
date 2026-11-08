@@ -1,4 +1,4 @@
 {
-  "version": "1.60.61",
-  "notes": ["Make Corporation Tax periods collapsible with alternating card tones."]
+  "version": "1.60.62",
+  "notes": ["Fix the animated HMRC tax-period chevron and align its delete control."]
 }
