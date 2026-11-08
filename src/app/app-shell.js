@@ -12,7 +12,7 @@ function renderHeaderControls(root) {
   header.insertAdjacentHTML('beforeend', `
     <div class="header-actions" role="group" aria-label="App controls">
       <span id="connectionStatus" class="header-icon-control connection-icon" role="status" tabindex="0" aria-label="Online" title="Online" data-tooltip="Online">${connectionIcons}</span>
-      <button id="accountBtn" class="header-icon-control" type="button" aria-label="Sign in" title="Sign in" data-tooltip="Sign in">${getIconSvg('users')}</button>
+      <button id="accountBtn" class="header-icon-control" type="button" aria-label="Sign in" title="Sign in" data-tooltip="Sign in">${getIconSvg('user')}</button>
       <button id="installBtn" class="header-icon-control" type="button" aria-label="Install app" title="Install app" data-tooltip="Install app">${getIconSvg('download')}</button>
     </div>`);
 }
