@@ -1,6 +1,6 @@
 /* Standard full-screen modal presentation for tablets and larger screens. */
 @media (min-width: 621px) {
-  dialog.app-dialog {
+  dialog.app-dialog:not(.more-menu-dialog) {
     box-sizing: border-box;
     inset: 0;
     width: 100vw;
