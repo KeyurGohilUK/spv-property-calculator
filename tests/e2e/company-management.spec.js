@@ -213,6 +213,35 @@ test('company chooser adds a second company without changing the first', async (
   await expect(page.getByRole('link', { name: /Second SPV Ltd/ })).toBeVisible();
 });
 
+test('investment entry deletion uses a row action and the standard confirmation dialog', async ({ page }) => {
+  await mockCompanyWorkspace(page, 'editor', {
+    companyName: 'Funding SPV Ltd',
+    appointments: [{ id: 'director-1', name: 'Alex Director', roles: ['director'] }],
+    investments: [{ id: 'investment-1', memberId: 'director-1', memberName: 'Alex Director', amount: 500, date: '2026-11-03', reference: 'Initial funding' }]
+  });
+  await page.goto('/company/');
+  await page.getByRole('link', { name: /Funding SPV Ltd/ }).click();
+  await page.getByRole('tab', { name: 'Investment' }).click();
+
+  const row = page.locator('#companyInvestmentEntryRows tr');
+  await expect(row).toContainText('Initial funding');
+  await expect(row.getByRole('button', { name: 'Delete funding entry for Alex Director' })).toBeVisible();
+  await expect(page.locator('#deleteInvestmentBtn')).toHaveCount(0);
+
+  await row.getByRole('button', { name: 'Delete funding entry for Alex Director' }).click();
+  const confirmation = page.getByRole('dialog', { name: 'Delete funding entry?' });
+  await expect(confirmation).toBeVisible();
+  await expect(confirmation).toContainText('Alex Director’s £500.00 contribution dated 3 Nov 2026');
+  await confirmation.getByRole('button', { name: 'Cancel' }).click();
+  await expect(confirmation).not.toBeVisible();
+  await expect(row).toContainText('Initial funding');
+
+  await row.getByRole('button', { name: 'Delete funding entry for Alex Director' }).click();
+  await confirmation.getByRole('button', { name: 'Delete entry' }).click();
+  await expect(row).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => window.savedCompanyProfile?.investments?.length)).toBe(0);
+});
+
 test('editor confirms company deletion and keeps other workspace data', async ({ page }) => {
   await mockCompanyWorkspace(page, 'editor', {
     companyName: 'Temporary SPV Ltd', companyNumber: '11223344',

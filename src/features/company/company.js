@@ -89,6 +89,9 @@ const appointmentDialog = setupDialog($('appointmentDialog'), {
 const investmentDialog = setupDialog($('investmentDialog'), {
   closeButtons: [$('closeInvestmentDialog'), $('cancelInvestmentBtn')]
 });
+const deleteInvestmentDialog = setupDialog($('deleteInvestmentDialog'), {
+  closeButtons: [$('closeDeleteInvestmentDialog'), $('cancelDeleteInvestmentBtn')]
+});
 
 const deleteCompanyDialog = setupDialog($('deleteCompanyDialog'), {
   closeButtons: [$('closeDeleteCompanyDialog'), $('cancelDeleteCompanyBtn')]
@@ -379,11 +382,22 @@ function renderInvestments() {
       <th scope="row">${escapeHtml(memberName(investment.memberId, investment.memberName))}</th>
       <td>${CURRENCY_FORMAT.format(investment.amount)}</td>
       <td class="company-investment-reference">${escapeHtml(investment.reference || '—')}</td>
-      <td><button class="secondary-btn compact-company-btn company-edit-icon-btn" type="button" aria-label="Edit funding entry for ${escapeHtml(memberName(investment.memberId, investment.memberName))}" title="Edit funding entry" data-edit-investment="${escapeHtml(investment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button></td>
+      <td><span class="hmrc-payment-actions"><button class="icon-btn company-evidence-action" type="button" aria-label="Edit funding entry for ${escapeHtml(memberName(investment.memberId, investment.memberName))}" title="Edit funding entry" data-edit-investment="${escapeHtml(investment.id)}" ${editingAllowed ? '' : 'disabled'}>${EDIT_ICON}</button><button class="icon-btn company-evidence-action company-evidence-action--remove" type="button" aria-label="Delete funding entry for ${escapeHtml(memberName(investment.memberId, investment.memberName))}" title="Delete funding entry" data-delete-investment="${escapeHtml(investment.id)}" ${editingAllowed ? '' : 'disabled'}>${REMOVE_ICON}</button></span></td>
     </tr>`).join('');
   document.querySelectorAll('[data-edit-investment]').forEach((button) => {
     button.addEventListener('click', () => openInvestment(button.dataset.editInvestment));
   });
+  document.querySelectorAll('[data-delete-investment]').forEach((button) => {
+    button.addEventListener('click', () => openInvestmentDeleteConfirmation(button.dataset.deleteInvestment, button));
+  });
+}
+
+function openInvestmentDeleteConfirmation(id, trigger) {
+  const investment = profile.investments.find((item) => item.id === id);
+  if (!investment || !editingAllowed) return;
+  $('deleteInvestmentDescription').textContent = `${memberName(investment.memberId, investment.memberName)}’s ${CURRENCY_FORMAT.format(investment.amount)} contribution${investment.date ? ` dated ${formatDate(`${investment.date}T00:00:00`, { day: 'numeric', month: 'short', year: 'numeric' }, investment.date)}` : ''}`;
+  $('deleteInvestmentForm').dataset.investmentId = id;
+  deleteInvestmentDialog.open(trigger);
 }
 
 function currentDateInputValue() {
@@ -407,7 +421,6 @@ function openInvestment(id = '') {
   $('investmentDateInput').value = investment?.date || currentDateInputValue();
   $('investmentReferenceInput').value = investment?.reference || '';
   $('investmentDialogTitle').textContent = investment ? 'Edit investment' : 'Add investment';
-  $('deleteInvestmentBtn').classList.toggle('hidden', !investment);
   $('investmentMessage').textContent = '';
   const trigger = investment
     ? [...document.querySelectorAll('[data-edit-investment]')].find((button) => button.dataset.editInvestment === id)
@@ -1810,14 +1823,15 @@ $('investmentForm').addEventListener('submit', async (event) => {
   }
 });
 
-$('deleteInvestmentBtn').addEventListener('click', async () => {
+$('deleteInvestmentForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
   if (!editingAllowed) return;
-  const id = $('investmentIdInput').value;
+  const id = $('deleteInvestmentForm').dataset.investmentId;
   const investment = profile.investments.find((item) => item.id === id);
-  if (!investment || !window.confirm(`Remove this ${CURRENCY_FORMAT.format(investment.amount)} investment entry?`)) return;
+  if (!investment) return;
   deleteInvestment(id);
   renderProfile();
-  investmentDialog.close();
+  deleteInvestmentDialog.close();
   await syncAfterSave();
 });
 

@@ -316,7 +316,16 @@
       </div>
       <label class="field"><span>Funding reference / note</span><textarea id="investmentReferenceInput" rows="3" maxlength="500" placeholder="e.g. Initial director funding or bank transfer reference" data-plain-text></textarea><small>Add a short reference or note for this funding entry.</small></label>
       <p id="investmentMessage" class="save-message" aria-live="polite"></p>
-      <div class="dialog-actions company-form-actions"><button id="deleteInvestmentBtn" class="text-btn danger-text hidden" type="button">Remove entry</button><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
+      <div class="dialog-actions company-form-actions"><button id="cancelInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="deleteInvestmentDialog" class="app-dialog company-dialog" aria-labelledby="deleteInvestmentDialogTitle">
+    <form id="deleteInvestmentForm">
+      <div class="company-dialog-header"><h2 id="deleteInvestmentDialogTitle">Delete funding entry?</h2><button id="closeDeleteInvestmentDialog" class="dialog-close" type="button" aria-label="Close delete confirmation">×</button></div>
+      <p>Delete this funding entry for <strong id="deleteInvestmentDescription"></strong>?</p>
+      <p class="muted">This removes the contribution from the company’s investment records and cannot be undone.</p>
+      <div class="dialog-actions company-form-actions"><button id="cancelDeleteInvestmentBtn" class="secondary-btn" type="button">Cancel</button><button class="secondary-btn danger-text" type="submit">Delete entry</button></div>
     </form>
   </dialog>
 
