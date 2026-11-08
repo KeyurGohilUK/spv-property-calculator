@@ -1,4 +1,4 @@
 {
-  "version": "1.60.71",
-  "notes": ["Fix shared icon sizing and use the matching account icon."]
+  "version": "1.60.72",
+  "notes": ["Use consistent shared icons in the app menu."]
 }
