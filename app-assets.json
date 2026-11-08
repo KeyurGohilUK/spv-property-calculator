@@ -1,5 +1,5 @@
 {
-  "version": "1.60.67",
+  "version": "1.60.68",
   "assets": [
     "./",
     "./index.html",
@@ -14,7 +14,6 @@
     "./styles/components/interactive-card-hover.css",
     "./styles/components/icon-action-feedback.css",
     "./styles/components/action-button-feedback.css",
-    "./styles/components/fullscreen-dialogs.css",
     "./styles/forms.css",
     "./styles/dialogs.css",
     "./styles/dialogs-updates.css",
