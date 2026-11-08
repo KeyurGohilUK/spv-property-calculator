@@ -125,4 +125,4 @@ assert.equal(receiptFileFromCache({ file: cachedBlob, objectPath: 'receipts/e1/o
 assert.equal(receiptFileFromCache(cachedBlob, 'receipts/e1/new.jpg'), null, 'Legacy unversioned files must be refreshed when a cloud object key exists');
 assert.equal(receiptFileFromCache(cachedBlob), cachedBlob, 'Legacy local-only receipts must remain available offline');
 
-conso
+console.log('Expense storage checks passed.');
