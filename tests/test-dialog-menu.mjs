@@ -18,7 +18,7 @@ assert.match(dialogHelper, /focusFirst = \(\) => dialog\.focus\(\{ preventScroll
 assert.match(dialogHelper, /focusFirst\(\)[\s\S]*requestAnimationFrame\(focusFirst\)/, 'Shared dialogs must re-apply neutral container focus after native dialog focus handling');
 assert.doesNotMatch(dialogHelper, /initialFocus|querySelectorAll\('\[autofocus\]/, 'Shared dialog helper must not preselect an input, button or close control');
 assert.doesNotMatch(appShell, /BRRR Calculator|href="\.\/brrr\/"/, 'App Menu must not duplicate the BRRR calculator already available inside Forecast');
-assert.match(policyAcceptance, /setupDialog\(dialog, \{ preventCancel: true, closeOnBackdrop: false \}\)[\s\S]*dialogController\.open\(document\.activeElement\)/, 'Policy acceptance must use the shared controller while blocking dismissal');
+assert.match(policyAcceptance, /setupDialog\(dialog, \{\s*preventCancel: true,\s*closeOnBackdrop: false,?\s*\}\)[\s\S]*dialogController\.open\(document\.activeElement\)/, 'Policy acceptance must use the shared controller while blocking dismissal');
 assert.doesNotMatch(policyAcceptance, /\.showModal\(/, 'Policy acceptance must not bypass the shared dialog controller');
 assert.match(dialogStyles, /\.app-dialog:focus\s*\{\s*outline:\s*none;/, 'Neutral dialog-container focus must not render as a selected control');
 assert.match(dialogStyles, /\.dialog-actions\s*\{[\s\S]*justify-content:\s*flex-end/, 'Dialog actions must align to the right');

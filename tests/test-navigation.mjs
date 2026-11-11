@@ -72,7 +72,7 @@ assert.match(secondaryHeader, /setupInstallComponent\(\{ button: shell\.installB
 assert.match(installComponent, /setupUpdateNotifier\(button, APP_VERSION\)/, 'Shared Install component must provide update notifications');
 assert.match(styles, /\.header-icon-control\.update-available[\s\S]*update-icon-pulse[\s\S]*::before/, 'Update available indicator styling is missing');
 assert.doesNotMatch(secondaryHeader, /window\.location\.href = '\.\/\?dialog=(?:account|install)'/, 'Account and Install must not navigate away');
-assert.match(secondaryHeader, /button: shell\.accountButton, dialog: \$\('secondaryAccountDialog'\)/, 'Account must use the shared header control with a local popup');
+assert.match(secondaryHeader, /button: shell\.accountButton,\s*dialog: \$\('secondaryAccountDialog'\)/, 'Account must use the shared header control with a local popup');
 assert.doesNotMatch(secondaryHeader, /secondaryInstallDialog|secondaryNativeInstallBtn|secondaryUpdateBtn/, 'Secondary pages must not keep a duplicate Install popup');
 assert.match(installComponent, /id="installDialog"[\s\S]*id="nativeInstallBtn"[\s\S]*id="downloadUpdatesBtn"/, 'Shared Install popup is incomplete');
 assert.match(secondaryHeader, /secondarySyncBtn[\s\S]*syncWorkspace/, 'Local Account popup must provide combined workspace sync');

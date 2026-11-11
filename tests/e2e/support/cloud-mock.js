@@ -10,15 +10,15 @@ const MOCK_SUPABASE_SDK = `
     expenses: [...(options.expenses || [])],
     tasks: [...(options.tasks || [])],
     task_events: [...(options.taskEvents || [])],
-    workspace_members: options.signedOut ? [] : [{ user_id: '00000000-0000-4000-8000-000000000001', role: options.workspaceRole || 'editor', active: true }],
-    policy_acceptances: options.policyAccepted === false ? [] : [{
+    workspace_members: options.unapproved ? [] : [{ user_id: '00000000-0000-4000-8000-000000000001', role: options.workspaceRole || 'editor', active: options.inactive !== true }],
+    policy_acceptances: options.policyAccepted === false && !sessionStorage.getItem('spv-test-policy-accepted') ? [] : [{
       terms_version: '2026-08-26',
       privacy_version: '2026-08-26',
       disclaimer_version: '2026-08-26',
       accepted_at: now
     }]
   };
-  let session = options.signedOut ? null : {
+  let session = options.signedOut && !sessionStorage.getItem('spv-test-signed-in') ? null : {
     access_token: 'playwright-access-token',
     user: {
       id: '00000000-0000-4000-8000-000000000001',
@@ -51,6 +51,7 @@ const MOCK_SUPABASE_SDK = `
       upsert(value) {
         state.calls.push({ type: 'upsert', table, value });
         state[table] = [value];
+        if (table === 'policy_acceptances') sessionStorage.setItem('spv-test-policy-accepted', 'true');
         return builder;
       },
       single() { return Promise.resolve(listResult(table)); },
@@ -164,11 +165,13 @@ const MOCK_SUPABASE_SDK = `
             return Promise.resolve({ data: { session }, error: null });
           },
           signOut() {
+            sessionStorage.removeItem('spv-test-signed-in');
             session = null;
             authChangeHandler('SIGNED_OUT', null);
             return Promise.resolve({ error: null });
           },
           signInWithPassword() {
+            sessionStorage.setItem('spv-test-signed-in', 'true');
             session = {
               access_token: 'playwright-access-token',
               user: {
@@ -197,11 +200,13 @@ export async function installCloudMock(page, options = {}) {
   const bootstrap = `window.__PW_CLOUD_OPTIONS__ = ${JSON.stringify(options)};\n${MOCK_SUPABASE_SDK}`;
   await page.addInitScript({ content: bootstrap });
 
-  await page.route(SUPABASE_SDK_PATTERN, (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/javascript',
-    body: MOCK_SUPABASE_SDK
-  }));
+  await page.route(SUPABASE_SDK_PATTERN, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: MOCK_SUPABASE_SDK,
+    }),
+  );
 }
 
 export async function cloudCalls(page) {

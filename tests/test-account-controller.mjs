@@ -18,7 +18,7 @@ assert.match(secondary, /setupAccountController\(\{/, 'Secondary pages must use 
 assert.doesNotMatch(app, /window\.SPVCloud\.signIn\(/, 'Home must not maintain a separate sign-in implementation');
 assert.doesNotMatch(secondary, /window\.SPVCloud\.signIn\(/, 'Secondary pages must not maintain a separate sign-in implementation');
 assert.match(controller, /cloud\.signIn\(email, password\)/, 'Shared controller must own sign-in');
-assert.match(controller, /cloud\.signUp\(email, password/, 'Shared controller must own account creation');
+assert.match(controller, /cloud\.signUp\(\s*email,\s*password/, 'Shared controller must own account creation');
 assert.match(controller, /cloud\.signOut\(\)/, 'Shared controller must own sign-out');
 assert.match(controller, /cloud\.onAuthChange/, 'Shared controller must own authentication state changes');
 assert.match(controller, /await cloud\.init\(\)/, 'Shared controller must own cloud initialisation');
