@@ -1,4 +1,7 @@
 {
-  "version": "1.60.73",
-  "notes": ["Improve mobile dialog spacing, scrolling, and action button alignment."]
+  "version": "1.60.74",
+  "notes": [
+    "Improve compliance details with clear status, deadline and evidence sections.",
+    "Stage evidence locally and upload only when Save evidence is pressed; Cancel discards the selection."
+  ]
 }
