@@ -80,8 +80,17 @@ let lookupCompanyNumber = '';
 let companySearchSequence = 0;
 
 const companyComplianceDialogController = setupDialog($('companyComplianceDialog'), {
-  closeButtons: [$('companyComplianceDialogClose')]
+  closeButtons: [$('companyComplianceDialogClose'), $('companyComplianceDialogCancel')]
 });
+let pendingCompanyComplianceEvidence = null;
+let savingCompanyComplianceEvidence = false;
+
+function updateCompanyComplianceSaveState() {
+  $('companyComplianceDialogSave').disabled = !editingAllowed || !pendingCompanyComplianceEvidence || savingCompanyComplianceEvidence;
+  $('companyComplianceDialogCancel').disabled = savingCompanyComplianceEvidence;
+  $('companyComplianceDialogDone').disabled = !editingAllowed || savingCompanyComplianceEvidence;
+}
+
 const companyDetailsDialogElement = createCompanyProfileDialog('edit');
 const detailsDialog = setupDialog(companyDetailsDialogElement, {
   closeButtons: [$('closeCompanyDetailsDialog'), $('cancelCompanyDetailsBtn')]
@@ -536,7 +545,13 @@ function renderCompanyComplianceDialog(ruleKey, open = true) {
   done.disabled = !editingAllowed;
   done.dataset.complianceKey = item.source === 'companies-house' ? '' : item.key;
   done.textContent = item.status === 'user-confirmed' ? 'Undo confirmation' : 'Mark as done';
-  $('companyComplianceDialogMessage').textContent = '';
+  if (open && !companyComplianceDialogController.dialog.open) {
+    pendingCompanyComplianceEvidence = null;
+    $('companyComplianceEvidenceInput').value = '';
+    $('companyCompliancePendingEvidence').textContent = 'No new document selected.';
+    $('companyComplianceDialogMessage').textContent = '';
+  }
+  updateCompanyComplianceSaveState();
   if (open && !companyComplianceDialogController.dialog.open) {
     companyComplianceDialogController.open(document.activeElement);
   }
@@ -1114,6 +1129,22 @@ $('complianceTabPanel').addEventListener('change', async (event) => {
       $('hmrcPaymentEvidenceMessage').textContent = error.message || 'Select a valid receipt.';
     }
     renderHmrcPaymentEvidence($('hmrcPaymentPeriod').value, hmrcPaymentEditingId);
+    return;
+  }
+  if (input.id === 'companyComplianceEvidenceInput') {
+    try {
+      validateEvidenceFile(file);
+      if (!editingAllowed) throw new Error('Approved editor access is required.');
+      pendingCompanyComplianceEvidence = { companyId: profile.id, ruleKey, file };
+      $('companyCompliancePendingEvidence').textContent = file.name + ' (' + Math.ceil(file.size / 1024) + ' KB) selected — press Save evidence to upload.';
+      $('companyComplianceDialogMessage').textContent = '';
+    } catch (error) {
+      pendingCompanyComplianceEvidence = null;
+      $('companyCompliancePendingEvidence').textContent = 'No valid document selected.';
+      $('companyComplianceDialogMessage').textContent = error.message || 'Select a valid document.';
+    }
+    input.value = '';
+    updateCompanyComplianceSaveState();
     return;
   }
   input.disabled = true;
@@ -1705,7 +1736,65 @@ $('hmrcPeriodForm').addEventListener('submit', async (event) => {
   }
 });
 
+$('companyComplianceDialogSave').addEventListener('click', async () => {
+  const selection = pendingCompanyComplianceEvidence;
+  if (!selection || savingCompanyComplianceEvidence) return;
+  if (selection.companyId !== profile.id ||
+      selection.ruleKey !== $('companyComplianceEvidenceInput').dataset.evidenceUpload) {
+    $('companyComplianceDialogMessage').textContent = 'Company or compliance requirement changed. Reopen the dialog.';
+    return;
+  }
+  savingCompanyComplianceEvidence = true;
+  updateCompanyComplianceSaveState();
+  let uploaded = null;
+  let metadataAdded = false;
+  try {
+    validateEvidenceFile(selection.file);
+    await requireEvidenceEditor();
+    const before = await syncCompanyProfile(window.SPVCloud);
+    if (before.conflicts.length || getCompanyProfile()._cloudDirty) {
+      throw new Error('Resolve company sync before uploading evidence.');
+    }
+    profile = getCompanyProfile();
+    if (profile.id !== selection.companyId) throw new Error('Company changed. Reopen this requirement.');
+    uploaded = await uploadComplianceEvidence(profile.id, selection.file);
+    try {
+      addCompanyEvidence({ ...uploaded, ruleKey: selection.ruleKey });
+      metadataAdded = true;
+    } catch (error) {
+      await deleteComplianceEvidence(profile.id, uploaded).catch(() => {});
+      uploaded = null;
+      throw error;
+    }
+    const saved = await syncCompanyProfile(window.SPVCloud);
+    if (saved.conflicts.length || getCompanyProfile()._cloudDirty) {
+      throw new Error('Evidence uploaded, but metadata sync is pending. Retry company sync; do not upload again.');
+    }
+    pendingCompanyComplianceEvidence = null;
+    profile = getCompanyProfile();
+    renderCompanyCompliance();
+    renderHmrcTracking();
+    renderHmrcDashboard();
+    setEvidenceMessage('Evidence uploaded and saved.');
+    companyComplianceDialogController.close();
+  } catch (error) {
+    if (metadataAdded) pendingCompanyComplianceEvidence = null;
+    $('companyComplianceDialogMessage').textContent = error.message || 'Evidence could not be saved.';
+    $('companyCompliancePendingEvidence').textContent = metadataAdded
+      ? 'Document uploaded; local metadata is pending synchronisation. Do not upload it again.'
+      : 'Save failed. The selected document has not been attached.';
+    setEvidenceMessage(error.message || 'Evidence save failed.', true);
+  } finally {
+    savingCompanyComplianceEvidence = false;
+    updateCompanyComplianceSaveState();
+  }
+});
+
 $('companyComplianceDialog').addEventListener('close', () => {
+  pendingCompanyComplianceEvidence = null;
+  $('companyComplianceEvidenceInput').value = '';
+  $('companyCompliancePendingEvidence').textContent = 'No new document selected.';
+  updateCompanyComplianceSaveState();
   const key = companyComplianceDialogTriggerKey;
   if (!key) return;
   const pointerActivation = companyComplianceDialogOpenedByPointer;
