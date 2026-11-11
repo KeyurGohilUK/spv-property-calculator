@@ -2,8 +2,14 @@ import { setupInstallComponent } from './install-component.js';
 import { setupAccountController } from '../services/account-controller.js';
 import { setupPrimaryNavigation } from '../app/primary-navigation.js';
 import { setupAppShell } from '../app/app-shell.js';
-import { syncWorkspace as syncWorkspaceData, formatWorkspaceSyncError } from '../services/workspace-sync.js';
-import { renderAccessState, redirectAnonymousToLanding } from '../services/access-gate.js';
+import {
+  syncWorkspace as syncWorkspaceData,
+  formatWorkspaceSyncError,
+} from '../services/workspace-sync.js';
+import {
+  renderAccessState,
+  redirectAnonymousToLanding,
+} from '../services/access-gate.js';
 import { requireCurrentPolicyAcceptance } from '../services/policy-acceptance.js';
 
 const $ = (id) => document.getElementById(id);
@@ -17,7 +23,7 @@ async function syncWorkspace() {
   if (syncing || !cloudUser || !navigator.onLine) return;
   syncing = true;
   accountController?.render();
-    $('secondaryAccountMessage').textContent = 'Syncing workspace data…';
+  $('secondaryAccountMessage').textContent = 'Syncing workspace data…';
   try {
     const result = await syncWorkspaceData(window.SPVCloud);
     $('secondaryAccountMessage').textContent = result.message;
@@ -31,13 +37,16 @@ async function syncWorkspace() {
   }
 }
 
-document.body.insertAdjacentHTML('beforeend', `
+document.body.insertAdjacentHTML(
+  'beforeend',
+  `
   <dialog id="secondaryAccountDialog" class="app-dialog auth-dialog">
     <button id="closeSecondaryAccount" class="dialog-close" type="button" aria-label="Close">×</button>
-    <div id="secondarySignedOut"><p class="eyebrow">Cloud sync</p><h3>Supabase account</h3>
+    <div id="secondarySignedOut"><p class="eyebrow">Cloud sync</p><h3>Sign in to your workspace</h3>
       <label class="field"><span>Email</span><input id="secondaryAuthEmail" type="email" autocomplete="email"></label>
       <label class="field"><span>Password</span><input id="secondaryAuthPassword" type="password" autocomplete="current-password" minlength="6"></label>
       <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button></div>
+      <details class="auth-help"><summary>Forgot password or need access?</summary><p class="muted small">Contact your workspace administrator to request access, account approval or a password reset. Self-service registration and password reset are not available in this app.</p></details>
       <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondarySignedIn" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Signed in</h3><p id="secondarySignedInEmail" class="muted"></p>
@@ -46,7 +55,8 @@ document.body.insertAdjacentHTML('beforeend', `
       <p id="secondaryAccountMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondaryAuthSetup" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Supabase setup required</h3><p>Configure the Project URL and Publishable key in <code>supabase-config.js</code>.</p></div>
-  </dialog>`);
+  </dialog>`,
+);
 
 setupInstallComponent({ button: shell.installButton });
 
@@ -65,22 +75,39 @@ updateConnection();
 accountController = setupAccountController({
   cloud: window.SPVCloud,
   elements: {
-    button: shell.accountButton, dialog: $('secondaryAccountDialog'), closeButton: $('closeSecondaryAccount'),
-    signedOut: $('secondarySignedOut'), signedIn: $('secondarySignedIn'), notConfigured: $('secondaryAuthSetup'),
+    button: shell.accountButton,
+    dialog: $('secondaryAccountDialog'),
+    closeButton: $('closeSecondaryAccount'),
+    signedOut: $('secondarySignedOut'),
+    signedIn: $('secondarySignedIn'),
+    notConfigured: $('secondaryAuthSetup'),
     setupMessage: $('secondaryAuthSetup').querySelector('p:not(.eyebrow)'),
-    email: $('secondaryAuthEmail'), password: $('secondaryAuthPassword'),
-    authMessage: $('secondaryAuthMessage'), signedInEmail: $('secondarySignedInEmail'),
-    signInButton: $('secondarySignInBtn'), signOutButton: $('secondarySignOutBtn'),
-    syncButton: $('secondarySyncBtn'), accountMessage: $('secondaryAccountMessage')
+    email: $('secondaryAuthEmail'),
+    password: $('secondaryAuthPassword'),
+    authMessage: $('secondaryAuthMessage'),
+    signedInEmail: $('secondarySignedInEmail'),
+    signInButton: $('secondarySignInBtn'),
+    signOutButton: $('secondarySignOutBtn'),
+    syncButton: $('secondarySyncBtn'),
+    accountMessage: $('secondaryAccountMessage'),
   },
   sync: syncWorkspace,
   isSyncing: () => syncing,
   onUserChange: async (user, { reason }) => {
     cloudUser = user;
-    if (user && !await requireCurrentPolicyAcceptance(user, { cloud: window.SPVCloud })) return;
+    if (
+      user &&
+      !(await requireCurrentPolicyAcceptance(user, { cloud: window.SPVCloud }))
+    )
+      return;
     renderAccessState(user);
     if (!user && redirectAnonymousToLanding(user)) return;
-    if (cloudUser && navigator.onLine && (reason === 'sign-in' || reason === 'sign-up')) await syncWorkspace();
-  }
+    if (
+      cloudUser &&
+      navigator.onLine &&
+      (reason === 'sign-in' || reason === 'sign-up')
+    )
+      await syncWorkspace();
+  },
 });
 accountController.initialise();

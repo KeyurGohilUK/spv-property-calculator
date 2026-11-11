@@ -26,7 +26,7 @@ Open **Authentication** in the Supabase dashboard and make sure the Email provid
 
 ### Easiest setup for a personal calculator
 
-For the simplest first setup, turn **Confirm Email** off while you create the 2–3 accounts you intend to use. The app can then create the account and sign in immediately without relying on confirmation email delivery.
+For the simplest first setup, turn **Confirm Email** off while you create the 2–3 accounts you intend to use. Create the intended Auth accounts through the Supabase administrator dashboard; the app offers sign-in only.
 
 After you have created all intended accounts successfully, turn **Allow new users to sign up** off. Existing users can still sign in, but visitors to the public GitHub Pages URL cannot create additional accounts.
 
@@ -145,7 +145,7 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 
 1. Open the GitHub Pages URL.
 2. Tap/click **Sign in** in the app header.
-3. Choose **Create account** the first time, or **Sign in** if the account already exists.
+3. Sign in with an account provisioned and approved by your workspace administrator. The app does not offer self-service registration or password reset. Use **Forgot password or need access?** for administrator-assisted recovery instructions.
 4. Existing local properties will be merged into the shared Supabase property list on sync.
 5. Save a property. The app first saves locally, then syncs the record to the shared Supabase workspace when online. Other signed-in users receive it on their next sync/app load.
 
@@ -189,4 +189,4 @@ The calculator remains usable locally. Once online, reload the app if necessary;
 
 ## Shared access model
 
-Only active, approved workspace members can access shared cloud data. Viewers have read-only access; editors can create, edit, archive and restore records; administrators have editor access plus permanent property deletion and user management. After a colleague creates an account, an administrator can open **More → Manage Users** to approve the account and assign its role. Signed-out and unapproved accounts have no shared workspace access.
+Only active, approved workspace members can access shared cloud data. Viewers have read-only access; editors can create, edit, archive and restore records; administrators have editor access plus permanent property deletion and user management. After an administrator provisions an Auth account, an administrator can open **More → Manage Users** to approve the account and assign its role. Signed-out and unapproved accounts have no shared workspace access.

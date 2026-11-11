@@ -1,7 +1,7 @@
 {
-  "version": "1.60.74",
+  "version": "1.60.75",
   "notes": [
-    "Improve compliance details with clear status, deadline and evidence sections.",
-    "Stage evidence locally and upload only when Save evidence is pressed; Cancel discards the selection."
+    "Show login before the workspace tour and wait for approved access and policy acknowledgement.",
+    "Keep the workspace usable after dismissing the tour and provide account access help."
   ]
 }

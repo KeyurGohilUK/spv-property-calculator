@@ -10,7 +10,9 @@ const appShell = fs.readFileSync(new URL('../src/app/app-shell.js', import.meta.
 const appAssets = JSON.parse(fs.readFileSync(new URL('../app-assets.json', import.meta.url), 'utf8')).assets;
 
 assert.match(guide, /spv-help-guide-seen/, 'Guide must remember that a first-time user has seen it');
-assert.match(guide, /if \(!hasSeenGuide\(\)\).*openGuide/, 'Guide must open automatically for a new user');
+assert.match(guide, /if \(!hasSeenGuide\(\)\).*openGuide/, 'Guide must open automatically for a new approved user');
+assert.doesNotMatch(guide, /setTimeout|create an account/, 'Tour must not race login or advertise registration');
+assert.match(guide, /auth-authenticated/, 'Tour must require workspace access');
 assert.match(guide, /iPhone\|iPad\|iPod[\s\S]*Add to Home Screen/, 'Guide must include iPhone installation directions');
 assert.match(guide, /Android[\s\S]*Install app/, 'Guide must include Android installation directions');
 assert.match(guide, /Account & sync[\s\S]*Properties[\s\S]*Expenses[\s\S]*Forecast[\s\S]*More/, 'Guide must cover login, sync and all primary menu options');

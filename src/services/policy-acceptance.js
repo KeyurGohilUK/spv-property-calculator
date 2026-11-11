@@ -6,13 +6,19 @@ export const POLICY_VERSION = '2026-08-26';
 let pendingAcceptance = null;
 
 function isCurrent(record) {
-  return record?.terms_version === POLICY_VERSION
-    && record?.privacy_version === POLICY_VERSION
-    && record?.disclaimer_version === POLICY_VERSION;
+  return (
+    record?.terms_version === POLICY_VERSION &&
+    record?.privacy_version === POLICY_VERSION &&
+    record?.disclaimer_version === POLICY_VERSION
+  );
 }
 
 function setPolicyRequired(root = document) {
-  root.body.classList.remove('auth-pending', 'auth-anonymous', 'auth-authenticated');
+  root.body.classList.remove(
+    'auth-pending',
+    'auth-anonymous',
+    'auth-authenticated',
+  );
   root.body.classList.add('auth-policy-required');
 }
 
@@ -20,7 +26,9 @@ function getDialog(root = document) {
   let dialog = root.getElementById('policyAcceptanceDialog');
   if (dialog) return dialog;
   const legalRoot = new URL('../../legal/', import.meta.url);
-  root.body.insertAdjacentHTML('beforeend', `
+  root.body.insertAdjacentHTML(
+    'beforeend',
+    `
     <dialog id="policyAcceptanceDialog" class="app-dialog policy-acceptance-dialog" aria-labelledby="policyAcceptanceTitle" tabindex="-1" autofocus>
       <p class="eyebrow">One-time acknowledgement</p>
       <h2 id="policyAcceptanceTitle">Review the legal information</h2>
@@ -34,21 +42,26 @@ function getDialog(root = document) {
       <p id="policyAcceptanceMessage" class="auth-message" role="status" aria-live="polite"></p>
       <div class="dialog-actions policy-acceptance-actions"><button id="acceptPoliciesBtn" class="primary-btn" type="button" disabled>Accept and continue</button><button id="declinePoliciesBtn" class="secondary-btn" type="button">Sign out</button></div>
       <p class="muted tiny">Acceptance version ${POLICY_VERSION}. The date and versions accepted will be stored with your account.</p>
-    </dialog>`);
+    </dialog>`,
+  );
   return root.getElementById('policyAcceptanceDialog');
 }
 
-function collectAcceptance({ user, cloud, root = document }) {
+function collectAcceptance({ cloud, root = document }) {
   const dialog = getDialog(root);
   const checkbox = root.getElementById('policyAcceptanceCheck');
   const acceptButton = root.getElementById('acceptPoliciesBtn');
   const declineButton = root.getElementById('declinePoliciesBtn');
   const message = root.getElementById('policyAcceptanceMessage');
   checkbox.checked = false;
+  declineButton.disabled = false;
   acceptButton.disabled = true;
   message.textContent = '';
   setPolicyRequired(root);
-  const dialogController = setupDialog(dialog, { preventCancel: true, closeOnBackdrop: false });
+  const dialogController = setupDialog(dialog, {
+    preventCancel: true,
+    closeOnBackdrop: false,
+  });
   dialogController.open(document.activeElement);
 
   return new Promise((resolve) => {
@@ -59,7 +72,9 @@ function collectAcceptance({ user, cloud, root = document }) {
       dialogController.close();
       resolve(accepted);
     };
-    const onChange = () => { acceptButton.disabled = !checkbox.checked; };
+    const onChange = () => {
+      acceptButton.disabled = !checkbox.checked;
+    };
     const onAccept = async () => {
       if (!checkbox.checked) return;
       acceptButton.disabled = true;
@@ -70,7 +85,9 @@ function collectAcceptance({ user, cloud, root = document }) {
         message.textContent = '';
         finish(true);
       } catch (error) {
-        message.textContent = error.message || 'Could not save your acknowledgement. Please try again.';
+        message.textContent =
+          error.message ||
+          'Could not save your acknowledgement. Please try again.';
         acceptButton.disabled = false;
         declineButton.disabled = false;
       }
@@ -78,7 +95,11 @@ function collectAcceptance({ user, cloud, root = document }) {
     const onDecline = async () => {
       declineButton.disabled = true;
       message.textContent = 'Signing out…';
-      try { await cloud.signOut(); } finally { finish(false); }
+      try {
+        await cloud.signOut();
+      } finally {
+        finish(false);
+      }
     };
     checkbox.addEventListener('change', onChange);
     acceptButton.addEventListener('click', onAccept);
@@ -86,22 +107,43 @@ function collectAcceptance({ user, cloud, root = document }) {
   });
 }
 
-export async function requireCurrentPolicyAcceptance(user, { cloud = window.SPVCloud, root = document } = {}) {
+export async function requireCurrentPolicyAcceptance(
+  user,
+  { cloud = window.SPVCloud, root = document } = {},
+) {
   if (!user) return false;
   if (pendingAcceptance) return pendingAcceptance;
+  const cacheKey = `spv-policy-acceptance:${user.id}`;
   pendingAcceptance = (async () => {
     try {
+      if (!navigator.onLine) {
+        try {
+          if (localStorage.getItem(cacheKey) === POLICY_VERSION) return true;
+        } catch {
+          /* Require acknowledgement. */
+        }
+      }
       const record = await cloud.getPolicyAcceptance();
       if (isCurrent(record)) return true;
-      return await collectAcceptance({ user, cloud, root });
+      if (cloud.getCurrentUser?.()?.id !== user.id) return false;
+      return await collectAcceptance({ cloud, root });
     } catch (error) {
       console.warn('Policy acceptance check failed:', error);
-      return await collectAcceptance({ user, cloud, root });
+      if (cloud.getCurrentUser?.()?.id !== user.id) return false;
+      return await collectAcceptance({ cloud, root });
     }
   })();
   try {
     const accepted = await pendingAcceptance;
-    if (accepted) renderAccessState(user, { root });
+    if (cloud.getCurrentUser?.()?.id !== user.id) return false;
+    if (accepted) {
+      try {
+        localStorage.setItem(cacheKey, POLICY_VERSION);
+      } catch {
+        /* Offline acknowledgement cache is optional. */
+      }
+      renderAccessState(user, { root });
+    }
     return accepted;
   } finally {
     pendingAcceptance = null;

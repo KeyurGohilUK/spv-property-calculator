@@ -199,6 +199,8 @@ npm ci
 Before opening a pull request, run all required checks:
 
 ```bash
+npm run lint
+npm run format:check
 npm test
 npm run test:html
 npm run test:e2e
@@ -240,3 +242,9 @@ Before opening a pull request, confirm all of the following:
 - Clearly call out migrations, environment changes, manual setup, security implications, and rollback considerations.
 - Do not weaken tests, accessibility checks, release enforcement, branch protection, or security controls to make a PR pass.
 - Treat a green CI result as necessary, not sufficient: review the actual diff and user flow before declaring the PR ready.
+
+## JavaScript quality and formatting adoption
+
+ESLint recommended rules and Prettier are enforced in the CI quality job for the shared authentication/onboarding modules, their browser mock and regression tests, and the ESLint configuration. `npm run lint` and `npm run format:check` list this initial boundary explicitly; they do not claim repository-wide coverage. Use `npm run format` to format it. Extend both scripts and the ESLint file list when migrating another module; keep unrelated repository-wide formatting out of bug-fix PRs. CI blocks database deployment until quality checks pass alongside unit and browser checks.
+
+Offline workspace access requires a previously verified active membership for the same restored user, and a cached current policy acknowledgement. Online membership checks always refresh approval; missing, inactive or unknown roles fail closed. These local caches never grant cloud permissions; database RLS remains authoritative. Account revocation cannot be rechecked while the device is offline.
