@@ -66,6 +66,7 @@ assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 9);
 
 assert.match(html, /id="companyComplianceDialogSave"/, 'Compliance evidence requires an explicit Save');
 assert.match(html, /id="companyComplianceDialogCancel"/, 'Dialog must offer Cancel');
+assert.match(html, /id="companyComplianceDialogSave"[^>]*disabled/, 'Evidence Save must be disabled until a document is selected');
 assert.match(html, /id="companyCompliancePendingEvidence"/, 'Staged evidence must be visible to users');
 assert.match(script, /let pendingCompanyComplianceEvidence = null;/);
 assert.match(script, /companyComplianceDialogSave'\)\.addEventListener\('click'/);
