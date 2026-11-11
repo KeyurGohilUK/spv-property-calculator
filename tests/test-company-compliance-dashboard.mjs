@@ -63,4 +63,15 @@ assert.match(script, /Due by <strong>/);
 assert.match(script, /Accounting Records Preservation/);
 assert.ok(assets.assets.includes('./src/features/company/compliance-rules.js'), 'Offline PWA must cache compliance rules');
 assert.equal(buildCompanyCompliance({ today: '2026-11-02' }).length, 9);
+
+assert.match(html, /id="companyComplianceDialogSave"/, 'Compliance evidence requires an explicit Save');
+assert.match(html, /id="companyComplianceDialogCancel"/, 'Dialog must offer Cancel');
+assert.match(html, /id="companyCompliancePendingEvidence"/, 'Staged evidence must be visible to users');
+assert.match(script, /let pendingCompanyComplianceEvidence = null;/);
+assert.match(script, /companyComplianceDialogSave'\)\.addEventListener\('click'/);
+assert.match(script, /pendingCompanyComplianceEvidence = \{ companyId: profile\.id, ruleKey, file \}/);
+assert.ok(script.indexOf("if (input.id === 'companyComplianceEvidenceInput')") < script.indexOf("setEvidenceMessage('Uploading compliance evidence…')"), 'Selecting evidence must be staged before automatic uploads');
+assert.match(style, /\.company-compliance-dialog-overview/, 'Dialog should visually group deadlines');
+assert.match(style, /\.company-compliance-pending-evidence/, 'Selected evidence must be legible');
+
 console.log('Company compliance dashboard integration checks passed.');
