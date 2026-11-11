@@ -1378,3 +1378,20 @@ html[data-theme="dark"] .hmrc-edit-dialog input[type="date"] { color-scheme:dark
 @media (min-width:701px) {
   .company-list-shell .company-list-card-icon { align-self:start; margin-top:4px; }
 }
+
+/* Compliance detail dialogs: clear overview, evidence staging, and explicit save. */
+.company-compliance-dialog { width:min(760px,calc(100% - 24px)); }
+.company-compliance-dialog-overview { border:1px solid var(--border); border-radius:14px; padding:16px; background:var(--surface-2); }
+.company-compliance-dialog-overview h3 { margin:2px 0 10px; font-size:1rem; }
+.company-compliance-dialog-overview .company-compliance-dialog-details { border-bottom:0; padding-bottom:0; }
+.company-compliance-dialog-evidence { padding:16px; border:1px solid var(--border); border-radius:14px; }
+.company-compliance-pending-evidence { margin:12px 0 0; font-size:.9rem; color:var(--text-muted); overflow-wrap:anywhere; }
+.company-compliance-dialog-actions { position:sticky; bottom:0; z-index:1; flex-wrap:wrap; align-items:center; padding:14px 0 0; background:var(--surface); border-top:1px solid var(--border); }
+.company-compliance-dialog-actions button { min-height:44px; }
+#companyComplianceDialogSave:disabled { opacity:.55; cursor:not-allowed; }
+@media (max-width:600px) {
+ .company-compliance-dialog-overview,.company-compliance-dialog-evidence { padding:12px; }
+ .company-compliance-dialog-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .company-compliance-dialog-actions button { width:100%; margin:0; }
+ #companyComplianceDialogSave { grid-column:1/-1; }
+}
