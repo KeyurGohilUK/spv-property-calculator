@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.60.75-mobile-dialog-layout';
+const CACHE_NAME = 'spv-property-calculator-v1.60.76-mobile-dialog-layout';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -135,7 +135,15 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(async () => (await caches.match(event.request)) || caches.match(APP_SHELL))
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          const recoveryPage = new URL('reset-password/', ROOT);
+          if (requestUrl.pathname === recoveryPage.pathname) {
+            return caches.match(recoveryPage.href);
+          }
+          return caches.match(APP_SHELL);
+        })
     );
     return;
   }

@@ -153,7 +153,28 @@ const MOCK_SUPABASE_SDK = `
   }
 
   window.supabase = {
-    createClient() {
+    createClient(_url, _key, { auth: config }) {
+      if (config.storageKey === 'spv-password-recovery') {
+        state.calls.push({ type: 'recovery-client', config });
+        return {
+          auth: {
+            resetPasswordForEmail(email, options) {
+              state.calls.push({ type: 'reset-email', email, options });
+              return Promise.resolve({ error: null });
+            },
+            setSession({ access_token, refresh_token }) {
+              const valid = access_token === 'test-access' && refresh_token === 'test-refresh';
+              return Promise.resolve(valid
+                ? { data: { session: { user: { id: 'recovery-user' } } }, error: null }
+                : { data: { session: null }, error: { status: 401 } });
+            },
+            updateUser({ password }) {
+              state.calls.push({ type: 'reset-password', password });
+              return Promise.resolve({ error: null });
+            }
+          }
+        };
+      }
       let authChangeHandler = () => {};
       return {
         auth: {

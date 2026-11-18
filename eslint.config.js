@@ -15,11 +15,13 @@ export default [
   {
     files: [
       'src/services/access-gate.js',
+      'src/features/account/password-recovery.js',
       'src/services/account-controller.js',
       'src/services/policy-acceptance.js',
       'src/components/help-guide.js',
       'src/components/secondary-page-header.js',
       'tests/e2e/onboarding-login.spec.js',
+      'tests/e2e/password-recovery.spec.js',
       'tests/e2e/support/cloud-mock.js',
       'tests/test-onboarding-access.mjs',
       'eslint.config.js',

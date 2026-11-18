@@ -66,24 +66,40 @@
     return sdkLoadPromise;
   }
 
-  function ensureClient() {
-    if (client) return client;
+  function createClient(auth) {
     if (!isConfigured()) throw new Error('Supabase is not configured yet.');
     if (!window.supabase?.createClient) throw new Error('Supabase library is not loaded yet.');
 
-    client = window.supabase.createClient(
+    return window.supabase.createClient(
       String(config.url).replace(/\/$/, ''),
       String(config.publishableKey || config.anonKey),
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          flowType: 'implicit'
-        }
-      }
+      { auth }
     );
+  }
+
+  function ensureClient() {
+    if (!client) {
+      client = createClient({
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'implicit'
+      });
+    }
     return client;
+  }
+
+  async function createPasswordRecoveryAuth() {
+    if (!isConfigured()) throw new Error('Supabase is not configured yet.');
+    await loadSdk();
+    // Keep email-link sessions out of the workspace's storage and auth channel.
+    return createClient({
+      storageKey: 'spv-password-recovery',
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      flowType: 'implicit'
+    }).auth;
   }
 
   function emitAuth(user, event = 'AUTH_STATE') {
@@ -103,6 +119,12 @@
       sdkLoadError = '';
     } catch (error) {
       return { configured: true, available: false, reason: error.message, user: null };
+    }
+
+    // Supabase can fall back to the Site URL if a redirect is not allowlisted.
+    // A reset link must never establish a workspace session on that page.
+    if (new URLSearchParams(window.location?.hash?.slice(1)).get('type') === 'recovery') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
     const state = getConfigState();
@@ -903,6 +925,7 @@
   window.SPVCloud = Object.freeze({
     isConfigured,
     getConfigState,
+    createPasswordRecoveryAuth,
     init,
     onAuthChange,
     onBeforeSignOut,

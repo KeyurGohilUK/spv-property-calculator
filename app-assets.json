@@ -1,8 +1,10 @@
 {
-  "version": "1.60.75",
+  "version": "1.60.76",
   "assets": [
     "./",
     "./index.html",
+    "./reset-password/",
+    "./src/features/account/password-recovery.js",
     "./styles.css",
     "./styles/tokens.css",
     "./styles/base.css",
