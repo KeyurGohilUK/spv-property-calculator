@@ -9,15 +9,16 @@ for (const theme of ['light', 'dark']) {
     await page.route('**/loader-test/', (route) =>
       route.fulfill({
         contentType: 'text/html',
-        body: `<!doctype html><html lang="en" data-theme="${theme}"><title>Loader test</title><link rel="stylesheet" href="/styles.css"><main><button type="button">Continue</button></main></html>`,
+        body: `<!doctype html><html lang="en" data-theme="${theme}"><title>Loader test</title><link rel="stylesheet" href="/styles.css"><main><label><input type="checkbox">Continue</label></main></html>`,
       }),
     );
     await page.emulateMedia({
       reducedMotion: theme === 'dark' ? 'reduce' : 'no-preference',
     });
     await page.goto('/loader-test/');
-    const button = page.getByRole('button', { name: 'Continue' });
-    await button.focus();
+    const checkbox = page.getByRole('checkbox', { name: 'Continue' });
+    const bounds = await checkbox.boundingBox();
+    await checkbox.focus();
     await page.evaluate(async () => {
       const { withBlockingLoader } =
         await import('/src/components/blocking-loader.js');
@@ -35,8 +36,13 @@ for (const theme of ['light', 'dark']) {
       name: 'Checking workspace access…',
     });
     await expect(loader).toBeVisible();
-    await expect(button).toHaveCount(0);
+    await page.mouse.click(
+      bounds.x + bounds.width / 2,
+      bounds.y + bounds.height / 2,
+    );
+    await expect(checkbox).not.toBeChecked();
     await page.keyboard.press('Tab');
+    await expect(checkbox).not.toBeFocused();
     await page.keyboard.press('Escape');
     await expect(loader).toBeVisible();
     await expect
@@ -54,7 +60,7 @@ for (const theme of ['light', 'dark']) {
     ).toBeVisible();
     await page.evaluate(() => window.loaderTest.first.resolve());
     await expect(page.locator('.blocking-loader')).toBeHidden();
-    await expect(button).toBeFocused();
+    await expect(checkbox).toBeFocused();
   });
 }
 
