@@ -21,7 +21,7 @@ assert.match(controller, /cloud\.signIn\(email, password\)/, 'Shared controller 
 assert.match(controller, /cloud\.signUp\(\s*email,\s*password/, 'Shared controller must own account creation');
 assert.match(controller, /cloud\.signOut\(\)/, 'Shared controller must own sign-out');
 assert.match(controller, /cloud\.onAuthChange/, 'Shared controller must own authentication state changes');
-assert.match(controller, /await cloud\.init\(\)/, 'Shared controller must own cloud initialisation');
+assert.match(controller, /runBlocking\([^\n]+\(\) => cloud\.init\(\)\)/, 'Shared controller must own cloud initialisation');
 assert.match(app, /requireCurrentPolicyAcceptance/, 'Home must require current policy acknowledgement after authentication');
 assert.match(secondary, /requireCurrentPolicyAcceptance/, 'Secondary pages must require current policy acknowledgement after authentication');
 assert.match(policyAcceptance, /POLICY_VERSION = '2026-08-26'/, 'Policy gate must define the current policy version');

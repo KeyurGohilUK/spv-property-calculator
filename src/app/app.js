@@ -1,3 +1,4 @@
+import { withBlockingLoader } from '../components/blocking-loader.js';
 import { getIconSvg } from '../components/shared-icons.js';
 import { TAX_CONFIG } from '../config/tax-config.js';
 import { renderSyncStatus } from '../components/sync-status.js';
@@ -1293,17 +1294,24 @@ async function setupCloud() {
       syncButton: $('dialogSyncBtn'), accountMessage: $('signedInMessage'),
       displayNameInput: $('accountDisplayName'), saveDisplayNameButton: $('saveDisplayNameBtn')
     },
+    runBlocking: withBlockingLoader,
     sync: () => syncCloud(),
     isSyncing: () => cloudSyncing,
     getDisplayName: getCloudDisplayName,
     onUserChange: async (user, { reason }) => {
       cloudUser = user;
-      if (user && !await requireCurrentPolicyAcceptance(user, { cloud })) return;
+      const blockWorkspaceLoad = reason === 'initialise' || reason === 'sign-in';
+      const workspaceLoader = blockWorkspaceLoad ? withBlockingLoader : undefined;
+      if (user && !await requireCurrentPolicyAcceptance(user, { cloud, runBlocking: workspaceLoader })) return;
       renderAccessState(user);
       renderCloudState();
       renderNotes();
       if (editingId && cloudUser) loadNotes();
-      if (cloudUser && navigator.onLine && reason !== 'profile') await syncCloud({ showFeedback: false });
+      if (cloudUser && navigator.onLine && reason !== 'profile') {
+        const loadWorkspace = () => syncCloud({ showFeedback: false });
+        if (workspaceLoader) await workspaceLoader('Loading your workspace…', loadWorkspace);
+        else await loadWorkspace();
+      }
       if (!cloudUser && reason === 'sign-out') cloudLastMessage = 'Signed out. Your local offline copy is still on this device.';
     },
     onInitialised: (state) => {

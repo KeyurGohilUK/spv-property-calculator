@@ -109,7 +109,11 @@ function collectAcceptance({ cloud, root = document }) {
 
 export async function requireCurrentPolicyAcceptance(
   user,
-  { cloud = window.SPVCloud, root = document } = {},
+  {
+    cloud = window.SPVCloud,
+    root = document,
+    runBlocking = (_message, operation) => operation(),
+  } = {},
 ) {
   if (!user) return false;
   if (pendingAcceptance) return pendingAcceptance;
@@ -123,7 +127,9 @@ export async function requireCurrentPolicyAcceptance(
           /* Require acknowledgement. */
         }
       }
-      const record = await cloud.getPolicyAcceptance();
+      const record = await runBlocking('Checking your acknowledgement…', () =>
+        cloud.getPolicyAcceptance(),
+      );
       if (isCurrent(record)) return true;
       if (cloud.getCurrentUser?.()?.id !== user.id) return false;
       return await collectAcceptance({ cloud, root });

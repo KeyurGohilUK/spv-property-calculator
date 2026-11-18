@@ -1,8 +1,11 @@
 {
-  "version": "1.60.80",
+  "version": "1.61.0",
   "assets": [
     "./",
     "./index.html",
+    "./src/components/blocking-loader.js",
+    "./styles/components/blocking-loader.css",
+    "./icons/spv-loading.gif",
     "./reset-password/",
     "./src/features/account/password-recovery.js",
     "./src/components/password-field.js",
