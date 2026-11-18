@@ -26,6 +26,13 @@ for (const theme of ['light', 'dark']) {
       page.getByRole('textbox', { name: 'Email address' }),
     ).toHaveValue('existing@example.test');
     await page.getByRole('button', { name: 'Send reset link' }).click();
+    await expect(page.getByRole('status')).toHaveAttribute(
+      'data-state',
+      'success',
+    );
+    await expect(page.getByRole('status').locator('strong')).toHaveText(
+      'Check your inbox and spam folder',
+    );
     await expect(page.getByRole('status')).toContainText(
       'If an account exists',
     );
@@ -62,6 +69,15 @@ test('@mobile recovery session updates the password without opening the workspac
     },
   });
   const password = page.getByLabel('New password', { exact: true });
+  const save = page.getByRole('button', { name: 'Save new password' });
+  await save.click();
+  await expect(password).toHaveAccessibleDescription('Enter a new password.');
+  await expect(password).toBeFocused();
+  await password.fill('short');
+  await save.click();
+  await expect(password).toHaveAccessibleDescription(
+    'Use at least 6 characters.',
+  );
   await password.fill('new-test-password');
   await page
     .getByRole('button', { name: 'Show new password', exact: true })
@@ -71,7 +87,6 @@ test('@mobile recovery session updates the password without opening the workspac
   await confirmation.fill('different-password');
   await page.getByRole('button', { name: 'Show confirm new password' }).click();
   await expect(confirmation).toHaveAttribute('type', 'text');
-  const save = page.getByRole('button', { name: 'Save new password' });
   expect(
     await save.evaluate((button) => {
       const range = document.createRange();
@@ -82,9 +97,10 @@ test('@mobile recovery session updates the password without opening the workspac
   await save.click();
   await expect(password).toHaveAttribute('type', 'password');
   await expect(confirmation).toHaveAttribute('type', 'password');
-  await expect(page.getByRole('status')).toHaveText(
+  await expect(confirmation).toHaveAccessibleDescription(
     'The passwords do not match.',
   );
+  await expect(confirmation).toBeFocused();
   expect(await cloudCalls(page)).not.toContainEqual(
     expect.objectContaining({ type: 'reset-password' }),
   );
@@ -140,4 +156,36 @@ test('@mobile sign-in password visibility expires and resets when the dialog clo
   await login.click();
   await expect(password).toHaveAttribute('type', 'password');
   await expect(password).toHaveValue('test-password');
+});
+
+test('@mobile sign-in and reset requests validate required fields and email format', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.locator('#publicLoginBtn').click();
+  const email = page.locator('#authEmail');
+  const password = page.locator('#authPassword');
+  await page.locator('#signInBtn').click();
+  await expect(email).toHaveAccessibleDescription('Enter your email address.');
+  await expect(email).toBeFocused();
+  await expect(password).toHaveAccessibleDescription('Enter your password.');
+  await email.fill('invalid');
+  await email.press('Enter');
+  await expect(email).toHaveAccessibleDescription(
+    'Enter a valid email address.',
+  );
+  await page.getByRole('link', { name: 'Forgot password?' }).click();
+  const resetEmail = page.getByRole('textbox', { name: 'Email address' });
+  const send = page.getByRole('button', { name: 'Send reset link' });
+  await send.click();
+  await expect(resetEmail).toHaveAccessibleDescription(
+    'Enter a valid email address.',
+  );
+  await resetEmail.clear();
+  await send.click();
+  await expect(resetEmail).toHaveAccessibleDescription(
+    'Enter your email address.',
+  );
+  await expect(resetEmail).toBeFocused();
+  expect(await cloudCalls(page)).toEqual([]);
 });

@@ -1,3 +1,8 @@
+import {
+  setupAuthField,
+  validateAuthEmail,
+  validateAuthFields,
+} from '../../services/auth-validation.js';
 import { setupPasswordField } from '../../components/password-field.js';
 import { takeRecoveryEmail } from '../../services/password-recovery-email.js';
 
@@ -10,21 +15,59 @@ let auth;
 const hidePassword = setupPasswordField(updateForm.elements.password);
 const hideConfirmation = setupPasswordField(updateForm.elements.confirmation);
 const emailDraft = takeRecoveryEmail();
+const emailField = setupAuthField(
+  requestForm.elements.email,
+  'Enter your email address.',
+  validateAuthEmail,
+);
+const passwordInput = updateForm.elements.password;
+const passwordField = setupAuthField(
+  passwordInput,
+  'Enter a new password.',
+  (input) =>
+    input.value.length < input.minLength
+      ? `Use at least ${input.minLength} characters.`
+      : '',
+);
+const confirmationField = setupAuthField(
+  updateForm.elements.confirmation,
+  'Confirm your new password.',
+  (input) =>
+    input.value !== passwordInput.value ? 'The passwords do not match.' : '',
+);
+passwordInput.addEventListener('input', confirmationField.clear);
+requestForm.noValidate = true;
+updateForm.noValidate = true;
+
+function setRecoveryStatus(message, state = '', title = '') {
+  status.dataset.state = state;
+  status.textContent = message;
+  if (title) {
+    const label = document.createElement('strong');
+    label.textContent = title;
+    status.prepend(label, ' ');
+  }
+}
 
 requestForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (!validateAuthFields(emailField)) return;
   const button = event.submitter;
+  if (button.disabled) return;
   const email = new FormData(requestForm).get('email').trim();
   button.disabled = true;
-  status.textContent = 'Requesting reset link…';
+  setRecoveryStatus('Requesting reset link…');
   try {
     auth ??= await window.SPVCloud.createPasswordRecoveryAuth();
     const { error } = await auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl.href,
     });
     if (error) throw error;
-    status.textContent =
-      'If an account exists for that email address, you’ll receive a reset link. Check your inbox and spam folder.';
+    setRecoveryStatus(
+      'If an account exists for that email address, you’ll receive a reset link.',
+      'success',
+      'Check your inbox and spam folder',
+    );
   } catch {
     status.textContent = navigator.onLine
       ? 'We couldn’t request a reset link right now. Try again later or contact your workspace administrator.'
@@ -38,24 +81,23 @@ updateForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   hidePassword();
   hideConfirmation();
-  const fields = new FormData(updateForm);
-  const password = fields.get('password');
-  if (password !== fields.get('confirmation')) {
-    status.textContent = 'The passwords do not match.';
-    updateForm.elements.confirmation.focus();
-    return;
-  }
+  if (!validateAuthFields(passwordField, confirmationField)) return;
+  const password = passwordInput.value;
   const button = event.submitter;
+  if (button.disabled) return;
   button.disabled = true;
-  status.textContent = 'Saving your new password…';
+  setRecoveryStatus('Saving your new password…');
   try {
     const { error } = await auth.updateUser({ password });
     if (error) throw error;
     updateForm.reset();
     updateForm.hidden = true;
     document.querySelector('main a').focus();
-    status.textContent =
-      'Password updated. Return to sign in with your new password.';
+    setRecoveryStatus(
+      'Return to sign in with your new password.',
+      'success',
+      'Password updated',
+    );
   } catch (error) {
     if (error.status === 401 || error.code === 'session_not_found') {
       updateForm.reset();
@@ -102,7 +144,7 @@ async function initialise() {
     if (error || !data.session)
       throw error || new Error('Missing recovery session.');
     heading.textContent = 'Choose a new password';
-    status.textContent = '';
+    setRecoveryStatus('');
     updateForm.hidden = false;
     updateForm.elements.password.focus();
   } catch {

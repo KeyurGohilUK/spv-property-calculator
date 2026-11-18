@@ -24,13 +24,13 @@
   <main class="legal-main">
     <article class="legal-card recovery-card">
       <h1 id="recovery-heading">Reset your password</h1>
-      <p id="recovery-status" role="status"></p>
+      <p id="recovery-status" class="recovery-status" role="status"></p>
       <form id="recovery-request" hidden>
         <p>Enter your workspace email address to request a password reset link.</p>
-        <label class="field">
-          <span>Email address</span>
-          <input name="email" type="email" autocomplete="email" required>
-        </label>
+        <div class="field">
+          <label for="recovery-email">Email address</label>
+          <input id="recovery-email" name="email" type="email" autocomplete="email" required>
+        </div>
         <div class="recovery-actions">
           <button class="primary-btn" type="submit">Send reset link</button>
         </div>

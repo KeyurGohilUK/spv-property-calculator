@@ -38,7 +38,7 @@ function getDialog(root = document) {
         <li><a href="${new URL('privacy.html', legalRoot).href}" target="_blank" rel="noopener">Privacy Policy</a></li>
         <li><a href="${new URL('disclaimer.html', legalRoot).href}" target="_blank" rel="noopener">Planning Disclaimer</a></li>
       </ul>
-      <label class="policy-confirmation"><input id="policyAcceptanceCheck" type="checkbox"><span>I agree to the Terms of Use and acknowledge that I have read the Privacy Policy and Disclaimer.</span></label>
+      <label class="policy-confirmation"><input id="policyAcceptanceCheck" required type="checkbox"><span>I agree to the Terms of Use and acknowledge that I have read the Privacy Policy and Disclaimer.</span></label>
       <p id="policyAcceptanceMessage" class="auth-message" role="status" aria-live="polite"></p>
       <div class="dialog-actions policy-acceptance-actions"><button id="acceptPoliciesBtn" class="primary-btn" type="button" disabled>Accept and continue</button><button id="declinePoliciesBtn" class="secondary-btn" type="button">Sign out</button></div>
       <p class="muted tiny">Acceptance version ${POLICY_VERSION}. The date and versions accepted will be stored with your account.</p>
