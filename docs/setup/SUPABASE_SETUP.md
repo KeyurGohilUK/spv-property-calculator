@@ -145,9 +145,15 @@ Then open **GitHub → repository → Settings → Pages**, choose **Deploy from
 
 1. Open the GitHub Pages URL.
 2. Tap/click **Sign in** in the app header.
-3. Sign in with an account provisioned and approved by your workspace administrator. The app does not offer self-service registration or password reset. Use **Forgot password or need access?** for administrator-assisted recovery instructions.
+3. Sign in with an account provisioned and approved by your workspace administrator. Use **Forgot password?** to reset the password on an existing account. New accounts and workspace approval are handled by your workspace administrator.
 4. Existing local properties will be merged into the shared Supabase property list on sync.
 5. Save a property. The app first saves locally, then syncs the record to the shared Supabase workspace when online. Other signed-in users receive it on their next sync/app load.
+
+### Enable password recovery emails
+
+- In **Authentication → URL Configuration → Redirect URLs**, add your deployed app's exact recovery URL, including the trailing slash and query string. For example, add `https://keyurgohiluk.github.io/spv-property-calculator/reset-password/?recovery=1` and the equivalent URL for any custom domain you use.
+- In **Authentication → Email Templates → Reset Password**, use the Supabase confirmation URL (`{{ .ConfirmationURL }}`) so the email opens the configured recovery page.
+- Set up [custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) for delivery to workspace users outside the Supabase project team. Verify delivery and a complete reset with a test account after deployment.
 
 ## 9. Offline behaviour
 

@@ -1,7 +1,6 @@
 {
-  "version": "1.60.75",
+  "version": "1.60.76",
   "notes": [
-    "Show login before the workspace tour and wait for approved access and policy acknowledgement.",
-    "Keep the workspace usable after dismissing the tour and provide account access help."
+    "Existing users can request a password reset email from the sign-in screen."
   ]
 }

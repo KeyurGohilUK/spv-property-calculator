@@ -46,7 +46,8 @@ document.body.insertAdjacentHTML(
       <label class="field"><span>Email</span><input id="secondaryAuthEmail" type="email" autocomplete="email"></label>
       <label class="field"><span>Password</span><input id="secondaryAuthPassword" type="password" autocomplete="current-password" minlength="6"></label>
       <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button></div>
-      <details class="auth-help"><summary>Forgot password or need access?</summary><p class="muted small">Contact your workspace administrator to request access, account approval or a password reset. Self-service registration and password reset are not available in this app.</p></details>
+      <p class="small"><a href="${new URL('../../reset-password/', import.meta.url).href}">Forgot password?</a></p>
+      <details class="auth-help"><summary>Need workspace access?</summary><p class="muted small">Contact your workspace administrator to request access or account approval.</p></details>
       <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondarySignedIn" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Signed in</h3><p id="secondarySignedInEmail" class="muted"></p>
