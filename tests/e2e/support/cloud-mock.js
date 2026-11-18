@@ -191,7 +191,10 @@ const MOCK_SUPABASE_SDK = `
             authChangeHandler('SIGNED_OUT', null);
             return Promise.resolve({ error: null });
           },
-          signInWithPassword() {
+          signInWithPassword({ password }) {
+            if (options.rejectedPassword && password === options.rejectedPassword) {
+              return Promise.resolve({ data: null, error: { code: 'invalid_credentials', message: 'Invalid login credentials' } });
+            }
             sessionStorage.setItem('spv-test-signed-in', 'true');
             session = {
               access_token: 'playwright-access-token',

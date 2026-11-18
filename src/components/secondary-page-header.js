@@ -46,9 +46,9 @@ document.body.insertAdjacentHTML(
       <div class="field"><label for="secondaryAuthEmail">Email</label><input id="secondaryAuthEmail" required type="email" autocomplete="email"></div>
       <div class="field"><label for="secondaryAuthPassword">Password</label><input id="secondaryAuthPassword" required type="password" autocomplete="current-password" minlength="6"></div>
       <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button></div>
+      <p id="secondaryAuthMessage" class="auth-message auth-sign-in-message" role="status"></p>
       <a class="auth-recovery-link" href="${new URL('../../reset-password/', import.meta.url).href}">Forgot password?</a>
       <details class="auth-help"><summary>Need workspace access?</summary><p class="muted small">Contact your workspace administrator to request access or account approval.</p></details>
-      <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>
     <div id="secondarySignedIn" class="hidden"><p class="eyebrow">Cloud sync</p><h3>Signed in</h3><p id="secondarySignedInEmail" class="muted"></p>
       <div class="auth-account-card"><strong>Supabase connected</strong><small>Company details, properties, expenses and tasks share the same workspace.</small></div>
