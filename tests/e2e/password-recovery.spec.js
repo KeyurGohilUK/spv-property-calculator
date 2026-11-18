@@ -16,11 +16,15 @@ for (const theme of ['light', 'dark']) {
     );
     await page.goto('/');
     await page.locator('#publicLoginBtn').click();
-    await page.getByRole('link', { name: 'Forgot password?' }).click();
+    await page.locator('#authEmail').fill('existing@example.test');
+    const recoveryLink = page.getByRole('link', { name: 'Forgot password?' });
+    await expect(recoveryLink).toHaveCSS('font-size', '16px');
+    await recoveryLink.click();
+    await expect(page).toHaveURL(/\/reset-password\/$/);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    await page
-      .getByRole('textbox', { name: 'Email address' })
-      .fill('existing@example.test');
+    await expect(
+      page.getByRole('textbox', { name: 'Email address' }),
+    ).toHaveValue('existing@example.test');
     await page.getByRole('button', { name: 'Send reset link' }).click();
     await expect(page.getByRole('status')).toContainText(
       'If an account exists',
@@ -57,13 +61,27 @@ test('@mobile recovery session updates the password without opening the workspac
       flowType: 'implicit',
     },
   });
+  const password = page.getByLabel('New password', { exact: true });
+  await password.fill('new-test-password');
   await page
-    .getByLabel('New password', { exact: true })
-    .fill('new-test-password');
+    .getByRole('button', { name: 'Show new password', exact: true })
+    .click();
+  await expect(password).toHaveAttribute('type', 'text');
   const confirmation = page.getByLabel('Confirm new password');
   await confirmation.fill('different-password');
+  await page.getByRole('button', { name: 'Show confirm new password' }).click();
+  await expect(confirmation).toHaveAttribute('type', 'text');
   const save = page.getByRole('button', { name: 'Save new password' });
+  expect(
+    await save.evaluate((button) => {
+      const range = document.createRange();
+      range.selectNodeContents(button);
+      return range.getClientRects().length;
+    }),
+  ).toBe(1);
   await save.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await expect(confirmation).toHaveAttribute('type', 'password');
   await expect(page.getByRole('status')).toHaveText(
     'The passwords do not match.',
   );
@@ -94,4 +112,31 @@ test('@mobile expired recovery link allows a fresh request', async ({
     page.getByRole('button', { name: 'Save new password' }),
   ).toBeHidden();
   await expect(page).toHaveURL(/\/reset-password\/\?recovery=1$/);
+});
+
+test('@mobile sign-in password visibility expires and resets when the dialog closes', async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto('/');
+  const login = page.locator('#publicLoginBtn');
+  await login.click();
+  const password = page.locator('#authPassword');
+  await password.fill('test-password');
+  const reveal = page.getByRole('button', { name: 'Show password' });
+  await expect(password).toHaveAttribute('type', 'password');
+  await reveal.focus();
+  await page.keyboard.press('Space');
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(reveal).toHaveAttribute('aria-pressed', 'true');
+  await reveal.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await reveal.click();
+  await page.clock.fastForward(15001);
+  await expect(password).toHaveAttribute('type', 'password');
+  await reveal.click();
+  await page.locator('#closeAuthDialog').click();
+  await login.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await expect(password).toHaveValue('test-password');
 });

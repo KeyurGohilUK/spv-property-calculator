@@ -83,6 +83,16 @@
 button:disabled { opacity: .55; cursor: not-allowed; }
 
 .auth-dialog { max-width: 460px; }
+.auth-dialog a { color: var(--brand-strong); text-underline-offset: .18em; }
+.auth-dialog a:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 3px; }
+.auth-recovery-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: 4px;
+  font-size: 1rem;
+  font-weight: 650;
+}
 .auth-dialog code { padding: 2px 5px; border-radius: 6px; background: var(--surface-2); color: var(--text); }
 .auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
 .auth-actions.dialog-actions { display: flex; margin-top: 18px; }

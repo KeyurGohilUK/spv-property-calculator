@@ -32,3 +32,9 @@
   .legal-footer { width: min(100% - 24px, 820px); }
   .legal-card { border-radius: 18px; }
 }
+
+.recovery-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}

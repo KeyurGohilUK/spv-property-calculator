@@ -1,5 +1,7 @@
 .field { display: grid; gap: 7px; margin-top: 14px; }
 .field > span, .field > label { font-weight: 750; font-size: 13px; }
+.auth-dialog .field > :is(span:not(.password-field), label),
+.recovery-card .field > :is(span:not(.password-field), label) { font-size: .9375rem; }
 .field em { font-style: normal; color: var(--muted); font-weight: 500; font-size: 11px; }
 .field small { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .field input, .field textarea, .field select, .expense-row input {
@@ -12,6 +14,28 @@
   padding: 11px 13px;
   font-size: 16px;
 }
+.password-field { display: block; position: relative; min-width: 0; }
+.password-field input { padding-inline-end: 52px; }
+.password-field input::-ms-reveal { display: none; }
+.password-visibility {
+  position: absolute;
+  inset-inline-end: 2px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  color: var(--brand-strong);
+  background: transparent;
+  cursor: pointer;
+}
+.password-visibility:hover, .password-visibility[aria-pressed="true"] { background: var(--brand-soft); }
+.password-visibility:focus-visible { outline: 2px solid var(--brand); outline-offset: -3px; }
+.password-visibility svg { width: 21px; height: 21px; }
 .field textarea { resize: vertical; min-height: 100px; }
 .field select {
   appearance: none;

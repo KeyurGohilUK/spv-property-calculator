@@ -22,7 +22,7 @@
     </a>
   </header>
   <main class="legal-main">
-    <article class="legal-card">
+    <article class="legal-card recovery-card">
       <h1 id="recovery-heading">Reset your password</h1>
       <p id="recovery-status" role="status"></p>
       <form id="recovery-request" hidden>
@@ -31,20 +31,20 @@
           <span>Email address</span>
           <input name="email" type="email" autocomplete="email" required>
         </label>
-        <div class="auth-actions dialog-actions">
+        <div class="recovery-actions">
           <button class="primary-btn" type="submit">Send reset link</button>
         </div>
       </form>
       <form id="recovery-update" hidden>
-        <label class="field">
-          <span>New password</span>
-          <input name="password" type="password" autocomplete="new-password" minlength="6" required>
-        </label>
-        <label class="field">
-          <span>Confirm new password</span>
-          <input name="confirmation" type="password" autocomplete="new-password" minlength="6" required>
-        </label>
-        <div class="auth-actions dialog-actions">
+        <div class="field">
+          <label for="recovery-password">New password</label>
+          <input id="recovery-password" name="password" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="field">
+          <label for="recovery-confirmation">Confirm new password</label>
+          <input id="recovery-confirmation" name="confirmation" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="recovery-actions">
           <button class="primary-btn" type="submit">Save new password</button>
         </div>
       </form>

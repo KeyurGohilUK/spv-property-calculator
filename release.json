@@ -1,6 +1,6 @@
 {
-  "version": "1.60.76",
+  "version": "1.60.77",
   "notes": [
-    "Existing users can request a password reset email from the sign-in screen."
+    "Improve sign-in and password reset forms, carry over the entered email, and add temporary password visibility."
   ]
 }

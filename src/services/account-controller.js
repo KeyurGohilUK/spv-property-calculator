@@ -1,3 +1,5 @@
+import { setupPasswordField } from '../components/password-field.js';
+import { saveRecoveryEmail } from './password-recovery-email.js';
 import {
   renderAccessState,
   requireWorkspaceMembership,
@@ -40,6 +42,13 @@ export function setupAccountController({
 } = {}) {
   let user = null;
   let busy = false;
+  const hidePassword = setupPasswordField(elements.password);
+  elements.dialog.addEventListener('close', hidePassword);
+  elements.signedOut
+    .querySelector('.auth-recovery-link')
+    ?.addEventListener('click', () => {
+      saveRecoveryEmail(elements.email.value.trim());
+    });
 
   const setBusy = (value) => {
     busy = Boolean(value);
@@ -135,6 +144,7 @@ export function setupAccountController({
     if (busy) return;
     const email = elements.email.value.trim();
     const password = elements.password.value;
+    hidePassword();
     const validation = validateAccountCredentials(email, password);
     if (validation) {
       elements.authMessage.textContent = validation;
@@ -161,6 +171,7 @@ export function setupAccountController({
   const signUp = async () => {
     const email = elements.email.value.trim();
     const password = elements.password.value;
+    hidePassword();
     const validation = validateAccountCredentials(email, password, true);
     if (validation) {
       elements.authMessage.textContent = validation;
