@@ -38,3 +38,13 @@
   justify-content: flex-end;
   margin-top: 18px;
 }
+
+.recovery-status[data-state="success"] {
+  padding: 14px 16px;
+  border: 1px solid var(--positive);
+  border-inline-start-width: 4px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--positive) 10%, var(--surface));
+  color: var(--text);
+}
+.recovery-status strong { display: block; }

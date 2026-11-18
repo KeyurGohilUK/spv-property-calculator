@@ -1,6 +1,6 @@
 {
-  "version": "1.60.77",
+  "version": "1.60.78",
   "notes": [
-    "Improve sign-in and password reset forms, carry over the entered email, and add temporary password visibility."
+    "Highlight password reset confirmations and show required-field errors during sign-in and password recovery."
   ]
 }

@@ -1,3 +1,8 @@
+import {
+  setupAuthField,
+  validateAuthEmail,
+  validateAuthFields,
+} from './auth-validation.js';
 import { setupPasswordField } from '../components/password-field.js';
 import { saveRecoveryEmail } from './password-recovery-email.js';
 import {
@@ -43,6 +48,22 @@ export function setupAccountController({
   let user = null;
   let busy = false;
   const hidePassword = setupPasswordField(elements.password);
+  const emailField = setupAuthField(
+    elements.email,
+    'Enter your email address.',
+    validateAuthEmail,
+  );
+  const passwordField = setupAuthField(
+    elements.password,
+    'Enter your password.',
+  );
+  const nameField =
+    elements.displayNameInput &&
+    setupAuthField(
+      elements.displayNameInput,
+      'Enter your display name.',
+      (input) => (input.value.trim() ? '' : 'Enter your display name.'),
+    );
   elements.dialog.addEventListener('close', hidePassword);
   elements.signedOut
     .querySelector('.auth-recovery-link')
@@ -145,11 +166,8 @@ export function setupAccountController({
     const email = elements.email.value.trim();
     const password = elements.password.value;
     hidePassword();
-    const validation = validateAccountCredentials(email, password);
-    if (validation) {
-      elements.authMessage.textContent = validation;
-      return;
-    }
+    elements.authMessage.textContent = '';
+    if (!validateAuthFields(emailField, passwordField)) return;
     setBusy(true);
     elements.authMessage.textContent = 'Signing in…';
     try {
@@ -172,6 +190,8 @@ export function setupAccountController({
     const email = elements.email.value.trim();
     const password = elements.password.value;
     hidePassword();
+    elements.authMessage.textContent = '';
+    if (!validateAuthFields(emailField, passwordField)) return;
     const validation = validateAccountCredentials(email, password, true);
     if (validation) {
       elements.authMessage.textContent = validation;
@@ -223,10 +243,8 @@ export function setupAccountController({
 
   const saveDisplayName = async () => {
     const name = elements.displayNameInput?.value.trim() || '';
-    if (!name) {
-      elements.accountMessage.textContent = 'Enter your name first.';
-      return;
-    }
+    elements.accountMessage.textContent = '';
+    if (!nameField || !validateAuthFields(nameField)) return;
     setBusy(true);
     elements.accountMessage.textContent = 'Saving name…';
     try {
@@ -261,9 +279,11 @@ export function setupAccountController({
   elements.signOutButton.addEventListener('click', signOut);
   elements.syncButton.addEventListener('click', () => sync?.());
   elements.saveDisplayNameButton?.addEventListener('click', saveDisplayName);
-  elements.password.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') signIn();
-  });
+  for (const input of [elements.email, elements.password]) {
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.isComposing) signIn();
+    });
+  }
 
   const initialise = async () => {
     if (!cloud) {

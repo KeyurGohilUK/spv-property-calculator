@@ -445,13 +445,13 @@
       <p class="eyebrow">Cloud sync</p>
       <h3>Sign in to your workspace</h3>
       <p class="muted small">Sign in with an approved account to open the private workspace.</p>
-      <label class="field">
-        <span>Email</span>
-        <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
-      </label>
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" required type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+      </div>
       <div class="field">
         <label for="authPassword">Password</label>
-        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Password">
+        <input id="authPassword" required type="password" autocomplete="current-password" minlength="6" placeholder="Password">
       </div>
       <div class="auth-actions">
         <button id="signInBtn" class="primary-btn" type="button">Sign in</button>
@@ -469,7 +469,7 @@
       <div class="field account-name-field">
         <label for="accountDisplayName">Display name <em>(shown on notes)</em></label>
         <div class="account-name-row">
-          <input id="accountDisplayName" type="text" autocomplete="name" maxlength="80" placeholder="Your name">
+          <input id="accountDisplayName" required type="text" autocomplete="name" maxlength="80" placeholder="Your name">
           <button id="saveDisplayNameBtn" class="secondary-btn compact-btn" type="button">Save</button>
         </div>
       </div>
