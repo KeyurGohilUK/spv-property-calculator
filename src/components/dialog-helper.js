@@ -37,6 +37,7 @@ export function setupDialog(dialog, { closeButtons = [], label, preventCancel = 
   if (preventCancel) dialog.addEventListener('cancel', (event) => event.preventDefault());
   if (closeOnBackdrop) {
     dialog.addEventListener('click', (event) => {
+      if (event.target !== dialog) return;
       const bounds = dialog.getBoundingClientRect();
       const outside = event.clientX < bounds.left || event.clientX > bounds.right
         || event.clientY < bounds.top || event.clientY > bounds.bottom;

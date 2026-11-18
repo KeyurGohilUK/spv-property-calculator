@@ -67,7 +67,7 @@ test('@mobile recovery session updates the password without opening the workspac
     .getByRole('button', { name: 'Show new password', exact: true })
     .click();
   await expect(password).toHaveAttribute('type', 'text');
-  const confirmation = page.getByLabel('Confirm new password');
+  const confirmation = page.getByLabel('Confirm new password', { exact: true });
   await confirmation.fill('different-password');
   await page.getByRole('button', { name: 'Show confirm new password' }).click();
   await expect(confirmation).toHaveAttribute('type', 'text');
@@ -125,6 +125,7 @@ test('@mobile sign-in password visibility expires and resets when the dialog clo
   await password.fill('test-password');
   const reveal = page.getByRole('button', { name: 'Show password' });
   await expect(password).toHaveAttribute('type', 'password');
+  await page.clock.runFor(50);
   await reveal.focus();
   await page.keyboard.press('Space');
   await expect(password).toHaveAttribute('type', 'text');
