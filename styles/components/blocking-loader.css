@@ -1,0 +1,33 @@
+.blocking-loader {
+  box-sizing: border-box;
+  inline-size: min(17rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.blocking-loader::backdrop {
+  background: color-mix(in srgb, var(--bg) 74%, transparent);
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+html:has(.blocking-loader[open]) {
+  overflow: hidden;
+}
+
+.blocking-loader img {
+  display: block;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.blocking-loader p {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+}

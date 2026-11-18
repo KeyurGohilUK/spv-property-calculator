@@ -37,6 +37,7 @@ export function setupAccountController({
   elements,
   sync,
   isSyncing = () => false,
+  runBlocking = (_message, operation) => operation(),
   onUserChange = () => {},
   onInitialised = () => {},
   onInitialisationError = () => {},
@@ -151,7 +152,12 @@ export function setupAccountController({
       await onUserChange(null, { reason });
       return;
     }
-    const approved = await requireWorkspaceMembership(nextUser, { cloud });
+    const checkMembership = () =>
+      requireWorkspaceMembership(nextUser, { cloud });
+    const approved =
+      reason === 'initialise' || reason === 'sign-in'
+        ? await runBlocking('Checking workspace access…', checkMembership)
+        : await checkMembership();
     if (request !== accessRequest) return;
     user = approved ? nextUser : null;
     if (!approved) renderAccessState(null);
@@ -176,10 +182,13 @@ export function setupAccountController({
     hidePassword();
     showAuthMessage('');
     if (!validateAuthFields(emailField, passwordField)) return;
-    setBusy(true);
-    showAuthMessage('Signing in…');
+    const previousFocus = elements.dialog.ownerDocument.activeElement;
     try {
-      const data = await cloud.signIn(email, password);
+      const data = await runBlocking('Signing in…', () => {
+        setBusy(true);
+        showAuthMessage('Signing in…');
+        return cloud.signIn(email, password);
+      });
       await applyUser(
         data?.user || data?.session?.user || cloud.getCurrentUser?.(),
         'sign-in',
@@ -199,6 +208,8 @@ export function setupAccountController({
     } finally {
       setBusy(false);
       render();
+      if (elements.dialog.open && elements.dialog.contains(previousFocus))
+        previousFocus.focus({ preventScroll: true });
     }
   };
 
@@ -311,7 +322,7 @@ export function setupAccountController({
       window.setTimeout(() => applyUser(nextUser, 'auth-change'), 0);
     });
     try {
-      const state = await cloud.init();
+      const state = await runBlocking('Starting the app…', () => cloud.init());
       await applyUser(state.user || null, 'initialise');
       await onInitialised(state);
     } catch (error) {

@@ -1,6 +1,6 @@
 {
-  "version": "1.60.80",
+  "version": "1.61.0",
   "notes": [
-    "Highlight sign-in errors directly below the Sign in button."
+    "Show an animated SPV logo while the app starts, signs in, or loads your workspace."
   ]
 }
