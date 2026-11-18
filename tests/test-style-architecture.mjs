@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const manifest = fs.readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 const imports = [...manifest.matchAll(/@import url\('\.\/(styles\/[^']+)'\);/g)].map((match) => match[1]);
 const expected = [
-  'styles/tokens.css', 'styles/base.css', 'styles/app-shell-core.css', 'styles/components/chat-thread.css',
+  'styles/tokens.css', 'styles/base.css', 'styles/components/chat-thread.css',
   'styles/components/linked-content.css', 'styles/components/rich-textarea.css', 'styles/components/data-tables.css', 'styles/features/properties.css', 'styles/forms.css', 'styles/components/file-upload.css', 'styles/features/summary.css',
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
   'styles/features/editor.css', 'styles/features/price-history.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
@@ -20,6 +20,11 @@ assert.match(fs.readFileSync(new URL('../styles/tokens.css', import.meta.url), '
 assert.match(fs.readFileSync(new URL('../styles/forms.css', import.meta.url), 'utf8'), /\.field[\s\S]*\.expense-row/);
 assert.match(fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8'), /\.app-dialog/);
 assert.match(fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8'), /\.primary-app-nav/);
+for (const page of ['index.html', 'reset-password/index.html', 'admin/users/index.html']) {
+  const html = fs.readFileSync(new URL(`../${page}`, import.meta.url), 'utf8');
+  assert.match(html, /<link rel="stylesheet" href="[^"]*styles\/app-shell-core\.css">\s*<link rel="stylesheet" href="[^"]*styles\.css">/,
+    `${page} must load the core layout directly before the remaining styles`);
+}
 const shellCore = fs.readFileSync(new URL('../styles/app-shell-core.css', import.meta.url), 'utf8');
 const dialogStyles = fs.readFileSync(new URL('../styles/dialogs.css', import.meta.url), 'utf8');
 const navigationStyles = fs.readFileSync(new URL('../styles/app-shell-navigation.css', import.meta.url), 'utf8');

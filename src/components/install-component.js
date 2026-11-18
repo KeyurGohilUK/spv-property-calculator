@@ -2,7 +2,7 @@ import { getIconSvg } from './shared-icons.js';
 import { isNewerVersion, setupUpdateNotifier } from './update-notifier.js';
 import { setupDialog } from './dialog-helper.js';
 
-export const APP_VERSION = '1.60.78';
+export const APP_VERSION = '1.60.79';
 
 const APP_ASSET_MANIFEST = './app-assets.json';
 

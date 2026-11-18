@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const installSource = fs.readFileSync(new URL('../src/components/install-component.js', import.meta.url), 'utf8');
 const workerSource = fs.readFileSync(new URL('../service-worker.js', import.meta.url), 'utf8');
@@ -52,3 +53,32 @@ for (const asset of assetManifest.assets) {
 }
 
 console.log(`Release metadata is consistent for version ${appVersion}.`);
+
+// Simulate failed asset responses after the worker has cached a working release.
+const handlers = {};
+const sheetUrl = 'https://example.test/app/styles/app-shell-core.css';
+const cachedCss = new Response('.hidden { display: none !important; }', {
+  headers: { 'content-type': 'text/css' }
+});
+let networkResponse;
+vm.runInNewContext(workerSource, {
+  self: {
+    location: new URL('https://example.test/app/service-worker.js'),
+    addEventListener: (type, callback) => { handlers[type] = callback; }
+  },
+  URL,
+  fetch: async () => networkResponse,
+  caches: { match: async (request) => request.url === sheetUrl ? cachedCss : undefined }
+});
+for (const response of [
+  new Response('Unavailable', { status: 503 }),
+  new Response('<html>Error page</html>', { headers: { 'content-type': 'text/html' } })
+]) {
+  networkResponse = response;
+  let result;
+  handlers.fetch({
+    request: { method: 'GET', url: sheetUrl },
+    respondWith: (promise) => { result = promise; }
+  });
+  assert.equal(await result, cachedCss, 'Unusable network styles must fall back to cached CSS');
+}

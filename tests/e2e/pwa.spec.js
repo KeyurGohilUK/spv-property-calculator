@@ -98,7 +98,8 @@ test('installs the app shell and controls the page', async ({ page }) => {
     '/index.html',
     '/expenses/',
     '/src/app/app.js',
-    '/styles.css'
+    '/styles.css',
+    '/styles/app-shell-core.css'
   ]));
 });
 
@@ -112,6 +113,7 @@ test('opens the cached expense tracker while offline', async ({ page, context })
 
   await expect(page.getByRole('heading', { name: 'Expense Tracker' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Add Expense/i })).toBeVisible();
+  await expect(page.locator('.main-shell')).toHaveCSS('max-width', '1328px');
 });
 
 test('loads canonical modules from the organised folders', async ({ page }) => {

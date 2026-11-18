@@ -1,7 +1,6 @@
 /* Global stylesheet manifest. Import order preserves the established cascade. */
 @import url('./styles/tokens.css');
 @import url('./styles/base.css');
-@import url('./styles/app-shell-core.css');
 @import url('./styles/components/chat-thread.css');
 @import url('./styles/components/linked-content.css');
 @import url('./styles/components/rich-textarea.css');

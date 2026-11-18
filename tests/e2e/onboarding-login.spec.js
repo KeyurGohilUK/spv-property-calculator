@@ -57,6 +57,12 @@ for (const theme of ['light', 'dark']) {
       await expect(tour).not.toBeVisible();
       await expect(page.locator('dialog[open]')).toHaveCount(0);
       await expect(page.locator('#newPropertyBtn')).toBeFocused();
+      await expect(page.locator('.header-inner')).toHaveCSS('display', 'flex');
+      await expect(page.locator('.main-shell')).toHaveCSS(
+        'max-width',
+        '1328px',
+      );
+      await expect(page.locator('#editorView')).toBeHidden();
       await page.locator('#newPropertyBtn').click();
       await expect(page.locator('#title')).toBeVisible();
       // Completion must survive a real reload on the same device.
