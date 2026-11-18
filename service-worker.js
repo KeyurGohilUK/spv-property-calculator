@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spv-property-calculator-v1.60.78-mobile-dialog-layout';
+const CACHE_NAME = 'spv-property-calculator-v1.60.79-mobile-dialog-layout';
 const ROOT = new URL('./', self.location.href).href;
 const APP_SHELL = new URL('./index.html', self.location.href).href;
 const CONFIG_URL = new URL('./supabase-config.js', self.location.href).href;
@@ -17,7 +17,7 @@ async function cacheAppAssets() {
   }
   const cache = await caches.open(CACHE_NAME);
   await cache.put(ASSET_MANIFEST_URL, response);
-  await cache.addAll(manifest.assets.map((path) => new URL(path, self.location.href).href));
+  await cache.addAll(manifest.assets.map((path) => new Request(new URL(path, ROOT), { cache: 'reload' })));
 }
 
 self.addEventListener('install', (event) => {
@@ -153,7 +153,12 @@ self.addEventListener('fetch', (event) => {
   // offline fallback when the network is unavailable.
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
+      .then(async (response) => {
+        const stylesheet = requestUrl.href.startsWith(ROOT) && requestUrl.pathname.endsWith('.css');
+        if (stylesheet && (!response.ok || !response.headers.get('content-type')?.includes('text/css'))) {
+          // A failed stylesheet refresh must not leave the app partly styled.
+          return (await caches.match(event.request)) || response;
+        }
         if (response.ok && requestUrl.href.startsWith(ROOT)) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));

@@ -1,6 +1,6 @@
 {
-  "version": "1.60.78",
+  "version": "1.60.79",
   "notes": [
-    "Highlight password reset confirmations and show required-field errors during sign-in and password recovery."
+    "Load core layout styles directly and retain cached styles when a refresh fails."
   ]
 }
