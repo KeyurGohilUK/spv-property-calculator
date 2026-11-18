@@ -44,9 +44,9 @@ document.body.insertAdjacentHTML(
     <button id="closeSecondaryAccount" class="dialog-close" type="button" aria-label="Close">×</button>
     <div id="secondarySignedOut"><p class="eyebrow">Cloud sync</p><h3>Sign in to your workspace</h3>
       <label class="field"><span>Email</span><input id="secondaryAuthEmail" type="email" autocomplete="email"></label>
-      <label class="field"><span>Password</span><input id="secondaryAuthPassword" type="password" autocomplete="current-password" minlength="6"></label>
+      <div class="field"><label for="secondaryAuthPassword">Password</label><input id="secondaryAuthPassword" type="password" autocomplete="current-password" minlength="6"></div>
       <div class="auth-actions"><button id="secondarySignInBtn" class="primary-btn" type="button">Sign in</button></div>
-      <p class="small"><a href="${new URL('../../reset-password/', import.meta.url).href}">Forgot password?</a></p>
+      <a class="auth-recovery-link" href="${new URL('../../reset-password/', import.meta.url).href}">Forgot password?</a>
       <details class="auth-help"><summary>Need workspace access?</summary><p class="muted small">Contact your workspace administrator to request access or account approval.</p></details>
       <p id="secondaryAuthMessage" class="auth-message" aria-live="polite"></p>
     </div>

@@ -1,9 +1,15 @@
+import { setupPasswordField } from '../../components/password-field.js';
+import { takeRecoveryEmail } from '../../services/password-recovery-email.js';
+
 const requestForm = document.querySelector('#recovery-request');
 const updateForm = document.querySelector('#recovery-update');
 const heading = document.querySelector('#recovery-heading');
 const status = document.querySelector('#recovery-status');
 const redirectUrl = new URL('./?recovery=1', location.href);
 let auth;
+const hidePassword = setupPasswordField(updateForm.elements.password);
+const hideConfirmation = setupPasswordField(updateForm.elements.confirmation);
+const emailDraft = takeRecoveryEmail();
 
 requestForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -30,6 +36,8 @@ requestForm.addEventListener('submit', async (event) => {
 
 updateForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  hidePassword();
+  hideConfirmation();
   const fields = new FormData(updateForm);
   const password = fields.get('password');
   if (password !== fields.get('confirmation')) {
@@ -71,6 +79,7 @@ async function initialise() {
   const fragment = new URLSearchParams(location.hash.slice(1));
   const recoveryCallback = location.search || location.hash;
   if (!recoveryCallback) {
+    requestForm.elements.email.value = emailDraft;
     requestForm.hidden = false;
     return;
   }

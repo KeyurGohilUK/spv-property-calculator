@@ -16,6 +16,8 @@ export default [
     files: [
       'src/services/access-gate.js',
       'src/features/account/password-recovery.js',
+      'src/components/password-field.js',
+      'src/services/password-recovery-email.js',
       'src/services/account-controller.js',
       'src/services/policy-acceptance.js',
       'src/components/help-guide.js',
