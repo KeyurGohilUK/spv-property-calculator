@@ -1,6 +1,6 @@
 {
-  "version": "1.60.79",
+  "version": "1.60.80",
   "notes": [
-    "Load core layout styles directly and retain cached styles when a refresh fails."
+    "Highlight sign-in errors directly below the Sign in button."
   ]
 }

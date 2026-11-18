@@ -187,3 +187,39 @@ test('@mobile storage write failure still allows tour dismissal', async ({
   await page.locator('#newPropertyBtn').click();
   await expect(page.locator('#title')).toBeVisible();
 });
+
+for (const theme of ['light', 'dark']) {
+  test(`@mobile ${theme}: invalid credentials are highlighted beside sign-in and allow retry`, async ({
+    page,
+  }) => {
+    await page.addInitScript(
+      (value) => localStorage.setItem('spv-theme', value),
+      theme,
+    );
+    await freshVisit(page, {
+      signedOut: true,
+      rejectedPassword: 'wrong-password',
+    });
+    await page.locator('#publicLoginBtn').click();
+    await page.locator('#authEmail').fill('approved@example.test');
+    await page.locator('#authPassword').fill('wrong-password');
+    await page.locator('#signInBtn').click();
+    const feedback = page.locator(
+      '.auth-actions:has(#signInBtn) + #authMessage',
+    );
+    await expect(feedback).toHaveText(
+      'Incorrect email or password. Check your details and try again.',
+    );
+    await expect(feedback).toHaveAttribute('role', 'status');
+    await expect(feedback).toHaveCSS('border-inline-start-width', '4px');
+    await expect(feedback).toBeInViewport();
+    const { violations } = await new AxeBuilder({ page })
+      .include('#authDialog')
+      .analyze();
+    expect(violations).toEqual([]);
+    await page.locator('#authPassword').fill('correct-password');
+    await page.locator('#signInBtn').click();
+    await expect(page.locator('#authDialog')).toBeHidden();
+    await expect(feedback).toHaveText('');
+  });
+}

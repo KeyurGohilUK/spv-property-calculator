@@ -133,6 +133,12 @@ export function setupAccountController({
     onRender({ user, state, busy });
   };
 
+  const showAuthMessage = (message, isError = false) => {
+    const output = elements.authMessage;
+    output.classList.toggle('is-error', isError);
+    output.textContent = message;
+  };
+
   let accessRequest = 0;
   const applyUser = async (nextUser, reason) => {
     const request = ++accessRequest;
@@ -157,8 +163,10 @@ export function setupAccountController({
       dialogController.close();
     await onUserChange(user, { reason });
     if (!approved)
-      elements.authMessage.textContent =
-        'Workspace access requires an active, approved account. Contact your workspace administrator.';
+      showAuthMessage(
+        'Workspace access requires an active, approved account. Contact your workspace administrator.',
+        true,
+      );
   };
 
   const signIn = async () => {
@@ -166,20 +174,28 @@ export function setupAccountController({
     const email = elements.email.value.trim();
     const password = elements.password.value;
     hidePassword();
-    elements.authMessage.textContent = '';
+    showAuthMessage('');
     if (!validateAuthFields(emailField, passwordField)) return;
     setBusy(true);
-    elements.authMessage.textContent = 'Signing in…';
+    showAuthMessage('Signing in…');
     try {
       const data = await cloud.signIn(email, password);
       await applyUser(
         data?.user || data?.session?.user || cloud.getCurrentUser?.(),
         'sign-in',
       );
-      if (user) elements.authMessage.textContent = '';
+      if (user) showAuthMessage('');
       elements.password.value = '';
     } catch (error) {
-      elements.authMessage.textContent = error.message || 'Could not sign in.';
+      const invalidCredentials =
+        error.code === 'invalid_credentials' ||
+        error.message === 'Invalid login credentials';
+      showAuthMessage(
+        invalidCredentials
+          ? 'Incorrect email or password. Check your details and try again.'
+          : error.message || 'Could not sign in.',
+        true,
+      );
     } finally {
       setBusy(false);
       render();
@@ -190,15 +206,15 @@ export function setupAccountController({
     const email = elements.email.value.trim();
     const password = elements.password.value;
     hidePassword();
-    elements.authMessage.textContent = '';
+    showAuthMessage('');
     if (!validateAuthFields(emailField, passwordField)) return;
     const validation = validateAccountCredentials(email, password, true);
     if (validation) {
-      elements.authMessage.textContent = validation;
+      showAuthMessage(validation, true);
       return;
     }
     setBusy(true);
-    elements.authMessage.textContent = 'Creating account…';
+    showAuthMessage('Creating account…');
     try {
       const data = await cloud.signUp(
         email,
@@ -208,15 +224,13 @@ export function setupAccountController({
       const signedInUser = data?.session?.user || null;
       if (signedInUser) {
         await applyUser(signedInUser, 'sign-up');
-        elements.authMessage.textContent = '';
+        showAuthMessage('');
         elements.password.value = '';
       } else {
-        elements.authMessage.textContent =
-          'Account created. Confirm your email, then sign in.';
+        showAuthMessage('Account created. Confirm your email, then sign in.');
       }
     } catch (error) {
-      elements.authMessage.textContent =
-        error.message || 'Could not create the account.';
+      showAuthMessage(error.message || 'Could not create the account.', true);
     } finally {
       setBusy(false);
       render();

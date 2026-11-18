@@ -97,6 +97,18 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
 .auth-actions.dialog-actions { display: flex; margin-top: 18px; }
 .auth-message { min-height: 20px; margin: 12px 0 0; color: var(--brand); font-size: 12px; font-weight: 700; line-height: 1.45; }
+.auth-sign-in-message { min-height: 0; }
+.auth-sign-in-message:empty { margin: 0; }
+.auth-sign-in-message.is-error {
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-inline-start-width: 4px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  color: var(--text);
+  font-size: .9375rem;
+}
+
 .auth-account-card { margin: 16px 0 4px; padding: 14px; border-radius: 14px; background: var(--surface-2); }
 .auth-account-card strong, .auth-account-card small { display: block; }
 .auth-account-card small { margin-top: 4px; color: var(--muted); line-height: 1.4; }
