@@ -51,7 +51,10 @@ export async function withBlockingLoader(message, operation) {
     if (pending.size) {
       updateLoader();
     } else {
-      const remaining = Math.max(0, MINIMUM_VISIBLE_MS - (performance.now() - visibleSince));
+      const remaining = Math.max(
+        0,
+        MINIMUM_VISIBLE_MS - (performance.now() - visibleSince),
+      );
       if (remaining) await new Promise((resolve) => setTimeout(resolve, remaining));
       if (!pending.size && dialog.open) dialog.close();
     }
