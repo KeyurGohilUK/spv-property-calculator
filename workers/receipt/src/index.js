@@ -193,6 +193,56 @@ async function deleteEvidence(request, env, url, route) {
   return new Response(null, { status: 204, headers: corsHeaders(request, env) });
 }
 
+
+// Property evidence is isolated from company compliance paths by property ID.
+function propertyEvidenceRoute(url) {
+  const match = /^\/property-evidence\/([A-Za-z0-9_-]{1,160})\/([0-9a-f]{8}-[0-9a-f-]{27,40})$/.exec(url.pathname);
+  return match ? { propertyId: match[1], fileId: match[2] } : null;
+}
+function propertyEvidenceKey(url, route) {
+  const key = url.searchParams.get('key') || '';
+  return key.startsWith('property-evidence/' + route.propertyId + '/' + route.fileId + '.')
+    && /^property-evidence\/[A-Za-z0-9_-]{1,160}\/[0-9a-f-]+\.(?:pdf|jpg|png|webp|heic|heif)$/.test(key) ? key : '';
+}
+async function handlePropertyEvidence(request, env, url, route) {
+  const editor = request.method !== 'GET';
+  const user = await requireWorkspaceAccess(request, env, editor);
+  const key = 'property-evidence/' + route.propertyId + '/' + route.fileId;
+  if (request.method === 'PUT') {
+    const type = String(request.headers.get('Content-Type') || '').toLowerCase().split(';')[0];
+    const ext = RECEIPT_TYPES.get(type);
+    if (!ext) return json(request, env, { error: 'Upload a PDF or supported image.' }, 415);
+    if (Number(request.headers.get('Content-Length')) > MAX_EVIDENCE_SIZE) return json(request, env, { error: 'Evidence exceeds 5 MB.' }, 413);
+    const bytes = await request.arrayBuffer();
+    if (!bytes.byteLength || bytes.byteLength > MAX_EVIDENCE_SIZE) return json(request, env, { error: 'Evidence must be 1 byte to 5 MB.' }, 413);
+    const objectPath = key + '.' + ext;
+    if (await env.RECEIPTS.head(objectPath)) return json(request, env, { error: 'Evidence already exists.' }, 409);
+    const originalName = decodeReceiptName(request.headers.get('X-Receipt-Name'));
+    await env.RECEIPTS.put(objectPath, bytes, {
+      httpMetadata: { contentType: type },
+      customMetadata: { propertyId: route.propertyId, fileId: route.fileId, uploadedBy: String(user.id || ''), originalName }
+    });
+    return json(request, env, { objectPath, name: originalName, type, size: bytes.byteLength, uploadedAt: new Date().toISOString() }, 201);
+  }
+  const objectPath = propertyEvidenceKey(url, route);
+  if (!objectPath) return json(request, env, { error: 'Invalid property evidence reference.' }, 400);
+  if (request.method === 'GET') {
+    const object = await env.RECEIPTS.get(objectPath);
+    if (!object) return json(request, env, { error: 'Evidence not found.' }, 404);
+    const headers = corsHeaders(request, env);
+    headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
+    headers.set('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(object.customMetadata?.originalName || 'evidence'));
+    headers.set('Cache-Control', 'private, no-store');
+    headers.set('X-Content-Type-Options', 'nosniff');
+    return new Response(object.body, { headers });
+  }
+  if (request.method === 'DELETE') {
+    await env.RECEIPTS.delete(objectPath);
+    return new Response(null, { status: 204, headers: corsHeaders(request, env) });
+  }
+  return json(request, env, { error: 'Method not allowed.' }, 405);
+}
+
 export default {
   async fetch(request, env) {
     if (!isOriginAllowed(request, env)) return json(request, env, { error: 'Origin not allowed.' }, 403);
@@ -200,6 +250,11 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/health' && request.method === 'GET') {
       return json(request, env, { ok: true, service: 'spv-receipt-service' });
+    }
+    const propertyEvidence = propertyEvidenceRoute(url);
+    if (propertyEvidence) {
+      try { return await handlePropertyEvidence(request, env, url, propertyEvidence); }
+      catch (error) { return json(request, env, { error: error.message || 'Property evidence unavailable.' }, Number(error.status) || 500); }
     }
     const evidence = evidenceRoute(url);
     if (evidence) {
