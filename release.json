@@ -1,6 +1,6 @@
 {
-  "version": "1.61.0",
+  "version": "1.62.0",
   "notes": [
-    "Show an animated SPV logo while the app starts, signs in, or loads your workspace."
+    "Open a property-specific compliance hub from owned-property cards, with urgency-sorted safety, tenancy, and maintenance checks."
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "version": "1.61.0",
+  "version": "1.62.0",
   "assets": [
     "./",
     "./index.html",
@@ -129,6 +129,9 @@
     "./icons/apple-touch-icon.png",
     "./icons/favicon-32.png",
     "./styles/components/file-upload.css",
-    "./src/components/file-upload-field.js"
+    "./src/components/file-upload-field.js",
+    "./src/features/property-compliance/compliance-rules.js",
+    "./src/features/property-compliance/compliance-ui.js",
+    "./styles/features/property-compliance.css"
   ]
 }

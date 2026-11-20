@@ -102,6 +102,22 @@
       </section>
       </div>
 
+      <section id="propertyComplianceView" class="view property-compliance-view" hidden aria-labelledby="propertyComplianceTitle">
+  <button id="propertyComplianceBack" class="secondary-btn" type="button">← Back to Portfolio</button>
+  <section class="hero-card"><div><p class="eyebrow">Owned property · legal obligations</p><h2 id="propertyComplianceTitle">Property Compliance</h2><p id="propertyComplianceName" class="muted"></p></div></section>
+  <section class="property-compliance-hub" aria-label="Property compliance">
+    <div id="propertyComplianceSummary" class="property-compliance-summary" role="status" aria-live="polite"></div>
+    <div class="property-compliance-tabs" role="tablist" aria-label="Property compliance sections">
+      <button type="button" role="tab" class="property-compliance-tab" data-compliance-tab="overview" aria-selected="true">Overview</button>
+      <button type="button" role="tab" class="property-compliance-tab" data-compliance-tab="safety" aria-selected="false">Safety &amp; Certificates</button>
+      <button type="button" role="tab" class="property-compliance-tab" data-compliance-tab="tenancy" aria-selected="false">Tenancy &amp; Legal</button>
+      <button type="button" role="tab" class="property-compliance-tab" data-compliance-tab="maintenance" aria-selected="false">Maintenance</button>
+    </div>
+    <p class="muted small">Priority is based on recorded deadlines, evidence and hazards. Missing evidence is not confirmation of non-compliance; verify each requirement against your property circumstances.</p>
+    <div id="propertyComplianceItems" class="property-compliance-items" aria-live="polite"></div>
+    <p id="propertyComplianceMessage" role="status" aria-live="polite"></p>
+  </section>
+</section>
       <section id="archiveView" class="view hidden" aria-labelledby="archiveTitle">
         <div class="hero-card archive-hero">
           <div>
@@ -500,6 +516,7 @@
   <script defer src="./cloud.js"></script>
   <script type="module" src="./src/components/admin-menu.js"></script>
   <script type="module" src="./src/features/portfolio/portfolio.js"></script>
+<script type="module" src="./src/features/property-compliance/compliance-ui.js"></script>
 <script type="module" src="./src/app/app.js"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@ function renderPortfolio() {
     const completionDate = property.completionDate ? formatDate(property.completionDate) : 'Date not recorded';
     return `<article class="portfolio-card">
       <div class="portfolio-card-heading"><div><p class="eyebrow">Owned property</p><h2>${title}</h2><p class="muted">Completed ${escapeHtml(completionDate)}</p></div>
-        <a class="secondary-btn" href="./?property=${encodeURIComponent(property.id)}">Open purchase record</a></div>
+        <div class="property-compliance-card-actions"><a class="secondary-btn" href="./?property=${encodeURIComponent(property.id)}">Open purchase record</a><button class="secondary-btn" type="button" data-open-property-compliance="${escapeHtml(property.id)}">Compliance</button></div></div>
       <div class="portfolio-card-stats"><div><span>Purchase price</span><strong>${formatCurrency(calculation.purchasePrice)}</strong></div>
         <div><span>Estimated mortgage</span><strong>${formatCurrency(calculation.mortgageRequired)}</strong></div>
         <div><span>Estimated cash invested</span><strong>${formatCurrency(calculation.totalCashRequired)}</strong></div></div>
