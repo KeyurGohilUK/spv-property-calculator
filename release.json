@@ -1,6 +1,6 @@
 {
-  "version": "1.62.0",
+  "version": "1.63.0",
   "notes": [
-    "Open a property-specific compliance hub from owned-property cards, with urgency-sorted safety, tenancy, and maintenance checks."
+    "Upload, download and retain certificate evidence history for each portfolio property's compliance checks."
   ]
 }

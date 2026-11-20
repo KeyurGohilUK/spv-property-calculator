@@ -1,5 +1,5 @@
 {
-  "version": "1.62.0",
+  "version": "1.63.0",
   "assets": [
     "./",
     "./index.html",
@@ -132,6 +132,7 @@
     "./src/components/file-upload-field.js",
     "./src/features/property-compliance/compliance-rules.js",
     "./src/features/property-compliance/compliance-ui.js",
-    "./styles/features/property-compliance.css"
+    "./styles/features/property-compliance.css",
+    "./src/features/property-compliance/evidence-service.js"
   ]
 }

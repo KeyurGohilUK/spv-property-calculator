@@ -20,3 +20,10 @@
 .property-compliance-item form .primary-btn{justify-self:start}
 .property-compliance-card-actions{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:650px){.property-compliance-tab{flex:1 1 45%;padding:10px}.property-compliance-item summary{align-items:flex-start;flex-direction:column}.property-compliance-card-actions{width:100%}}
+
+.property-compliance-evidence{display:grid;gap:10px;margin-block:12px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2)}
+.property-compliance-evidence ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.property-compliance-evidence li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}
+.property-compliance-evidence li span{flex:1 1 180px;min-width:0}
+.property-compliance-evidence .secondary-btn{min-height:38px}
+.property-compliance-evidence file-upload-field{display:block;max-width:100%}
