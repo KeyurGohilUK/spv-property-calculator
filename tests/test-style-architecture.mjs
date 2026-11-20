@@ -9,7 +9,7 @@ const expected = [
   'styles/dialogs.css', 'styles/features/archive.css', 'styles/app-shell-home.css',
   'styles/features/editor.css', 'styles/features/price-history.css', 'styles/dialogs-updates.css', 'styles/features/statuses.css',
   'styles/app-shell-navigation.css', 'styles/legal.css', 'styles/features/tasks.css', 'styles/components/interactive-card-hover.css', 'styles/components/icon-action-feedback.css', 'styles/components/action-button-feedback.css',
-  'styles/components/blocking-loader.css'
+  'styles/components/blocking-loader.css', 'styles/features/property-compliance.css'
 ];
 
 assert.deepEqual(imports, expected, 'Stylesheet manifest order must preserve the established cascade');
