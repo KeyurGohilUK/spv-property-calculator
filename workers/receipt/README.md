@@ -71,3 +71,7 @@ Use the existing Cloudflare account and Worker, not a new storage service. The `
 ### Estimated incremental storage cost
 
 At low volumes the added documents are expected to remain within R2's shared free Standard storage allowance; always verify actual total account usage (including receipts), request counts and current Cloudflare billing terms before relying on zero cost. This feature itself creates no paid subscription.
+
+## Property compliance evidence (release 1.63.0)
+
+Deploy the updated receipt Worker before enabling the property evidence UI. `PUT /property-evidence/:propertyId/:fileUuid` accepts a PDF or supported image (max 5 MB) for approved workspace editors. `GET` allows approved members, while `DELETE` requires editors. Objects are isolated under `property-evidence/{propertyId}/{fileUuid}.{ext}` and remain in the existing private R2 bucket. Document metadata is kept on the property record; never expose public document URLs. Verify cross-property key rejection and viewer write denial before deploying.
