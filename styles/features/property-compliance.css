@@ -1,0 +1,22 @@
+.property-compliance-view{display:grid;gap:16px}.property-compliance-view[hidden]{display:none}
+.property-compliance-hub{padding:clamp(14px,3vw,24px);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+.property-compliance-summary{padding:13px 16px;background:var(--surface-2);border-radius:var(--radius-sm);color:var(--text);font-weight:700;margin-bottom:15px}
+.property-compliance-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.property-compliance-tab{padding:12px 15px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
+.property-compliance-tab[aria-selected=true]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-strong)}
+.property-compliance-tab:focus-visible,.property-compliance-item summary:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.property-compliance-items{display:grid;gap:10px;margin-top:18px}
+.property-compliance-item{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden}
+.property-compliance-item summary{padding:15px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+.property-compliance-item summary strong,.property-compliance-item summary small{display:block}
+.property-compliance-item summary small{margin-top:5px;color:var(--muted)}
+.property-compliance-state{font-size:.8rem;font-weight:700;color:var(--brand);white-space:nowrap}
+.property-compliance-item[data-status=overdue] .property-compliance-state,.property-compliance-item[data-status=critical] .property-compliance-state{color:var(--danger)}
+.property-compliance-item[data-status=compliant] .property-compliance-state{color:var(--positive)}
+.property-compliance-item form{display:grid;gap:13px;padding:18px;border-top:1px solid var(--border)}
+.property-compliance-item form .field{display:grid;gap:6px}
+.property-compliance-item form input[type=date]{width:100%;max-width:320px}
+.property-compliance-check{display:flex;gap:10px;align-items:center}
+.property-compliance-item form .primary-btn{justify-self:start}
+.property-compliance-card-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:650px){.property-compliance-tab{flex:1 1 45%;padding:10px}.property-compliance-item summary{align-items:flex-start;flex-direction:column}.property-compliance-card-actions{width:100%}}
