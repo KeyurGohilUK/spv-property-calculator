@@ -3,11 +3,12 @@
   inline-size: min(17rem, calc(100% - 2rem));
   margin: auto;
   padding: 1.25rem;
-  border: 1px solid var(--border);
+  border: 0;
+  outline: none;
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  box-shadow: var(--shadow);
+  box-shadow: none;
   text-align: center;
 }
 

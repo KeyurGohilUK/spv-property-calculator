@@ -1,6 +1,8 @@
 const pending = new Map();
 let dialog;
 let status;
+let visibleSince = 0;
+const MINIMUM_VISIBLE_MS = 1000;
 
 function mountLoader() {
   dialog = document.createElement('dialog');
@@ -28,12 +30,12 @@ function mountLoader() {
 }
 
 function updateLoader() {
-  if (!pending.size) {
-    dialog.close();
-    return;
-  }
+  if (!pending.size) return;
   status.textContent = Array.from(pending.values()).at(-1);
-  if (!dialog.open) dialog.showModal();
+  if (!dialog.open) {
+    dialog.showModal();
+    visibleSince = performance.now();
+  }
 }
 
 export async function withBlockingLoader(message, operation) {
@@ -46,6 +48,15 @@ export async function withBlockingLoader(message, operation) {
     return await operation();
   } finally {
     pending.delete(request);
-    updateLoader();
+    if (pending.size) {
+      updateLoader();
+    } else {
+      const elapsed = performance.now() - visibleSince;
+      const remaining = Math.max(0, MINIMUM_VISIBLE_MS - elapsed);
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining));
+      }
+      if (!pending.size && dialog.open) dialog.close();
+    }
   }
 }
