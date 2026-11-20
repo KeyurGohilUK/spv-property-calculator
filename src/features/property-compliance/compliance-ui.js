@@ -60,12 +60,17 @@ document.addEventListener('click', (event) => {
   const tab = event.target.closest('[data-compliance-tab]');
   if (tab) { currentTab = tab.dataset.complianceTab; render(); }
 });
-document.addEventListener('submit', (event) => {
+document.addEventListener('submit', async (event) => {
   const form = event.target.closest('[data-compliance-requirement]');
   if (!form) return;
   event.preventDefault();
   const property = getProperty(propertyId);
   if (!property) return;
+  const access = await window.SPVCloud?.getWorkspaceAccess?.().catch(() => null);
+  if (!access?.active || access.role === 'viewer') {
+    $('propertyComplianceMessage').textContent = 'Editor access is required to save compliance records.';
+    return;
+  }
   const id = form.dataset.complianceRequirement;
   const data = new FormData(form);
   const existing = property.complianceRecords || {};
