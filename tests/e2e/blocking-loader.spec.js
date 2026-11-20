@@ -89,3 +89,33 @@ test('@mobile startup blocks until the cloud client is ready', async ({
   await expect(page.locator('.blocking-loader')).toBeHidden();
   await expect(page.locator('#publicLoginBtn')).toBeEnabled();
 });
+
+test('@mobile loader remains visible for one second after immediate completion and has no border', async ({ page }) => {
+  await page.route('**/loader-test/', route => route.fulfill({
+    contentType: 'text/html',
+    body: '<!doctype html><html lang="en"><title>Loader</title><link rel="stylesheet" href="/styles.css"><main>Ready</main></html>',
+  }));
+  await page.goto('/loader-test/');
+  const result = await page.evaluate(async () => {
+    const { withBlockingLoader } = await import('/src/components/blocking-loader.js');
+    let openedAt = 0;
+    let closedAt = 0;
+    const monitor = new MutationObserver(() => {
+      const loader = document.querySelector('.blocking-loader');
+      if (loader?.open && !openedAt) openedAt = performance.now();
+      if (openedAt && loader && !loader.open && !closedAt) closedAt = performance.now();
+    });
+    monitor.observe(document.body, { attributes: true, subtree: true, childList: true });
+    const started = performance.now();
+    await withBlockingLoader('Quick operation', async () => 'completed');
+    monitor.disconnect();
+    const loader = document.querySelector('.blocking-loader');
+    const style = getComputedStyle(loader);
+    return { elapsed: performance.now() - started, borderWidth: style.borderTopWidth,
+      outlineStyle: style.outlineStyle, closed: !loader.open };
+  });
+  expect(result.elapsed).toBeGreaterThanOrEqual(950);
+  expect(result.closed).toBe(true);
+  expect(result.borderWidth).toBe('0px');
+  expect(result.outlineStyle).toBe('none');
+});
